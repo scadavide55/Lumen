@@ -484,6 +484,8 @@ struct GroupChip: View {
     let count: Int
     @EnvironmentObject var b: BrowserState
     @State private var hover = false
+    @State private var renaming = false
+    @State private var name = ""
 
     var body: some View {
         HStack(spacing: 6) {
@@ -497,9 +499,19 @@ struct GroupChip: View {
         .frame(height: 30)
         .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Color.primary.opacity(hover ? 0.1 : (group.collapsed ? 0.06 : 0))))
         .contentShape(Rectangle())
+        .onTapGesture(count: 2) { startRename() }
         .onTapGesture { withAnimation(.easeOut(duration: 0.2)) { b.toggleCollapsed(group.id) } }
         .onHover { hover = $0 }
+        .popover(isPresented: $renaming, arrowEdge: .bottom) {
+            TextField("Group name", text: $name)
+                .textFieldStyle(.roundedBorder)
+                .frame(width: 200)
+                .padding(10)
+                .onSubmit { commitRename() }
+                .onExitCommand { renaming = false }
+        }
         .contextMenu {
+            Button("Rename Group…") { startRename() }
             Button(group.collapsed ? "Expand Group" : "Collapse Group") { b.toggleCollapsed(group.id) }
             Button("Ungroup Tabs") { b.ungroup(group.id) }
             Button("Close Group") { b.closeGroup(group.id) }
@@ -509,6 +521,17 @@ struct GroupChip: View {
             return b.handleDrop(items, on: last, placement: .group, pinned: false)
         }
         .help(L("Click to collapse, double-click to rename"))
+    }
+
+    private func startRename() {
+        name = group.name
+        renaming = true
+    }
+
+    private func commitRename() {
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        if !trimmed.isEmpty { b.renameGroup(group.id, trimmed) }
+        renaming = false
     }
 }
 
