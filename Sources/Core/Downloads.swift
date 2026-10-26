@@ -5,8 +5,11 @@ final class DownloadItem: NSObject, ObservableObject, Identifiable {
     enum State: Equatable { case active, finished, failed(String), cancelled }
 
     let id = UUID()
-    let download: WKDownload
+    /// Replaced when a stopped download is resumed.
+    fileprivate(set) var download: WKDownload
     let source: URL?
+    /// What WebKit needs to continue a download that failed or was cancelled.
+    @Published fileprivate(set) var resumeData: Data?
     @Published var filename = L("Download")
     @Published var destination: URL?
     @Published var fraction = 0.0
@@ -21,6 +24,12 @@ final class DownloadItem: NSObject, ObservableObject, Identifiable {
         self.download = download
         source = download.originalRequest?.url
         super.init()
+        observe(download)
+    }
+
+    var canResume: Bool { resumeData != nil && state != .active && state != .finished }
+
+    fileprivate func observe(_ download: WKDownload) {
         observation = download.progress.observe(\.fractionCompleted) { [weak self] p, _ in
             let fraction = p.fractionCompleted
             let done = p.completedUnitCount
@@ -141,14 +150,36 @@ final class DownloadManager: NSObject, ObservableObject, WKDownloadDelegate {
     }
 
     func download(_ download: WKDownload, didFailWithError error: Error, resumeData: Data?) {
+        guard let item = item(for: download) else { return }
         let e = error as NSError
-        item(for: download)?.state = e.code == NSURLErrorCancelled ? .cancelled : .failed(e.localizedDescription)
+        if let resumeData { item.resumeData = resumeData }
+        item.state = e.code == NSURLErrorCancelled ? .cancelled : .failed(e.localizedDescription)
     }
 
     func cancel(_ item: DownloadItem) {
-        item.download.cancel { _ in }
+        item.download.cancel { data in
+            DispatchQueue.main.async { if let data { item.resumeData = data } }
+        }
         item.state = .cancelled
     }
+
+    /// Continues a failed or cancelled download from where it stopped.
+    func resume(_ item: DownloadItem) {
+        guard let data = item.resumeData else { return }
+        let webView = item.download.webView ?? Self.resumer
+        item.resumeData = nil
+        item.state = .active
+        webView.resumeDownload(fromResumeData: data) { [weak self] download in
+            guard let self else { return }
+            download.delegate = self
+            // WebKit continues into the same file, so no destination is asked for again.
+            item.download = download
+            item.observe(download)
+        }
+    }
+
+    /// For resuming downloads whose tab has closed.
+    private static let resumer = WKWebView(frame: .zero, configuration: WKWebViewConfiguration())
 
     func reveal(_ item: DownloadItem) {
         guard let url = item.destination else { return }

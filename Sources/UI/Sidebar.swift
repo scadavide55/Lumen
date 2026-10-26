@@ -22,6 +22,7 @@ struct Sidebar: View {
                 AddressPill(tab: tab)
             }
             if b.isPrivate { PrivateBadge() }
+            if let p = b.profile { ProfileBadge(profile: p) }
             if !b.pinnedTabs.isEmpty { PinnedGrid() }
 
             ScrollView {
@@ -89,6 +90,25 @@ struct PrivateBadge: View {
         .frame(height: 26)
         .background(Color.purple.opacity(0.12), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
         .help("History, cookies and site data from this window are forgotten when you close it.")
+    }
+}
+
+/// Names the profile a window uses, in its colour.
+struct ProfileBadge: View {
+    let profile: Profile
+    var compact = false
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "person.crop.circle.fill")
+            Text(profile.name).font(.system(size: 11.5, weight: .medium)).lineLimit(1)
+            if !compact { Spacer() }
+        }
+        .foregroundStyle(profile.tint)
+        .padding(.horizontal, compact ? 8 : 10)
+        .frame(height: compact ? 24 : 26)
+        .background(profile.tint.opacity(0.12), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+        .help("This window uses the cookies, sign-ins and site data of this profile.")
     }
 }
 
@@ -566,6 +586,7 @@ struct CompactBar: View {
             Spacer().frame(width: 72)
             if let tab = b.current { NavButtons(tab: tab) }
             TabStrip(compact: true)
+            if let p = b.profile { ProfileBadge(profile: p, compact: true).fixedSize() }
             if let tab = b.current {
                 ShieldButton(tab: tab)
                 DownloadsButton()
@@ -625,7 +646,7 @@ struct TabChip: View, Equatable {
             .fill(selected ? Color.white.opacity(scheme == .dark ? 0.12 : 0.75) : Color.primary.opacity(hover ? 0.07 : 0.03)))
         .overlay(alignment: .bottom) {
             if showsAddress && tab.isLoading {
-                ProgressLine(progress: tab.progress).padding(.horizontal, 6)
+                LoadingLine(load: tab.load).padding(.horizontal, 6)
             }
         }
         .contentShape(Rectangle())

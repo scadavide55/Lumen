@@ -13,6 +13,12 @@ struct LumenApp: App {
         .defaultSize(width: 1280, height: 820)
         .commands { LumenCommands() }
 
+        WindowGroup("Lumen", id: "profile", for: UUID.self) { $profile in
+            ContentView(isPrivate: false, profileID: profile)
+        }
+        .windowStyle(.hiddenTitleBar)
+        .defaultSize(width: 1280, height: 820)
+
         WindowGroup("Private Window", id: "private") {
             ContentView(isPrivate: true)
         }
@@ -59,6 +65,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         UserDefaults.standard.set(false, forKey: "NSQuitAlwaysKeepsWindows")
         Settings.shared.applyTheme()
         ContentBlocker.shared.start()
+        Power.shared.start()
     }
 
     func applicationDidBecomeActive(_ notification: Notification) {
@@ -69,6 +76,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
             Self.handleExtraShortcut(event) ? nil : event
         }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) { ProfileCleanup.finishPending() }
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
@@ -82,6 +90,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         Session.shared.saveNow()
+        History.shared.flush()
         guard Settings.shared.clearOnQuit else { return .terminateNow }
         DataCleaner.clear(range: .all, history: true, cookies: true, cache: true) {
             sender.reply(toApplicationShouldTerminate: true)
@@ -130,6 +139,11 @@ struct LumenCommands: Commands {
             .keyboardShortcut("t")
             Button("New Window") { openWindow(id: "main") }.keyboardShortcut("n")
             Button("New Private Window") { openWindow(id: "private") }.keyboardShortcut("n", modifiers: [.command, .shift])
+            if !s.profiles.isEmpty {
+                Menu("New Window in Profile") {
+                    ForEach(s.profiles) { p in Button(p.name) { openWindow(id: "profile", value: p.id) } }
+                }
+            }
             Divider()
             Button("Open Location…") { b?.showPalette() }.keyboardShortcut("l").disabled(b == nil)
             Button("Reopen Closed Tab") { b?.reopenClosed() }.keyboardShortcut("t", modifiers: [.command, .shift]).disabled(b == nil)

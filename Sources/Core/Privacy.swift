@@ -129,6 +129,13 @@ enum InputResolver {
         return URL(string: "https://" + s)
     }
 
+    /// Whether the host is written with letters from other alphabets (punycode, "xn--"),
+    /// which can be made to look like a familiar site's name.
+    static func isInternational(_ url: URL?) -> Bool {
+        guard let host = url?.host?.lowercased() else { return false }
+        return host.split(separator: ".").contains { $0.hasPrefix("xn--") }
+    }
+
     /// Host for display: "www.apple.com" shows as "apple.com".
     static func displayHost(_ url: URL?) -> String {
         guard let host = url?.host else { return url?.absoluteString ?? "" }
@@ -198,7 +205,14 @@ enum DataCleaner {
         if cookies { types.formUnion(WKWebsiteDataStore.allWebsiteDataTypes().subtracting(cacheTypes)) }
         if cache && range == .all { Favicons.shared.clearDisk() }
         guard !types.isEmpty else { done(); return }
-        WKWebsiteDataStore.default().removeData(ofTypes: types, modifiedSince: range.since, completionHandler: done)
+        // Every profile's data goes too.
+        let stores = [WKWebsiteDataStore.default()] + Settings.shared.profiles.map { WKWebsiteDataStore(forIdentifier: $0.id) }
+        let group = DispatchGroup()
+        for store in stores {
+            group.enter()
+            store.removeData(ofTypes: types, modifiedSince: range.since) { group.leave() }
+        }
+        group.notify(queue: .main, execute: done)
     }
 
     /// Removes cookies and storage belonging to one site.

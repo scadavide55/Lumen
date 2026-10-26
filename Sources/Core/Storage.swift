@@ -23,38 +23,63 @@ enum Paths {
     }
 }
 
-/// A JSON document on disk with debounced background writes.
-final class JSONFile<T: Codable> {
+/// A document on disk, as JSON or a binary property list, with debounced background writes.
+final class StoredFile<T: Codable> {
+    enum Format { case json, binaryPlist }
+
     let url: URL
+    private let format: Format
     private var pending: DispatchWorkItem?
     private let queue = DispatchQueue(label: "lumen.storage", qos: .utility)
 
-    init(_ name: String) { url = Paths.file(name) }
+    init(_ name: String, format: Format = .json) {
+        url = Paths.file(name)
+        self.format = format
+    }
 
     func load() -> T? {
         guard let data = try? Data(contentsOf: url) else { return nil }
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .secondsSince1970
-        return try? decoder.decode(T.self, from: data)
+        switch format {
+        case .json:
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .secondsSince1970
+            return try? decoder.decode(T.self, from: data)
+        case .binaryPlist:
+            return try? PropertyListDecoder().decode(T.self, from: data)
+        }
     }
 
     func save(_ value: T, delay: TimeInterval = 1) {
         pending?.cancel()
-        let url = url
-        let item = DispatchWorkItem {
-            let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .secondsSince1970
-            if let data = try? encoder.encode(value) { try? data.write(to: url, options: .atomic) }
-        }
+        let item = DispatchWorkItem { [url, format] in Self.write(value, to: url, format: format) }
         pending = item
         queue.asyncAfter(deadline: .now() + delay, execute: item)
     }
 
     func saveNow(_ value: T) {
         pending?.cancel()
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .secondsSince1970
-        if let data = try? encoder.encode(value) { try? data.write(to: url, options: .atomic) }
+        Self.write(value, to: url, format: format)
+    }
+
+    func delete() {
+        pending?.cancel()
+        try? FileManager.default.removeItem(at: url)
+    }
+
+    private static func write(_ value: T, to url: URL, format: Format) {
+        let data: Data?
+        switch format {
+        case .json:
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .secondsSince1970
+            data = try? encoder.encode(value)
+        case .binaryPlist:
+            // Tab histories are raw bytes, which a binary plist stores as-is instead of as base64 text.
+            let encoder = PropertyListEncoder()
+            encoder.outputFormat = .binary
+            data = try? encoder.encode(value)
+        }
+        if let data { try? data.write(to: url, options: .atomic) }
     }
 }
 
@@ -74,7 +99,7 @@ final class Bookmarks: ObservableObject {
     }
     /// For `contains`, which the address bar asks on every redraw.
     private var urls: Set<URL>
-    private let file = JSONFile<[Bookmark]>("bookmarks.json")
+    private let file = StoredFile<[Bookmark]>("bookmarks.json")
 
     private init() {
         let loaded = file.load() ?? []
@@ -191,10 +216,19 @@ final class History: ObservableObject {
     }
     /// Lowercased "title url" per entry, built once and reused by every search until the history changes.
     private var haystacks: [String]?
-    private let file = JSONFile<[HistoryEntry]>("history.json")
+    private let db = HistoryDB(Paths.file("history.sqlite"))
     private let limit = 10_000
 
-    private init() { entries = file.load() ?? [] }
+    private init() {
+        // History used to be one JSON file rewritten after every visit; it moves into the database once.
+        let legacy = StoredFile<[HistoryEntry]>("history.json")
+        if let db, db.isEmpty, let old = legacy.load() {
+            db.save(old)
+            db.flush()
+            legacy.delete()
+        }
+        entries = db?.load(limit: limit) ?? []
+    }
 
     func record(url: URL, title: String) {
         guard ["http", "https"].contains(url.scheme ?? "") else { return }
@@ -206,8 +240,11 @@ final class History: ObservableObject {
             if !title.isEmpty { entry.title = title }
         }
         entries.insert(entry, at: 0)
-        if entries.count > limit { entries.removeLast(entries.count - limit) }
-        persist()
+        db?.save([entry])
+        if entries.count > limit {
+            entries.removeLast(entries.count - limit)
+            db?.trim(to: limit)
+        }
     }
 
     /// Merges history from another browser, keeping the newest visit per URL. Returns how many entries were new.
@@ -227,7 +264,8 @@ final class History: ObservableObject {
             }
         }
         entries = Array(byURL.values.sorted { $0.date > $1.date }.prefix(limit))
-        file.saveNow(entries)
+        db?.save(entries)
+        db?.trim(to: limit)
         return added
     }
 
@@ -235,18 +273,21 @@ final class History: ObservableObject {
         guard !title.isEmpty, let i = entries.prefix(20).firstIndex(where: { $0.url == url }),
               entries[i].title != title else { return }
         entries[i].title = title
-        persist()
+        db?.save([entries[i]])
     }
 
     func remove(_ ids: Set<UUID>) {
         entries.removeAll { ids.contains($0.id) }
-        persist()
+        db?.delete(ids)
     }
 
     func clear(since date: Date? = nil) {
         if let date { entries.removeAll { $0.date >= date } } else { entries.removeAll() }
-        file.saveNow(entries)
+        db?.clear(since: date)
     }
+
+    /// Waits for history writes still in progress, before Lumen quits.
+    func flush() { db?.flush() }
 
     /// `search` on a background thread, so typing never waits for a large history.
     func searchInBackground(_ query: String, limit: Int = 8) async -> [HistoryEntry] {
@@ -297,7 +338,6 @@ final class History: ObservableObject {
             .map(\.0)
     }
 
-    private func persist() { file.save(entries, delay: 2) }
 }
 
 // MARK: - Session
@@ -315,6 +355,7 @@ struct WindowSnapshot: Codable {
     var tabs: [TabSnapshot]
     var selected: Int
     var groups: [TabGroup]?
+    var profile: UUID?
 }
 
 struct TabGroup: Identifiable, Codable, Equatable {
@@ -331,12 +372,18 @@ struct TabGroup: Identifiable, Codable, Equatable {
 
 final class Session {
     static let shared = Session()
-    private let file = JSONFile<[WindowSnapshot]>("session.json")
+    private let file = StoredFile<[WindowSnapshot]>("session.plist", format: .binaryPlist)
     private var pending: [WindowSnapshot] = []
     private var extraWindowsClaimed = false
     private var pendingSave: DispatchWorkItem?
 
     private init() {
+        // Sessions used to be JSON, where each tab's history took a third more space as base64.
+        let legacy = StoredFile<[WindowSnapshot]>("session.json")
+        if let old = legacy.load() {
+            file.saveNow(old)
+            legacy.delete()
+        }
         if Settings.shared.restoreSession && !WebApp.isActive { pending = file.load() ?? [] }
     }
 
@@ -411,7 +458,12 @@ final class WindowRegistry {
 
 final class Favicons {
     static let shared = Favicons()
-    private var memory: [String: NSImage] = [:]
+    /// Icons in memory; the cache lets go of them on its own when memory runs short.
+    private let memory: NSCache<NSString, NSImage> = {
+        let c = NSCache<NSString, NSImage>()
+        c.countLimit = 400
+        return c
+    }()
     /// Hosts with no icon on disk, so lists that redraw don't hit the disk again for them.
     private var missing: Set<String> = []
     private var inFlight: Set<String> = []
@@ -426,11 +478,11 @@ final class Favicons {
 
     func cached(_ host: String?) -> NSImage? {
         guard let host = host?.lowercased() else { return nil }
-        if let img = memory[host] { return img }
+        if let img = memory.object(forKey: host as NSString) { return img }
         guard !missing.contains(host) else { return nil }
         let file = folder.appendingPathComponent(host + ".icon")
         if let data = try? Data(contentsOf: file), let img = NSImage(data: data) {
-            memory[host] = img
+            memory.setObject(img, forKey: host as NSString)
             return img
         }
         missing.insert(host)
@@ -448,7 +500,7 @@ final class Favicons {
                 guard let data, data.count < 1_000_000,
                       (response as? HTTPURLResponse)?.statusCode ?? 200 < 400,
                       let img = NSImage(data: data), img.isValid else { return }
-                self.memory[key] = img
+                self.memory.setObject(img, forKey: key as NSString)
                 self.missing.remove(key)
                 if persist { try? data.write(to: self.folder.appendingPathComponent(key + ".icon"), options: .atomic) }
                 done(img)
@@ -456,9 +508,13 @@ final class Favicons {
         }.resume()
     }
 
-    func clearDisk() {
-        memory.removeAll()
+    func trimMemory() {
+        memory.removeAllObjects()
         missing.removeAll()
+    }
+
+    func clearDisk() {
+        trimMemory()
         try? FileManager.default.removeItem(at: folder)
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
     }

@@ -29,6 +29,7 @@ struct ToolbarContent: View {
             if horizontal { Spacer(minLength: 8) }
             AddressPill(tab: tab).frame(maxWidth: horizontal ? 720 : .infinity)
             if horizontal { Spacer(minLength: 8) }
+            if horizontal, let p = b.profile { ProfileBadge(profile: p, compact: true).fixedSize() }
             ShieldButton(tab: tab)
             DownloadsButton()
             PageMenu(tab: tab)
@@ -57,6 +58,7 @@ struct AddressPill: View {
     private var lock: (String, Color) {
         guard let u = shownURL else { return ("magnifyingglass", .secondary) }
         if tab.failedURL != nil { return ("exclamationmark.triangle.fill", .orange) }
+        if InputResolver.isInternational(u) { return ("character.textbox", .orange) }
         switch u.scheme {
         case "https": return tab.isSecure ? ("lock.fill", .secondary) : ("lock.trianglebadge.exclamationmark", .orange)
         case "http": return ("exclamationmark.triangle", .orange)
@@ -115,13 +117,19 @@ struct AddressPill: View {
         .frame(height: 30)
         .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Color.primary.opacity(hover ? 0.085 : 0.055)))
         .overlay(alignment: .bottom) {
-            if tab.isLoading { ProgressLine(progress: tab.progress).padding(.horizontal, 6) }
+            if tab.isLoading { LoadingLine(load: tab.load).padding(.horizontal, 6) }
         }
         .contentShape(Rectangle())
         .onTapGesture { b.showPalette(shownURL?.absoluteString) }
         .onHover { hover = $0 }
         .help(shownURL?.absoluteString ?? L("Search or enter address (⌘L)"))
     }
+}
+
+/// The progress line of a loading page; it watches only the progress, not the whole tab.
+struct LoadingLine: View {
+    @ObservedObject var load: LoadProgress
+    var body: some View { ProgressLine(progress: load.value) }
 }
 
 struct ProgressLine: View {
@@ -216,6 +224,10 @@ struct SiteInfoPopover: View {
                     Text(secure ? LocalizedStringKey("Connection is secure") : "Connection is not secure").font(.headline)
                     Text(InputResolver.displayHost(url)).font(.caption).foregroundStyle(.secondary)
                 }
+            }
+            if InputResolver.isInternational(url) {
+                Label("This address uses letters from other alphabets, which can be made to look like a familiar site. Check that it's the site you meant to visit.", systemImage: "character.textbox")
+                    .font(.caption).foregroundStyle(.orange).fixedSize(horizontal: false, vertical: true)
             }
             if secure, let cert = tab.certificateSummary {
                 Label(cert, systemImage: "checkmark.seal").font(.caption).foregroundStyle(.secondary)
@@ -325,6 +337,8 @@ struct DownloadRow: View {
             Spacer()
             if item.state == .active {
                 IconButton(systemName: "xmark.circle.fill", help: "Cancel") { dm.cancel(item) }
+            } else if item.canResume {
+                IconButton(systemName: "arrow.clockwise.circle.fill", help: "Resume") { dm.resume(item) }
             } else if item.state == .finished {
                 IconButton(systemName: "magnifyingglass", help: "Show in Finder") { dm.reveal(item) }
             }
@@ -335,6 +349,7 @@ struct DownloadRow: View {
         .onTapGesture(count: 2) { dm.open(item) }
         .contextMenu {
             Button("Open") { dm.open(item) }.disabled(item.state != .finished)
+            if item.canResume { Button("Resume") { dm.resume(item) } }
             Button("Show in Finder") { dm.reveal(item) }.disabled(item.destination == nil)
             if let src = item.source {
                 Button("Copy Address") {

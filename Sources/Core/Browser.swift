@@ -7,6 +7,9 @@ import WebKit
 final class BrowserState: ObservableObject {
     let isPrivate: Bool
     let dataStore: WKWebsiteDataStore
+    /// The profile whose cookies and site data this window uses; nil for the main one.
+    let profileID: UUID?
+    var profile: Profile? { profileID.flatMap { id in Settings.shared.profiles.first { $0.id == id } } }
 
     @Published var tabs: [Tab] = []
     @Published var groups: [TabGroup] = []
@@ -38,15 +41,20 @@ final class BrowserState: ObservableObject {
     var regularTabs: [Tab] { tabs.filter { !$0.isPinned } }
     var canReopen: Bool { !closedTabs.isEmpty }
 
-    init(isPrivate: Bool) {
+    init(isPrivate: Bool, profileID: UUID? = nil) {
         self.isPrivate = isPrivate
-        dataStore = isPrivate ? .nonPersistent() : .default()
+        // A window restored from the last session reopens in the profile it had.
+        let snap = WebApp.isActive || isPrivate || profileID != nil ? nil : Session.shared.takePending()
+        let pid = isPrivate ? nil : (profileID ?? snap?.profile)
+        let profile = pid.flatMap { id in Settings.shared.profiles.first { $0.id == id } }
+        self.profileID = profile?.id
+        dataStore = isPrivate ? .nonPersistent() : profile.map { WKWebsiteDataStore(forIdentifier: $0.id) } ?? .default()
         sidebarVisible = Settings.shared.sidebarVisible
         WindowRegistry.shared.add(self)
 
         if let app = WebApp.url {
             newTab(url: app)
-        } else if !isPrivate, let snap = Session.shared.takePending() {
+        } else if let snap {
             restore(snap)
         }
         if !isPrivate {
@@ -60,6 +68,13 @@ final class BrowserState: ObservableObject {
                 if Settings.shared.lockPrivateWindows { self?.locked = true }
             }
         }
+        // Settings are baked into a web view when it's made, so a change throws the spare away.
+        spareObserver = NotificationCenter.default.addObserver(forName: .settingChanged, object: nil, queue: .main) { [weak self] _ in
+            guard let self, self.spare != nil else { return }
+            self.spare = nil
+            self.prepareSpare()
+        }
+        prepareSpare()
         if !isPrivate {
             $tabs.combineLatest($selectedID)
                 .debounce(for: .seconds(1), scheduler: RunLoop.main)
@@ -72,6 +87,7 @@ final class BrowserState: ObservableObject {
         timer?.invalidate()
         if let keyObserver { NotificationCenter.default.removeObserver(keyObserver) }
         if let lockObserver { NotificationCenter.default.removeObserver(lockObserver) }
+        if let spareObserver { NotificationCenter.default.removeObserver(spareObserver) }
         tabs.forEach { $0.close() }
     }
 
@@ -103,7 +119,7 @@ final class BrowserState: ObservableObject {
     }
 
     func snapshot() -> WindowSnapshot {
-        WindowSnapshot(tabs: tabs.map { $0.snapshot() }, selected: tabs.firstIndex { $0.id == selectedID } ?? 0, groups: groups)
+        WindowSnapshot(tabs: tabs.map { $0.snapshot() }, selected: tabs.firstIndex { $0.id == selectedID } ?? 0, groups: groups, profile: profileID)
     }
 
     // MARK: Opening and selecting
@@ -480,17 +496,22 @@ final class BrowserState: ObservableObject {
             let old = Date().addingTimeInterval(-Double(days) * 86_400)
             for t in tabs where !t.isPinned && !t.isSelected && !t.isPlayingAudio && t.lastActive < old { close(t) }
         }
-        let minutes = Settings.shared.hibernateMinutes
+        var minutes = Double(Settings.shared.hibernateMinutes)
         guard minutes > 0 else { return }
-        let cutoff = Date().addingTimeInterval(-Double(minutes) * 60)
-        for t in tabs where !t.isSelected && !t.isHibernated && !t.isPlayingAudio && t.lastActive < cutoff {
+        // In Low Power Mode background tabs go to sleep three times sooner.
+        if Power.shared.lowPower { minutes = max(2, minutes / 3) }
+        hibernate(idleFor: minutes * 60)
+    }
+
+    /// Hibernates background tabs unused for `seconds`, except ones playing sound.
+    func hibernate(idleFor seconds: TimeInterval) {
+        let cutoff = Date().addingTimeInterval(-seconds)
+        for t in tabs where !t.isSelected && !t.isHibernated && !t.isPlayingAudio && t.lastActive <= cutoff {
             t.hibernate()
         }
     }
 
-    func hibernateOthers() {
-        for t in tabs where !t.isSelected && !t.isPlayingAudio { t.hibernate() }
-    }
+    func hibernateOthers() { hibernate(idleFor: 0) }
 
     // MARK: Window lock
 
@@ -528,6 +549,28 @@ final class BrowserState: ObservableObject {
     private func finishUnlock() {
         locked = false
         lockedByUser = false
+    }
+
+    // MARK: Spare web view
+
+    /// A web view built ahead of time, so the next new tab doesn't wait while one is made and its scripts are set up.
+    private var spare: LumenWebView?
+    private var spareObserver: NSObjectProtocol?
+
+    func takeSpareWebView() -> LumenWebView? {
+        let wv = spare
+        spare = nil
+        prepareSpare()
+        return wv
+    }
+
+    private func prepareSpare() {
+        // Low Power Mode skips it: the next tab builds its own when it's needed.
+        guard !Power.shared.lowPower, !WebApp.isActive else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            guard let self, self.spare == nil, !Power.shared.lowPower else { return }
+            self.spare = LumenWebView(frame: .zero, configuration: Tab.configuration(store: self.dataStore))
+        }
     }
 
     // MARK: Overlays

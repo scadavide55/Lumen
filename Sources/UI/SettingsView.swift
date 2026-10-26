@@ -104,6 +104,7 @@ struct GeneralPane: View {
                 Text("Hibernated tabs keep their place and history but release memory until you open them again.")
                     .font(.caption).foregroundStyle(.secondary)
             }
+            ProfilesSection()
             Section("Start page") {
                 Toggle("Show clock", isOn: $s.showClock)
                 Toggle("Show greeting", isOn: $s.showGreeting)
@@ -116,6 +117,68 @@ struct GeneralPane: View {
         }
         .formStyle(.grouped)
         .onAppear { isDefault = DefaultBrowser.isDefault }
+    }
+}
+
+struct ProfilesSection: View {
+    @ObservedObject private var s = Settings.shared
+    @Environment(\.openWindow) private var openWindow
+
+    var body: some View {
+        Section {
+            ForEach(s.profiles) { p in
+                HStack(spacing: 8) {
+                    Menu {
+                        ForEach(0..<TabGroup.colors.count, id: \.self) { i in
+                            Button(GroupHeader.colorNames[i]) { update(p.id) { $0.color = i } }
+                        }
+                    } label: {
+                        Image(systemName: "person.crop.circle.fill").foregroundStyle(p.tint)
+                    }
+                    .menuStyle(.borderlessButton)
+                    .menuIndicator(.hidden)
+                    .fixedSize()
+                    .help("Colour")
+                    TextField("Name", text: Binding(get: { p.name }, set: { name in update(p.id) { $0.name = name } }))
+                        .textFieldStyle(.plain)
+                    Spacer()
+                    Button("Open Window") { openWindow(id: "profile", value: p.id) }
+                    Button { delete(p) } label: { Image(systemName: "minus.circle.fill") }
+                        .buttonStyle(.plain).foregroundStyle(.secondary)
+                        .help("Delete Profile")
+                }
+            }
+            Button("Add Profile") {
+                let n = s.profiles.count + 1
+                s.profiles.append(Profile(name: String(format: L("Profile %lld"), n), color: n % TabGroup.colors.count))
+            }
+        } header: {
+            Text("Profiles")
+        } footer: {
+            Text("Each profile keeps its own cookies, sign-ins and site data, so you can be signed in to different accounts at the same time. History, bookmarks, passwords and settings are shared.")
+        }
+    }
+
+    private func update(_ id: UUID, _ change: (inout Profile) -> Void) {
+        guard let i = s.profiles.firstIndex(where: { $0.id == id }) else { return }
+        var p = s.profiles[i]
+        change(&p)
+        s.profiles[i] = p
+    }
+
+    private func delete(_ p: Profile) {
+        if WindowRegistry.shared.browsers.contains(where: { $0.profileID == p.id }) {
+            Dialogs.alert(NSApp.keyWindow, title: L("Close this profile's windows first"),
+                          message: L("A profile can be deleted once none of its windows are open.")) {}
+            return
+        }
+        Dialogs.confirm(NSApp.keyWindow, title: String(format: L("Delete “%@”?"), p.name),
+                        message: L("Its cookies, sign-ins and site data will be removed. Saved passwords stay in Lumen."),
+                        ok: L("Delete")) { ok in
+            guard ok else { return }
+            s.profiles.removeAll { $0.id == p.id }
+            ProfileCleanup.remove(p.id)
+        }
     }
 }
 
@@ -443,6 +506,29 @@ struct SitesPane: View {
                 Text("Site styles")
             } footer: {
                 Text("Your own CSS for any site: hide distractions, change fonts, restyle pages. Applies to subdomains too.")
+            }
+            Section("Camera and microphone") {
+                if s.mediaPermissions.isEmpty {
+                    Text("Sites you allow or block from using your camera or microphone are remembered here.").foregroundStyle(.secondary)
+                }
+                ForEach(s.mediaPermissions.sorted { $0.key < $1.key }, id: \.key) { key, allowed in
+                    if let p = MediaPermission.parse(key) {
+                        HStack {
+                            Text(p.host)
+                            Text(p.kind.label).foregroundStyle(.secondary)
+                            Spacer()
+                            Picker("", selection: Binding(get: { allowed }, set: { s.mediaPermissions[key] = $0 })) {
+                                Text("Allow").tag(true)
+                                Text("Block").tag(false)
+                            }
+                            .labelsHidden()
+                            .fixedSize()
+                            Button { s.mediaPermissions[key] = nil } label: { Image(systemName: "minus.circle.fill") }
+                                .buttonStyle(.plain).foregroundStyle(.secondary)
+                                .help("Forget")
+                        }
+                    }
+                }
             }
             Section("Zoom levels") {
                 if s.siteZoom.isEmpty {

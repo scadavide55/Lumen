@@ -107,6 +107,78 @@ struct SearchShortcut: Codable, Identifiable, Hashable {
     var template: String
 }
 
+/// A separate set of cookies, sign-ins and site data, for windows opened in it.
+struct Profile: Codable, Identifiable, Hashable {
+    var id = UUID()
+    var name: String
+    var color = 0
+    var tint: Color { TabGroup.colors[color % TabGroup.colors.count] }
+}
+
+/// Deleting a profile's cookies and site data.
+enum ProfileCleanup {
+    private static let key = "lumen.profilesToRemove"
+
+    /// Erases the profile's data right away. WebKit only gives up the profile's folder once Lumen
+    /// restarts, so removing the folder itself may wait until then.
+    static func remove(_ id: UUID) {
+        let store = WKWebsiteDataStore(forIdentifier: id)
+        store.removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), modifiedSince: .distantPast) {
+            _ = store
+            WKWebsiteDataStore.remove(forIdentifier: id) { error in
+                if error != nil { DispatchQueue.main.async { pending.append(id.uuidString) } }
+            }
+        }
+    }
+
+    /// Removes folders left by profiles deleted last time. It runs once a page has loaded,
+    /// because WebKit crashes when asked to remove a profile before it has started.
+    static func finishPending() {
+        let ids = pending.compactMap(UUID.init)
+        guard !ids.isEmpty else { return }
+        guard WindowRegistry.shared.browsers.contains(where: { $0.current?.webView != nil }) else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 10) { finishPending() }
+            return
+        }
+        pending = []
+        for id in ids {
+            WKWebsiteDataStore.remove(forIdentifier: id) { error in
+                if error != nil { DispatchQueue.main.async { pending.append(id.uuidString) } }
+            }
+        }
+    }
+
+    private static var pending: [String] {
+        get { UserDefaults.standard.stringArray(forKey: key) ?? [] }
+        set { UserDefaults.standard.set(newValue, forKey: key) }
+    }
+}
+
+enum MediaPermission {
+    enum Kind: String {
+        case camera, microphone, both
+
+        init(_ type: WKMediaCaptureType) {
+            switch type {
+            case .camera: self = .camera
+            case .microphone: self = .microphone
+            default: self = .both
+            }
+        }
+
+        var label: String { L(["camera": "camera", "microphone": "microphone", "both": "camera and microphone"][rawValue]!) }
+    }
+
+    static func key(host: String, kind: Kind) -> String { host.lowercased() + "|" + kind.rawValue }
+
+    /// Splits a stored key back into its site and what it's for.
+    static func parse(_ key: String) -> (host: String, kind: Kind)? {
+        let parts = key.split(separator: "|", maxSplits: 1).map(String.init)
+        guard parts.count == 2, let kind = Kind(rawValue: parts[1]) else { return nil }
+        return (parts[0], kind)
+    }
+}
+
 struct SiteStyle: Codable, Identifiable, Hashable {
     var id = UUID()
     var host: String
@@ -200,6 +272,7 @@ final class Settings: ObservableObject {
     @Pref("autoCloseDays") var autoCloseDays = 0
     @Pref("alwaysShowTitles") var alwaysShowTitles = false
     @Pref("pullToRefresh") var pullToRefresh = true
+    @Pref("profiles") var profiles: [Profile] = []
     @Pref("onboarded") var onboarded = false
 
     // Search
@@ -241,6 +314,8 @@ final class Settings: ObservableObject {
     @Pref("siteStyles") var siteStyles: [SiteStyle] = []
     @Pref("siteZoom") var siteZoom: [String: Double] = [:]
     @Pref("defaultZoom") var defaultZoom = 1.0
+    /// Camera and microphone choices per site, keyed by `MediaPermission.key`.
+    @Pref("mediaPermissions") var mediaPermissions: [String: Bool] = [:]
     @Pref("forceDark") var forceDark = false
 
     // Advanced

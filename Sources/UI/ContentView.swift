@@ -8,8 +8,8 @@ struct ContentView: View {
     static var onboardingShown = false
     static var updateChecked = false
 
-    init(isPrivate: Bool) {
-        _browser = StateObject(wrappedValue: BrowserState(isPrivate: isPrivate))
+    init(isPrivate: Bool, profileID: UUID? = nil) {
+        _browser = StateObject(wrappedValue: BrowserState(isPrivate: isPrivate, profileID: profileID))
     }
 
     var body: some View {
@@ -295,6 +295,7 @@ struct ChromeBackground: View {
             }
             if s.siteTint, let tab = b.current { SiteTint(tab: tab) }
             if b.isPrivate { Color(red: 0.36, green: 0.22, blue: 0.62).opacity(0.24) }
+            if let p = b.profile { p.tint.opacity(0.1) }
         }
         .ignoresSafeArea()
     }

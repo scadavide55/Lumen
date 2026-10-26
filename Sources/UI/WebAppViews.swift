@@ -41,7 +41,7 @@ private struct WebAppBar: View {
         .frame(height: 38)
         .background(WindowDragArea())
         .overlay(alignment: .bottom) {
-            if tab.isLoading { ProgressLine(progress: tab.progress) }
+            if tab.isLoading { LoadingLine(load: tab.load) }
         }
     }
 }

@@ -12,6 +12,7 @@
 "(no username)" = "(aucun nom d'utilisateur)";
 "1 profile" = "1 profil";
 "A few things worth knowing." = "Quelques choses à savoir.";
+"A profile can be deleted once none of its windows are open." = "Un profil peut être supprimé lorsqu'aucune de ses fenêtres n'est ouverte.";
 "A quiet, fast browser that blocks ads and trackers for you. Let's get it set up the way you like. It only takes a minute." = "Un navigateur discret et rapide qui bloque les publicités et les traqueurs pour vous. Configurons-le à votre goût : cela ne prend qu'une minute.";
 "About Lumen" = "À propos de Lumen";
 "Accent" = "Accent";
@@ -20,6 +21,7 @@
 "Ad blocker on or off" = "Activer ou désactiver le bloqueur";
 "Add" = "Ajouter";
 "Add Bookmark" = "Ajouter un signet";
+"Add Profile" = "Ajouter un profil";
 "Add Site Style…" = "Ajouter un style de site…";
 "Add to New Group" = "Ajouter à un nouveau groupe";
 "Adds EasyList and EasyPrivacy: tens of thousands of rules, updated weekly." = "Ajoute EasyList et EasyPrivacy : des dizaines de milliers de règles, mises à jour chaque semaine.";
@@ -54,6 +56,7 @@
 "Back (⌘[)" = "Retour (⌘[)";
 "Back / forward" = "Retour / avant";
 "Background" = "Fond";
+"Block" = "Bloquer";
 "Block Ads and Trackers" = "Bloquer les publicités et les traqueurs";
 "Block Third-Party Cookies" = "Bloquer les cookies tiers";
 "Block ads and trackers" = "Bloquer les publicités et les traqueurs";
@@ -73,6 +76,7 @@
 "Browsing" = "Navigation";
 "Built-in list. Works offline, breaks almost nothing." = "Liste intégrée. Fonctionne hors ligne et ne casse presque rien.";
 "Cached images and files" = "Images et fichiers en cache";
+"Camera and microphone" = "Caméra et micro";
 "Can't find this site" = "Impossible de trouver ce site";
 "Can't open this page" = "Impossible d'ouvrir cette page";
 "Cancel" = "Annuler";
@@ -108,6 +112,7 @@
 "Close split view" = "Fermer la vue partagée";
 "Close tab" = "Fermer l'onglet";
 "Close tab (⌘W)" = "Fermer l'onglet (⌘W)";
+"Close this profile's windows first" = "Fermez d'abord les fenêtres de ce profil";
 "Collapse Group" = "Réduire le groupe";
 "Colour" = "Couleur";
 "Command" = "Commande";
@@ -144,6 +149,8 @@
 "Data folder" = "Dossier des données";
 "Default zoom" = "Zoom par défaut";
 "Delete" = "Supprimer";
+"Delete Profile" = "Supprimer le profil";
+"Delete “%@”?" = "Supprimer « %@ » ?";
 "Developer" = "Développeur";
 "Don't Allow" = "Refuser";
 "Done" = "Terminé";
@@ -155,6 +162,7 @@
 "Downloads (⌥⌘L)" = "Téléchargements (⌥⌘L)";
 "Duplicate Tab" = "Dupliquer l'onglet";
 "Dusk" = "Crépuscule";
+"Each profile keeps its own cookies, sign-ins and site data, so you can be signed in to different accounts at the same time. History, bookmarks, passwords and settings are shared." = "Chaque profil a ses propres cookies, connexions et données de sites, pour être connecté à plusieurs comptes en même temps. L'historique, les signets, les mots de passe et les réglages sont partagés.";
 "EasyList (ads)" = "EasyList (publicités)";
 "EasyPrivacy (trackers)" = "EasyPrivacy (traqueurs)";
 "Edit" = "Modifier";
@@ -191,6 +199,7 @@
 "Follows your Mac" = "Suit votre Mac";
 "Force dark pages (experimental)" = "Forcer les pages sombres (expérimental)";
 "Forest" = "Forêt";
+"Forget" = "Oublier";
 "Forward" = "Avant";
 "Forward (⌘])" = "Avant (⌘])";
 "Free memory used by background tabs" = "Libérer la mémoire des onglets en arrière-plan";
@@ -244,6 +253,7 @@
 "Install as App" = "Installer comme app";
 "Install as App…" = "Installer comme app…";
 "Installing… Lumen will restart." = "Installation… Lumen va redémarrer.";
+"Its cookies, sign-ins and site data will be removed. Saved passwords stay in Lumen." = "Ses cookies, connexions et données de sites seront supprimés. Les mots de passe enregistrés restent dans Lumen.";
 "Its own window and Dock icon" = "Sa propre fenêtre et icône dans le Dock";
 "Keeps one tab per address" = "Garde un seul onglet par adresse";
 "Keeps you signed in to sites." = "Vous garde connecté aux sites.";
@@ -290,6 +300,7 @@
 "Lumen is your default browser" = "Lumen est votre navigateur par défaut";
 "Lumen looks for Safari, Firefox and Chromium browsers such as Chrome, Opera, Brave, Edge and Arc." = "Lumen recherche Safari, Firefox et les navigateurs Chromium comme Chrome, Opera, Brave, Edge et Arc.";
 "Lumen opens it from sign-in pages so you can copy passwords. Lumen won't offer to save passwords." = "Lumen l'ouvre depuis les pages de connexion pour copier vos mots de passe. Lumen ne proposera pas d'enregistrer les mots de passe.";
+"Lumen remembers your choice for this site. You can change it in Settings › Sites." = "Lumen retient votre choix pour ce site. Vous pouvez le modifier dans Réglages › Sites.";
 "Lumen remembers your choice until you close this tab." = "Lumen se souvient de votre choix jusqu'à la fermeture de cet onglet.";
 "Lumen saves passwords in your Mac's Keychain and asks for Touch ID before filling them. Already use another password manager? Pick it here." = "Lumen enregistre les mots de passe dans le trousseau de votre Mac et demande Touch ID avant de les remplir. Vous utilisez déjà un autre gestionnaire ? Choisissez-le ici.";
 "Make Default" = "Définir par défaut";
@@ -311,6 +322,7 @@
 "New Tab" = "Nouvel onglet";
 "New Update Available" = "Nouvelle mise à jour disponible";
 "New Window" = "Nouvelle fenêtre";
+"New Window in Profile" = "Nouvelle fenêtre dans le profil";
 "New private window" = "Nouvelle fenêtre privée";
 "New private window (⇧⌘N)" = "Nouvelle fenêtre privée (⇧⌘N)";
 "New tab" = "Nouvel onglet";
@@ -357,6 +369,7 @@
 "Open Location…" = "Ouvrir l'adresse…";
 "Open Settings" = "Ouvrir les réglages";
 "Open Video in New Tab" = "Ouvrir la vidéo dans un nouvel onglet";
+"Open Window" = "Ouvrir une fenêtre";
 "Open address" = "Ouvrir l'adresse";
 "Open in Lumen" = "Ouvrir dans Lumen";
 "Open in Split View" = "Ouvrir en vue partagée";
@@ -404,6 +417,8 @@
 "Private window locked" = "Fenêtre privée verrouillée";
 "Private windows" = "Fenêtres privées";
 "Profile" = "Profil";
+"Profile %lld" = "Profil %lld";
+"Profiles" = "Profils";
 "Protection on this site" = "Protection sur ce site";
 "Purple" = "Violet";
 "Put the address bar in the sidebar" = "Placer la barre d'adresse dans la barre latérale";
@@ -438,6 +453,7 @@
 "Restart Lumen to use the new language." = "Redémarrez Lumen pour utiliser la nouvelle langue.";
 "Restart Now" = "Redémarrer";
 "Restore windows and tabs when Lumen opens" = "Restaurer les fenêtres et onglets à l'ouverture de Lumen";
+"Resume" = "Reprendre";
 "Right" = "Droite";
 "Right-click a page and choose Inspect Element." = "Cliquez avec le bouton droit sur une page et choisissez Inspecter l'élément.";
 "Safari (recommended)" = "Safari (recommandé)";
@@ -509,6 +525,7 @@
 "Sites" = "Sites";
 "Sites that don't support HTTPS won't open until you confirm." = "Les sites sans HTTPS ne s'ouvrent pas tant que vous ne confirmez pas.";
 "Sites where Shield is off" = "Sites où Shield est désactivé";
+"Sites you allow or block from using your camera or microphone are remembered here." = "Les sites que vous autorisez ou bloquez pour la caméra ou le micro sont listés ici.";
 "Sites you zoom in or out are remembered here." = "Les sites dont vous modifiez le zoom sont mémorisés ici.";
 "Skip Setup" = "Passer la configuration";
 "Skip This Version" = "Ignorer cette version";
@@ -550,13 +567,16 @@
 "The downloaded version isn't newer than this one." = "La version téléchargée n'est pas plus récente que celle-ci.";
 "The quiet browser for your Mac" = "Le navigateur discret pour votre Mac";
 "The site says: “%@”" = "Le site indique : « %@ »";
+"The update couldn't be verified. It may be damaged or changed; try again later." = "Impossible de vérifier la mise à jour. Elle est peut-être endommagée ou modifiée ; réessayez plus tard.";
 "The update doesn't come from GitHub." = "La mise à jour ne provient pas de GitHub.";
 "Theme" = "Thème";
+"This address uses letters from other alphabets, which can be made to look like a familiar site. Check that it's the site you meant to visit." = "Cette adresse utilise des lettres d'autres alphabets, qui peuvent imiter un site connu. Vérifiez qu'il s'agit bien du site voulu.";
 "This page isn't secure. Passwords you type here can be read by others on your network." = "Cette page n'est pas sécurisée. Les mots de passe saisis ici peuvent être lus par d'autres sur votre réseau.";
 "This page says" = "Cette page indique";
 "This page stopped working more than once, so Lumen stopped reloading it." = "Cette page a cessé de fonctionner plusieurs fois, donc Lumen a arrêté de la recharger.";
 "This site doesn't support a secure connection" = "Ce site ne prend pas en charge une connexion sécurisée";
 "This site requires a username and password." = "Ce site nécessite un nom d'utilisateur et un mot de passe.";
+"This window uses the cookies, sign-ins and site data of this profile." = "Cette fenêtre utilise les cookies, connexions et données de sites de ce profil.";
 "Time range" = "Période";
 "Tint the window with the site's colour" = "Teinter la fenêtre avec la couleur du site";
 "Tinted" = "Teinté";

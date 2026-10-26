@@ -1,4 +1,5 @@
 import AppKit
+import CryptoKit
 
 /// Checks GitHub releases for a newer Lumen and can install it in place.
 final class UpdateChecker: ObservableObject {
@@ -11,6 +12,8 @@ final class UpdateChecker: ObservableObject {
         let notes: String
         let page: URL
         let asset: URL?
+        /// "<asset>.sha256" published next to the asset, holding its SHA-256.
+        let checksum: URL?
     }
 
     @Published private(set) var available: Release?
@@ -75,9 +78,10 @@ final class UpdateChecker: ObservableObject {
             guard let name = a["name"] as? String, let url = (a["browser_download_url"] as? String).flatMap(URL.init) else { return nil }
             return (name.lowercased(), url)
         }
-        let asset = assets.first { $0.0.hasSuffix(".dmg") }?.1 ?? assets.first { $0.0.hasSuffix(".zip") }?.1
+        let picked = assets.first { $0.0.hasSuffix(".dmg") } ?? assets.first { $0.0.hasSuffix(".zip") }
+        let checksum = picked.flatMap { p in assets.first { $0.0 == p.0 + ".sha256" }?.1 }
         return Release(version: version(fromTag: tag), name: r["name"] as? String ?? tag,
-                       notes: r["body"] as? String ?? "", page: page, asset: asset)
+                       notes: r["body"] as? String ?? "", page: page, asset: picked?.1, checksum: checksum)
     }
 
     /// "v1.5-beta" → "1.5"
@@ -156,8 +160,9 @@ final class UpdateInstaller: NSObject, ObservableObject, URLSessionDownloadDeleg
             return
         }
         state = .installing
+        let checksum = release?.checksum
         DispatchQueue.global(qos: .userInitiated).async {
-            let result = Self.prepare(archive: archive, ext: ext, work: work)
+            let result = Self.verify(archive: archive, checksum: checksum).flatMap { Self.prepare(archive: archive, ext: ext, work: work) }
             DispatchQueue.main.async {
                 switch result {
                 case .success(let app): self.relaunch(into: app)
@@ -168,6 +173,18 @@ final class UpdateInstaller: NSObject, ObservableObject, URLSessionDownloadDeleg
     }
 
     struct Message: Error { let text: String }
+
+    /// When the release publishes a SHA-256 for the download, the file must match it.
+    private static func verify(archive: URL, checksum: URL?) -> Result<Void, Message> {
+        guard let checksum else { return .success(()) }
+        let damaged = Message(text: L("The update couldn't be verified. It may be damaged or changed; try again later."))
+        guard checksum.scheme == "https", trustedHosts.contains(checksum.host ?? ""),
+              let text = try? String(contentsOf: checksum, encoding: .utf8),
+              let expected = text.split(whereSeparator: \.isWhitespace).first?.lowercased(),
+              let data = try? Data(contentsOf: archive, options: .mappedIfSafe) else { return .failure(damaged) }
+        let actual = SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+        return actual == expected ? .success(()) : .failure(damaged)
+    }
 
     /// Extracts the new Lumen.app and checks its identity and version.
     private static func prepare(archive: URL, ext: String, work: URL) -> Result<URL, Message> {
@@ -190,6 +207,10 @@ final class UpdateInstaller: NSObject, ObservableObject, URLSessionDownloadDeleg
         guard let app = findApp(in: extracted), let bundle = Bundle(url: app),
               bundle.bundleIdentifier == Bundle.main.bundleIdentifier else {
             return .failure(Message(text: L("The download doesn't contain Lumen.")))
+        }
+        // The app must be intact: every file has to match its code signature.
+        guard run("/usr/bin/codesign", ["--verify", "--deep", "--strict", app.path]) else {
+            return .failure(Message(text: L("The update couldn't be verified. It may be damaged or changed; try again later.")))
         }
         let version = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"
         guard UpdateChecker.isNewer(version, than: UpdateChecker.currentVersion) else {

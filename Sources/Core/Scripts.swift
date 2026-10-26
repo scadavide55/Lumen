@@ -427,7 +427,8 @@ enum Scripts {
           return img;
         }
         const out = keep.has(node.tagName) ? document.createElement(node.tagName) : document.createDocumentFragment();
-        if (node.tagName === 'A' && node.href) out.setAttribute('href', node.href);
+        // Only ordinary links: a javascript: link would run on the article's site from the reader page.
+        if (node.tagName === 'A' && /^(https?|mailto):/i.test(node.href || '')) out.setAttribute('href', node.href);
         for (const c of node.childNodes) { const k = clone(c); if (k) out.appendChild(k); }
         return out;
       };

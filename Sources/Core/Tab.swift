@@ -10,7 +10,6 @@ final class Tab: NSObject, ObservableObject, Identifiable {
     @Published var title: String
     @Published var url: URL?
     @Published var isLoading = false
-    @Published var progress = 0.0
     @Published var canGoBack = false
     @Published var canGoForward = false
     @Published var favicon: NSImage?
@@ -42,6 +41,8 @@ final class Tab: NSObject, ObservableObject, Identifiable {
     private var faviconHost: String?
     /// Pull to refresh state, kept apart so that only the indicator redraws while you pull.
     let pull = PullToRefresh()
+    /// Loading progress, kept apart so that only the progress line redraws while a page loads.
+    let load = LoadProgress()
     private var mediaPermissions: [String: Bool] = [:]
     private var rememberedUser: (host: String, name: String, at: Date)?
     private var lastCrash: Date?
@@ -118,7 +119,9 @@ final class Tab: NSObject, ObservableObject, Identifiable {
 
     func ensureWebView() {
         guard webView == nil, let browser else { return }
-        let wv = LumenWebView(frame: .zero, configuration: Tab.configuration(store: browser.dataStore))
+        // A tab restoring its history needs a web view that has never loaded anything; a fresh tab can take the spare.
+        let spare = restoreState == nil ? browser.takeSpareWebView() : nil
+        let wv = spare ?? LumenWebView(frame: .zero, configuration: Tab.configuration(store: browser.dataStore))
         attach(wv)
         let state = restoreState
         let target = pendingURL
@@ -150,10 +153,10 @@ final class Tab: NSObject, ObservableObject, Identifiable {
             wv.observe(\.url) { [weak self] w, _ in if let u = w.url, self?.url != u { self?.url = u } },
             wv.observe(\.isLoading) { [weak self] w, _ in if self?.isLoading != w.isLoading { self?.isLoading = w.isLoading } },
             wv.observe(\.estimatedProgress) { [weak self] w, _ in
-                guard let self else { return }
+                guard let load = self?.load else { return }
                 let p = w.estimatedProgress
                 // The bar is 2 pt tall: steps under 4% can't be seen, but each one costs a redraw.
-                if abs(p - self.progress) >= 0.04 || p == 1 || p < self.progress { if p != self.progress { self.progress = p } }
+                if abs(p - load.value) >= 0.04 || p == 1 || p < load.value { if p != load.value { load.value = p } }
             },
             wv.observe(\.canGoBack) { [weak self] w, _ in if self?.canGoBack != w.canGoBack { self?.canGoBack = w.canGoBack } },
             wv.observe(\.canGoForward) { [weak self] w, _ in if self?.canGoForward != w.canGoForward { self?.canGoForward = w.canGoForward } },
@@ -184,7 +187,7 @@ final class Tab: NSObject, ObservableObject, Identifiable {
         webView = nil
         appliedLists = nil
         isLoading = false
-        progress = 0
+        load.value = 0
         isPlayingAudio = false
         hoverURL = nil
     }
@@ -737,21 +740,23 @@ extension Tab: WKUIDelegate {
     func webView(_ webView: WKWebView, requestMediaCapturePermissionFor origin: WKSecurityOrigin,
                  initiatedByFrame frame: WKFrameInfo, type: WKMediaCaptureType,
                  decisionHandler: @escaping (WKPermissionDecision) -> Void) {
-        let what: String
-        switch type {
-        case .camera: what = L("camera")
-        case .microphone: what = L("microphone")
-        default: what = L("camera and microphone")
-        }
-        let key = origin.host + "|" + what
-        if let remembered = mediaPermissions[key] {
+        let kind = MediaPermission.Kind(type)
+        let key = MediaPermission.key(host: origin.host, kind: kind)
+        // Private windows remember a choice only in the tab; other windows remember it for the site.
+        if let remembered = isPrivate ? mediaPermissions[key] : Settings.shared.mediaPermissions[key] {
             decisionHandler(remembered ? .grant : .deny)
             return
         }
-        Dialogs.confirm(webView.window, title: String(format: L("Allow “%@” to use your %@?"), origin.host, what),
-                        message: L("Lumen remembers your choice until you close this tab."),
+        Dialogs.confirm(webView.window, title: String(format: L("Allow “%@” to use your %@?"), origin.host, kind.label),
+                        message: L(isPrivate ? "Lumen remembers your choice until you close this tab."
+                                             : "Lumen remembers your choice for this site. You can change it in Settings › Sites."),
                         ok: L("Allow"), cancel: L("Don't Allow")) { [weak self] allowed in
-            self?.mediaPermissions[key] = allowed
+            guard let self else { decisionHandler(.deny); return }
+            if self.isPrivate {
+                self.mediaPermissions[key] = allowed
+            } else {
+                Settings.shared.mediaPermissions[key] = allowed
+            }
             decisionHandler(allowed ? .grant : .deny)
         }
     }
@@ -875,6 +880,10 @@ enum Dialogs {
         a.window.initialFirstResponder = user
         present(a, in: window) { done($0 == .alertFirstButtonReturn ? (user.stringValue, pass.stringValue) : nil) }
     }
+}
+
+final class LoadProgress: ObservableObject {
+    @Published var value = 0.0
 }
 
 /// Scrolling up past the top of a page with the trackpad reloads it.

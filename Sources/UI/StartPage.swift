@@ -140,10 +140,14 @@ struct StartBackgroundView: View {
     let style: StartBackground
     let isPrivate: Bool
     @ObservedObject private var s = Settings.shared
+    @ObservedObject private var power = Power.shared
+
+    /// Backgrounds hold still in Low Power Mode.
+    private var animated: Bool { s.animateBackground && !power.lowPower }
 
     var body: some View {
         if isPrivate {
-            AnimatedGradient(base: [0x1A1033, 0x2E1A57], blobs: [0x7B4DDB, 0x3B2A8C], animated: s.animateBackground)
+            AnimatedGradient(base: [0x1A1033, 0x2E1A57], blobs: [0x7B4DDB, 0x3B2A8C], animated: animated)
         } else {
             switch style {
             case .image:
@@ -157,7 +161,7 @@ struct StartBackgroundView: View {
                 }
             case .video:
                 if FileManager.default.fileExists(atPath: s.startVideoPath) {
-                    VideoBackground(url: URL(fileURLWithPath: s.startVideoPath)).overlay(Color.black.opacity(0.25))
+                    VideoBackground(url: URL(fileURLWithPath: s.startVideoPath), paused: power.lowPower).overlay(Color.black.opacity(0.25))
                 } else {
                     Self.fallback
                 }
@@ -166,10 +170,10 @@ struct StartBackgroundView: View {
             case .accent:
                 LinearGradient(colors: [s.accent, s.accent.opacity(0.55), .black.opacity(0.85)], startPoint: .topLeading, endPoint: .bottomTrailing)
             case .flow:
-                FlowGradient()
+                FlowGradient(animated: !power.lowPower)
             default:
                 let p = Self.presets[style] ?? Self.presets[.aurora]!
-                AnimatedGradient(base: p.0, blobs: p.1, animated: s.animateBackground)
+                AnimatedGradient(base: p.0, blobs: p.1, animated: animated)
             }
         }
     }
@@ -203,7 +207,8 @@ struct AnimatedGradient: View {
 
 /// Colours that slowly shift around the hue wheel.
 struct FlowGradient: View {
-    var body: some View { GradientLayers(style: .flow) }
+    var animated = true
+    var body: some View { GradientLayers(style: .flow(animated: animated)) }
 }
 
 /// Draws the start page gradients with Core Animation. The motion runs in the window server,
@@ -211,7 +216,7 @@ struct FlowGradient: View {
 struct GradientLayers: NSViewRepresentable {
     enum Style: Equatable {
         case preset(base: [UInt32], blobs: [UInt32], animated: Bool)
-        case flow
+        case flow(animated: Bool)
     }
     let style: Style
 
@@ -292,7 +297,7 @@ final class GradientLayerView: NSView {
                 }
             }
 
-        case .flow:
+        case .flow(let animated):
             func hue(_ h: Double, _ s: Double, _ b: Double, _ a: Double = 1) -> CGColor {
                 NSColor(colorSpace: .sRGB, hue: h.truncatingRemainder(dividingBy: 1), saturation: s, brightness: b, alpha: a).cgColor
             }
@@ -305,9 +310,11 @@ final class GradientLayerView: NSView {
             let t0 = Self.now
             base.colors = baseColors(t0)
             (base.startPoint, base.endPoint) = ends(t0)
-            base.add(Self.drift("colors", period: 60) { baseColors($0) }, forKey: "colors")
-            base.add(Self.drift("startPoint", period: 2 * .pi * 9) { NSValue(point: ends($0).0) }, forKey: "start")
-            base.add(Self.drift("endPoint", period: 2 * .pi * 9) { NSValue(point: ends($0).1) }, forKey: "end")
+            if animated {
+                base.add(Self.drift("colors", period: 60) { baseColors($0) }, forKey: "colors")
+                base.add(Self.drift("startPoint", period: 2 * .pi * 9) { NSValue(point: ends($0).0) }, forKey: "start")
+                base.add(Self.drift("endPoint", period: 2 * .pi * 9) { NSValue(point: ends($0).1) }, forKey: "end")
+            }
 
             let glowSpecs: [(radius: Double, shift: Double, b: Double, a: Double, x: (Double) -> Double, y: (Double) -> Double, px: Double, py: Double)] = [
                 (0.55, 0.3, 0.75, 0.5, { 0.3 + 0.25 * sin($0 / 7) }, { 0.3 + 0.2 * cos($0 / 11) }, 7, 11),
@@ -321,6 +328,7 @@ final class GradientLayerView: NSView {
                 }
                 g.colors = colors(t0)
                 g.position = point(spec.x(t0), spec.y(t0))
+                guard animated else { continue }
                 g.add(Self.drift("colors", period: 60) { colors($0) }, forKey: "colors")
                 g.add(Self.drift("position.x", period: 2 * .pi * spec.px) { point(spec.x($0), 0).x }, forKey: "x")
                 g.add(Self.drift("position.y", period: 2 * .pi * spec.py) { point(0, spec.y($0)).y }, forKey: "y")
@@ -352,18 +360,25 @@ final class GradientLayerView: NSView {
     }
 }
 
-/// A muted, looping video.
+/// A muted, looping video. It pauses on its first frame while `paused` (Low Power Mode).
 struct VideoBackground: NSViewRepresentable {
     let url: URL
+    var paused = false
 
     func makeNSView(context: Context) -> PlayerView { PlayerView(url: url) }
-    func updateNSView(_ v: PlayerView, context: Context) { v.play(url) }
+    func updateNSView(_ v: PlayerView, context: Context) {
+        v.play(url)
+        v.paused = paused
+    }
     static func dismantleNSView(_ v: PlayerView, coordinator: ()) { v.stop() }
 
     final class PlayerView: NSView {
         private let player = AVQueuePlayer()
         private var looper: AVPlayerLooper?
         private var current: URL?
+        var paused = false {
+            didSet { if paused != oldValue { syncPlayback() } }
+        }
 
         init(url: URL) {
             super.init(frame: .zero)
@@ -382,7 +397,7 @@ struct VideoBackground: NSViewRepresentable {
             guard url != current else { return }
             current = url
             looper = AVPlayerLooper(player: player, templateItem: AVPlayerItem(url: url))
-            player.play()
+            syncPlayback()
         }
 
         func stop() {
@@ -406,8 +421,8 @@ struct VideoBackground: NSViewRepresentable {
         }
 
         private func syncPlayback() {
-            guard looper != nil, let window else { return }
-            window.occlusionState.contains(.visible) ? player.play() : player.pause()
+            guard looper != nil, let window else { player.pause(); return }
+            window.occlusionState.contains(.visible) && !paused ? player.play() : player.pause()
         }
     }
 }

@@ -2,3 +2,4 @@ Lumen.app/
 .DS_Store
 *.dmg
 build/
+*.dmg.sha256
