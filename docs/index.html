@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lumen — the quiet browser for Mac</title>
+<meta name="description" content="Lumen is a minimal, fast browser for macOS built on WebKit. It blocks ads and trackers out of the box and turns off with one click.">
+<meta name="theme-color" content="#07080f">
+<meta property="og:title" content="Lumen — the quiet browser for Mac">
+<meta property="og:description" content="Minimal, fast and private. Ads and trackers blocked out of the box.">
+<meta property="og:image" content="assets/screenshot.jpg">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/icon.png">
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #07080f;
+  --bg-2: #0d1020;
+  --card: rgba(255, 255, 255, 0.035);
+  --card-hover: rgba(255, 255, 255, 0.06);
+  --line: rgba(255, 255, 255, 0.08);
+  --fg: #f3f2ef;
+  --muted: #9a9cb2;
+  --faint: #6b6e86;
+  --accent: #7b79f2;
+  --amber: #ffd68a;
+  --radius: 18px;
+  --max: 1120px;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Inter, system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 17px/1.55 var(--font);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+.wrap { width: 100%; max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+
+/* Nav */
+nav {
+  position: sticky; top: 0; z-index: 50;
+  backdrop-filter: saturate(160%) blur(18px);
+  -webkit-backdrop-filter: saturate(160%) blur(18px);
+  background: rgba(7, 8, 15, 0.72);
+  border-bottom: 1px solid transparent;
+  transition: border-color .25s;
+}
+nav.scrolled { border-bottom-color: var(--line); }
+nav .wrap { display: flex; align-items: center; height: 60px; gap: 28px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 650; font-size: 18px; letter-spacing: -0.01em; }
+.brand img { width: 28px; height: 28px; }
+.navlinks { display: flex; gap: 24px; margin-left: auto; font-size: 14.5px; color: var(--muted); }
+.navlinks a:hover { color: var(--fg); }
+.nav-cta { font-size: 14px; padding: 7px 14px; border-radius: 999px; background: var(--fg); color: #0a0b12; font-weight: 600; }
+.nav-cta:hover { background: #fff; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 13px 22px; border-radius: 12px;
+  font-weight: 600; font-size: 16px;
+  transition: transform .15s, background .2s, box-shadow .2s;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn svg { width: 18px; height: 18px; }
+.btn.primary { background: var(--fg); color: #0a0b12; box-shadow: 0 8px 30px rgba(255, 214, 138, 0.18); }
+.btn.primary:hover { background: #fff; box-shadow: 0 10px 40px rgba(255, 214, 138, 0.28); }
+.btn.ghost { border: 1px solid var(--line); background: var(--card); }
+.btn.ghost:hover { background: var(--card-hover); }
+
+/* Hero */
+.hero { position: relative; padding: 96px 0 40px; text-align: center; isolation: isolate; }
+.hero::before {
+  content: ""; position: absolute; z-index: -1;
+  left: 50%; top: -120px; width: 1100px; height: 760px; transform: translateX(-50%);
+  background:
+    radial-gradient(closest-side, rgba(255, 214, 138, 0.22), transparent 70%),
+    radial-gradient(closest-side at 30% 60%, rgba(94, 92, 230, 0.28), transparent 75%),
+    radial-gradient(closest-side at 72% 55%, rgba(46, 196, 182, 0.14), transparent 75%);
+  filter: blur(10px);
+}
+.orb {
+  width: 76px; height: 76px; margin: 0 auto 28px; border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #fff, #ffe2a3 55%, #f0b04a);
+  box-shadow: 0 0 60px 10px rgba(255, 214, 138, 0.35), 0 0 0 10px rgba(255, 255, 255, 0.04), 0 0 0 11px rgba(255, 255, 255, 0.1);
+  animation: breathe 6s ease-in-out infinite;
+}
+@keyframes breathe { 50% { box-shadow: 0 0 80px 18px rgba(255, 214, 138, 0.45), 0 0 0 14px rgba(255, 255, 255, 0.03), 0 0 0 15px rgba(255, 255, 255, 0.08); } }
+.pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 5px 12px 5px 6px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--card);
+  font-size: 13.5px; color: var(--muted); margin-bottom: 26px;
+}
+.pill b { background: var(--accent); color: #fff; font-weight: 600; font-size: 11.5px; padding: 2px 8px; border-radius: 999px; letter-spacing: .02em; }
+.pill:hover { color: var(--fg); }
+h1 {
+  font-size: clamp(44px, 7.4vw, 84px); line-height: 1.02; letter-spacing: -0.04em;
+  font-weight: 700; margin: 0 0 22px;
+}
+h1 .soft { background: linear-gradient(180deg, #fff 30%, #a9abc6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lead { font-size: clamp(18px, 2.1vw, 21px); color: var(--muted); max-width: 640px; margin: 0 auto 34px; }
+.cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.fine { margin-top: 18px; font-size: 13.5px; color: var(--faint); }
+
+.shot { margin: 70px auto 0; max-width: 1040px; position: relative; perspective: 1600px; }
+.shot .frame {
+  border-radius: 14px; overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 50px 120px -20px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 0, 0, 0.6), 0 30px 80px -30px rgba(94, 92, 230, 0.5);
+  transform: rotateX(8deg) scale(.98);
+  transform-origin: 50% 100%;
+  transition: transform 1.2s cubic-bezier(.2,.7,.2,1);
+}
+.shot.in .frame { transform: rotateX(0) scale(1); }
+.shot::after {
+  content: ""; position: absolute; inset: auto 8% -40px; height: 80px; z-index: -1;
+  background: radial-gradient(closest-side, rgba(255, 214, 138, 0.25), transparent);
+  filter: blur(20px);
+}
+
+/* Sections */
+section { padding: 120px 0 0; }
+.eyebrow { font-size: 13px; text-transform: uppercase; letter-spacing: .14em; color: var(--accent); font-weight: 650; margin-bottom: 14px; }
+h2 { font-size: clamp(34px, 4.6vw, 54px); line-height: 1.06; letter-spacing: -0.035em; margin: 0 0 18px; font-weight: 700; }
+.sub { color: var(--muted); font-size: 19px; max-width: 620px; margin: 0; }
+.center { text-align: center; }
+.center .sub { margin: 0 auto; }
+
+/* Feature grid */
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 56px; }
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 28px; transition: background .2s, transform .2s, border-color .2s;
+}
+.card:hover { background: var(--card-hover); transform: translateY(-2px); border-color: rgba(255,255,255,0.12); }
+.icon {
+  width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; margin-bottom: 20px;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: color-mix(in srgb, var(--accent) 70%, white);
+}
+.icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.card h3 { margin: 0 0 8px; font-size: 19px; letter-spacing: -0.01em; }
+.card p { margin: 0; color: var(--muted); font-size: 15.5px; }
+
+/* Split rows */
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+.row.flip > :first-child { order: 2; }
+.checks { list-style: none; padding: 0; margin: 28px 0 0; display: grid; gap: 12px; }
+.checks li { display: flex; gap: 12px; color: var(--muted); font-size: 16px; }
+.checks li::before {
+  content: ""; flex: none; width: 20px; height: 20px; margin-top: 2px; border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 22%, transparent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M6 10.5l2.5 2.5L14 7.5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 14px no-repeat;
+}
+.checks li b { color: var(--fg); font-weight: 600; }
+
+/* Shield popover mock */
+.stage {
+  position: relative; border-radius: 24px; padding: 48px 32px;
+  background: linear-gradient(160deg, #141833, #0b0d1a 60%);
+  border: 1px solid var(--line); overflow: hidden;
+}
+.stage::before {
+  content: ""; position: absolute; width: 380px; height: 380px; right: -120px; top: -120px;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 45%, transparent), transparent);
+}
+.popover {
+  position: relative; max-width: 340px; margin: 0 auto;
+  background: rgba(30, 31, 42, 0.92); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px; padding: 18px; box-shadow: 0 30px 60px -10px rgba(0,0,0,0.6);
+  font-size: 14px;
+}
+.popover header { display: flex; gap: 12px; align-items: center; margin-bottom: 14px; }
+.popover header svg { width: 30px; height: 30px; color: var(--accent); }
+.popover header b { display: block; font-size: 15px; }
+.popover header span { font-size: 12px; color: var(--muted); }
+.popover hr { border: 0; border-top: 1px solid var(--line); margin: 12px 0; }
+.tg { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; cursor: pointer; user-select: none; }
+.switch { width: 34px; height: 20px; border-radius: 999px; background: rgba(255,255,255,0.18); position: relative; transition: background .2s; flex: none; }
+.switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+.tg.on .switch { background: var(--accent); }
+.tg.on .switch::after { transform: translateX(14px); }
+.rules { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+/* Clean link demo */
+.url {
+  font: 15px/1.6 var(--mono); padding: 22px 24px; border-radius: 14px;
+  background: rgba(0,0,0,0.35); border: 1px solid var(--line); word-break: break-all;
+}
+.url .junk { color: #ff8f8f; transition: all .6s ease; display: inline; }
+.url.clean .junk { opacity: 0; font-size: 0; }
+.url .host { color: var(--fg); }
+.url .keep { color: var(--amber); }
+.url-label { display: flex; justify-content: space-between; font-size: 13px; color: var(--faint); margin: 0 4px 10px; }
+.url-label span:last-child { color: var(--accent); font-weight: 600; }
+
+/* Customise */
+.swatches { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+.swatch { width: 36px; height: 36px; border-radius: 50%; border: 0; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15); transition: transform .15s; }
+.swatch:hover { transform: scale(1.1); }
+.swatch.active { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--fg); }
+.backgrounds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.bgtile { aspect-ratio: 16/10; border-radius: 14px; position: relative; overflow: hidden; border: 1px solid var(--line); }
+.bgtile span { position: absolute; left: 12px; bottom: 10px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9); }
+.bg-aurora { background: radial-gradient(circle at 15% 10%, rgba(46,196,182,.55), transparent 60%), radial-gradient(circle at 90% 95%, rgba(142,68,173,.45), transparent 65%), linear-gradient(#0b1026, #1b2a6b); }
+.bg-dusk { background: radial-gradient(circle at 15% 10%, rgba(255,138,91,.55), transparent 60%), radial-gradient(circle at 90% 95%, rgba(255,195,113,.45), transparent 65%), linear-gradient(#2b1b3f, #7a2e58); }
+.bg-ocean { background: radial-gradient(circle at 15% 10%, rgba(0,180,216,.55), transparent 60%), radial-gradient(circle at 90% 95%, rgba(72,202,228,.45), transparent 65%), linear-gradient(#03152b, #0b3d6e); }
+.bg-forest { background: radial-gradient(circle at 15% 10%, rgba(82,183,136,.55), transparent 60%), radial-gradient(circle at 90% 95%, rgba(149,213,178,.45), transparent 65%), linear-gradient(#0b2016, #1e4d3a); }
+.bg-ember { background: radial-gradient(circle at 15% 10%, rgba(255,107,53,.55), transparent 60%), radial-gradient(circle at 90% 95%, rgba(255,179,71,.45), transparent 65%), linear-gradient(#2a0e0e, #6b1e1e); }
+.bg-graphite { background: radial-gradient(circle at 15% 10%, rgba(99,99,102,.55), transparent 60%), radial-gradient(circle at 90% 95%, rgba(142,142,147,.45), transparent 65%), linear-gradient(#1c1c1e, #3a3a3c); }
+
+/* Shortcuts */
+.keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 48px; }
+.key { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+.key kbd {
+  display: inline-block; font: 600 15px var(--font); padding: 4px 9px; border-radius: 7px; margin-bottom: 10px;
+  background: rgba(255,255,255,0.08); box-shadow: inset 0 -2px 0 rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.08);
+}
+.key div { color: var(--muted); font-size: 14.5px; }
+
+/* Download */
+.download {
+  margin-top: 0; text-align: center; padding: 72px 32px; border-radius: 28px; position: relative; overflow: hidden; isolation: isolate;
+  background: linear-gradient(180deg, #121530, #0a0c18);
+  border: 1px solid var(--line);
+}
+.download::before {
+  content: ""; position: absolute; inset: -40% -10% auto; height: 520px; z-index: -1;
+  background: radial-gradient(closest-side, rgba(255, 214, 138, 0.22), transparent 70%);
+}
+.download img { width: 112px; height: 112px; margin: 0 auto 22px; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.5)); }
+.download .version { color: var(--muted); margin: 0 0 30px; }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 46px auto 0; max-width: 860px; text-align: left; }
+.step { background: rgba(255,255,255,0.03); border: 1px solid var(--line); border-radius: 14px; padding: 18px; font-size: 15px; color: var(--muted); }
+.step b { display: block; color: var(--fg); margin-bottom: 4px; font-size: 15.5px; }
+.step i { font-style: normal; color: var(--accent); font-weight: 700; margin-right: 6px; }
+
+/* FAQ */
+.faq { max-width: 760px; margin: 48px auto 0; }
+details { border-bottom: 1px solid var(--line); padding: 20px 4px; }
+summary { cursor: pointer; font-size: 18px; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 20px; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: "+"; color: var(--muted); font-weight: 400; font-size: 22px; line-height: 1; transition: transform .2s; }
+details[open] summary::after { transform: rotate(45deg); }
+details p { color: var(--muted); margin: 12px 0 0; font-size: 16px; }
+
+/* Footer */
+footer { margin-top: 120px; border-top: 1px solid var(--line); padding: 36px 0 48px; color: var(--faint); font-size: 14px; }
+footer .wrap { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+footer .brand { font-size: 15px; color: var(--muted); }
+footer .brand img { width: 22px; height: 22px; }
+footer .links { margin-left: auto; display: flex; gap: 20px; }
+footer .links a:hover { color: var(--fg); }
+.note { width: 100%; font-size: 13px; }
+
+/* Reveal */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); }
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .shot .frame { opacity: 1; transform: none; transition: none; }
+  .orb { animation: none; }
+  html { scroll-behavior: auto; }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr 1fr; }
+  .keys { grid-template-columns: 1fr 1fr; }
+  .row { grid-template-columns: 1fr; gap: 40px; }
+  .row.flip > :first-child { order: 0; }
+  .steps { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .wrap { padding: 0 16px; }
+  .navlinks { display: none; }
+  .nav-cta { margin-left: auto; }
+  .hero { padding-top: 64px; }
+  .grid { grid-template-columns: 1fr; }
+  .backgrounds { grid-template-columns: 1fr 1fr; }
+  section { padding-top: 88px; }
+  .stage { padding: 32px 16px; }
+  .download { padding: 56px 20px; }
+  footer .links { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="assets/icon.png" alt="">Lumen</a>
+    <div class="navlinks">
+      <a href="#features">Features</a>
+      <a href="#shield">Shield</a>
+      <a href="#customise">Customise</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/scadavide55/Lumen">GitHub</a>
+    </div>
+    <a class="nav-cta" href="#download">Download</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="orb" aria-hidden="true"></div>
+    <a class="pill" href="https://github.com/scadavide55/Lumen/releases/tag/v1.5-beta"><b>NEW</b> Lumen 1.5 Beta is here</a>
+    <h1><span class="soft">The quiet browser</span><br>for your Mac.</h1>
+    <p class="lead">Lumen is a minimal, fast browser built on WebKit. It blocks ads and trackers out of the box, and turns off with one click when you need it to.</p>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/scadavide55/Lumen/releases/download/v1.5-beta/Lumen-1.5-beta.zip">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8-1.6 0-3.1 1-4 2.4-1.7 3-.4 7.4 1.2 9.8.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8s1.9.8 3.2.8c1.3 0 2.1-1.2 2.9-2.4.9-1.4 1.3-2.7 1.3-2.8-.1 0-2.5-1-2.4-3.9zM14 5.5c.7-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1.1.1 2.1-.6 2.8-1.4z"/></svg>
+        Download for Mac
+      </a>
+      <a class="btn ghost" href="https://github.com/scadavide55/Lumen">View on GitHub</a>
+    </div>
+    <p class="fine">Free · macOS 14 or later · Apple silicon · Beta</p>
+    <figure class="shot" id="shot">
+      <div class="frame"><img src="assets/screenshot.jpg" width="1280" height="820" alt="The Lumen window: a sidebar with tabs on the left and the start page with a clock and search bar on the right"></div>
+    </figure>
+  </div>
+</header>
+
+<section id="features">
+  <div class="wrap">
+    <div class="center reveal">
+      <div class="eyebrow">Why Lumen</div>
+      <h2>Everything you need.<br>Nothing that gets in the way.</h2>
+      <p class="sub">The speed and battery life of WebKit, the engine behind Safari, with the features Safari is missing.</p>
+    </div>
+    <div class="grid">
+      <div class="card reveal">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <h3>Ads blocked, natively</h3>
+        <p>Ads and trackers are stopped before they load, using WebKit's own content blocker. No extension, no slowdown.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="5"/><circle cx="16" cy="12" r="3"/></svg></div>
+        <h3>Off in one click</h3>
+        <p>If a site misbehaves, turn the blocker off for that site only. Or everywhere, with ⇧⌘B.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></div>
+        <h3>One bar for everything</h3>
+        <p>Addresses, searches, open tabs, bookmarks, history and every command live in a single command bar. Press ⌘L.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></div>
+        <h3>Light on memory</h3>
+        <p>Tabs you haven't touched in a while hibernate, then wake up exactly where you left them, history included.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16"/></svg></div>
+        <h3>Split view and reader</h3>
+        <p>Put two pages side by side, or turn a cluttered article into a clean, readable page.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+        <h3>Private by default</h3>
+        <p>Tracking removed from links, automatic HTTPS, Global Privacy Control and private windows that forget everything.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="shield">
+  <div class="wrap row">
+    <div class="reveal">
+      <div class="eyebrow">Lumen Shield</div>
+      <h2>Ad blocking you can actually switch off.</h2>
+      <p class="sub">Most blockers are all or nothing. Shield gives you a clear switch for every site, and sensible defaults everywhere else.</p>
+      <ul class="checks">
+        <li><span><b>Works offline.</b> A built-in list covers the biggest ad and tracking networks from the first launch.</span></li>
+        <li><span><b>Community lists.</b> Turn on EasyList and EasyPrivacy for tens of thousands more rules, refreshed weekly.</span></li>
+        <li><span><b>No cookie walls.</b> Consent banners are hidden and the page scrolls again.</span></li>
+        <li><span><b>Fewer YouTube ads.</b> Video ads are stripped or skipped automatically.</span></li>
+        <li><span><b>Third-party cookies blocked.</b> Sites can't follow you around the web.</span></li>
+      </ul>
+    </div>
+    <div class="stage reveal">
+      <div class="popover" id="popover">
+        <header>
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l8 3.4v5.8c0 5-3.4 9.5-8 10.8-4.6-1.3-8-5.8-8-10.8V5.4L12 2z" opacity=".35"/><path d="M12 2v20c-4.6-1.3-8-5.8-8-10.8V5.4L12 2z"/></svg>
+          <div><b>Lumen Shield</b><span>news.example.com</span></div>
+        </header>
+        <div class="tg on" role="switch" aria-checked="true" tabindex="0"><span>Protection on this site</span><i class="switch"></i></div>
+        <hr>
+        <div class="tg on" role="switch" aria-checked="true" tabindex="0"><span>Block ads and trackers</span><i class="switch"></i></div>
+        <div class="tg on" role="switch" aria-checked="true" tabindex="0"><span>Hide cookie banners</span><i class="switch"></i></div>
+        <div class="tg on" role="switch" aria-checked="true" tabindex="0"><span>Skip YouTube ads</span><i class="switch"></i></div>
+        <div class="tg on" role="switch" aria-checked="true" tabindex="0"><span>Block third-party cookies</span><i class="switch"></i></div>
+        <div class="tg on" role="switch" aria-checked="true" tabindex="0"><span>Remove tracking from links</span><i class="switch"></i></div>
+        <div class="rules">275 rules active</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="privacy">
+  <div class="wrap row flip">
+    <div class="reveal">
+      <div class="eyebrow">Clean links</div>
+      <h2>Links without the luggage.</h2>
+      <p class="sub">Shared links are stuffed with tags that tell advertisers where you came from. Lumen strips them before the page even loads, so you land on the same page, minus the tracking.</p>
+      <ul class="checks">
+        <li><span>Removes <b>utm_</b>, <b>fbclid</b>, <b>gclid</b>, <b>msclkid</b> and dozens more</span></li>
+        <li><span>Knows the site-specific ones on YouTube, Spotify, Amazon and X</span></li>
+        <li><span>"Copy Link Without Tracking" in every page's menu</span></li>
+      </ul>
+    </div>
+    <div class="reveal">
+      <div class="url-label"><span>Link you clicked</span><span id="url-state">Cleaning…</span></div>
+      <div class="url" id="url"><span class="host">https://shop.example.com/item</span><span class="keep">?id=42</span><span class="junk">&amp;utm_source=newsletter&amp;utm_medium=email&amp;utm_campaign=autumn_sale</span><span class="junk">&amp;fbclid=IwAR2xK9vQ7mT3pL</span><span class="junk">&amp;gclid=Cj0KCQjw8eTFBhCX</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="customise">
+  <div class="wrap row">
+    <div class="reveal">
+      <div class="eyebrow">Make it yours</div>
+      <h2>Your browser, your colours.</h2>
+      <p class="sub">Pick an accent colour, put the sidebar on either side or switch to tabs along the top, float the page with rounded corners, and choose your start page. Try a colour:</p>
+      <div class="swatches" id="swatches">
+        <button class="swatch active" style="background:#7b79f2" data-c="#7b79f2" aria-label="Indigo"></button>
+        <button class="swatch" style="background:#0a84ff" data-c="#0a84ff" aria-label="Blue"></button>
+        <button class="swatch" style="background:#30b0c7" data-c="#30b0c7" aria-label="Teal"></button>
+        <button class="swatch" style="background:#34c759" data-c="#34c759" aria-label="Green"></button>
+        <button class="swatch" style="background:#e8a33d" data-c="#e8a33d" aria-label="Amber"></button>
+        <button class="swatch" style="background:#ff6b35" data-c="#ff6b35" aria-label="Orange"></button>
+        <button class="swatch" style="background:#ff375f" data-c="#ff375f" aria-label="Pink"></button>
+        <button class="swatch" style="background:#bf5af2" data-c="#bf5af2" aria-label="Purple"></button>
+      </div>
+      <ul class="checks">
+        <li><span>Window tint that follows each site's colour</span></li>
+        <li><span>Your own CSS for any site: hide distractions, change fonts</span></li>
+        <li><span>Search shortcuts: type <b>yt lofi</b> to search YouTube</span></li>
+      </ul>
+    </div>
+    <div class="backgrounds reveal">
+      <div class="bgtile bg-aurora"><span>Aurora</span></div>
+      <div class="bgtile bg-dusk"><span>Dusk</span></div>
+      <div class="bgtile bg-ocean"><span>Ocean</span></div>
+      <div class="bgtile bg-forest"><span>Forest</span></div>
+      <div class="bgtile bg-ember"><span>Ember</span></div>
+      <div class="bgtile bg-graphite"><span>Graphite</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="shortcuts">
+  <div class="wrap">
+    <div class="center reveal">
+      <div class="eyebrow">Keyboard first</div>
+      <h2>Fast hands, fast browser.</h2>
+      <p class="sub">Everything has a shortcut, and the command bar finds the rest.</p>
+    </div>
+    <div class="keys">
+      <div class="key reveal"><kbd>⌘ L</kbd><div>Command bar</div></div>
+      <div class="key reveal"><kbd>⌘ T</kbd><div>New tab</div></div>
+      <div class="key reveal"><kbd>⇧ ⌘ T</kbd><div>Reopen closed tab</div></div>
+      <div class="key reveal"><kbd>⌘ S</kbd><div>Show or hide the sidebar</div></div>
+      <div class="key reveal"><kbd>⇧ ⌘ R</kbd><div>Reader</div></div>
+      <div class="key reveal"><kbd>⇧ ⌘ \</kbd><div>Split view</div></div>
+      <div class="key reveal"><kbd>⇧ ⌘ B</kbd><div>Ad blocker on or off</div></div>
+      <div class="key reveal"><kbd>⇧ ⌘ N</kbd><div>Private window</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="download">
+  <div class="wrap">
+    <div class="download reveal">
+      <img src="assets/icon.png" alt="Lumen app icon" width="112" height="112">
+      <h2>Try Lumen today.</h2>
+      <p class="version">Version 1.5 Beta · free · macOS 14 or later · Apple silicon</p>
+      <div class="cta">
+        <a class="btn primary" href="https://github.com/scadavide55/Lumen/releases/download/v1.5-beta/Lumen-1.5-beta.zip">Download Lumen 1.5 Beta</a>
+        <a class="btn ghost" href="https://github.com/scadavide55/Lumen/releases">All releases</a>
+      </div>
+      <div class="steps">
+        <div class="step"><b><i>1</i>Download and unzip</b>You get Lumen.app, about 2 MB.</div>
+        <div class="step"><b><i>2</i>Move it to Applications</b>Drag Lumen.app into your Applications folder.</div>
+        <div class="step"><b><i>3</i>Open it the first time</b>Right-click Lumen and choose Open. The beta isn't notarized by Apple yet.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="center reveal">
+      <div class="eyebrow">Questions</div>
+      <h2>Good to know.</h2>
+    </div>
+    <div class="faq">
+      <details class="reveal">
+        <summary>Is Lumen free?</summary>
+        <p>Yes. Lumen is free to download and use.</p>
+      </details>
+      <details class="reveal">
+        <summary>Does Lumen collect any data?</summary>
+        <p>No. There are no analytics and no accounts. Lumen only talks to the sites you visit. If you turn them on, it also downloads filter lists from easylist.to and fetches search suggestions from your search engine. Suggestions are off by default.</p>
+      </details>
+      <details class="reveal">
+        <summary>Why does macOS warn me when I open it?</summary>
+        <p>The beta isn't notarized by Apple yet. Right-click Lumen.app and choose Open, and macOS remembers your choice from then on.</p>
+      </details>
+      <details class="reveal">
+        <summary>Which engine does Lumen use?</summary>
+        <p>WebKit, the same engine as Safari. Sites look and behave the way they do in Safari, and you get its speed and battery life.</p>
+      </details>
+      <details class="reveal">
+        <summary>Can I bring my bookmarks?</summary>
+        <p>Yes. Export your bookmarks from Safari, Chrome or Firefox as an HTML file, then import it from Lumen's Bookmarks window.</p>
+      </details>
+      <details class="reveal">
+        <summary>Does it block every YouTube ad?</summary>
+        <p>Most of them, most of the time. YouTube changes its ads often, so some may still get through.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="assets/icon.png" alt="">Lumen</a>
+    <span>© 2026</span>
+    <div class="links">
+      <a href="https://github.com/scadavide55/Lumen">GitHub</a>
+      <a href="https://github.com/scadavide55/Lumen/releases">Releases</a>
+      <a href="https://github.com/scadavide55/Lumen/issues">Report a bug</a>
+    </div>
+    <div class="note">This site has no cookies, no analytics and no trackers.</div>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const nav = document.getElementById('nav');
+  const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 8);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // Reveal on scroll
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal, #shot').forEach((el, i) => {
+    el.style.transitionDelay = el.closest('.grid, .keys') ? (i % 4) * 70 + 'ms' : '';
+    io.observe(el);
+  });
+
+  // Shield popover switches
+  document.querySelectorAll('.tg').forEach((t) => {
+    const flip = () => { t.classList.toggle('on'); t.setAttribute('aria-checked', t.classList.contains('on')); };
+    t.addEventListener('click', flip);
+    t.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); } });
+  });
+
+  // Clean link demo: loops between the tracked and the clean link
+  const url = document.getElementById('url');
+  const state = document.getElementById('url-state');
+  let clean = false;
+  const tick = () => {
+    clean = !clean;
+    url.classList.toggle('clean', clean);
+    state.textContent = clean ? 'Cleaned by Lumen' : 'Cleaning…';
+  };
+  new IntersectionObserver((entries, obs) => {
+    if (entries[0].isIntersecting) { setTimeout(tick, 900); setInterval(tick, 3200); obs.disconnect(); }
+  }, { threshold: 0.6 }).observe(url);
+
+  // Accent swatches recolour the page
+  const root = document.documentElement;
+  document.querySelectorAll('.swatch').forEach((s) => s.addEventListener('click', () => {
+    document.querySelectorAll('.swatch').forEach((x) => x.classList.remove('active'));
+    s.classList.add('active');
+    root.style.setProperty('--accent', s.dataset.c);
+  }));
+})();
+</script>
+</body>
+</html>
