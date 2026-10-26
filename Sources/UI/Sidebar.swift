@@ -413,14 +413,31 @@ struct TabStrip: View {
     var body: some View {
         GeometryReader { geo in
             let pinned = b.pinnedTabs.count
-            let regular = max(1, b.regularTabs.count)
+            let visible = b.regularTabs.filter { t in !(b.groups.first { $0.id == t.groupID }?.collapsed ?? false) }
+            let regular = max(1, visible.count + b.groups.count)
             let free = geo.size.width - 16 - CGFloat(pinned) * 40 - 34 - (compact ? 120 : 0)
             let width = min(240, max(compact ? 90 : 110, free / CGFloat(regular) - 4))
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 4) {
-                    ForEach(b.tabs) { t in
-                        let selectedWide = compact && t.id == b.selectedID
-                        TabChip(tab: t, width: t.isPinned ? 36 : (selectedWide ? min(420, max(220, width + 120)) : width), compact: compact)
+                    ForEach(stripItems) { item in
+                        switch item {
+                        case .tab(let t):
+                            chip(t, width)
+                        case .group(let g, let members):
+                            HStack(spacing: 0) {
+                                GroupChip(group: g, count: members.count)
+                                if !g.collapsed {
+                                    ForEach(Array(members.enumerated()), id: \.element.id) { i, t in
+                                        Rectangle().fill(Color.primary.opacity(0.12)).frame(width: 1, height: 16)
+                                            .opacity(t.id == b.selectedID || (i > 0 && members[i - 1].id == b.selectedID) ? 0 : 1)
+                                        chip(t, width)
+                                    }
+                                }
+                            }
+                            .padding(2)
+                            .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Color.primary.opacity(0.06)))
+                            .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(g.tint.opacity(0.35), lineWidth: 1))
+                        }
                     }
                     IconButton(systemName: "plus", help: "New tab (⌘T)") { b.newTabWithPalette() }
                 }
@@ -429,6 +446,72 @@ struct TabStrip: View {
         }
         .frame(height: 34)
         .padding(.bottom, compact ? 0 : 4)
+    }
+}
+
+enum StripItem: Identifiable {
+    case tab(Tab)
+    case group(TabGroup, [Tab])
+    var id: String {
+        switch self {
+        case .tab(let t): t.id.uuidString
+        case .group(let g, _): "g" + g.id.uuidString
+        }
+    }
+}
+
+extension TabStrip {
+    /// Tabs in order, with each group gathered into one folder-like item.
+    var stripItems: [StripItem] {
+        var out: [StripItem] = []
+        var seen = Set<UUID>()
+        for t in b.tabs {
+            if !t.isPinned, let gid = t.groupID, let g = b.groups.first(where: { $0.id == gid }) {
+                if seen.insert(gid).inserted { out.append(.group(g, b.tabs(in: g))) }
+            } else {
+                out.append(.tab(t))
+            }
+        }
+        return out
+    }
+
+    func chip(_ t: Tab, _ width: CGFloat) -> some View {
+        let selectedWide = compact && t.id == b.selectedID
+        return TabChip(tab: t, width: t.isPinned ? 36 : (selectedWide ? min(420, max(220, width + 120)) : width), compact: compact)
+    }
+}
+
+/// The folder of a tab group in the top bar: "Google 3 ›" when closed.
+struct GroupChip: View {
+    let group: TabGroup
+    let count: Int
+    @EnvironmentObject var b: BrowserState
+    @State private var hover = false
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Text(group.name).font(.system(size: 12.5, weight: .bold)).lineLimit(1)
+            Text("\(count)").font(.system(size: 12.5, weight: .semibold)).foregroundStyle(.secondary)
+            if group.collapsed {
+                Image(systemName: "chevron.right").font(.system(size: 10, weight: .semibold)).foregroundStyle(.secondary)
+            }
+        }
+        .padding(.horizontal, 12)
+        .frame(height: 30)
+        .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Color.primary.opacity(hover ? 0.1 : (group.collapsed ? 0.06 : 0))))
+        .contentShape(Rectangle())
+        .onTapGesture { withAnimation(.easeOut(duration: 0.2)) { b.toggleCollapsed(group.id) } }
+        .onHover { hover = $0 }
+        .contextMenu {
+            Button(group.collapsed ? "Expand Group" : "Collapse Group") { b.toggleCollapsed(group.id) }
+            Button("Ungroup Tabs") { b.ungroup(group.id) }
+            Button("Close Group") { b.closeGroup(group.id) }
+        }
+        .dropDestination(for: String.self) { items, _ in
+            guard let last = b.tabs(in: group).last else { return false }
+            return b.handleDrop(items, on: last, placement: .group, pinned: false)
+        }
+        .help(L("Click to collapse, double-click to rename"))
     }
 }
 
@@ -494,8 +577,6 @@ struct TabChip: View {
         .overlay(alignment: .bottom) {
             if showsAddress && tab.isLoading {
                 ProgressLine(progress: tab.progress).padding(.horizontal, 6)
-            } else if let g = b.groups.first(where: { $0.id == tab.groupID }) {
-                Capsule().fill(g.tint).frame(height: 2.5).padding(.horizontal, 8)
             }
         }
         .contentShape(Rectangle())

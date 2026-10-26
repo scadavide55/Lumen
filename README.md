@@ -2,7 +2,7 @@
 
 A minimal, fast and light browser for macOS, built on WebKit. Lumen blocks ads and trackers natively, and you can turn the blocker off with one click.
 
-> **Status: 1.5 Beta.** Most features are in place, but some haven't been tested much yet. Expect bugs.
+> **Status: 1.5.1 Beta.** Most features are in place, but some haven't been tested much yet. Expect bugs.
 
 ## Features
 
@@ -19,8 +19,21 @@ A minimal, fast and light browser for macOS, built on WebKit. Lumen blocks ads a
 - Sends Global Privacy Control
 - Private windows that forget everything when you close them
 - Optionally clears cookies, cache and history when you quit
+- HTTPS-only mode, confirmation before downloading apps and scripts, and Touch ID lock for private windows
+
+**Passwords**
+- Saves passwords in the macOS Keychain and fills them after Touch ID
+- Suggests strong passwords on sign-up pages (optional)
+- Imports and exports CSV for Apple Passwords, and works alongside 1Password, KeePassXC and others
+
+**Moving in**
+- Imports bookmarks, history and sign-ins from Safari, Chrome, Firefox, Opera, Brave, Edge, Arc and other Chromium browsers
+- A guided setup on first launch, in English, Italian or French
 
 **Tabs and windows**
+- Tab groups: drag a tab onto another, or let Lumen group tabs from the same site
+- Sidebar, separate or compact tab layouts
+- Install any site as an app with its own window and Dock icon
 - Vertical tabs in a resizable sidebar, or tabs along the top
 - Pinned tabs, drag to reorder, split view, reopen closed tabs
 - Background tabs hibernate to save memory and wake up where you left them
@@ -37,7 +50,7 @@ A minimal, fast and light browser for macOS, built on WebKit. Lumen blocks ads a
 - Light, dark or system appearance and any accent colour
 - Sidebar on the left or right, floating page with rounded corners, compact tabs
 - Window tint that follows the site's colour
-- Start page with clock, greeting, favourites and a choice of backgrounds, including your own image
+- Start page with clock, greeting, favourites and backgrounds: gradients, animated gradients, your own photo or a short video
 - Custom CSS per site
 
 ## Keyboard shortcuts
@@ -62,7 +75,7 @@ A minimal, fast and light browser for macOS, built on WebKit. Lumen blocks ads a
 ## Requirements
 
 - macOS 14 Sonoma or later
-- Apple silicon (arm64)
+- Apple silicon or Intel
 - Xcode command line tools (to build from source)
 
 ## Build
@@ -72,8 +85,8 @@ A minimal, fast and light browser for macOS, built on WebKit. Lumen blocks ads a
 open Lumen.app
 ```
 
-`build.sh` compiles everything in `Sources` with `swiftc`, assembles `Lumen.app` and signs it ad hoc. To regenerate the icon, run `swift tools/make-icon.swift Resources/Lumen.iconset` followed by `iconutil -c icns Resources/Lumen.iconset -o Resources/Lumen.icns`.
+`build.sh` compiles everything in `Sources` for Apple silicon and Intel, assembles a universal `Lumen.app` and signs it ad hoc. `tools/make-dmg.sh` then packages it as a disk image. Translations live in `tools/translations.py`; run it to regenerate the `.lproj` files. To regenerate the icon, run `swift tools/make-icon.swift Resources/Lumen.iconset` followed by `iconutil -c icns Resources/Lumen.iconset -o Resources/Lumen.icns`.
 
 ## Installing a downloaded build
 
-Release builds are not notarized yet, so macOS warns you the first time you open one. To open it anyway, right-click `Lumen.app` and choose **Open**.
+Open the `.dmg` and drag Lumen to Applications. Release builds are not notarized yet, so macOS warns you the first time you open one: right-click `Lumen.app` and choose **Open**. After that, Lumen tells you about new versions and can install them for you.

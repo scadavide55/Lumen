@@ -1,2 +1,4 @@
 Lumen.app/
 .DS_Store
+*.dmg
+build/
