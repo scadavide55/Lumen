@@ -21,6 +21,7 @@ struct SettingsView: View {
 struct GeneralPane: View {
     @ObservedObject private var s = Settings.shared
     @State private var isDefault = DefaultBrowser.isDefault
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         Form {
@@ -36,6 +37,15 @@ struct GeneralPane: View {
                             DefaultBrowser.makeDefault { isDefault = DefaultBrowser.isDefault }
                         }
                     }
+                }
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Import from another browser")
+                        Text("Bookmarks, history and sign-ins from Safari, Chrome, Firefox, Opera and more.")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button("Import…") { openWindow(id: "import") }
                 }
             }
             Section("Tabs") {

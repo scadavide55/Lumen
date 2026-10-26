@@ -262,6 +262,7 @@ struct CommandPalette: View {
             command("Show Bookmarks", "book", "⌥⌘B") { LibraryView.requestedSection = .bookmarks; openWindow(id: "library") },
             command("Show Downloads", "arrow.down.circle", "⌥⌘L") { LibraryView.requestedSection = .downloads; openWindow(id: "library") },
             command("Settings", "gearshape", "⌘,") { openSettings() },
+            command("Import from Another Browser", "square.and.arrow.down", "Safari, Chrome, Firefox, Opera…") { openWindow(id: "import") },
             command(s.adBlock ? "Turn Off Ad Blocker" : "Turn On Ad Blocker", "shield.lefthalf.filled", "⇧⌘B") { s.adBlock.toggle() },
             command("Hibernate Other Tabs", "moon.zzz", "Free memory used by background tabs") { b.hibernateOthers() },
             command("Dark Appearance", "moon", "Appearance") { s.theme = .dark },

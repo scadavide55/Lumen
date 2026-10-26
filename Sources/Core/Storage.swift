@@ -104,6 +104,19 @@ final class Bookmarks: ObservableObject {
         persist()
     }
 
+    /// Adds bookmarks from another browser, skipping URLs already saved. Returns how many were added.
+    func importItems(_ list: [(String, URL)]) -> Int {
+        var known = Set(items.map(\.url))
+        var added = 0
+        for (title, url) in list where !known.contains(url) {
+            known.insert(url)
+            items.append(Bookmark(title: title.isEmpty ? (url.host ?? url.absoluteString) : title, url: url))
+            added += 1
+        }
+        if added > 0 { persist() }
+        return added
+    }
+
     /// Imports a Netscape bookmark file (the format Safari, Chrome and Firefox export).
     func importHTML(_ html: String) -> Int {
         let pattern = #"<A[^>]*HREF="([^"]+)"[^>]*>(.*?)</A>"#
@@ -179,6 +192,27 @@ final class History: ObservableObject {
         entries.insert(entry, at: 0)
         if entries.count > limit { entries.removeLast(entries.count - limit) }
         persist()
+    }
+
+    /// Merges history from another browser, keeping the newest visit per URL. Returns how many entries were new.
+    func importEntries(_ list: [HistoryEntry]) -> Int {
+        guard !list.isEmpty else { return 0 }
+        var byURL = Dictionary(entries.map { ($0.url, $0) }, uniquingKeysWith: { a, _ in a })
+        var added = 0
+        for e in list where ["http", "https"].contains(e.url.scheme ?? "") {
+            if var old = byURL[e.url] {
+                old.visits += e.visits
+                if e.date > old.date { old.date = e.date }
+                if old.title.isEmpty { old.title = e.title }
+                byURL[e.url] = old
+            } else {
+                byURL[e.url] = e
+                added += 1
+            }
+        }
+        entries = Array(byURL.values.sorted { $0.date > $1.date }.prefix(limit))
+        file.saveNow(entries)
+        return added
     }
 
     func updateTitle(url: URL, title: String) {

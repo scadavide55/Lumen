@@ -24,6 +24,11 @@ struct LumenApp: App {
         }
         .defaultSize(width: 820, height: 560)
 
+        Window("Import", id: "import") {
+            ImportView()
+        }
+        .windowResizability(.contentSize)
+
         SwiftUI.Settings {
             SettingsView()
         }
@@ -114,7 +119,7 @@ struct LumenCommands: Commands {
             .keyboardShortcut("w")
             Button("Close Window") { NSApp.keyWindow?.performClose(nil) }.keyboardShortcut("w", modifiers: [.command, .shift])
             Divider()
-            Button("Import Bookmarks…") { library(.bookmarks) }
+            Button("Import from Another Browser…") { openWindow(id: "import") }
             Button("Print…") { b?.current?.printPage() }.keyboardShortcut("p").disabled(b == nil)
         }
 
