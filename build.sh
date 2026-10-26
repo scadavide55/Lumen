@@ -4,8 +4,9 @@ set -e
 cd "$(dirname "$0")"
 APP=Lumen.app
 rm -rf "$APP"
-mkdir -p "$APP/Contents/MacOS"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp Info.plist "$APP/Contents/Info.plist"
+cp Resources/Lumen.icns "$APP/Contents/Resources/Lumen.icns"
 swiftc -O -swift-version 5 -parse-as-library \
     -target arm64-apple-macosx14.0 \
     Sources/Lumen.swift -o "$APP/Contents/MacOS/Lumen"
