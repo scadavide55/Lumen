@@ -1,0 +1,4 @@
+TODO FOR LUMEN
+-Add that when you scroll up the page refreshes
+-Optimizations
+-Even more privacy cuz we love privacy 
