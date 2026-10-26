@@ -258,6 +258,7 @@ struct TabRow: View {
         .onTapGesture { b.select(tab) }
         .onHover { hover = $0 }
         .contextMenu { TabMenu(tab: tab) }
+        .background(NoWindowDrag())
         .draggable(tab.id.uuidString) {
             Label(tab.title, systemImage: "globe").padding(6).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 6))
         }
@@ -303,6 +304,7 @@ struct PinnedTile: View {
             .onTapGesture { b.select(tab) }
             .onHover { hover = $0 }
             .contextMenu { TabMenu(tab: tab) }
+            .background(NoWindowDrag())
             .draggable(tab.id.uuidString)
             .dropDestination(for: String.self) { items, _ in b.handleDrop(items, before: tab, pinned: true) }
             .help(tab.title)
@@ -579,6 +581,7 @@ struct TabChip: View {
         }
         .onHover { hover = $0 }
         .contextMenu { TabMenu(tab: tab) }
+        .background(NoWindowDrag())
         .draggable(tab.id.uuidString)
         .dropDestination(for: String.self) { items, location in
             let placement: BrowserState.DropPlacement = tab.isPinned ? .before
@@ -586,6 +589,19 @@ struct TabChip: View {
             return b.handleDrop(items, on: tab, placement: placement, pinned: tab.isPinned)
         }
         .help(tab.title)
+    }
+}
+
+/// Marks a tab as a place where pressing and dragging moves the tab, not the window.
+/// Tabs along the top sit in the title bar, which macOS otherwise treats as a handle for the window.
+struct NoWindowDrag: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSView { Blocker() }
+    func updateNSView(_ nsView: NSView, context: Context) {}
+
+    final class Blocker: NSView {
+        override var mouseDownCanMoveWindow: Bool { false }
+        // Clicks still go to the tab itself.
+        override func hitTest(_ point: NSPoint) -> NSView? { nil }
     }
 }
 
