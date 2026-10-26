@@ -10,43 +10,50 @@ extension Notification.Name {
 enum ThemeMode: String, Codable, CaseIterable, Identifiable {
     case system, light, dark
     var id: String { rawValue }
-    var label: String { ["system": "System", "light": "Light", "dark": "Dark"][rawValue]! }
+    var label: String { L(["system": "System", "light": "Light", "dark": "Dark"][rawValue]!) }
 }
 
 enum TabLayout: String, Codable, CaseIterable, Identifiable {
-    case vertical, horizontal
+    case vertical, horizontal, compact
     var id: String { rawValue }
-    var label: String { self == .vertical ? "Sidebar" : "Top bar" }
+    var label: String { L(["vertical": "Sidebar", "horizontal": "Separate", "compact": "Compact"][rawValue]!) }
 }
 
 enum SidebarSide: String, Codable, CaseIterable, Identifiable {
     case left, right
     var id: String { rawValue }
-    var label: String { self == .left ? "Left" : "Right" }
+    var label: String { L(self == .left ? "Left" : "Right") }
 }
 
 enum ChromeStyle: String, Codable, CaseIterable, Identifiable {
     case translucent, solid, tinted
     var id: String { rawValue }
-    var label: String { ["translucent": "Translucent", "solid": "Solid", "tinted": "Tinted"][rawValue]! }
+    var label: String { L(["translucent": "Translucent", "solid": "Solid", "tinted": "Tinted"][rawValue]!) }
 }
 
 enum StartBackground: String, Codable, CaseIterable, Identifiable {
-    case aurora, dusk, ocean, forest, ember, graphite, accent, plain, image
+    case aurora, dusk, ocean, forest, ember, graphite, flow, accent, plain, image, video
     var id: String { rawValue }
-    var label: String { rawValue == "plain" ? "Plain" : rawValue.capitalized }
+    var label: String { L(["plain": "Plain", "flow": "Flow (animated)"][rawValue] ?? rawValue.capitalized) }
+    var isGradient: Bool { ![.plain, .image, .video, .accent].contains(self) }
+}
+
+enum PopupMode: String, Codable, CaseIterable, Identifiable {
+    case never, automatic, always
+    var id: String { rawValue }
+    var label: String { L(["never": "Never", "automatic": "Automatically", "always": "Always"][rawValue]!) }
 }
 
 enum NewTabPosition: String, Codable, CaseIterable, Identifiable {
     case afterCurrent, end
     var id: String { rawValue }
-    var label: String { self == .end ? "At the end" : "Next to current tab" }
+    var label: String { L(self == .end ? "At the end" : "Next to current tab") }
 }
 
 enum UserAgentMode: String, Codable, CaseIterable, Identifiable {
     case safari, custom
     var id: String { rawValue }
-    var label: String { self == .safari ? "Safari (recommended)" : "Custom" }
+    var label: String { L(self == .safari ? "Safari (recommended)" : "Custom") }
 }
 
 enum SearchEngine: String, Codable, CaseIterable, Identifiable {
@@ -62,7 +69,7 @@ enum SearchEngine: String, Codable, CaseIterable, Identifiable {
         case .startpage: "Startpage"
         case .ecosia: "Ecosia"
         case .kagi: "Kagi"
-        case .custom: "Custom"
+        case .custom: L("Custom")
         }
     }
 
@@ -174,6 +181,8 @@ final class Settings: ObservableObject {
     // Start page
     @Pref("startBackground") var startBackground = StartBackground.aurora
     @Pref("startImage") var startImagePath = ""
+    @Pref("startVideo") var startVideoPath = ""
+    @Pref("animateBackground") var animateBackground = false
     @Pref("showClock") var showClock = true
     @Pref("showGreeting") var showGreeting = true
     @Pref("userName") var userName = ""
@@ -183,6 +192,14 @@ final class Settings: ObservableObject {
     @Pref("hibernate") var hibernateMinutes = 15
     @Pref("newTabPosition") var newTabPosition = NewTabPosition.afterCurrent
     @Pref("restoreSession") var restoreSession = true
+    @Pref("blockAutoplay") var blockAutoplay = true
+    @Pref("checkUpdates") var checkUpdates = true
+    @Pref("paletteOnNewTab") var paletteOnNewTab = true
+    @Pref("organizeTabs") var organizeTabs = false
+    @Pref("popupMode") var popupMode = PopupMode.automatic
+    @Pref("autoCloseDays") var autoCloseDays = 0
+    @Pref("alwaysShowTitles") var alwaysShowTitles = false
+    @Pref("onboarded") var onboarded = false
 
     // Search
     @Pref("engine") var engine = SearchEngine.duckduckgo
@@ -208,6 +225,16 @@ final class Settings: ObservableObject {
     @Pref("gpc") var gpc = true
     @Pref("clearOnQuit") var clearOnQuit = false
     @Pref("allowlist") var allowlist: [String] = []
+
+    // Passwords and security
+    @Pref("savePasswords") var savePasswords = true
+    @Pref("autofillPasswords") var autofillPasswords = true
+    @Pref("strongPasswords") var suggestStrongPasswords = false
+    @Pref("passwordManager") var passwordManager = ""
+    @Pref("neverSave") var neverSaveHosts: [String] = []
+    @Pref("httpsOnly") var httpsOnly = false
+    @Pref("confirmDownloads") var confirmDangerousDownloads = true
+    @Pref("lockPrivate") var lockPrivateWindows = true
 
     // Sites
     @Pref("siteStyles") var siteStyles: [SiteStyle] = []
@@ -251,6 +278,50 @@ final class Settings: ObservableObject {
         case .system: NSApp.appearance = nil
         case .light: NSApp.appearance = NSAppearance(named: .aqua)
         case .dark: NSApp.appearance = NSAppearance(named: .darkAqua)
+        }
+    }
+}
+
+// MARK: - Language
+
+/// Looks up a translation for text that isn't a SwiftUI string literal.
+func L(_ key: String) -> String { NSLocalizedString(key, comment: "") }
+
+enum AppLanguage: String, CaseIterable, Identifiable {
+    case system, en, it, fr
+    var id: String { rawValue }
+
+    /// Each language is named in itself, so it can be found in any locale.
+    var label: String {
+        switch self {
+        case .system: L("System")
+        case .en: "English"
+        case .it: "Italiano"
+        case .fr: "Français"
+        }
+    }
+
+    static var current: AppLanguage {
+        guard let list = UserDefaults.standard.persistentDomain(forName: Bundle.main.bundleIdentifier ?? "")?["AppleLanguages"] as? [String],
+              let first = list.first else { return .system }
+        return AppLanguage(rawValue: String(first.prefix(2))) ?? .system
+    }
+
+    /// Takes effect the next time Lumen starts.
+    func apply() {
+        if self == .system {
+            UserDefaults.standard.removeObject(forKey: "AppleLanguages")
+        } else {
+            UserDefaults.standard.set([rawValue], forKey: "AppleLanguages")
+        }
+    }
+
+    static func relaunch() {
+        Session.shared.saveNow()
+        let config = NSWorkspace.OpenConfiguration()
+        config.createsNewApplicationInstance = true
+        NSWorkspace.shared.openApplication(at: Bundle.main.bundleURL, configuration: config) { _, _ in
+            DispatchQueue.main.async { NSApp.terminate(nil) }
         }
     }
 }

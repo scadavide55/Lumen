@@ -105,6 +105,8 @@ enum InputResolver {
 enum HTTPSUpgrade {
     /// Hosts that failed over HTTPS during this run, so they are loaded over HTTP.
     static var httpOnly: Set<String> = []
+    /// Hosts the user chose to open over HTTP despite HTTPS-only mode.
+    static var userAllowed: Set<String> = []
 
     static func eligible(_ url: URL) -> Bool {
         guard url.scheme == "http", let host = url.host?.lowercased() else { return false }
@@ -138,7 +140,7 @@ enum DataCleaner {
     enum Range: String, CaseIterable, Identifiable {
         case hour, day, week, all
         var id: String { rawValue }
-        var label: String { ["hour": "Last hour", "day": "Today", "week": "Last 7 days", "all": "All time"][rawValue]! }
+        var label: String { L(["hour": "Last hour", "day": "Today", "week": "Last 7 days", "all": "All time"][rawValue]!) }
         var since: Date {
             switch self {
             case .hour: Date().addingTimeInterval(-3600)

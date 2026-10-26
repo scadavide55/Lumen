@@ -111,7 +111,7 @@ final class ContentBlocker: ObservableObject {
         guard !enabled.isEmpty else { removeFilters(); return }
         guard !updating else { return }
         updating = true
-        status = "Downloading filter lists…"
+        status = L("Downloading filter lists…")
 
         let group = DispatchGroup()
         var texts = [String?](repeating: nil, count: enabled.count)
@@ -132,10 +132,10 @@ final class ContentBlocker: ObservableObject {
             let downloaded = texts.compactMap { $0 }
             guard downloaded.count == texts.count else {
                 self.updating = false
-                self.status = "Couldn't download the filter lists. Check your connection."
+                self.status = L("Couldn't download the filter lists. Check your connection.")
                 return
             }
-            self.status = "Converting rules…"
+            self.status = L("Converting rules…")
             DispatchQueue.global(qos: .utility).async {
                 let out = FilterConverter.convert(downloaded.joined(separator: "\n"))
                 let chunks = Self.chunks(out)
@@ -145,7 +145,7 @@ final class ContentBlocker: ObservableObject {
     }
 
     private func compileFilters(_ chunks: [[[String: Any]]], total: Int) {
-        status = "Compiling \(total.formatted()) rules…"
+        status = String(format: L("Compiling %@ rules…"), total.formatted())
         let stamp = Int(Date().timeIntervalSince1970)
         var lists: [WKContentRuleList] = []
         var compiled = 0
@@ -170,7 +170,7 @@ final class ContentBlocker: ObservableObject {
         filterCount = count
         lastUpdated = Date()
         updating = false
-        status = lists.isEmpty ? "No rules could be compiled." : ""
+        status = lists.isEmpty ? L("No rules could be compiled.") : ""
         defaults.set(lists.map(\.identifier), forKey: "lumen.filterIDs")
         defaults.set(count, forKey: "lumen.filterCount")
         defaults.set(lastUpdated, forKey: "lumen.filterDate")

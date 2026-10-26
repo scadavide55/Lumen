@@ -10,6 +10,7 @@ enum Scripts {
         c.add(ScriptBridge.shared, contentWorld: .defaultClient, name: "lumen")
 
         c.addUserScript(WKUserScript(source: bridge, injectionTime: .atDocumentEnd, forMainFrameOnly: true, in: .defaultClient))
+        c.addUserScript(WKUserScript(source: logins, injectionTime: .atDocumentEnd, forMainFrameOnly: true, in: .defaultClient))
         if s.gpc {
             c.addUserScript(WKUserScript(source: gpc, injectionTime: .atDocumentStart, forMainFrameOnly: false, in: .page))
         }
@@ -91,6 +92,134 @@ enum Scripts {
       };
     })();
     """#
+
+    // MARK: Logins: find sign-in fields, offer saved accounts, fill them, and notice submitted credentials
+
+    static let logins = #"""
+    (() => {
+      if (window.__lumenLogins) return;
+      window.__lumenLogins = true;
+      const post = (m) => { try { webkit.messageHandlers.lumen.postMessage(m); } catch (e) {} };
+      const visible = (el) => {
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden';
+      };
+      const textual = (i) => i instanceof HTMLInputElement && /^(text|email|tel|)$/.test(i.type);
+      const userish = (i) => textual(i) && (i.type === 'email' ||
+        /user|email|e-mail|login|account|identifier|mail|phone/i.test([i.autocomplete, i.name, i.id, i.placeholder, i.getAttribute('aria-label')].join(' ')));
+      const fields = (anchor) => {
+        const scope = (anchor && anchor.form) || document;
+        const pw = [...scope.querySelectorAll('input[type=password]')].filter(visible)[0] || null;
+        let user = scope.querySelector('input[autocomplete~=username], input[autocomplete~=email]');
+        if (!user || !visible(user)) {
+          const inputs = [...scope.querySelectorAll('input')].filter((i) => visible(i) && textual(i));
+          const before = pw ? inputs.filter((i) => i.compareDocumentPosition(pw) & Node.DOCUMENT_POSITION_FOLLOWING) : inputs.filter(userish);
+          user = before.reverse().find(userish) || before[0] || null;
+        }
+        return { user, pw };
+      };
+
+      document.addEventListener('focusin', (e) => {
+        const t = e.target;
+        if (!(t instanceof HTMLInputElement)) return;
+        const f = fields(t);
+        const isPw = t.type === 'password';
+        if (!isPw && !(f.pw && t === f.user) && !(!f.pw && userish(t) && /username|email/.test(t.autocomplete || ''))) return;
+        if (isPw && location.protocol === 'http:') post({ type: 'insecurePassword' });
+        const r = t.getBoundingClientRect();
+        const scope = t.form || document;
+        const isNew = isPw && (/new-password/.test(t.autocomplete || '') ||
+          [...scope.querySelectorAll('input[type=password]')].filter(visible).length > 1 ||
+          /sign.?up|register|create|join|iscri|registra|inscri|nuova password|new password|nouveau mot/i.test(
+            [scope.action || '', scope.id || '', scope.className || '', t.name, t.id, t.placeholder].join(' ')));
+        post({ type: 'loginFocus', x: r.left, y: r.bottom, w: r.width, newPassword: isNew });
+      }, true);
+      const hide = () => post({ type: 'loginBlur' });
+      document.addEventListener('mousedown', (e) => { if (!(e.target instanceof HTMLInputElement)) hide(); }, true);
+      window.addEventListener('scroll', hide, { passive: true, capture: true });
+
+      let last = '';
+      const capture = (anchor) => {
+        const f = fields(anchor);
+        if (!f.pw || !f.pw.value) {
+          if (f.user && f.user.value && userish(f.user)) post({ type: 'loginUsername', username: f.user.value });
+          return;
+        }
+        const key = (f.user ? f.user.value : '') + '\u0001' + f.pw.value;
+        if (key === last) return;
+        last = key;
+        post({ type: 'loginSubmit', username: f.user ? f.user.value : '', password: f.pw.value });
+      };
+      document.addEventListener('submit', (e) => capture(e.target.querySelector('input')), true);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && e.target instanceof HTMLInputElement) capture(e.target);
+      }, true);
+      document.addEventListener('click', (e) => {
+        const b = e.target.closest && e.target.closest('button, input[type=submit], [role=button]');
+        if (!b) return;
+        const label = [b.textContent, b.value, b.getAttribute('aria-label')].join(' ');
+        if (b.type === 'submit' || /log\s?in|sign\s?in|accedi|entra|connexion|connecter|continu|next|avanti|suivant|submit/i.test(label)) {
+          capture(b.form ? b.form.querySelector('input') : document.activeElement);
+        }
+      }, true);
+
+      window.__lumenFillNew = (password) => {
+        const anchor = document.activeElement instanceof HTMLInputElement ? document.activeElement : null;
+        const scope = (anchor && anchor.form) || document;
+        const fields = [...scope.querySelectorAll('input[type=password]')].filter(visible)
+          .filter((p) => !/current-password/.test(p.autocomplete || ''));
+        for (const el of fields) {
+          Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, password);
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        return fields.length;
+      };
+
+      window.__lumenFill = (username, password) => {
+        const anchor = document.activeElement instanceof HTMLInputElement ? document.activeElement : null;
+        const f = fields(anchor);
+        const set = (el, v) => {
+          Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, v);
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+        };
+        const user = f.user || (anchor && textual(anchor) ? anchor : null);
+        if (user && username) set(user, username);
+        if (f.pw) { set(f.pw, password); f.pw.focus(); }
+        return !!(f.pw || user);
+      };
+    })();
+    """#
+
+    // MARK: HTTPS-only interstitial
+
+    static func httpsOnlyPage(url: URL) -> String {
+        func esc(_ s: String) -> String {
+            s.replacingOccurrences(of: "&", with: "&amp;").replacingOccurrences(of: "<", with: "&lt;").replacingOccurrences(of: "\"", with: "&quot;")
+        }
+        let host = url.host ?? url.absoluteString
+        return """
+        <!doctype html><html><head><meta charset="utf-8"><title>\(esc(L("Not Secure")))</title>
+        <style>
+        :root { color-scheme: light dark; }
+        body { margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center;
+               font: 15px -apple-system, sans-serif; color: #6e6e73; background: Canvas; }
+        .box { max-width: 480px; text-align: center; padding: 24px; }
+        .icon { font-size: 44px; margin-bottom: 14px; }
+        h1 { color: CanvasText; font-size: 24px; font-weight: 600; margin: 0 0 10px; }
+        p { line-height: 1.5; margin: 0 0 24px; }
+        a { display: inline-block; padding: 8px 18px; border-radius: 8px; text-decoration: none; font-weight: 500; margin: 0 4px; }
+        .back { background: #5e5ce6; color: white; }
+        .go { color: #d9534f; }
+        </style></head><body><div class="box"><div class="icon">🔒</div>
+        <h1>\(esc(L("This site doesn't support a secure connection")))</h1>
+        <p>\(esc(String(format: L("HTTPS-only mode is on. %@ only works over HTTP, so anyone on your network could see or change what you send."), host)))</p>
+        <a class="back" href="javascript:history.back()">\(esc(L("Go Back")))</a>
+        <a class="go" href="lumen-continue-http:\(esc(url.absoluteString))">\(esc(L("Continue to Site")))</a>
+        </div></body></html>
+        """
+    }
 
     // MARK: Global Privacy Control
 
@@ -291,7 +420,7 @@ enum Scripts {
         func esc(_ s: String) -> String {
             s.replacingOccurrences(of: "&", with: "&amp;").replacingOccurrences(of: "<", with: "&lt;").replacingOccurrences(of: ">", with: "&gt;")
         }
-        let meta = [site, byline, "\(minutes) min read"].filter { !$0.isEmpty }.map(esc).joined(separator: " · ")
+        let meta = [site, byline, String(format: L("%lld min read"), minutes)].filter { !$0.isEmpty }.map(esc).joined(separator: " · ")
         return """
         <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
         <title>\(esc(title))</title>
@@ -325,7 +454,7 @@ enum Scripts {
             s.replacingOccurrences(of: "&", with: "&amp;").replacingOccurrences(of: "<", with: "&lt;").replacingOccurrences(of: "\"", with: "&quot;")
         }
         let offline = [NSURLErrorNotConnectedToInternet, NSURLErrorNetworkConnectionLost, NSURLErrorDataNotAllowed].contains(error.code)
-        let title = offline ? "You're offline" : (error.code == NSURLErrorCannotFindHost ? "Can't find this site" : "Can't open this page")
+        let title = L(offline ? "You're offline" : (error.code == NSURLErrorCannotFindHost ? "Can't find this site" : "Can't open this page"))
         let host = url.host ?? url.absoluteString
         return """
         <!doctype html><html><head><meta charset="utf-8"><title>\(esc(title))</title>
@@ -343,7 +472,7 @@ enum Scripts {
         </style></head><body><div class="box"><div class="orb"></div>
         <h1>\(esc(title))</h1>
         <p>\(esc(error.localizedDescription))<br><strong>\(esc(host))</strong></p>
-        <a class="btn" href="\(esc(url.absoluteString))">Try Again</a>
+        <a class="btn" href="\(esc(url.absoluteString))">\(esc(L("Try Again")))</a>
         <p><code>\(esc(error.domain)) \(error.code)</code></p>
         </div></body></html>
         """

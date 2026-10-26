@@ -196,7 +196,7 @@ enum BrowserImporter {
                 }
             } catch ImportError.permission {
                 result.needsFullDiskAccess = true
-                result.warnings.append("macOS blocked access to \(source.name)'s data. Give Lumen Full Disk Access, then try again.")
+                result.warnings.append(String(format: L("macOS blocked access to %@'s data. Give Lumen Full Disk Access, then try again."), source.name))
             } catch {
                 result.warnings.append(error.localizedDescription)
             }
@@ -208,8 +208,8 @@ enum BrowserImporter {
         case unreadable(String)
         var errorDescription: String? {
             switch self {
-            case .permission: "Permission denied"
-            case .unreadable(let what): "Couldn't read \(what)."
+            case .permission: L("Permission denied")
+            case .unreadable(let what): String(format: L("Couldn't read %@."), what)
             }
         }
     }
@@ -272,7 +272,7 @@ enum BrowserImporter {
             .first { FileManager.default.fileExists(atPath: $0.path) }
         guard let file else { return [] }
         guard let key = chromiumKey(service) else {
-            result.warnings.append("Sign-ins weren't imported: Lumen couldn't read “\(service)” from your Keychain.")
+            result.warnings.append(String(format: L("Sign-ins weren't imported: Lumen couldn't read “%@” from your Keychain."), service))
             return []
         }
         let db = try open(file)

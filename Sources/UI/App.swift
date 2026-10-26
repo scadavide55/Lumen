@@ -24,6 +24,22 @@ struct LumenApp: App {
         }
         .defaultSize(width: 820, height: 560)
 
+        Window("Keyboard Shortcuts", id: "shortcuts") {
+            ShortcutList().padding(24).frame(width: 760)
+        }
+        .windowResizability(.contentSize)
+
+        Window("About Lumen", id: "about") {
+            AboutView()
+        }
+        .windowStyle(.hiddenTitleBar)
+        .windowResizability(.contentSize)
+
+        Window("Software Update", id: "update") {
+            UpdateView()
+        }
+        .windowResizability(.contentSize)
+
         Window("Import", id: "import") {
             ImportView()
         }
@@ -45,6 +61,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         ContentBlocker.shared.start()
     }
 
+    func applicationDidBecomeActive(_ notification: Notification) {
+        UpdateChecker.shared.check()
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
             Self.handleExtraShortcut(event) ? nil : event
@@ -56,6 +76,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool { true }
 
     func application(_ application: NSApplication, open urls: [URL]) {
+        if WebApp.isActive { urls.forEach(WebApp.openInBrowser); return }
         if !WindowRegistry.shared.open(urls) { Self.openNewWindow() }
     }
 
@@ -121,6 +142,9 @@ struct LumenCommands: Commands {
             Divider()
             Button("Import from Another Browser…") { openWindow(id: "import") }
             Button("Print…") { b?.current?.printPage() }.keyboardShortcut("p").disabled(b == nil)
+            Button("Install Site as App…") { b?.showInstallApp = true }.disabled(b?.current?.url == nil || WebApp.isActive)
+            Button("Export as PDF…") { b?.current?.exportPDF() }.keyboardShortcut("e", modifiers: [.command, .shift]).disabled(b == nil)
+            Button("Take Screenshot of Page") { b?.current?.screenshot() }.keyboardShortcut("s", modifiers: [.command, .shift]).disabled(b == nil)
         }
 
         CommandGroup(after: .pasteboard) {
@@ -165,6 +189,13 @@ struct LumenCommands: Commands {
             Button("Forward") { b?.current?.goForward() }.keyboardShortcut("]").disabled(b == nil)
             Divider()
             Button("Show All History") { library(.history) }.keyboardShortcut("y")
+            if let b, !b.closedTabs.isEmpty {
+                Divider()
+                Text("Recently Closed")
+                ForEach(Array(b.closedTabs.enumerated().reversed().prefix(10)), id: \.offset) { i, item in
+                    Button(item.snapshot.title) { b.reopenClosed(at: i) }
+                }
+            }
             Menu("Clear History") {
                 Button("Last Hour") { History.shared.clear(since: Date().addingTimeInterval(-3600)) }
                 Button("Today") { History.shared.clear(since: Calendar.current.startOfDay(for: Date())) }
@@ -199,7 +230,7 @@ struct LumenCommands: Commands {
             Button("Hibernate Other Tabs") { b?.hibernateOthers() }.disabled(b == nil)
             Divider()
             ForEach(1...9, id: \.self) { i in
-                Button(i == 9 ? "Last Tab" : "Tab \(i)") { b?.select(index: i) }
+                Button(i == 9 ? LocalizedStringKey("Last Tab") : "Tab \(i)") { b?.select(index: i) }
                     .keyboardShortcut(KeyEquivalent(Character(String(i))))
                     .disabled(b == nil)
             }
@@ -220,11 +251,30 @@ struct LumenCommands: Commands {
             Divider()
             Button("Downloads") { library(.downloads) }.keyboardShortcut("l", modifiers: [.command, .option])
         }
+
+        CommandGroup(replacing: .appInfo) {
+            Button("About Lumen") { openWindow(id: "about") }
+            Button("Check for Updates…") { UpdateChecker.shared.check(force: true) { openWindow(id: "update") } }
+        }
+
+        CommandGroup(replacing: .help) {
+            Button("Welcome to Lumen…") {
+                if let b { b.showOnboarding = true } else { openWindow(id: "main") }
+            }
+            Button("Keyboard Shortcuts") { openWindow(id: "shortcuts") }
+            Divider()
+            Button("Lumen Website") { NSWorkspace.shared.open(URL(string: "https://scadavide55.github.io/Lumen/")!) }
+            Button("Report a Bug") { NSWorkspace.shared.open(URL(string: "https://github.com/scadavide55/Lumen/issues")!) }
+        }
     }
 
     private func library(_ section: LibraryView.Section) {
         LibraryView.requestedSection = section
         openWindow(id: "library")
+    }
+
+    private func openSettingsWindow() {
+        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
     }
 
     private func findAgain(backwards: Bool) {

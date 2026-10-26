@@ -5,13 +5,17 @@ struct ContentView: View {
     @StateObject private var browser: BrowserState
     @ObservedObject private var settings = Settings.shared
     @Environment(\.openWindow) private var openWindow
+    static var onboardingShown = false
+    static var updateChecked = false
 
     init(isPrivate: Bool) {
         _browser = StateObject(wrappedValue: BrowserState(isPrivate: isPrivate))
     }
 
     var body: some View {
-        BrowserLayout()
+        Group {
+            if WebApp.isActive { WebAppLayout() } else { BrowserLayout() }
+        }
             .environmentObject(browser)
             .environmentObject(settings)
             .tint(settings.accent)
@@ -20,8 +24,24 @@ struct ContentView: View {
             .frame(minWidth: 640, minHeight: 420)
             .ignoresSafeArea()
             .onAppear {
-                guard !browser.isPrivate else { return }
-                for _ in 0..<Session.shared.claimExtraWindows() { openWindow(id: "main") }
+                guard !browser.isPrivate, !WebApp.isActive else { return }
+                let extra = Session.shared.claimExtraWindows()
+                for _ in 0..<extra { openWindow(id: "main") }
+                if !ContentView.updateChecked && settings.checkUpdates {
+                    ContentView.updateChecked = true
+                    UpdateChecker.shared.check(force: true) {
+                        if UpdateChecker.shared.announceable != nil && settings.onboarded { openWindow(id: "update") }
+                    }
+                }
+                if !settings.onboarded && !ContentView.onboardingShown {
+                    ContentView.onboardingShown = true
+                    browser.paletteVisible = false
+                    browser.showOnboarding = true
+                }
+            }
+            .sheet(isPresented: $browser.showOnboarding) { OnboardingView() }
+            .sheet(isPresented: $browser.showInstallApp) {
+                if let tab = browser.current { InstallAppSheet(tab: tab) }
             }
     }
 }
@@ -57,6 +77,11 @@ struct BrowserLayout: View {
                     }
                 }
                 if !b.sidebarVisible { PeekSidebar() }
+            } else if s.tabLayout == .compact {
+                VStack(spacing: 0) {
+                    CompactBar()
+                    MainColumn(toolbar: false, trafficSpace: false, leadingFlush: false, trailingFlush: false)
+                }
             } else {
                 VStack(spacing: 0) {
                     Toolbar(trafficSpace: true)
@@ -67,6 +92,7 @@ struct BrowserLayout: View {
             if b.paletteVisible {
                 CommandPalette().transition(.opacity.combined(with: .scale(scale: 0.98)))
             }
+            if b.locked { PrivateLockView() }
         }
         .animation(.easeOut(duration: 0.18), value: b.sidebarVisible)
         .animation(.easeOut(duration: 0.15), value: b.paletteVisible)
@@ -126,6 +152,17 @@ struct TabPane: View {
         )
         .overlay(alignment: .bottomLeading) {
             if s.statusBar, let link = tab.hoverURL { StatusBubble(text: link) }
+        }
+        .overlay(alignment: .topLeading) {
+            if let menu = tab.loginMenu { LoginMenuView(tab: tab, menu: menu) }
+        }
+        .overlay(alignment: .top) {
+            VStack(spacing: 0) {
+                if tab.insecureWarning { InsecurePasswordBanner(tab: tab) }
+                if let pending = tab.pendingSave { SavePasswordBanner(tab: tab, pending: pending) }
+            }
+            .animation(.easeOut(duration: 0.2), value: tab.pendingSave)
+            .animation(.easeOut(duration: 0.2), value: tab.insecureWarning)
         }
         .overlay(alignment: .topTrailing) {
             if isSplit {
@@ -347,8 +384,8 @@ struct IconButton: View {
         .foregroundStyle(tint ?? Color.secondary)
         .opacity(enabled ? 1 : 0.35)
         .onHover { hover = $0 }
-        .help(help)
-        .accessibilityLabel(help.isEmpty ? systemName : String(help.prefix { $0 != "(" }).trimmingCharacters(in: .whitespaces))
+        .help(L(help))
+        .accessibilityLabel(help.isEmpty ? systemName : String(L(help).prefix { $0 != "(" }).trimmingCharacters(in: .whitespaces))
     }
 }
 

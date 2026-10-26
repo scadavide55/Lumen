@@ -10,7 +10,7 @@ struct LibraryView: View {
     enum Section: String, CaseIterable, Identifiable {
         case history, bookmarks, downloads
         var id: String { rawValue }
-        var label: String { rawValue.capitalized }
+        var label: String { L(rawValue.capitalized) }
         var symbol: String { ["history": "clock", "bookmarks": "book", "downloads": "arrow.down.circle"][rawValue]! }
     }
 
@@ -91,7 +91,7 @@ struct HistoryList: View {
         }
         .overlay {
             if groups.isEmpty {
-                ContentUnavailableView(query.isEmpty ? "No History" : "No Results", systemImage: "clock")
+                ContentUnavailableView(query.isEmpty ? LocalizedStringKey("No History") : "No Results", systemImage: "clock")
             }
         }
         .contextMenu(forSelectionType: UUID.self) { ids in
@@ -197,7 +197,7 @@ struct BookmarkList: View {
         guard panel.runModal() == .OK, let url = panel.url,
               let data = try? Data(contentsOf: url) else { return }
         let n = bookmarks.importHTML(String(decoding: data, as: UTF8.self))
-        message = n == 1 ? "Imported 1 bookmark." : "Imported \(n) bookmarks."
+        message = n == 1 ? L("Imported 1 bookmark.") : String(format: L("Imported %lld bookmarks."), n)
     }
 
     private func exportFile() {

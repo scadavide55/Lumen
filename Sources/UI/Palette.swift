@@ -183,6 +183,13 @@ struct CommandPalette: View {
         var out: [PaletteItem] = []
 
         if q.isEmpty || q == b.current?.url?.absoluteString {
+            if let clip = NSPasteboard.general.string(forType: .string)?.trimmingCharacters(in: .whitespacesAndNewlines),
+               !clip.isEmpty, clip.count < 2000, !clip.contains("\n"), let url = InputResolver.resolve(clip) {
+                let isAddress = URL(string: clip)?.scheme != nil || InputResolver.addressURL(clip) != nil
+                out.append(PaletteItem(id: "paste", icon: .symbol("doc.on.clipboard"),
+                                       title: isAddress ? L("Paste and Go") : L("Paste and Search"),
+                                       subtitle: clip, badge: "↩", run: { navigate(url, newTab: $0) }))
+            }
             out += b.tabs.filter { $0.id != b.selectedID }
                 .sorted { $0.lastActive > $1.lastActive }
                 .prefix(6).map(tabItem)
@@ -198,7 +205,7 @@ struct CommandPalette: View {
                 id: "go",
                 icon: .symbol(isAddress ? "arrow.up.right.circle.fill" : "magnifyingglass.circle.fill"),
                 title: isAddress ? url.absoluteString : q,
-                subtitle: isAddress ? "Open address" : "Search \(shortcut?.name ?? s.engine.name)",
+                subtitle: isAddress ? L("Open address") : String(format: L("Search %@"), shortcut?.name ?? s.engine.name),
                 badge: "↩",
                 run: { navigate(url, newTab: $0) }))
         }
@@ -229,7 +236,7 @@ struct CommandPalette: View {
 
         out += suggestions.filter { $0.lowercased() != lower }.map { text in
             PaletteItem(id: "s" + text, icon: .symbol("magnifyingglass"), title: text,
-                        subtitle: "Search \(s.engine.name)", badge: "Suggestion",
+                        subtitle: String(format: L("Search %@"), s.engine.name), badge: "Suggestion",
                         run: { nt in if let u = InputResolver.searchURL(text) { navigate(u, newTab: nt) } })
         }
         return out
@@ -241,7 +248,7 @@ struct CommandPalette: View {
 
     private func tabItem(_ t: Tab) -> PaletteItem {
         PaletteItem(id: "t" + t.id.uuidString, icon: t.favicon.map { .image($0) } ?? .symbol("square.on.square"),
-                    title: t.title, subtitle: t.url.map { InputResolver.displayHost($0) } ?? "Start page",
+                    title: t.title, subtitle: t.url.map { InputResolver.displayHost($0) } ?? L("Start page"),
                     badge: "Switch to Tab", run: { _ in b.select(t) })
     }
 
@@ -263,8 +270,12 @@ struct CommandPalette: View {
             command("Show Downloads", "arrow.down.circle", "⌥⌘L") { LibraryView.requestedSection = .downloads; openWindow(id: "library") },
             command("Settings", "gearshape", "⌘,") { openSettings() },
             command("Import from Another Browser", "square.and.arrow.down", "Safari, Chrome, Firefox, Opera…") { openWindow(id: "import") },
+            command("Welcome Tour", "sparkles", "Setup and how Lumen works") { b.showOnboarding = true },
+            command("Keyboard Shortcuts", "keyboard", "Every shortcut in one place") { openWindow(id: "shortcuts") },
+            command("Check for Updates", "arrow.down.app", "Looks for a newer Lumen on GitHub") { UpdateChecker.shared.check(force: true) { openWindow(id: "update") } },
             command(s.adBlock ? "Turn Off Ad Blocker" : "Turn On Ad Blocker", "shield.lefthalf.filled", "⇧⌘B") { s.adBlock.toggle() },
             command("Hibernate Other Tabs", "moon.zzz", "Free memory used by background tabs") { b.hibernateOthers() },
+            command("Close Duplicate Tabs", "square.on.square.dashed", "Keeps one tab per address") { b.closeDuplicates() },
             command("Dark Appearance", "moon", "Appearance") { s.theme = .dark },
             command("Light Appearance", "sun.max", "Appearance") { s.theme = .light },
             command("System Appearance", "circle.lefthalf.filled", "Appearance") { s.theme = .system },
@@ -280,6 +291,12 @@ struct CommandPalette: View {
                     Bookmarks.shared.toggle(url: tab.url, title: tab.title)
                 },
                 command("Copy Link", "link", "⇧⌘C") { copy(tab.url) },
+                command("Copy Link as Markdown", "text.badge.plus", "[Title](address)") {
+                    let url = tab.url.map { URLCleaner.clean($0) ?? $0 }?.absoluteString ?? ""
+                    let title = tab.title.replacingOccurrences(of: "]", with: "\\]")
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString("[\(title)](\(url))", forType: .string)
+                },
                 command("Copy Link Without Tracking", "link.badge.plus", "Removes utm_ and similar parameters") {
                     copy(tab.url.map { URLCleaner.clean($0) ?? $0 })
                 },
@@ -290,6 +307,9 @@ struct CommandPalette: View {
                 command("Zoom Out", "minus.magnifyingglass", "⌘−") { tab.zoom(-1) },
                 command("Actual Size", "1.magnifyingglass", "⌘0") { tab.zoom(0) },
                 command("Print", "printer", "⌘P") { tab.printPage() },
+                command("Export as PDF", "doc.richtext", "⇧⌘E") { tab.exportPDF() },
+                command("Install as App", "app.badge.checkmark", "Its own window and Dock icon") { b.showInstallApp = true },
+                command("Take Screenshot of Page", "camera.viewfinder", "⇧⌘S") { tab.screenshot() },
             ], at: 1)
         }
         return list
@@ -322,14 +342,14 @@ struct PaletteRow: View {
                 .fill(selected ? Color.white.opacity(0.18) : Color.primary.opacity(0.06)))
 
             VStack(alignment: .leading, spacing: 1) {
-                Text(item.title).font(.system(size: 13, weight: .medium)).lineLimit(1)
+                Text(L(item.title)).font(.system(size: 13, weight: .medium)).lineLimit(1)
                 if !item.subtitle.isEmpty {
-                    Text(item.subtitle).font(.system(size: 11)).lineLimit(1).truncationMode(.middle)
+                    Text(L(item.subtitle)).font(.system(size: 11)).lineLimit(1).truncationMode(.middle)
                         .foregroundStyle(selected ? Color.white.opacity(0.75) : .secondary)
                 }
             }
             Spacer(minLength: 8)
-            Text(item.badge).font(.system(size: 10.5, weight: .medium))
+            Text(L(item.badge)).font(.system(size: 10.5, weight: .medium))
                 .foregroundStyle(selected ? Color.white.opacity(0.8) : .secondary)
         }
         .foregroundStyle(selected ? Color.white : .primary)

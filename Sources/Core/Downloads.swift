@@ -7,7 +7,7 @@ final class DownloadItem: NSObject, ObservableObject, Identifiable {
     let id = UUID()
     let download: WKDownload
     let source: URL?
-    @Published var filename = "Download"
+    @Published var filename = L("Download")
     @Published var destination: URL?
     @Published var fraction = 0.0
     @Published var received: Int64 = 0
@@ -36,10 +36,10 @@ final class DownloadItem: NSObject, ObservableObject, Identifiable {
         let f = ByteCountFormatter()
         switch state {
         case .active:
-            return total > 0 ? "\(f.string(fromByteCount: received)) of \(f.string(fromByteCount: total))" : f.string(fromByteCount: received)
+            return total > 0 ? String(format: L("%@ of %@"), f.string(fromByteCount: received), f.string(fromByteCount: total)) : f.string(fromByteCount: received)
         case .finished: return f.string(fromByteCount: max(total, received))
         case .failed(let reason): return reason
-        case .cancelled: return "Cancelled"
+        case .cancelled: return L("Cancelled")
         }
     }
 
@@ -72,8 +72,35 @@ final class DownloadManager: NSObject, ObservableObject, WKDownloadDelegate {
 
     func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String,
                   completionHandler: @escaping (URL?) -> Void) {
-        let name = suggestedFilename.isEmpty ? "Download" : suggestedFilename
+        let name = suggestedFilename.isEmpty ? L("Download") : suggestedFilename
         item(for: download)?.filename = name
+        if Settings.shared.confirmDangerousDownloads, Self.isDangerous(name) {
+            let host = download.originalRequest?.url?.host ?? ""
+            Dialogs.confirm(NSApp.keyWindow, title: String(format: L("“%@” can make changes to your Mac"), name),
+                            message: String(format: L("Apps, installers and scripts can harm your Mac. Download it only if you trust %@."), host.isEmpty ? L("this site") : host),
+                            ok: L("Download Anyway"), cancel: L("Cancel")) { ok in
+                if ok {
+                    self.chooseDestination(download, name: name, completionHandler: completionHandler)
+                } else {
+                    self.item(for: download)?.state = .cancelled
+                    completionHandler(nil)
+                }
+            }
+            return
+        }
+        chooseDestination(download, name: name, completionHandler: completionHandler)
+    }
+
+    static let dangerousExtensions: Set<String> = [
+        "dmg", "pkg", "mpkg", "app", "command", "sh", "zsh", "bash", "tool", "terminal", "scpt", "applescript",
+        "workflow", "action", "prefpane", "kext", "jar", "bin", "run", "exe", "msi", "bat", "ps1", "py", "pl", "rb",
+    ]
+
+    static func isDangerous(_ name: String) -> Bool {
+        dangerousExtensions.contains((name as NSString).pathExtension.lowercased())
+    }
+
+    private func chooseDestination(_ download: WKDownload, name: String, completionHandler: @escaping (URL?) -> Void) {
         if Settings.shared.askDownloadLocation {
             let panel = NSSavePanel()
             panel.nameFieldStringValue = name

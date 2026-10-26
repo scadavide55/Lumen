@@ -1,4 +1,5 @@
 import AppKit
+import SwiftUI
 import WebKit
 
 // MARK: - Files
@@ -6,7 +7,9 @@ import WebKit
 enum Paths {
     static let support: URL = {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        let url = base.appendingPathComponent("Lumen", isDirectory: true)
+        var url = base.appendingPathComponent("Lumen", isDirectory: true)
+        // Installed web apps keep their own history and settings apart from the browser.
+        if WebApp.isActive { url = url.appendingPathComponent("WebApps/" + (Bundle.main.bundleIdentifier ?? "app"), isDirectory: true) }
         try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         return url
     }()
@@ -264,11 +267,26 @@ struct TabSnapshot: Codable {
     var title: String
     var pinned: Bool
     var state: Data?
+    var group: UUID?
+    var lastActive: Date?
 }
 
 struct WindowSnapshot: Codable {
     var tabs: [TabSnapshot]
     var selected: Int
+    var groups: [TabGroup]?
+}
+
+struct TabGroup: Identifiable, Codable, Equatable {
+    var id = UUID()
+    var name: String
+    var collapsed = false
+    var color = 0
+    /// Set for groups Lumen made by site; nil for groups you made.
+    var site: String?
+
+    static let colors: [Color] = [.blue, .purple, .pink, .orange, .green, .teal, .yellow, .gray]
+    var tint: Color { Self.colors[color % Self.colors.count] }
 }
 
 final class Session {
@@ -278,7 +296,7 @@ final class Session {
     private var extraWindowsClaimed = false
 
     private init() {
-        if Settings.shared.restoreSession { pending = file.load() ?? [] }
+        if Settings.shared.restoreSession && !WebApp.isActive { pending = file.load() ?? [] }
     }
 
     func takePending() -> WindowSnapshot? { pending.isEmpty ? nil : pending.removeFirst() }
@@ -291,12 +309,14 @@ final class Session {
     }
 
     func scheduleSave() {
+        guard !WebApp.isActive else { return }
         let snaps = WindowRegistry.shared.browsers.filter { !$0.isPrivate }.map { $0.snapshot() }
         guard !snaps.isEmpty else { return }
         file.save(snaps, delay: 2)
     }
 
     func saveNow() {
+        guard !WebApp.isActive else { return }
         let snaps = WindowRegistry.shared.browsers.filter { !$0.isPrivate }.map { $0.snapshot() }
         guard !snaps.isEmpty else { return }
         file.saveNow(snaps)

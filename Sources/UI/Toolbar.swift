@@ -23,7 +23,7 @@ struct ToolbarContent: View {
     @EnvironmentObject var s: Settings
 
     var body: some View {
-        let horizontal = s.tabLayout == .horizontal
+        let horizontal = s.tabLayout != .vertical
         HStack(spacing: 4) {
             NavButtons(tab: tab)
             if horizontal { Spacer(minLength: 8) }
@@ -49,8 +49,8 @@ struct AddressPill: View {
     private var shownURL: URL? { tab.failedURL ?? tab.url }
 
     private var text: String {
-        guard let u = shownURL else { return "Search or enter address" }
-        if tab.isReader { return "Reader · " + InputResolver.displayHost(u) }
+        guard let u = shownURL else { return L("Search or enter address") }
+        if tab.isReader { return L("Reader") + " · " + InputResolver.displayHost(u) }
         return s.showFullURL ? u.absoluteString : InputResolver.displayHost(u)
     }
 
@@ -82,6 +82,18 @@ struct AddressPill: View {
                 .foregroundStyle(shownURL == nil ? .secondary : .primary)
             Spacer(minLength: 4)
 
+            if tab.url != nil && abs(tab.zoom - 1) > 0.01 {
+                Button { tab.zoom(0) } label: {
+                    Text("\(Int((tab.zoom * 100).rounded()))%")
+                        .font(.system(size: 10.5, weight: .semibold)).monospacedDigit()
+                        .padding(.horizontal, 5).padding(.vertical, 1)
+                        .background(Color.primary.opacity(0.08), in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.secondary)
+                .help(L("Reset zoom"))
+            }
+
             if tab.url != nil && (hover || tab.isReader) {
                 Button { tab.toggleReader() } label: {
                     Image(systemName: tab.isReader ? "doc.plaintext.fill" : "doc.plaintext").font(.system(size: 11.5))
@@ -108,7 +120,7 @@ struct AddressPill: View {
         .contentShape(Rectangle())
         .onTapGesture { b.showPalette(shownURL?.absoluteString) }
         .onHover { hover = $0 }
-        .help(shownURL?.absoluteString ?? "Search or enter address (⌘L)")
+        .help(shownURL?.absoluteString ?? L("Search or enter address (⌘L)"))
     }
 }
 
@@ -155,7 +167,7 @@ struct ShieldPopover: View {
                     .foregroundStyle(tab.shieldsUp ? s.accent : .secondary)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Lumen Shield").font(.headline)
-                    Text(tab.host.map { InputResolver.displayHost(URL(string: "https://" + $0)) } ?? "No site loaded")
+                    Text(tab.host.map { InputResolver.displayHost(URL(string: "https://" + $0)) } ?? L("No site loaded"))
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }
@@ -172,7 +184,7 @@ struct ShieldPopover: View {
             Toggle("Block third-party cookies", isOn: $s.blockThirdPartyCookies)
             Toggle("Remove tracking from links", isOn: $s.stripTracking)
             HStack {
-                Text(s.adBlock ? "\(blocker.ruleCount.formatted()) rules active" : "Blocking is off")
+                Text(s.adBlock ? LocalizedStringKey("\(blocker.ruleCount.formatted()) rules active") : "Blocking is off")
                     .font(.caption).foregroundStyle(.secondary)
                 Spacer()
                 SettingsLink { Text("Settings…") }.controlSize(.small)
@@ -201,7 +213,7 @@ struct SiteInfoPopover: View {
                     .font(.system(size: 22))
                     .foregroundStyle(secure ? Color.green : Color.orange)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(secure ? "Connection is secure" : "Connection is not secure").font(.headline)
+                    Text(secure ? LocalizedStringKey("Connection is secure") : "Connection is not secure").font(.headline)
                     Text(InputResolver.displayHost(url)).font(.caption).foregroundStyle(.secondary)
                 }
             }
@@ -222,10 +234,10 @@ struct SiteInfoPopover: View {
             }
             .controlSize(.small)
             if let host = tab.host {
-                Button(cleared ? "Site data cleared" : "Clear Cookies and Site Data…") {
-                    Dialogs.confirm(b.window, title: "Clear data for \(InputResolver.displayHost(url))?",
-                                    message: "You'll be signed out of this site and its saved preferences will be removed.",
-                                    ok: "Clear") { ok in
+                Button(cleared ? LocalizedStringKey("Site data cleared") : "Clear Cookies and Site Data…") {
+                    Dialogs.confirm(b.window, title: String(format: L("Clear data for %@?"), InputResolver.displayHost(url)),
+                                    message: L("You'll be signed out of this site and its saved preferences will be removed."),
+                                    ok: L("Clear")) { ok in
                         guard ok else { return }
                         DataCleaner.clearSite(host, store: b.dataStore) {
                             cleared = true
@@ -343,7 +355,7 @@ struct PageMenu: View {
 
     var body: some View {
         Menu {
-            Button(tab.isReader ? "Exit Reader" : "Reader") { tab.toggleReader() }.disabled(tab.url == nil)
+            Button(tab.isReader ? LocalizedStringKey("Exit Reader") : "Reader") { tab.toggleReader() }.disabled(tab.url == nil)
             Button("Find on Page…") { b.showFind() }.disabled(tab.url == nil)
             Menu("Zoom") {
                 Button("Zoom In") { tab.zoom(1) }
@@ -357,12 +369,15 @@ struct PageMenu: View {
                 Button("Copy Link Without Tracking") { copy(URLCleaner.clean(url) ?? url) }
             }
             Button("Print…") { tab.printPage() }.disabled(tab.url == nil)
+            Button("Export as PDF…") { tab.exportPDF() }.disabled(tab.url == nil)
+            Button("Install as App…") { b.showInstallApp = true }.disabled(tab.url == nil || WebApp.isActive)
+            Button("Take Screenshot of Page") { tab.screenshot() }.disabled(tab.url == nil)
             Divider()
-            Button(b.splitTab == nil ? "Split View with New Tab" : "Close Split View") {
+            Button(b.splitTab == nil ? LocalizedStringKey("Split View with New Tab") : "Close Split View") {
                 b.splitTab == nil ? b.splitWithNewTab() : b.closeSplit()
             }
-            Button(tab.isPinned ? "Unpin Tab" : "Pin Tab") { b.togglePin(tab) }
-            Button(tab.isMuted ? "Unmute Tab" : "Mute Tab") { tab.setMuted(!tab.isMuted) }
+            Button(tab.isPinned ? LocalizedStringKey("Unpin Tab") : "Pin Tab") { b.togglePin(tab) }
+            Button(tab.isMuted ? LocalizedStringKey("Unmute Tab") : "Mute Tab") { tab.setMuted(!tab.isMuted) }
             Divider()
             Button("History and Bookmarks") {
                 LibraryView.requestedSection = .history

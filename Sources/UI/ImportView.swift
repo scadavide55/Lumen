@@ -36,7 +36,7 @@ struct ImportView: View {
                         .frame(width: 28, height: 28)
                         VStack(alignment: .leading, spacing: 1) {
                             Text(s.name).font(.system(size: 13, weight: .medium))
-                            Text(s.profiles.count == 1 ? "1 profile" : "\(s.profiles.count) profiles")
+                            Text(s.profiles.count == 1 ? LocalizedStringKey("1 profile") : "\(s.profiles.count) profiles")
                                 .font(.caption).foregroundStyle(.secondary)
                         }
                     }
@@ -91,9 +91,9 @@ struct ImportView: View {
 
     private func cookieNote(_ s: BrowserSource) -> String {
         switch s.kind {
-        case .chromium: "Keeps you signed in to sites. macOS will ask you to allow access to “\(s.keychainService ?? "")” in your Keychain: choose Allow."
-        case .safari: "Keeps you signed in to sites. Needs Full Disk Access for Lumen."
-        case .firefox: "Keeps you signed in to sites."
+        case .chromium: String(format: L("Keeps you signed in to sites. macOS will ask you to allow access to “%@” in your Keychain: choose Allow."), s.keychainService ?? "")
+        case .safari: L("Keeps you signed in to sites. Needs Full Disk Access for Lumen.")
+        case .firefox: L("Keeps you signed in to sites.")
         }
     }
 

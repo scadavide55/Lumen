@@ -27,7 +27,12 @@ struct Sidebar: View {
             ScrollView {
                 LazyVStack(spacing: 2) {
                     NewTabRow()
-                    ForEach(b.regularTabs) { TabRow(tab: $0) }
+                    ForEach(entries) { entry in
+                        switch entry {
+                        case .header(let g): GroupHeader(group: g)
+                        case .tab(let t, let grouped): TabRow(tab: t, grouped: grouped)
+                        }
+                    }
                 }
                 .padding(.vertical, 2)
             }
@@ -105,8 +110,107 @@ struct NewTabRow: View {
     }
 }
 
+/// A row in the sidebar's tab list: a group header or a tab.
+enum SidebarEntry: Identifiable {
+    case header(TabGroup)
+    case tab(Tab, grouped: Bool)
+
+    var id: String {
+        switch self {
+        case .header(let g): "g" + g.id.uuidString
+        case .tab(let t, _): t.id.uuidString
+        }
+    }
+}
+
+extension Sidebar {
+    var entries: [SidebarEntry] {
+        var out: [SidebarEntry] = []
+        var seen = Set<UUID>()
+        for t in b.regularTabs {
+            if let gid = t.groupID, let g = b.groups.first(where: { $0.id == gid }) {
+                if !seen.contains(gid) { seen.insert(gid); out.append(.header(g)) }
+                if !g.collapsed { out.append(.tab(t, grouped: true)) }
+            } else {
+                out.append(.tab(t, grouped: false))
+            }
+        }
+        return out
+    }
+}
+
+struct GroupHeader: View {
+    let group: TabGroup
+    @EnvironmentObject var b: BrowserState
+    @State private var hover = false
+    @State private var renaming = false
+    @State private var name = ""
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        HStack(spacing: 7) {
+            Image(systemName: "chevron.right")
+                .font(.system(size: 9, weight: .bold))
+                .rotationEffect(.degrees(group.collapsed ? 0 : 90))
+                .foregroundStyle(.secondary)
+                .frame(width: 12)
+            Circle().fill(group.tint).frame(width: 8, height: 8)
+            if renaming {
+                TextField("Group name", text: $name)
+                    .textFieldStyle(.plain)
+                    .font(.system(size: 12, weight: .semibold))
+                    .focused($focused)
+                    .onSubmit { commit() }
+                    .onExitCommand { renaming = false }
+            } else {
+                Text(group.name).font(.system(size: 12, weight: .semibold)).lineLimit(1)
+            }
+            Spacer(minLength: 0)
+            Text("\(b.tabs(in: group).count)").font(.system(size: 10.5, weight: .medium)).foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 8)
+        .frame(height: 26)
+        .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(group.tint.opacity(hover ? 0.16 : 0.09)))
+        .contentShape(Rectangle())
+        .onTapGesture(count: 2) { startRename() }
+        .onTapGesture { withAnimation(.easeOut(duration: 0.15)) { b.toggleCollapsed(group.id) } }
+        .onHover { hover = $0 }
+        .contextMenu {
+            Button("Rename Group…") { startRename() }
+            Menu("Colour") {
+                ForEach(0..<TabGroup.colors.count, id: \.self) { i in
+                    Button { b.setColor(group.id, i) } label: { Text(Self.colorNames[i]) }
+                }
+            }
+            Button(group.collapsed ? "Expand Group" : "Collapse Group") { b.toggleCollapsed(group.id) }
+            Divider()
+            Button("Ungroup Tabs") { b.ungroup(group.id) }
+            Button("Close Group") { b.closeGroup(group.id) }
+        }
+        .dropDestination(for: String.self) { items, _ in
+            guard let last = b.tabs(in: group).last else { return false }
+            return b.handleDrop(items, on: last, placement: .group, pinned: false)
+        }
+        .help(L("Click to collapse, double-click to rename"))
+    }
+
+    static let colorNames = [L("Blue"), L("Purple"), L("Pink"), L("Orange"), L("Green"), L("Teal"), L("Yellow"), L("Grey")]
+
+    private func startRename() {
+        name = group.name
+        renaming = true
+        DispatchQueue.main.async { focused = true }
+    }
+
+    private func commit() {
+        b.renameGroup(group.id, name)
+        renaming = false
+    }
+}
+
 struct TabRow: View {
     @ObservedObject var tab: Tab
+    var grouped = false
     @EnvironmentObject var b: BrowserState
     @EnvironmentObject var s: Settings
     @Environment(\.colorScheme) private var scheme
@@ -128,7 +232,7 @@ struct TabRow: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
-                .help(tab.isMuted ? "Unmute tab" : "Mute tab")
+                .help(tab.isMuted ? LocalizedStringKey("Unmute tab") : "Mute tab")
             }
             if b.splitID == tab.id {
                 Image(systemName: "rectangle.split.2x1").font(.system(size: 10)).foregroundStyle(.secondary)
@@ -144,6 +248,12 @@ struct TabRow: View {
         }
         .padding(.horizontal, 8)
         .frame(height: s.compactTabs ? 28 : 34)
+        .overlay(alignment: .leading) {
+            if grouped, let g = b.groups.first(where: { $0.id == tab.groupID }) {
+                Capsule().fill(g.tint).frame(width: 2.5).padding(.vertical, 7).offset(x: -6)
+            }
+        }
+        .padding(.leading, grouped ? 10 : 0)
         .background {
             RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .fill(selected ? Color.white.opacity(scheme == .dark ? 0.12 : 0.75) : Color.primary.opacity(hover ? 0.06 : 0))
@@ -156,7 +266,11 @@ struct TabRow: View {
         .draggable(tab.id.uuidString) {
             Label(tab.title, systemImage: "globe").padding(6).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 6))
         }
-        .dropDestination(for: String.self) { items, _ in b.handleDrop(items, before: tab, pinned: false) }
+        .dropDestination(for: String.self) { items, location in
+            let h: CGFloat = s.compactTabs ? 28 : 34
+            let placement: BrowserState.DropPlacement = location.y < h * 0.28 ? .before : (location.y > h * 0.72 ? .after : .group)
+            return b.handleDrop(items, on: tab, placement: placement, pinned: false)
+        }
         .help(tab.url?.absoluteString ?? tab.title)
     }
 }
@@ -205,9 +319,14 @@ struct TabMenu: View {
     @EnvironmentObject var b: BrowserState
 
     var body: some View {
-        Button(tab.isPinned ? "Unpin Tab" : "Pin Tab") { b.togglePin(tab) }
+        Button(tab.isPinned ? LocalizedStringKey("Unpin Tab") : "Pin Tab") { b.togglePin(tab) }
         Button("Duplicate Tab") { b.duplicate(tab) }
-        Button(tab.isMuted ? "Unmute Tab" : "Mute Tab") { tab.setMuted(!tab.isMuted) }
+        if tab.groupID != nil {
+            Button("Remove from Group") { b.removeFromGroup(tab) }
+        } else if !tab.isPinned {
+            Button("Add to New Group") { b.newGroup(with: tab) }
+        }
+        Button(tab.isMuted ? LocalizedStringKey("Unmute Tab") : "Mute Tab") { tab.setMuted(!tab.isMuted) }
         if b.selectedID != tab.id {
             if b.splitID == tab.id {
                 Button("Close Split View") { b.closeSplit() }
@@ -221,7 +340,7 @@ struct TabMenu: View {
             NSPasteboard.general.setString(tab.url?.absoluteString ?? "", forType: .string)
         }
         .disabled(tab.url == nil)
-        Button(Bookmarks.shared.contains(tab.url) ? "Remove Bookmark" : "Add Bookmark") {
+        Button(Bookmarks.shared.contains(tab.url) ? LocalizedStringKey("Remove Bookmark") : "Add Bookmark") {
             Bookmarks.shared.toggle(url: tab.url, title: tab.title)
         }
         .disabled(tab.url == nil)
@@ -232,7 +351,12 @@ struct TabMenu: View {
         Divider()
         Button("Close Tab") { b.close(tab) }
         Button("Close Other Tabs") { b.closeOthers(tab) }
-        Button("Close Tabs Below") { b.closeBelow(tab) }
+        Button("Close Duplicate Tabs") { b.closeDuplicates() }
+        if Settings.shared.tabLayout != .vertical {
+            Button("Close Tabs to the Right") { b.closeBelow(tab) }
+        } else {
+            Button("Close Tabs Below") { b.closeBelow(tab) }
+        }
     }
 }
 
@@ -240,6 +364,7 @@ struct SidebarFooter: View {
     let showsDownloads: Bool
     @EnvironmentObject var b: BrowserState
     @ObservedObject private var blocker = ContentBlocker.shared
+    @ObservedObject private var updates = UpdateChecker.shared
     @ObservedObject private var s = Settings.shared
     @Environment(\.openWindow) private var openWindow
 
@@ -258,6 +383,14 @@ struct SidebarFooter: View {
                     .help("Lumen Shield is on with \(blocker.ruleCount.formatted()) rules")
             }
             Spacer()
+            if let r = updates.available {
+                Button { openWindow(id: "update") } label: {
+                    Text("Update").font(.system(size: 10.5, weight: .semibold)).padding(.horizontal, 7).padding(.vertical, 3)
+                        .background(Color.accentColor, in: Capsule()).foregroundStyle(.white)
+                }
+                .buttonStyle(.plain)
+                .help(String(format: L("%@ is available."), r.name))
+            }
             IconButton(systemName: "eyeglasses", help: "New private window (⇧⌘N)") { openWindow(id: "private") }
             SettingsLink {
                 Image(systemName: "gearshape").font(.system(size: 13, weight: .medium)).frame(width: 26, height: 26)
@@ -273,40 +406,75 @@ struct SidebarFooter: View {
 // MARK: - Horizontal tabs
 
 struct TabStrip: View {
+    /// Compact: the strip shares the toolbar row and the selected tab shows the address.
+    var compact = false
     @EnvironmentObject var b: BrowserState
 
     var body: some View {
         GeometryReader { geo in
             let pinned = b.pinnedTabs.count
             let regular = max(1, b.regularTabs.count)
-            let free = geo.size.width - 16 - CGFloat(pinned) * 40 - 34
-            let width = min(240, max(110, free / CGFloat(regular) - 4))
+            let free = geo.size.width - 16 - CGFloat(pinned) * 40 - 34 - (compact ? 120 : 0)
+            let width = min(240, max(compact ? 90 : 110, free / CGFloat(regular) - 4))
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 4) {
-                    ForEach(b.tabs) { TabChip(tab: $0, width: $0.isPinned ? 36 : width) }
+                    ForEach(b.tabs) { t in
+                        let selectedWide = compact && t.id == b.selectedID
+                        TabChip(tab: t, width: t.isPinned ? 36 : (selectedWide ? min(420, max(220, width + 120)) : width), compact: compact)
+                    }
                     IconButton(systemName: "plus", help: "New tab (⌘T)") { b.newTabWithPalette() }
                 }
-                .padding(.horizontal, 8)
+                .padding(.horizontal, compact ? 2 : 8)
             }
         }
         .frame(height: 34)
-        .padding(.bottom, 4)
+        .padding(.bottom, compact ? 0 : 4)
+    }
+}
+
+/// Safari's compact layout: navigation, tabs and the address in one row.
+struct CompactBar: View {
+    @EnvironmentObject var b: BrowserState
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Spacer().frame(width: 72)
+            if let tab = b.current { NavButtons(tab: tab) }
+            TabStrip(compact: true)
+            if let tab = b.current {
+                ShieldButton(tab: tab)
+                DownloadsButton()
+                PageMenu(tab: tab)
+            }
+        }
+        .padding(.horizontal, 8)
+        .frame(height: 44)
+        .background(WindowDragArea())
     }
 }
 
 struct TabChip: View {
     @ObservedObject var tab: Tab
     let width: CGFloat
+    var compact = false
+    @EnvironmentObject var s: Settings
     @EnvironmentObject var b: BrowserState
     @Environment(\.colorScheme) private var scheme
     @State private var hover = false
 
     var body: some View {
         let selected = b.selectedID == tab.id
+        let showsAddress = compact && selected && !tab.isPinned
         HStack(spacing: 6) {
-            FaviconView(tab: tab, size: 14)
+            if showsAddress && !s.alwaysShowTitles && tab.url != nil {
+                Image(systemName: tab.url?.scheme == "https" ? "lock.fill" : "exclamationmark.triangle")
+                    .font(.system(size: 10)).foregroundStyle(.secondary)
+            } else {
+                FaviconView(tab: tab, size: 14)
+            }
             if !tab.isPinned {
-                Text(tab.title).font(.system(size: 12)).lineLimit(1)
+                Text(showsAddress && !s.alwaysShowTitles ? (tab.url.map { InputResolver.displayHost($0) } ?? L("Search or enter address")) : tab.title)
+                    .font(.system(size: 12, weight: showsAddress ? .medium : .regular)).lineLimit(1)
                 Spacer(minLength: 0)
                 if tab.isPlayingAudio || tab.isMuted {
                     Image(systemName: tab.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
@@ -323,12 +491,25 @@ struct TabChip: View {
         .frame(width: width, height: 30)
         .background(RoundedRectangle(cornerRadius: 8, style: .continuous)
             .fill(selected ? Color.white.opacity(scheme == .dark ? 0.12 : 0.75) : Color.primary.opacity(hover ? 0.07 : 0.03)))
+        .overlay(alignment: .bottom) {
+            if showsAddress && tab.isLoading {
+                ProgressLine(progress: tab.progress).padding(.horizontal, 6)
+            } else if let g = b.groups.first(where: { $0.id == tab.groupID }) {
+                Capsule().fill(g.tint).frame(height: 2.5).padding(.horizontal, 8)
+            }
+        }
         .contentShape(Rectangle())
-        .onTapGesture { b.select(tab) }
+        .onTapGesture {
+            if showsAddress { b.showPalette(tab.url?.absoluteString) } else { b.select(tab) }
+        }
         .onHover { hover = $0 }
         .contextMenu { TabMenu(tab: tab) }
         .draggable(tab.id.uuidString)
-        .dropDestination(for: String.self) { items, _ in b.handleDrop(items, before: tab, pinned: tab.isPinned) }
+        .dropDestination(for: String.self) { items, location in
+            let placement: BrowserState.DropPlacement = tab.isPinned ? .before
+                : (location.x < width * 0.25 ? .before : (location.x > width * 0.75 ? .after : .group))
+            return b.handleDrop(items, on: tab, placement: placement, pinned: tab.isPinned)
+        }
         .help(tab.title)
     }
 }

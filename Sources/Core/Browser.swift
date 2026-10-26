@@ -1,4 +1,5 @@
 import Combine
+import LocalAuthentication
 import SwiftUI
 import WebKit
 
@@ -8,6 +9,8 @@ final class BrowserState: ObservableObject {
     let dataStore: WKWebsiteDataStore
 
     @Published var tabs: [Tab] = []
+    @Published var groups: [TabGroup] = []
+    private var popups: [PopupWindow] = []
     @Published var selectedID: UUID?
     @Published var splitID: UUID?
     @Published var sidebarVisible: Bool {
@@ -16,14 +19,18 @@ final class BrowserState: ObservableObject {
     @Published var peekSidebar = false
     @Published var paletteVisible = false
     @Published var findVisible = false
+    @Published var showOnboarding = false
+    @Published var locked = false
+    @Published var showInstallApp = false
     var palettePrefill = ""
     weak var window: NSWindow?
 
-    private var closedTabs: [(snapshot: TabSnapshot, index: Int)] = []
+    @Published private(set) var closedTabs: [(snapshot: TabSnapshot, index: Int)] = []
     private var lastOpened: (opener: UUID, tab: UUID)?
     private var timer: Timer?
     private var cancellables = Set<AnyCancellable>()
     private var keyObserver: NSObjectProtocol?
+    private var lockObserver: NSObjectProtocol?
 
     var current: Tab? { tabs.first { $0.id == selectedID } }
     var splitTab: Tab? { splitID.flatMap { id in tabs.first { $0.id == id } } }
@@ -37,13 +44,22 @@ final class BrowserState: ObservableObject {
         sidebarVisible = Settings.shared.sidebarVisible
         WindowRegistry.shared.add(self)
 
-        if !isPrivate, let snap = Session.shared.takePending() { restore(snap) }
+        if let app = WebApp.url {
+            newTab(url: app)
+        } else if !isPrivate, let snap = Session.shared.takePending() {
+            restore(snap)
+        }
         if !isPrivate {
             for u in WindowRegistry.shared.takePendingURLs() { newTab(url: u) }
         }
         if tabs.isEmpty { newTab() }
 
         timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in self?.hibernateIdle() }
+        if isPrivate {
+            lockObserver = NotificationCenter.default.addObserver(forName: NSApplication.didResignActiveNotification, object: nil, queue: .main) { [weak self] _ in
+                if Settings.shared.lockPrivateWindows { self?.locked = true }
+            }
+        }
         if !isPrivate {
             $tabs.combineLatest($selectedID)
                 .debounce(for: .seconds(1), scheduler: RunLoop.main)
@@ -55,6 +71,7 @@ final class BrowserState: ObservableObject {
     deinit {
         timer?.invalidate()
         if let keyObserver { NotificationCenter.default.removeObserver(keyObserver) }
+        if let lockObserver { NotificationCenter.default.removeObserver(lockObserver) }
         tabs.forEach { $0.close() }
     }
 
@@ -72,13 +89,19 @@ final class BrowserState: ObservableObject {
     }
 
     private func restore(_ snap: WindowSnapshot) {
-        tabs = snap.tabs.map { Tab(browser: self, url: $0.url, title: $0.title, state: $0.state, pinned: $0.pinned) }
+        groups = snap.groups ?? []
+        tabs = snap.tabs.map { s in
+            let t = Tab(browser: self, url: s.url, title: s.title, state: s.state, pinned: s.pinned)
+            t.groupID = s.group.flatMap { g in groups.contains { $0.id == g } ? g : nil }
+            if let d = s.lastActive { t.lastActive = d }
+            return t
+        }
         normalizeOrder()
         if !tabs.isEmpty { select(tabs[max(0, min(snap.selected, tabs.count - 1))]) }
     }
 
     func snapshot() -> WindowSnapshot {
-        WindowSnapshot(tabs: tabs.map { $0.snapshot() }, selected: tabs.firstIndex { $0.id == selectedID } ?? 0)
+        WindowSnapshot(tabs: tabs.map { $0.snapshot() }, selected: tabs.firstIndex { $0.id == selectedID } ?? 0, groups: groups)
     }
 
     // MARK: Opening and selecting
@@ -91,10 +114,10 @@ final class BrowserState: ObservableObject {
         return tab
     }
 
-    /// ⌘T: a fresh tab with the command bar open.
+    /// ⌘T: a fresh tab, with the command bar open unless the user turned that off.
     func newTabWithPalette() {
         newTab()
-        showPalette("")
+        if Settings.shared.paletteOnNewTab { showPalette("") }
     }
 
     private func insert(_ tab: Tab, after anchor: Tab?) {
@@ -125,8 +148,21 @@ final class BrowserState: ObservableObject {
         select(tabs[(i + step + tabs.count) % tabs.count])
     }
 
-    func openPopup(configuration: WKWebViewConfiguration, from opener: Tab) -> WKWebView? {
+    func openPopup(configuration: WKWebViewConfiguration, from opener: Tab, features: WKWindowFeatures) -> WKWebView? {
+        let sized = features.width != nil || features.height != nil || WebApp.isActive
+        switch WebApp.isActive ? .automatic : Settings.shared.popupMode {
+        case .never, .automatic:
+            guard Settings.shared.popupMode == .never || sized || WebApp.isActive else { break }
+            let popup = PopupWindow(configuration: configuration, features: features, parent: window) { [weak self] p in
+                self?.popups.removeAll { $0 === p }
+            }
+            popups.append(popup)
+            return popup.webView
+        default:
+            break
+        }
         let tab = Tab(browser: self, configuration: configuration)
+        tab.groupID = opener.groupID
         insert(tab, after: opener)
         select(tab)
         return tab.webView
@@ -134,6 +170,7 @@ final class BrowserState: ObservableObject {
 
     /// ⌘-click: opens next to the opener, keeping successive links in order.
     func openInBackground(_ url: URL, from opener: Tab?, select: Bool = false) {
+        if WebApp.isActive { WebApp.openInBrowser(url); return }
         var anchor = opener
         if let opener, let last = lastOpened, last.opener == opener.id,
            let t = tabs.first(where: { $0.id == last.tab }) { anchor = t }
@@ -144,6 +181,7 @@ final class BrowserState: ObservableObject {
 
     func tabDidNavigate(_ tab: Tab) {
         if tab.id == selectedID { window?.title = tab.title }
+        if Settings.shared.organizeTabs { autoOrganize() }
         if !isPrivate { Session.shared.scheduleSave() }
     }
 
@@ -158,6 +196,7 @@ final class BrowserState: ObservableObject {
         let wasSelected = tab.id == selectedID
         tabs.remove(at: i)
         tab.close()
+        if tab.groupID != nil { cleanupGroups() }
         if splitID == tab.id { splitID = nil }
         if tabs.isEmpty {
             newTab()
@@ -180,13 +219,23 @@ final class BrowserState: ObservableObject {
         for t in tabs where t.id != keep.id && !t.isPinned { close(t) }
     }
 
+    /// Closes tabs showing the same address as an earlier tab, keeping the selected and pinned ones.
+    func closeDuplicates() {
+        var seen = Set<String>()
+        for t in tabs.sorted(by: { ($0.isPinned || $0.id == selectedID ? 0 : 1) < ($1.isPinned || $1.id == selectedID ? 0 : 1) }) {
+            guard let key = t.url?.absoluteString else { continue }
+            if seen.contains(key), !t.isPinned, t.id != selectedID { close(t) } else { seen.insert(key) }
+        }
+    }
+
     func closeBelow(_ tab: Tab) {
         guard let i = tabs.firstIndex(where: { $0.id == tab.id }) else { return }
         for t in tabs[(i + 1)...] where !t.isPinned { close(t) }
     }
 
-    func reopenClosed() {
-        guard let (snap, index) = closedTabs.popLast() else { return }
+    func reopenClosed(at position: Int? = nil) {
+        guard !closedTabs.isEmpty else { return }
+        let (snap, index) = closedTabs.remove(at: position ?? closedTabs.count - 1)
         let tab = Tab(browser: self, url: snap.url, title: snap.title, state: snap.state, pinned: snap.pinned)
         tabs.insert(tab, at: min(index, tabs.count))
         normalizeOrder()
@@ -207,7 +256,43 @@ final class BrowserState: ObservableObject {
     }
 
     /// Handles tab IDs or URLs dropped onto a tab row or section.
+    enum DropPlacement { case before, after, group }
+
     func handleDrop(_ items: [String], before target: Tab?, pinned: Bool) -> Bool {
+        handleDrop(items, on: target, placement: .before, pinned: pinned)
+    }
+
+    /// Moves or opens dropped tabs. Dropping onto the middle of a tab groups the two.
+    func handleDrop(_ items: [String], on target: Tab?, placement: DropPlacement, pinned: Bool) -> Bool {
+        if placement == .group, let target, !target.isPinned {
+            var handled = false
+            for item in items {
+                if let id = UUID(uuidString: item), let dragged = tabs.first(where: { $0.id == id }), dragged.id != target.id {
+                    group(dragged, with: target)
+                    handled = true
+                } else if let url = URL(string: item), ["http", "https"].contains(url.scheme ?? "") {
+                    let t = Tab(browser: self, url: url)
+                    tabs.append(t)
+                    group(t, with: target)
+                    select(t)
+                    handled = true
+                }
+            }
+            return handled
+        }
+        let anchor: Tab?
+        if placement == .after, let target, let i = tabs.firstIndex(where: { $0.id == target.id }) {
+            anchor = tabs.indices.contains(i + 1) ? tabs[i + 1] : nil
+        } else {
+            anchor = target
+        }
+        let joinGroup = target?.groupID
+        let ok = handleDropBefore(items, before: anchor, pinned: pinned, group: pinned ? nil : joinGroup)
+        cleanupGroups()
+        return ok
+    }
+
+    private func handleDropBefore(_ items: [String], before target: Tab?, pinned: Bool, group: UUID?) -> Bool {
         var handled = false
         var opened: Tab?
         for item in items {
@@ -223,6 +308,7 @@ final class BrowserState: ObservableObject {
                 continue
             }
             tab.isPinned = pinned
+            tab.groupID = group
             if let target, let i = tabs.firstIndex(where: { $0.id == target.id }) {
                 tabs.insert(tab, at: i)
             } else if pinned, let i = tabs.lastIndex(where: \.isPinned) {
@@ -237,8 +323,126 @@ final class BrowserState: ObservableObject {
         return handled
     }
 
+    /// Pinned tabs first, and the tabs of each group kept together where the group first appears.
     private func normalizeOrder() {
-        tabs = tabs.filter(\.isPinned) + tabs.filter { !$0.isPinned }
+        var regular: [Tab] = []
+        var placed = Set<UUID>()
+        let unpinned = tabs.filter { !$0.isPinned }
+        for t in unpinned {
+            guard let g = t.groupID else { regular.append(t); continue }
+            if placed.contains(g) { continue }
+            placed.insert(g)
+            regular += unpinned.filter { $0.groupID == g }
+        }
+        tabs = tabs.filter(\.isPinned) + regular
+    }
+
+    // MARK: Groups
+
+    func group(_ dragged: Tab, with target: Tab) {
+        dragged.isPinned = false
+        if let g = target.groupID {
+            dragged.groupID = g
+        } else {
+            let sameSite = dragged.host.map(PasswordStore.site) == target.host.map(PasswordStore.site) ? target.host.map(PasswordStore.site) : nil
+            let new = TabGroup(name: sameSite.map(Self.siteName) ?? L("New Group"), color: groups.count)
+            groups.append(new)
+            target.groupID = new.id
+            dragged.groupID = new.id
+        }
+        tabs.removeAll { $0.id == dragged.id }
+        if let i = tabs.lastIndex(where: { $0.groupID == dragged.groupID }) { tabs.insert(dragged, at: i + 1) } else { tabs.append(dragged) }
+        cleanupGroups()
+    }
+
+    func tabs(in group: TabGroup) -> [Tab] { tabs.filter { $0.groupID == group.id } }
+
+    func newGroup(with tab: Tab) {
+        let g = TabGroup(name: tab.host.map { Self.siteName(PasswordStore.site($0)) } ?? L("New Group"), color: groups.count)
+        groups.append(g)
+        tab.groupID = g.id
+        cleanupGroups()
+    }
+
+    func renameGroup(_ id: UUID, _ name: String) {
+        guard let i = groups.firstIndex(where: { $0.id == id }) else { return }
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        groups[i].name = trimmed.isEmpty ? groups[i].name : trimmed
+        groups[i].site = nil // a renamed group is yours now
+    }
+
+    func toggleCollapsed(_ id: UUID) {
+        guard let i = groups.firstIndex(where: { $0.id == id }) else { return }
+        groups[i].collapsed.toggle()
+        if groups[i].collapsed, let current, current.groupID == id,
+           let next = tabs.first(where: { $0.groupID != id && !$0.isPinned }) ?? tabs.first(where: { $0.groupID != id }) {
+            select(next)
+        }
+    }
+
+    func setColor(_ id: UUID, _ color: Int) {
+        guard let i = groups.firstIndex(where: { $0.id == id }) else { return }
+        groups[i].color = color
+    }
+
+    func ungroup(_ id: UUID) {
+        for t in tabs where t.groupID == id { t.groupID = nil }
+        groups.removeAll { $0.id == id }
+        normalizeOrder()
+    }
+
+    func removeFromGroup(_ tab: Tab) {
+        tab.groupID = nil
+        cleanupGroups()
+    }
+
+    func closeGroup(_ id: UUID) {
+        for t in tabs where t.groupID == id { close(t) }
+        groups.removeAll { $0.id == id }
+    }
+
+    /// Drops empty groups (and site groups down to one tab) and keeps members together.
+    func cleanupGroups() {
+        for g in groups {
+            let count = tabs.filter { $0.groupID == g.id }.count
+            if count == 0 || (g.site != nil && count < 2) {
+                for t in tabs where t.groupID == g.id { t.groupID = nil }
+                groups.removeAll { $0.id == g.id }
+            }
+        }
+        normalizeOrder()
+    }
+
+    /// Groups three or more ungrouped tabs from the same site under the site's name.
+    func autoOrganize() {
+        var bySite: [String: [Tab]] = [:]
+        for t in tabs where !t.isPinned {
+            guard let host = t.host, ["http", "https"].contains(t.url?.scheme ?? "") else { continue }
+            let auto = t.groupID.flatMap { g in groups.first { $0.id == g } }?.site
+            if t.groupID != nil && auto == nil { continue } // grouped by you: leave it alone
+            bySite[PasswordStore.site(host), default: []].append(t)
+        }
+        var changed = false
+        for (site, members) in bySite where members.count >= 3 {
+            let group: TabGroup
+            if let existing = groups.first(where: { $0.site == site }) {
+                group = existing
+            } else {
+                group = TabGroup(name: Self.siteName(site), color: groups.count, site: site)
+                groups.append(group)
+            }
+            for t in members where t.groupID != group.id { t.groupID = group.id; changed = true }
+        }
+        if changed { cleanupGroups() }
+    }
+
+    static func siteName(_ site: String) -> String {
+        let brands = ["github": "GitHub", "youtube": "YouTube", "stackoverflow": "Stack Overflow", "linkedin": "LinkedIn",
+                      "gitlab": "GitLab", "icloud": "iCloud", "chatgpt": "ChatGPT", "openai": "OpenAI", "x": "X",
+                      "duckduckgo": "DuckDuckGo", "wikipedia": "Wikipedia", "tiktok": "TikTok", "paypal": "PayPal",
+                      "ebay": "eBay", "whatsapp": "WhatsApp", "soundcloud": "SoundCloud", "deviantart": "DeviantArt"]
+        let name = String(site.split(separator: ".").first ?? Substring(site))
+        return brands[name.lowercased()] ?? name.prefix(1).uppercased() + name.dropFirst()
     }
 
     // MARK: Split view
@@ -266,6 +470,11 @@ final class BrowserState: ObservableObject {
     // MARK: Memory
 
     func hibernateIdle() {
+        let days = Settings.shared.autoCloseDays
+        if days > 0 {
+            let old = Date().addingTimeInterval(-Double(days) * 86_400)
+            for t in tabs where !t.isPinned && !t.isSelected && !t.isPlayingAudio && t.lastActive < old { close(t) }
+        }
         let minutes = Settings.shared.hibernateMinutes
         guard minutes > 0 else { return }
         let cutoff = Date().addingTimeInterval(-Double(minutes) * 60)
@@ -276,6 +485,17 @@ final class BrowserState: ObservableObject {
 
     func hibernateOthers() {
         for t in tabs where !t.isSelected && !t.isPlayingAudio { t.hibernate() }
+    }
+
+    // MARK: Private window lock
+
+    func unlock() {
+        let context = LAContext()
+        var error: NSError?
+        guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else { locked = false; return }
+        context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: L("unlock your private window")) { ok, _ in
+            DispatchQueue.main.async { if ok { self.locked = false } }
+        }
     }
 
     // MARK: Overlays

@@ -7,6 +7,7 @@ struct SettingsView: View {
             GeneralPane().tabItem { Label("General", systemImage: "gearshape") }
             AppearancePane().tabItem { Label("Appearance", systemImage: "paintbrush") }
             ShieldPane().tabItem { Label("Shield", systemImage: "shield.lefthalf.filled") }
+            PasswordsPane().tabItem { Label("Passwords", systemImage: "key") }
             SearchPane().tabItem { Label("Search", systemImage: "magnifyingglass") }
             SitesPane().tabItem { Label("Sites", systemImage: "globe") }
             AdvancedPane().tabItem { Label("Advanced", systemImage: "wrench.and.screwdriver") }
@@ -21,6 +22,7 @@ struct SettingsView: View {
 struct GeneralPane: View {
     @ObservedObject private var s = Settings.shared
     @State private var isDefault = DefaultBrowser.isDefault
+    @State private var language: AppLanguage?
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
@@ -28,7 +30,7 @@ struct GeneralPane: View {
             Section {
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(isDefault ? "Lumen is your default browser" : "Lumen is not your default browser")
+                        Text(isDefault ? LocalizedStringKey("Lumen is your default browser") : "Lumen is not your default browser")
                         Text("Links you open in other apps go to your default browser.").font(.caption).foregroundStyle(.secondary)
                     }
                     Spacer()
@@ -48,8 +50,47 @@ struct GeneralPane: View {
                     Button("Import…") { openWindow(id: "import") }
                 }
             }
+            WebAppsSection()
+            Section("Updates") {
+                UpdateRow()
+                Toggle("Check for updates automatically", isOn: $s.checkUpdates)
+            }
+            Section("Language") {
+                Picker("Language", selection: Binding(get: { AppLanguage.current }, set: { lang in
+                    lang.apply()
+                    language = lang
+                })) {
+                    ForEach(AppLanguage.allCases) { Text($0.label).tag($0) }
+                }
+                if language != nil {
+                    HStack {
+                        Text("Restart Lumen to use the new language.").foregroundStyle(.secondary)
+                        Spacer()
+                        Button("Restart Now") { AppLanguage.relaunch() }
+                    }
+                }
+            }
             Section("Tabs") {
                 Toggle("Restore windows and tabs when Lumen opens", isOn: $s.restoreSession)
+                Toggle("Open the command bar on every new tab", isOn: $s.paletteOnNewTab)
+                Picker("Organize tabs", selection: $s.organizeTabs) {
+                    Text("Manually").tag(false)
+                    Text("Automatically by site").tag(true)
+                }
+                if s.organizeTabs {
+                    Text("When three or more tabs are open from the same site, Lumen groups them, for example into “GitHub”.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                Picker("Open pages in tabs instead of windows", selection: $s.popupMode) {
+                    ForEach(PopupMode.allCases) { Text($0.label).tag($0) }
+                }
+                Picker("Automatically close tabs", selection: $s.autoCloseDays) {
+                    Text("Manually").tag(0)
+                    Text("After One Day").tag(1)
+                    Text("After One Week").tag(7)
+                    Text("After One Month").tag(30)
+                }
+                Toggle("Block videos that play sound automatically", isOn: $s.blockAutoplay)
                 Picker("Open new tabs", selection: $s.newTabPosition) {
                     ForEach(NewTabPosition.allCases) { Text($0.label).tag($0) }
                 }
@@ -75,6 +116,31 @@ struct GeneralPane: View {
         }
         .formStyle(.grouped)
         .onAppear { isDefault = DefaultBrowser.isDefault }
+    }
+}
+
+struct UpdateRow: View {
+    @ObservedObject private var updates = UpdateChecker.shared
+    @Environment(\.openWindow) private var openWindow
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(String(format: L("Lumen %@"), UpdateChecker.currentVersion))
+                if let r = updates.available {
+                    Text(String(format: L("%@ is available."), r.name)).font(.caption).foregroundStyle(.green)
+                } else if let result = updates.lastResult {
+                    Text(result).font(.caption).foregroundStyle(.secondary)
+                }
+            }
+            Spacer()
+            if updates.checking { ProgressView().controlSize(.small) }
+            if updates.available != nil {
+                Button("Update…") { openWindow(id: "update") }.buttonStyle(.borderedProminent)
+            } else {
+                Button("Check Now") { updates.check(force: true) }.disabled(updates.checking)
+            }
+        }
     }
 }
 
@@ -121,13 +187,13 @@ struct AppearancePane: View {
                 Picker("Window style", selection: $s.chromeStyle) {
                     ForEach(ChromeStyle.allCases) { Text($0.label).tag($0) }
                 }
-                Toggle("Tint the window with the site's colour", isOn: $s.siteTint)
             }
-            Section("Layout") {
-                Picker("Tabs", selection: $s.tabLayout) {
-                    ForEach(TabLayout.allCases) { Text($0.label).tag($0) }
+            Section("Tabs") {
+                TabLayoutPicker().frame(maxWidth: .infinity)
+                Toggle("Show colour in tab bar", isOn: $s.siteTint)
+                if s.tabLayout == .compact {
+                    Toggle("Always show website titles in tabs", isOn: $s.alwaysShowTitles)
                 }
-                .pickerStyle(.segmented)
                 if s.tabLayout == .vertical {
                     Picker("Sidebar position", selection: $s.sidebarSide) {
                         ForEach(SidebarSide.allCases) { Text($0.label).tag($0) }
@@ -140,6 +206,8 @@ struct AppearancePane: View {
                     }
                     Toggle("Compact tabs", isOn: $s.compactTabs)
                 }
+            }
+            Section("Page") {
                 Toggle("Float the page with rounded corners", isOn: $s.insetContent)
                 if s.insetContent {
                     LabeledContent("Corner radius") {
@@ -150,29 +218,10 @@ struct AppearancePane: View {
                 Toggle("Show link addresses on hover", isOn: $s.statusBar)
             }
             Section("Start page background") {
-                Picker("Background", selection: $s.startBackground) {
-                    ForEach(StartBackground.allCases) { Text($0.label).tag($0) }
-                }
-                if s.startBackground == .image {
-                    HStack {
-                        Text(s.startImagePath.isEmpty ? "No image chosen" : (s.startImagePath as NSString).lastPathComponent)
-                            .foregroundStyle(.secondary).lineLimit(1)
-                        Spacer()
-                        Button("Choose…") { chooseImage() }
-                    }
-                }
-                StartBackgroundView(style: s.startBackground, imagePath: s.startImagePath, accent: s.accent, isPrivate: false)
-                    .frame(height: 90)
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                BackgroundPicker()
             }
         }
         .formStyle(.grouped)
-    }
-
-    private func chooseImage() {
-        let panel = NSOpenPanel()
-        panel.allowedContentTypes = [.image]
-        if panel.runModal() == .OK, let url = panel.url { s.startImagePath = url.path }
     }
 }
 
@@ -226,6 +275,14 @@ struct ShieldPane: View {
                 Toggle("Block third-party cookies", isOn: $s.blockThirdPartyCookies)
                 Toggle("Remove tracking parameters from links", isOn: $s.stripTracking)
                 Toggle("Upgrade connections to HTTPS", isOn: $s.httpsUpgrade)
+                Toggle(isOn: $s.httpsOnly) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("HTTPS-only mode")
+                        Text("Sites that don't support HTTPS won't open until you confirm.").font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                Toggle("Confirm before downloading apps, installers and scripts", isOn: $s.confirmDangerousDownloads)
+                Toggle("Lock private windows with Touch ID when Lumen is in the background", isOn: $s.lockPrivateWindows)
                 Toggle("Tell sites not to sell or share my data (Global Privacy Control)", isOn: $s.gpc)
                 Toggle("Clear cookies, cache and history when Lumen quits", isOn: $s.clearOnQuit)
                 Button("Clear Browsing Data…") { showClear = true }
