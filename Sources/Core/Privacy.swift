@@ -1,0 +1,174 @@
+import Foundation
+import WebKit
+
+// MARK: - Tracking parameter removal
+
+enum URLCleaner {
+    static let params: Set<String> = [
+        "fbclid", "gclid", "gclsrc", "dclid", "gbraid", "wbraid", "msclkid", "yclid", "twclid", "ttclid",
+        "igshid", "igsh", "mc_cid", "mc_eid", "_hsenc", "_hsmi", "__hssc", "__hstc", "__hsfp", "hsctatracking",
+        "mkt_tok", "oly_anon_id", "oly_enc_id", "vero_id", "vero_conv", "_openstat", "wickedid", "rb_clickid",
+        "s_cid", "ef_id", "srsltid", "epik", "ncid", "sr_share", "spm", "scm", "trk", "trkCampaign",
+        "ga_source", "ga_medium", "ga_campaign", "ga_content", "ga_term", "_ga", "_gl", "obOrigUrl",
+    ]
+    static let prefixes = ["utm_", "mtm_", "pk_", "hsa_", "piwik_", "matomo_"]
+    /// Parameters that only track on specific sites.
+    static let hostParams: [String: Set<String>] = [
+        "youtube.com": ["si", "pp", "feature"],
+        "youtu.be": ["si", "feature"],
+        "open.spotify.com": ["si", "context"],
+        "twitter.com": ["s", "t", "ref_src", "ref_url"],
+        "x.com": ["s", "t", "ref_src", "ref_url"],
+        "amazon.com": ["ref", "ref_", "pf_rd_r", "pf_rd_p", "pd_rd_r", "pd_rd_w", "pd_rd_wg", "content-id"],
+        "instagram.com": ["igsh", "img_index"],
+        "linkedin.com": ["trk", "trackingId", "lipi", "refId"],
+    ]
+
+    /// Returns the URL without tracking parameters, or nil when nothing changed.
+    static func clean(_ url: URL) -> URL? {
+        guard var c = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let items = c.queryItems, !items.isEmpty else { return nil }
+        let host = (url.host ?? "").lowercased()
+        let extra = hostParams.first { host == $0.key || host.hasSuffix("." + $0.key) }?.value ?? []
+        let kept = items.filter { item in
+            let n = item.name.lowercased()
+            if params.contains(item.name) || params.contains(n) || extra.contains(item.name) { return false }
+            return !prefixes.contains { n.hasPrefix($0) }
+        }
+        guard kept.count != items.count else { return nil }
+        c.queryItems = kept.isEmpty ? nil : kept
+        return c.url
+    }
+}
+
+// MARK: - Address bar input
+
+enum InputResolver {
+    /// Turns what the user typed into a URL: an address, a search shortcut, or a search.
+    static func resolve(_ raw: String) -> URL? {
+        let s = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !s.isEmpty else { return nil }
+
+        if let u = URL(string: s), let scheme = u.scheme?.lowercased(),
+           ["http", "https", "file", "about", "data", "blob", "view-source"].contains(scheme) {
+            return u
+        }
+        if s.hasPrefix("/") || s.hasPrefix("~/") {
+            let path = (s as NSString).expandingTildeInPath
+            if FileManager.default.fileExists(atPath: path) { return URL(fileURLWithPath: path) }
+        }
+
+        // Search shortcuts: "yt lofi" searches YouTube.
+        let parts = s.split(separator: " ", maxSplits: 1).map(String.init)
+        if parts.count == 2, let sc = Settings.shared.shortcuts.first(where: { $0.keyword.lowercased() == parts[0].lowercased() }) {
+            return fill(sc.template, parts[1])
+        }
+
+        if !s.contains(" "), let u = addressURL(s) { return u }
+        return searchURL(s)
+    }
+
+    static func searchURL(_ query: String) -> URL? {
+        fill(Settings.shared.engine.template, query) ?? fill(SearchEngine.duckduckgo.template, query)
+    }
+
+    static func fill(_ template: String, _ query: String) -> URL? {
+        var allowed = CharacterSet.urlQueryAllowed
+        allowed.remove(charactersIn: "&+=?#/")
+        let q = query.addingPercentEncoding(withAllowedCharacters: allowed) ?? query
+        return URL(string: template.replacingOccurrences(of: "%s", with: q))
+    }
+
+    /// Recognises "example.com", "localhost:3000/x", "192.168.1.1" and similar.
+    static func addressURL(_ s: String) -> URL? {
+        let hostPart = s.split(whereSeparator: { "/?#".contains($0) }).first.map(String.init) ?? s
+        let host = hostPart.split(separator: ":").first.map(String.init) ?? hostPart
+        let isLocal = host == "localhost" || host.hasSuffix(".localhost") || host.hasSuffix(".local") || host.hasSuffix(".test")
+        let isIP = host.split(separator: ".").count == 4 && host.split(separator: ".").allSatisfy { UInt8($0) != nil }
+        if isLocal || isIP { return URL(string: "http://" + s) }
+        let labels = host.split(separator: ".")
+        guard labels.count >= 2, let tld = labels.last, tld.count >= 2,
+              tld.allSatisfy({ $0.isLetter }) || tld.hasPrefix("xn--"),
+              labels.allSatisfy({ !$0.isEmpty }) else { return nil }
+        return URL(string: "https://" + s)
+    }
+
+    /// Host for display: "www.apple.com" shows as "apple.com".
+    static func displayHost(_ url: URL?) -> String {
+        guard let host = url?.host else { return url?.absoluteString ?? "" }
+        return host.hasPrefix("www.") ? String(host.dropFirst(4)) : host
+    }
+}
+
+// MARK: - HTTPS upgrade
+
+enum HTTPSUpgrade {
+    /// Hosts that failed over HTTPS during this run, so they are loaded over HTTP.
+    static var httpOnly: Set<String> = []
+
+    static func eligible(_ url: URL) -> Bool {
+        guard url.scheme == "http", let host = url.host?.lowercased() else { return false }
+        if httpOnly.contains(host) { return false }
+        if host == "localhost" || host.hasSuffix(".localhost") || host.hasSuffix(".local") || host.hasSuffix(".test") { return false }
+        if host.split(separator: ".").allSatisfy({ Int($0) != nil }) || host.contains(":") { return false }
+        return true
+    }
+
+    static func upgraded(_ url: URL) -> URL? {
+        guard var c = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return nil }
+        c.scheme = "https"
+        if c.port == 80 { c.port = nil }
+        return c.url
+    }
+
+    /// Errors that mean the host does not really speak HTTPS.
+    static func shouldFallBack(_ error: NSError) -> Bool {
+        guard error.domain == NSURLErrorDomain else { return false }
+        return [NSURLErrorSecureConnectionFailed, NSURLErrorServerCertificateHasBadDate,
+                NSURLErrorServerCertificateUntrusted, NSURLErrorServerCertificateHasUnknownRoot,
+                NSURLErrorServerCertificateNotYetValid, NSURLErrorClientCertificateRejected,
+                NSURLErrorCannotConnectToHost, NSURLErrorNetworkConnectionLost,
+                NSURLErrorTimedOut, NSURLErrorBadServerResponse].contains(error.code)
+    }
+}
+
+// MARK: - Clearing data
+
+enum DataCleaner {
+    enum Range: String, CaseIterable, Identifiable {
+        case hour, day, week, all
+        var id: String { rawValue }
+        var label: String { ["hour": "Last hour", "day": "Today", "week": "Last 7 days", "all": "All time"][rawValue]! }
+        var since: Date {
+            switch self {
+            case .hour: Date().addingTimeInterval(-3600)
+            case .day: Calendar.current.startOfDay(for: Date())
+            case .week: Date().addingTimeInterval(-7 * 86_400)
+            case .all: .distantPast
+            }
+        }
+    }
+
+    static func clear(range: Range, history: Bool, cookies: Bool, cache: Bool, done: @escaping () -> Void) {
+        if history {
+            History.shared.clear(since: range == .all ? nil : range.since)
+        }
+        var types = Set<String>()
+        let cacheTypes: Set<String> = [WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache,
+                                       WKWebsiteDataTypeFetchCache, WKWebsiteDataTypeOfflineWebApplicationCache]
+        if cache { types.formUnion(cacheTypes) }
+        if cookies { types.formUnion(WKWebsiteDataStore.allWebsiteDataTypes().subtracting(cacheTypes)) }
+        if cache && range == .all { Favicons.shared.clearDisk() }
+        guard !types.isEmpty else { done(); return }
+        WKWebsiteDataStore.default().removeData(ofTypes: types, modifiedSince: range.since, completionHandler: done)
+    }
+
+    /// Removes cookies and storage belonging to one site.
+    static func clearSite(_ host: String, store: WKWebsiteDataStore, done: @escaping () -> Void) {
+        let base = host.lowercased().replacingOccurrences(of: "www.", with: "", options: .anchored)
+        store.fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
+            let matching = records.filter { base == $0.displayName || base.hasSuffix("." + $0.displayName) || $0.displayName.hasSuffix("." + base) }
+            store.removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), for: matching, completionHandler: done)
+        }
+    }
+}

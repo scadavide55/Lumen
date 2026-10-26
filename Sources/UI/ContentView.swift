@@ -1,0 +1,410 @@
+import SwiftUI
+import WebKit
+
+struct ContentView: View {
+    @StateObject private var browser: BrowserState
+    @ObservedObject private var settings = Settings.shared
+    @Environment(\.openWindow) private var openWindow
+
+    init(isPrivate: Bool) {
+        _browser = StateObject(wrappedValue: BrowserState(isPrivate: isPrivate))
+    }
+
+    var body: some View {
+        BrowserLayout()
+            .environmentObject(browser)
+            .environmentObject(settings)
+            .tint(settings.accent)
+            .focusedSceneObject(browser)
+            .background(WindowAccessor { browser.attach($0) })
+            .frame(minWidth: 640, minHeight: 420)
+            .ignoresSafeArea()
+            .onAppear {
+                guard !browser.isPrivate else { return }
+                for _ in 0..<Session.shared.claimExtraWindows() { openWindow(id: "main") }
+            }
+    }
+}
+
+// MARK: - Layout
+
+struct BrowserLayout: View {
+    @EnvironmentObject var b: BrowserState
+    @EnvironmentObject var s: Settings
+
+    private var vertical: Bool { s.tabLayout == .vertical }
+    private var sidebarShown: Bool { vertical && b.sidebarVisible }
+    private var left: Bool { s.sidebarSide == .left }
+    /// Navigation and the address live in the sidebar only when it sits next to the traffic lights.
+    private var controlsInSidebar: Bool { sidebarShown && left && s.addressInSidebar }
+
+    var body: some View {
+        ZStack {
+            ChromeBackground()
+            if vertical {
+                HStack(spacing: 0) {
+                    if sidebarShown && left {
+                        Sidebar(showsControls: controlsInSidebar).frame(width: s.sidebarWidth)
+                        ResizeHandle(side: .left)
+                    }
+                    MainColumn(toolbar: !controlsInSidebar,
+                               trafficSpace: !(sidebarShown && left),
+                               leadingFlush: sidebarShown && left,
+                               trailingFlush: sidebarShown && !left)
+                    if sidebarShown && !left {
+                        ResizeHandle(side: .right)
+                        Sidebar(showsControls: false).frame(width: s.sidebarWidth)
+                    }
+                }
+                if !b.sidebarVisible { PeekSidebar() }
+            } else {
+                VStack(spacing: 0) {
+                    Toolbar(trafficSpace: true)
+                    TabStrip()
+                    MainColumn(toolbar: false, trafficSpace: false, leadingFlush: false, trailingFlush: false)
+                }
+            }
+            if b.paletteVisible {
+                CommandPalette().transition(.opacity.combined(with: .scale(scale: 0.98)))
+            }
+        }
+        .animation(.easeOut(duration: 0.18), value: b.sidebarVisible)
+        .animation(.easeOut(duration: 0.15), value: b.paletteVisible)
+        .animation(.easeOut(duration: 0.15), value: b.peekSidebar)
+    }
+}
+
+struct MainColumn: View {
+    let toolbar: Bool
+    let trafficSpace: Bool
+    let leadingFlush: Bool
+    let trailingFlush: Bool
+    @EnvironmentObject var s: Settings
+
+    var body: some View {
+        let inset: CGFloat = s.insetContent ? 8 : 0
+        VStack(spacing: 0) {
+            if toolbar { Toolbar(trafficSpace: trafficSpace) }
+            PageArea()
+                .padding(.top, toolbar ? 0 : inset)
+                .padding(.bottom, inset)
+                .padding(.leading, leadingFlush ? 0 : inset)
+                .padding(.trailing, trailingFlush ? 0 : inset)
+        }
+    }
+}
+
+struct PageArea: View {
+    @EnvironmentObject var b: BrowserState
+
+    var body: some View {
+        HStack(spacing: 6) {
+            if let tab = b.current { TabPane(tab: tab, isSplit: false).id(tab.id) }
+            if let split = b.splitTab { TabPane(tab: split, isSplit: true).id(split.id) }
+        }
+    }
+}
+
+struct TabPane: View {
+    @ObservedObject var tab: Tab
+    let isSplit: Bool
+    @EnvironmentObject var b: BrowserState
+    @EnvironmentObject var s: Settings
+
+    var body: some View {
+        let r: CGFloat = s.insetContent ? s.cornerRadius : 0
+        ZStack {
+            if let wv = tab.webView { WebContainer(webView: wv, radius: r) }
+            if tab.isStartPage {
+                StartPage(tab: tab).clipShape(RoundedRectangle(cornerRadius: r, style: .continuous))
+            }
+        }
+        .background(
+            RoundedRectangle(cornerRadius: r, style: .continuous)
+                .fill(Color(nsColor: .textBackgroundColor))
+                .shadow(color: .black.opacity(s.insetContent ? 0.14 : 0), radius: 2.5, y: 1)
+        )
+        .overlay(alignment: .bottomLeading) {
+            if s.statusBar, let link = tab.hoverURL { StatusBubble(text: link) }
+        }
+        .overlay(alignment: .topTrailing) {
+            if isSplit {
+                SplitHeader(tab: tab)
+            } else if b.findVisible {
+                FindBar(tab: tab)
+            }
+        }
+    }
+}
+
+// MARK: - AppKit bridges
+
+/// Hosts a tab's web view, clipped to the content corner radius.
+struct WebContainer: NSViewRepresentable {
+    let webView: WKWebView
+    let radius: CGFloat
+
+    func makeNSView(context: Context) -> NSView {
+        let v = NSView()
+        v.wantsLayer = true
+        v.layer?.cornerCurve = .continuous
+        host(in: v)
+        return v
+    }
+
+    func updateNSView(_ v: NSView, context: Context) {
+        v.layer?.cornerRadius = radius
+        v.layer?.masksToBounds = radius > 0
+        if webView.superview !== v { host(in: v) }
+    }
+
+    private func host(in v: NSView) {
+        v.subviews.forEach { $0.removeFromSuperview() }
+        webView.frame = v.bounds
+        webView.autoresizingMask = [.width, .height]
+        v.addSubview(webView)
+    }
+}
+
+struct VisualEffect: NSViewRepresentable {
+    var material: NSVisualEffectView.Material = .sidebar
+    var blending: NSVisualEffectView.BlendingMode = .behindWindow
+
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let v = NSVisualEffectView()
+        v.state = .followsWindowActiveState
+        return v
+    }
+
+    func updateNSView(_ v: NSVisualEffectView, context: Context) {
+        v.material = material
+        v.blendingMode = blending
+    }
+}
+
+struct WindowAccessor: NSViewRepresentable {
+    let onWindow: (NSWindow) -> Void
+
+    func makeNSView(context: Context) -> WindowReaderView {
+        let v = WindowReaderView()
+        v.onWindow = onWindow
+        return v
+    }
+
+    func updateNSView(_ v: WindowReaderView, context: Context) {}
+}
+
+final class WindowReaderView: NSView {
+    var onWindow: ((NSWindow) -> Void)?
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        guard let window else { return }
+        DispatchQueue.main.async { self.onWindow?(window) }
+    }
+}
+
+/// Empty chrome that drags the window, and zooms it on double-click, like a title bar.
+struct WindowDragArea: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSView { DragView() }
+    func updateNSView(_ nsView: NSView, context: Context) {}
+
+    final class DragView: NSView {
+        override var mouseDownCanMoveWindow: Bool { true }
+
+        override func mouseDown(with event: NSEvent) {
+            guard event.clickCount == 2 else {
+                window?.performDrag(with: event)
+                return
+            }
+            switch UserDefaults.standard.string(forKey: "AppleActionOnDoubleClick") ?? "Maximize" {
+            case "Minimize": window?.performMiniaturize(nil)
+            case "None": break
+            default: window?.performZoom(nil)
+            }
+        }
+    }
+}
+
+// MARK: - Chrome
+
+struct ChromeBackground: View {
+    @EnvironmentObject var b: BrowserState
+    @EnvironmentObject var s: Settings
+
+    var body: some View {
+        ZStack {
+            switch s.chromeStyle {
+            case .translucent:
+                VisualEffect(material: .sidebar)
+            case .solid:
+                Color(nsColor: .windowBackgroundColor)
+            case .tinted:
+                VisualEffect(material: .sidebar)
+                s.accent.opacity(0.18)
+            }
+            if s.siteTint, let tab = b.current { SiteTint(tab: tab) }
+            if b.isPrivate { Color(red: 0.36, green: 0.22, blue: 0.62).opacity(0.24) }
+        }
+        .ignoresSafeArea()
+    }
+}
+
+/// Washes the chrome with the page's theme colour.
+struct SiteTint: View {
+    @ObservedObject var tab: Tab
+
+    var body: some View {
+        Group {
+            if let c = tab.themeColor, !tab.isStartPage { Color(nsColor: c).opacity(0.22) } else { Color.clear }
+        }
+        .animation(.easeInOut(duration: 0.35), value: tab.themeColor)
+    }
+}
+
+struct ResizeHandle: View {
+    let side: SidebarSide
+    @EnvironmentObject var s: Settings
+    @State private var start: Double?
+
+    var body: some View {
+        ZStack {
+            Color.clear
+            if !s.insetContent { Divider() }
+        }
+        .frame(width: s.insetContent ? 6 : 1)
+        .contentShape(Rectangle().inset(by: -3))
+        .onHover { inside in
+            if inside { NSCursor.resizeLeftRight.push() } else { NSCursor.pop() }
+        }
+        .gesture(
+            DragGesture(minimumDistance: 1, coordinateSpace: .global)
+                .onChanged { v in
+                    let base = start ?? s.sidebarWidth
+                    if start == nil { start = base }
+                    let delta = side == .left ? v.translation.width : -v.translation.width
+                    s.sidebarWidth = min(420, max(180, base + delta))
+                }
+                .onEnded { _ in start = nil }
+        )
+    }
+}
+
+/// With the sidebar hidden, hovering the window edge slides it in over the page.
+struct PeekSidebar: View {
+    @EnvironmentObject var b: BrowserState
+    @EnvironmentObject var s: Settings
+
+    var body: some View {
+        let left = s.sidebarSide == .left
+        HStack(spacing: 0) {
+            if !left { Spacer(minLength: 0) }
+            if b.peekSidebar {
+                Sidebar(showsControls: false)
+                    .frame(width: s.sidebarWidth)
+                    .background(
+                        ZStack {
+                            VisualEffect(material: .sidebar, blending: .withinWindow)
+                            if b.isPrivate { Color.purple.opacity(0.15) }
+                        }
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .shadow(color: .black.opacity(0.25), radius: 16)
+                    )
+                    .padding(6)
+                    .onHover { if !$0 { b.peekSidebar = false } }
+                    .transition(.move(edge: left ? .leading : .trailing).combined(with: .opacity))
+            } else {
+                Color.clear
+                    .frame(width: 5)
+                    .contentShape(Rectangle())
+                    .onHover { if $0 { b.peekSidebar = true } }
+            }
+            if left { Spacer(minLength: 0) }
+        }
+    }
+}
+
+// MARK: - Small shared views
+
+struct IconButton: View {
+    let systemName: String
+    var help: String = ""
+    var tint: Color?
+    var size: CGFloat = 13
+    let action: () -> Void
+    @State private var hover = false
+    @Environment(\.isEnabled) private var enabled
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .font(.system(size: size, weight: .medium))
+                .frame(width: 26, height: 26)
+                .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(Color.primary.opacity(hover && enabled ? 0.08 : 0)))
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(tint ?? Color.secondary)
+        .opacity(enabled ? 1 : 0.35)
+        .onHover { hover = $0 }
+        .help(help)
+        .accessibilityLabel(help.isEmpty ? systemName : String(help.prefix { $0 != "(" }).trimmingCharacters(in: .whitespaces))
+    }
+}
+
+struct FaviconView: View {
+    @ObservedObject var tab: Tab
+    var size: CGFloat = 16
+
+    var body: some View {
+        Group {
+            if let img = tab.favicon {
+                Image(nsImage: img).resizable().interpolation(.high).aspectRatio(contentMode: .fit)
+            } else if tab.isLoading {
+                ProgressView().controlSize(.mini).scaleEffect(size / 20)
+            } else if tab.isStartPage {
+                Image(systemName: "sparkle").resizable().aspectRatio(contentMode: .fit).foregroundStyle(.tint).padding(1)
+            } else {
+                Image(systemName: "globe").resizable().aspectRatio(contentMode: .fit).foregroundStyle(.secondary).padding(1)
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(RoundedRectangle(cornerRadius: size / 5, style: .continuous))
+        .opacity(tab.isHibernated && tab.url != nil ? 0.75 : 1)
+    }
+}
+
+struct StatusBubble: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .font(.system(size: 11))
+            .lineLimit(1)
+            .truncationMode(.middle)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).stroke(Color.primary.opacity(0.08)))
+            .frame(maxWidth: 520, alignment: .leading)
+            .padding(8)
+            .allowsHitTesting(false)
+    }
+}
+
+struct SplitHeader: View {
+    @ObservedObject var tab: Tab
+    @EnvironmentObject var b: BrowserState
+
+    var body: some View {
+        HStack(spacing: 2) {
+            FaviconView(tab: tab, size: 13).padding(.leading, 8)
+            Text(tab.title).font(.system(size: 11)).lineLimit(1).frame(maxWidth: 160)
+            IconButton(systemName: "arrow.left.arrow.right", help: "Swap panes", size: 10) { b.swapSplit() }
+            IconButton(systemName: "xmark", help: "Close split view", size: 10) { b.closeSplit() }
+        }
+        .background(.regularMaterial, in: Capsule())
+        .overlay(Capsule().stroke(Color.primary.opacity(0.08)))
+        .padding(8)
+    }
+}

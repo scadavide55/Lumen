@@ -1,0 +1,476 @@
+import SwiftUI
+import UniformTypeIdentifiers
+
+struct SettingsView: View {
+    var body: some View {
+        TabView {
+            GeneralPane().tabItem { Label("General", systemImage: "gearshape") }
+            AppearancePane().tabItem { Label("Appearance", systemImage: "paintbrush") }
+            ShieldPane().tabItem { Label("Shield", systemImage: "shield.lefthalf.filled") }
+            SearchPane().tabItem { Label("Search", systemImage: "magnifyingglass") }
+            SitesPane().tabItem { Label("Sites", systemImage: "globe") }
+            AdvancedPane().tabItem { Label("Advanced", systemImage: "wrench.and.screwdriver") }
+        }
+        .frame(width: 600, height: 560)
+        .tint(Settings.shared.accent)
+    }
+}
+
+// MARK: - General
+
+struct GeneralPane: View {
+    @ObservedObject private var s = Settings.shared
+    @State private var isDefault = DefaultBrowser.isDefault
+
+    var body: some View {
+        Form {
+            Section {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(isDefault ? "Lumen is your default browser" : "Lumen is not your default browser")
+                        Text("Links you open in other apps go to your default browser.").font(.caption).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    if !isDefault {
+                        Button("Make Default") {
+                            DefaultBrowser.makeDefault { isDefault = DefaultBrowser.isDefault }
+                        }
+                    }
+                }
+            }
+            Section("Tabs") {
+                Toggle("Restore windows and tabs when Lumen opens", isOn: $s.restoreSession)
+                Picker("Open new tabs", selection: $s.newTabPosition) {
+                    ForEach(NewTabPosition.allCases) { Text($0.label).tag($0) }
+                }
+                Picker("Hibernate background tabs", selection: $s.hibernateMinutes) {
+                    Text("Never").tag(0)
+                    Text("After 5 minutes").tag(5)
+                    Text("After 15 minutes").tag(15)
+                    Text("After 30 minutes").tag(30)
+                    Text("After 1 hour").tag(60)
+                }
+                Text("Hibernated tabs keep their place and history but release memory until you open them again.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            Section("Start page") {
+                Toggle("Show clock", isOn: $s.showClock)
+                Toggle("Show greeting", isOn: $s.showGreeting)
+                TextField("Your name", text: $s.userName, prompt: Text("Optional"))
+                Toggle("Show favorites", isOn: $s.showFavorites)
+            }
+            Section("Downloads") {
+                Toggle("Ask where to save each download", isOn: $s.askDownloadLocation)
+            }
+        }
+        .formStyle(.grouped)
+        .onAppear { isDefault = DefaultBrowser.isDefault }
+    }
+}
+
+enum DefaultBrowser {
+    static var isDefault: Bool {
+        guard let url = URL(string: "https://example.com"),
+              let app = NSWorkspace.shared.urlForApplication(toOpen: url) else { return false }
+        return Bundle(url: app)?.bundleIdentifier == Bundle.main.bundleIdentifier
+    }
+
+    static func makeDefault(done: @escaping () -> Void) {
+        let app = Bundle.main.bundleURL
+        NSWorkspace.shared.setDefaultApplication(at: app, toOpenURLsWithScheme: "http") { _ in
+            NSWorkspace.shared.setDefaultApplication(at: app, toOpenURLsWithScheme: "https") { _ in
+                DispatchQueue.main.async(execute: done)
+            }
+        }
+    }
+}
+
+// MARK: - Appearance
+
+struct AppearancePane: View {
+    @ObservedObject private var s = Settings.shared
+    private let presets = ["#5E5CE6", "#0A84FF", "#30B0C7", "#34C759", "#E8A33D", "#FF6B35", "#FF375F", "#BF5AF2", "#8E8E93"]
+
+    var body: some View {
+        Form {
+            Section("Theme") {
+                Picker("Appearance", selection: $s.theme) {
+                    ForEach(ThemeMode.allCases) { Text($0.label).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                LabeledContent("Accent colour") {
+                    HStack(spacing: 6) {
+                        ForEach(presets, id: \.self) { hex in
+                            Circle().fill(Color(hex: hex)).frame(width: 18, height: 18)
+                                .overlay(Circle().stroke(Color.primary, lineWidth: s.accentHex.uppercased() == hex ? 2 : 0).padding(-3))
+                                .onTapGesture { s.accentHex = hex }
+                        }
+                        ColorPicker("", selection: s.accentBinding, supportsOpacity: false).labelsHidden()
+                    }
+                }
+                Picker("Window style", selection: $s.chromeStyle) {
+                    ForEach(ChromeStyle.allCases) { Text($0.label).tag($0) }
+                }
+                Toggle("Tint the window with the site's colour", isOn: $s.siteTint)
+            }
+            Section("Layout") {
+                Picker("Tabs", selection: $s.tabLayout) {
+                    ForEach(TabLayout.allCases) { Text($0.label).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                if s.tabLayout == .vertical {
+                    Picker("Sidebar position", selection: $s.sidebarSide) {
+                        ForEach(SidebarSide.allCases) { Text($0.label).tag($0) }
+                    }
+                    .pickerStyle(.segmented)
+                    Toggle("Put the address bar in the sidebar", isOn: $s.addressInSidebar)
+                        .disabled(s.sidebarSide == .right)
+                    LabeledContent("Sidebar width") {
+                        Slider(value: $s.sidebarWidth, in: 180...420).frame(width: 220)
+                    }
+                    Toggle("Compact tabs", isOn: $s.compactTabs)
+                }
+                Toggle("Float the page with rounded corners", isOn: $s.insetContent)
+                if s.insetContent {
+                    LabeledContent("Corner radius") {
+                        Slider(value: $s.cornerRadius, in: 0...20, step: 1).frame(width: 220)
+                    }
+                }
+                Toggle("Show the full address", isOn: $s.showFullURL)
+                Toggle("Show link addresses on hover", isOn: $s.statusBar)
+            }
+            Section("Start page background") {
+                Picker("Background", selection: $s.startBackground) {
+                    ForEach(StartBackground.allCases) { Text($0.label).tag($0) }
+                }
+                if s.startBackground == .image {
+                    HStack {
+                        Text(s.startImagePath.isEmpty ? "No image chosen" : (s.startImagePath as NSString).lastPathComponent)
+                            .foregroundStyle(.secondary).lineLimit(1)
+                        Spacer()
+                        Button("Choose…") { chooseImage() }
+                    }
+                }
+                StartBackgroundView(style: s.startBackground, imagePath: s.startImagePath, accent: s.accent, isPrivate: false)
+                    .frame(height: 90)
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            }
+        }
+        .formStyle(.grouped)
+    }
+
+    private func chooseImage() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.image]
+        if panel.runModal() == .OK, let url = panel.url { s.startImagePath = url.path }
+    }
+}
+
+// MARK: - Shield
+
+struct ShieldPane: View {
+    @ObservedObject private var s = Settings.shared
+    @ObservedObject private var blocker = ContentBlocker.shared
+    @State private var newHost = ""
+    @State private var showClear = false
+
+    var body: some View {
+        Form {
+            Section {
+                Toggle(isOn: $s.adBlock) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Block ads and trackers")
+                        Text("\(blocker.ruleCount.formatted()) rules active. Toggle anytime with ⇧⌘B.")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                Toggle("Hide cookie consent banners", isOn: $s.hideCookieBanners).disabled(!s.adBlock)
+                Toggle("Skip YouTube ads", isOn: $s.youtubeAds).disabled(!s.adBlock)
+            }
+            Section {
+                Toggle("EasyList (ads)", isOn: $s.easyList).disabled(!s.adBlock)
+                Toggle("EasyPrivacy (trackers)", isOn: $s.easyPrivacy).disabled(!s.adBlock)
+                HStack {
+                    if blocker.updating {
+                        ProgressView().controlSize(.small)
+                        Text(blocker.status).foregroundStyle(.secondary)
+                    } else if !blocker.status.isEmpty {
+                        Text(blocker.status).foregroundStyle(.orange)
+                    } else if let date = blocker.lastUpdated {
+                        Text("\(blocker.filterCount.formatted()) rules · updated \(date.formatted(.relative(presentation: .named)))")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text("Lists are downloaded from easylist.to and refreshed weekly.").foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button("Update Now") { blocker.updateFilterLists() }
+                        .disabled(blocker.updating || !(s.easyList || s.easyPrivacy))
+                }
+                .font(.caption)
+            } header: {
+                Text("Filter lists")
+            } footer: {
+                Text("The built-in list works offline. Filter lists add tens of thousands of community-maintained rules.")
+            }
+            Section("Privacy") {
+                Toggle("Block third-party cookies", isOn: $s.blockThirdPartyCookies)
+                Toggle("Remove tracking parameters from links", isOn: $s.stripTracking)
+                Toggle("Upgrade connections to HTTPS", isOn: $s.httpsUpgrade)
+                Toggle("Tell sites not to sell or share my data (Global Privacy Control)", isOn: $s.gpc)
+                Toggle("Clear cookies, cache and history when Lumen quits", isOn: $s.clearOnQuit)
+                Button("Clear Browsing Data…") { showClear = true }
+            }
+            Section("Sites where Shield is off") {
+                if s.allowlist.isEmpty {
+                    Text("None. Turn Shield off for a site from the shield button in the toolbar.").foregroundStyle(.secondary)
+                }
+                ForEach(s.allowlist, id: \.self) { host in
+                    HStack {
+                        Text(host)
+                        Spacer()
+                        Button { s.setAllowlisted(host, false) } label: { Image(systemName: "minus.circle.fill") }
+                            .buttonStyle(.plain).foregroundStyle(.secondary)
+                    }
+                }
+                HStack {
+                    TextField("example.com", text: $newHost).onSubmit(addHost)
+                    Button("Add", action: addHost).disabled(newHost.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+            }
+        }
+        .formStyle(.grouped)
+        .sheet(isPresented: $showClear) { ClearDataSheet() }
+    }
+
+    private func addHost() {
+        let raw = newHost.trimmingCharacters(in: .whitespaces).lowercased()
+        let host = URL(string: raw.contains("://") ? raw : "https://" + raw)?.host ?? raw
+        guard !host.isEmpty else { return }
+        s.setAllowlisted(host, true)
+        newHost = ""
+    }
+}
+
+struct ClearDataSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var range = DataCleaner.Range.hour
+    @State private var history = true
+    @State private var cookies = true
+    @State private var cache = true
+    @State private var working = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Clear Browsing Data").font(.title3.weight(.semibold))
+            Picker("Time range", selection: $range) {
+                ForEach(DataCleaner.Range.allCases) { Text($0.label).tag($0) }
+            }
+            Toggle("History", isOn: $history)
+            Toggle("Cookies and site data (signs you out of most sites)", isOn: $cookies)
+            Toggle("Cached images and files", isOn: $cache)
+            HStack {
+                Spacer()
+                Button("Cancel") { dismiss() }.keyboardShortcut(.cancelAction)
+                Button("Clear") {
+                    working = true
+                    DataCleaner.clear(range: range, history: history, cookies: cookies, cache: cache) {
+                        working = false
+                        dismiss()
+                    }
+                }
+                .keyboardShortcut(.defaultAction)
+                .disabled(working || !(history || cookies || cache))
+            }
+        }
+        .padding(20)
+        .frame(width: 380)
+    }
+}
+
+// MARK: - Search
+
+struct SearchPane: View {
+    @ObservedObject private var s = Settings.shared
+    @State private var keyword = ""
+    @State private var name = ""
+    @State private var template = ""
+
+    var body: some View {
+        Form {
+            Section("Search engine") {
+                Picker("Search with", selection: $s.engine) {
+                    ForEach(SearchEngine.allCases) { Text($0.name).tag($0) }
+                }
+                if s.engine == .custom {
+                    TextField("Search URL", text: $s.customSearch, prompt: Text("https://example.com/search?q=%s"))
+                    Text("Use %s where the search terms go.").font(.caption).foregroundStyle(.secondary)
+                }
+                Toggle("Show search suggestions", isOn: $s.suggestions)
+                    .disabled(s.engine.suggestTemplate == nil)
+                Text("Suggestions send what you type to \(s.engine.name). They're never fetched in private windows.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            Section {
+                ForEach(s.shortcuts) { sc in
+                    HStack {
+                        Text(sc.keyword).font(.system(.body, design: .monospaced)).frame(width: 60, alignment: .leading)
+                        Text(sc.name)
+                        Spacer()
+                        Text(sc.template).font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle).frame(maxWidth: 220)
+                        Button { s.shortcuts.removeAll { $0.id == sc.id } } label: { Image(systemName: "minus.circle.fill") }
+                            .buttonStyle(.plain).foregroundStyle(.secondary)
+                    }
+                }
+                HStack {
+                    TextField("Keyword", text: $keyword).frame(width: 80)
+                    TextField("Name", text: $name).frame(width: 110)
+                    TextField("URL with %s", text: $template)
+                    Button("Add") {
+                        s.shortcuts.append(SearchShortcut(keyword: keyword.trimmingCharacters(in: .whitespaces),
+                                                          name: name.isEmpty ? keyword : name, template: template))
+                        keyword = ""; name = ""; template = ""
+                    }
+                    .disabled(keyword.trimmingCharacters(in: .whitespaces).isEmpty || !template.contains("%s"))
+                }
+            } header: {
+                Text("Search shortcuts")
+            } footer: {
+                Text("Type a keyword, a space and your search in the command bar. For example: yt lofi beats")
+            }
+        }
+        .formStyle(.grouped)
+    }
+}
+
+// MARK: - Sites
+
+struct SitesPane: View {
+    @ObservedObject private var s = Settings.shared
+    @State private var editing: SiteStyle?
+
+    var body: some View {
+        Form {
+            Section {
+                Toggle("Force dark pages (experimental)", isOn: $s.forceDark)
+                Picker("Default zoom", selection: $s.defaultZoom) {
+                    ForEach(Tab.zoomSteps, id: \.self) { Text("\(Int((($0) * 100).rounded()))%").tag($0) }
+                }
+            }
+            Section {
+                ForEach(s.siteStyles) { style in
+                    HStack {
+                        Toggle("", isOn: Binding(
+                            get: { style.enabled },
+                            set: { on in s.siteStyles = s.siteStyles.map { $0.id == style.id ? SiteStyle(id: $0.id, host: $0.host, css: $0.css, enabled: on) : $0 } }
+                        )).labelsHidden()
+                        Text(style.host)
+                        Spacer()
+                        Button("Edit") { editing = style }
+                        Button { s.siteStyles.removeAll { $0.id == style.id } } label: { Image(systemName: "minus.circle.fill") }
+                            .buttonStyle(.plain).foregroundStyle(.secondary)
+                    }
+                }
+                Button("Add Site Style…") { editing = SiteStyle(host: "", css: "") }
+            } header: {
+                Text("Site styles")
+            } footer: {
+                Text("Your own CSS for any site: hide distractions, change fonts, restyle pages. Applies to subdomains too.")
+            }
+            Section("Zoom levels") {
+                if s.siteZoom.isEmpty {
+                    Text("Sites you zoom in or out are remembered here.").foregroundStyle(.secondary)
+                }
+                ForEach(s.siteZoom.sorted { $0.key < $1.key }, id: \.key) { host, zoom in
+                    HStack {
+                        Text(host)
+                        Spacer()
+                        Text("\(Int((zoom * 100).rounded()))%").monospacedDigit().foregroundStyle(.secondary)
+                        Button { s.siteZoom[host] = nil } label: { Image(systemName: "minus.circle.fill") }
+                            .buttonStyle(.plain).foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+        .formStyle(.grouped)
+        .sheet(item: $editing) { style in
+            SiteStyleEditor(style: style) { saved in
+                if let i = s.siteStyles.firstIndex(where: { $0.id == saved.id }) {
+                    s.siteStyles[i] = saved
+                } else {
+                    s.siteStyles.append(saved)
+                }
+            }
+        }
+    }
+}
+
+struct SiteStyleEditor: View {
+    @State var style: SiteStyle
+    let save: (SiteStyle) -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Site Style").font(.title3.weight(.semibold))
+            TextField("Site, for example youtube.com", text: $style.host)
+            TextEditor(text: $style.css)
+                .font(.system(size: 12, design: .monospaced))
+                .frame(minHeight: 220)
+                .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.primary.opacity(0.15)))
+            Text("Example: #comments, .sidebar { display: none !important; }").font(.caption).foregroundStyle(.secondary)
+            HStack {
+                Spacer()
+                Button("Cancel") { dismiss() }.keyboardShortcut(.cancelAction)
+                Button("Save") {
+                    var s = style
+                    let raw = s.host.trimmingCharacters(in: .whitespaces).lowercased()
+                    s.host = (URL(string: raw.contains("://") ? raw : "https://" + raw)?.host ?? raw)
+                        .replacingOccurrences(of: "www.", with: "", options: .anchored)
+                    save(s)
+                    dismiss()
+                }
+                .keyboardShortcut(.defaultAction)
+                .disabled(style.host.trimmingCharacters(in: .whitespaces).isEmpty)
+            }
+        }
+        .padding(20)
+        .frame(width: 480)
+    }
+}
+
+// MARK: - Advanced
+
+struct AdvancedPane: View {
+    @ObservedObject private var s = Settings.shared
+
+    var body: some View {
+        Form {
+            Section("Web content") {
+                Toggle("Enable JavaScript", isOn: $s.javaScript)
+                Picker("User agent", selection: $s.uaMode) {
+                    ForEach(UserAgentMode.allCases) { Text($0.label).tag($0) }
+                }
+                if s.uaMode == .custom {
+                    TextField("User agent", text: $s.customUA, prompt: Text("Mozilla/5.0 …"))
+                }
+                Text("Lumen identifies as Safari \(UserAgent.safariVersion) so sites serve their full experience.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            Section("Developer") {
+                Toggle("Enable Web Inspector", isOn: $s.developer)
+                Text("Right-click a page and choose Inspect Element.").font(.caption).foregroundStyle(.secondary)
+            }
+            Section("Data") {
+                LabeledContent("Data folder") {
+                    Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([Paths.support]) }
+                }
+            }
+            Section {
+                LabeledContent("Version") {
+                    Text(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "–")
+                }
+            }
+        }
+        .formStyle(.grouped)
+    }
+}

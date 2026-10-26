@@ -9,13 +9,37 @@
     <key>CFBundleIconFile</key><string>Lumen</string>
     <key>CFBundlePackageType</key><string>APPL</string>
     <key>CFBundleShortVersionString</key><string>1.0</string>
-    <key>CFBundleVersion</key><string>1</string>
+    <key>CFBundleVersion</key><string>2</string>
     <key>LSMinimumSystemVersion</key><string>14.0</string>
+    <key>LSApplicationCategoryType</key><string>public.app-category.productivity</string>
+    <key>LSFileQuarantineEnabled</key><true/>
     <key>NSPrincipalClass</key><string>NSApplication</string>
     <key>NSHighResolutionCapable</key><true/>
+    <key>NSSupportsAutomaticTermination</key><false/>
+    <key>NSCameraUsageDescription</key><string>Websites you allow can use the camera, for example for video calls.</string>
+    <key>NSMicrophoneUsageDescription</key><string>Websites you allow can use the microphone, for example for video calls.</string>
+    <key>NSLocationUsageDescription</key><string>Websites you allow can see your approximate location.</string>
     <key>NSAppTransportSecurity</key>
     <dict>
         <key>NSAllowsArbitraryLoadsInWebContent</key><true/>
     </dict>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key><string>Web site URL</string>
+            <key>CFBundleURLSchemes</key>
+            <array><string>http</string><string>https</string></array>
+        </dict>
+    </array>
+    <key>CFBundleDocumentTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeName</key><string>HTML document</string>
+            <key>CFBundleTypeRole</key><string>Viewer</string>
+            <key>LSHandlerRank</key><string>Alternate</string>
+            <key>LSItemContentTypes</key>
+            <array><string>public.html</string><string>public.xhtml</string></array>
+        </dict>
+    </array>
 </dict>
 </plist>
