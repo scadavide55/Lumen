@@ -40,6 +40,8 @@ final class Tab: NSObject, ObservableObject, Identifiable {
     private var internalNavigation: WKNavigation?
     private var readerOrigin: URL?
     private var faviconHost: String?
+    /// Pull to refresh state, kept apart so that only the indicator redraws while you pull.
+    let pull = PullToRefresh()
     private var mediaPermissions: [String: Bool] = [:]
     private var rememberedUser: (host: String, name: String, at: Date)?
 
@@ -142,14 +144,22 @@ final class Tab: NSObject, ObservableObject, Identifiable {
         wv.customUserAgent = UserAgent.custom
         Tab.owners.setObject(self, forKey: wv)
         observers = [
+            // Each assignment redraws every view watching the tab, so only real changes are passed on.
             wv.observe(\.title) { [weak self] w, _ in self?.titleChanged(w.title) },
-            wv.observe(\.url) { [weak self] w, _ in if let u = w.url { self?.url = u } },
-            wv.observe(\.isLoading) { [weak self] w, _ in self?.isLoading = w.isLoading },
-            wv.observe(\.estimatedProgress) { [weak self] w, _ in self?.progress = w.estimatedProgress },
-            wv.observe(\.canGoBack) { [weak self] w, _ in self?.canGoBack = w.canGoBack },
-            wv.observe(\.canGoForward) { [weak self] w, _ in self?.canGoForward = w.canGoForward },
-            wv.observe(\.hasOnlySecureContent) { [weak self] w, _ in self?.isSecure = w.hasOnlySecureContent },
-            wv.observe(\.themeColor) { [weak self] w, _ in self?.themeColor = w.themeColor },
+            wv.observe(\.url) { [weak self] w, _ in if let u = w.url, self?.url != u { self?.url = u } },
+            wv.observe(\.isLoading) { [weak self] w, _ in if self?.isLoading != w.isLoading { self?.isLoading = w.isLoading } },
+            wv.observe(\.estimatedProgress) { [weak self] w, _ in
+                guard let self else { return }
+                let p = w.estimatedProgress
+                // The bar is 2 pt tall: steps under 4% can't be seen, but each one costs a redraw.
+                if abs(p - self.progress) >= 0.04 || p == 1 || p < self.progress { if p != self.progress { self.progress = p } }
+            },
+            wv.observe(\.canGoBack) { [weak self] w, _ in if self?.canGoBack != w.canGoBack { self?.canGoBack = w.canGoBack } },
+            wv.observe(\.canGoForward) { [weak self] w, _ in if self?.canGoForward != w.canGoForward { self?.canGoForward = w.canGoForward } },
+            wv.observe(\.hasOnlySecureContent) { [weak self] w, _ in
+                if self?.isSecure != w.hasOnlySecureContent { self?.isSecure = w.hasOnlySecureContent }
+            },
+            wv.observe(\.themeColor) { [weak self] w, _ in if self?.themeColor != w.themeColor { self?.themeColor = w.themeColor } },
         ]
         webView = wv
     }
@@ -389,6 +399,8 @@ final class Tab: NSObject, ObservableObject, Identifiable {
             }
         case "hover":
             hoverURL = body["url"] as? String
+        case "top":
+            pull.atTop = body["top"] as? Bool ?? true
         case "media":
             isPlayingAudio = body["playing"] as? Bool ?? false
         case "loginFocus":
@@ -556,7 +568,7 @@ extension Tab: WKNavigationDelegate {
             let s = Settings.shared
             let fresh = action.navigationType != .backForward && action.navigationType != .reload
                 && (action.request.httpMethod ?? "GET") == "GET"
-            if fresh, s.stripTracking, let clean = URLCleaner.clean(url) {
+            if fresh, s.stripTracking, let clean = URLCleaner.unwrap(url) ?? URLCleaner.clean(url) {
                 decisionHandler(.cancel, preferences)
                 webView.load(URLRequest(url: clean))
                 return
@@ -735,6 +747,12 @@ extension Tab: WKUIDelegate {
 final class LumenWebView: WKWebView {
     weak var tab: Tab?
 
+    override func scrollWheel(with event: NSEvent) {
+        super.scrollWheel(with: event)
+        guard let tab, Settings.shared.pullToRefresh, tab.url != nil else { return }
+        if tab.pull.track(event) { tab.reload() }
+    }
+
     override func willOpenMenu(_ menu: NSMenu, with event: NSEvent) {
         super.willOpenMenu(menu, with: event)
         let renames = [
@@ -840,5 +858,49 @@ enum Dialogs {
         a.accessoryView = box
         a.window.initialFirstResponder = user
         present(a, in: window) { done($0 == .alertFirstButtonReturn ? (user.stringValue, pass.stringValue) : nil) }
+    }
+}
+
+/// Scrolling up past the top of a page with the trackpad reloads it.
+final class PullToRefresh: ObservableObject {
+    /// 0 when idle, 1 when letting go reloads the page.
+    @Published private(set) var progress: CGFloat = 0
+    var atTop = true {
+        didSet { if !atTop { reset() } }
+    }
+    private var pulling = false
+    private var distance: CGFloat = 0
+    static let threshold: CGFloat = 110
+
+    /// Feeds a scroll event in. Returns true when the gesture ended past the threshold.
+    func track(_ e: NSEvent) -> Bool {
+        // Momentum after a flick never counts, and neither do mouse wheels, which have no gesture phases.
+        guard e.momentumPhase == [], e.hasPreciseScrollingDeltas else { return false }
+        switch e.phase {
+        case .began:
+            // Only a gesture that starts at the top counts, so a long scroll up doesn't reload on arrival.
+            pulling = atTop
+            distance = 0
+        case .changed:
+            guard pulling else { return false }
+            distance = max(0, distance + e.scrollingDeltaY)
+            let p = min(1, distance / Self.threshold)
+            if abs(p - progress) > 0.02 || (p == 1) != (progress == 1) { progress = p }
+        case .ended:
+            let fire = pulling && distance >= Self.threshold
+            reset()
+            return fire
+        case .cancelled:
+            reset()
+        default:
+            break
+        }
+        return false
+    }
+
+    private func reset() {
+        pulling = false
+        distance = 0
+        if progress != 0 { progress = 0 }
     }
 }

@@ -177,7 +177,11 @@ struct HistoryEntry: Codable, Identifiable, Hashable {
 final class History: ObservableObject {
     static let shared = History()
     /// Newest first, one entry per URL.
-    @Published private(set) var entries: [HistoryEntry]
+    @Published private(set) var entries: [HistoryEntry] {
+        didSet { haystacks = nil }
+    }
+    /// Lowercased "title url" per entry, built once and reused by every search until the history changes.
+    private var haystacks: [String]?
     private let file = JSONFile<[HistoryEntry]>("history.json")
     private let limit = 10_000
 
@@ -235,16 +239,30 @@ final class History: ObservableObject {
         file.saveNow(entries)
     }
 
-    /// Ranked matches for the command palette: title/URL contains every word, frequent and recent first.
-    func search(_ query: String, limit: Int = 8) -> [HistoryEntry] {
+    /// `search` on a background thread, so typing never waits for a large history.
+    func searchInBackground(_ query: String, limit: Int = 8) async -> [HistoryEntry] {
+        let entries = entries
+        let cached = haystacks
+        let (hits, built) = await Task.detached(priority: .userInitiated) {
+            let hay = cached ?? History.haystacks(for: entries)
+            return (History.search(query, entries: entries, haystacks: hay, limit: limit), hay)
+        }.value
+        // Keep the index only if the history didn't change while it was being built.
+        if cached == nil, built.count == self.entries.count, self.entries.first?.id == entries.first?.id { haystacks = built }
+        return hits
+    }
+
+    private static func haystacks(for entries: [HistoryEntry]) -> [String] {
+        entries.map { ($0.title + " " + $0.url.absoluteString).lowercased() }
+    }
+
+    private static func search(_ query: String, entries: [HistoryEntry], haystacks: [String], limit: Int) -> [HistoryEntry] {
         let words = query.lowercased().split(separator: " ").map(String.init)
         guard !words.isEmpty else { return [] }
         let now = Date()
-        return entries.lazy
-            .filter { e in
-                let hay = (e.title + " " + e.url.absoluteString).lowercased()
-                return words.allSatisfy { hay.contains($0) }
-            }
+        return entries.indices.lazy
+            .filter { i in words.allSatisfy { haystacks[i].contains($0) } }
+            .map { entries[$0] }
             .prefix(200)
             .map { e -> (HistoryEntry, Double) in
                 let age = now.timeIntervalSince(e.date) / 86_400
@@ -360,6 +378,8 @@ final class WindowRegistry {
 final class Favicons {
     static let shared = Favicons()
     private var memory: [String: NSImage] = [:]
+    /// Hosts with no icon on disk, so lists that redraw don't hit the disk again for them.
+    private var missing: Set<String> = []
     private var inFlight: Set<String> = []
     private let folder = Paths.folder("Favicons")
     private let session: URLSession = {
@@ -373,11 +393,13 @@ final class Favicons {
     func cached(_ host: String?) -> NSImage? {
         guard let host = host?.lowercased() else { return nil }
         if let img = memory[host] { return img }
+        guard !missing.contains(host) else { return nil }
         let file = folder.appendingPathComponent(host + ".icon")
         if let data = try? Data(contentsOf: file), let img = NSImage(data: data) {
             memory[host] = img
             return img
         }
+        missing.insert(host)
         return nil
     }
 
@@ -393,6 +415,7 @@ final class Favicons {
                       (response as? HTTPURLResponse)?.statusCode ?? 200 < 400,
                       let img = NSImage(data: data), img.isValid else { return }
                 self.memory[key] = img
+                self.missing.remove(key)
                 if persist { try? data.write(to: self.folder.appendingPathComponent(key + ".icon"), options: .atomic) }
                 done(img)
             }
@@ -401,6 +424,7 @@ final class Favicons {
 
     func clearDisk() {
         memory.removeAll()
+        missing.removeAll()
         try? FileManager.default.removeItem(at: folder)
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
     }

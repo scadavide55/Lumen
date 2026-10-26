@@ -156,6 +156,7 @@ struct TabPane: View {
         .overlay(alignment: .topLeading) {
             if let menu = tab.loginMenu { LoginMenuView(tab: tab, menu: menu) }
         }
+        .overlay(alignment: .top) { PullIndicator(pull: tab.pull) }
         .overlay(alignment: .top) {
             VStack(spacing: 0) {
                 if tab.insecureWarning { InsecurePasswordBanner(tab: tab) }
@@ -443,5 +444,28 @@ struct SplitHeader: View {
         .background(.regularMaterial, in: Capsule())
         .overlay(Capsule().stroke(Color.primary.opacity(0.08)))
         .padding(8)
+    }
+}
+
+/// The arrow that appears while you pull a page down to reload it.
+struct PullIndicator: View {
+    @ObservedObject var pull: PullToRefresh
+
+    var body: some View {
+        let p = pull.progress
+        let ready = p >= 1
+        Image(systemName: "arrow.clockwise")
+            .font(.system(size: 13, weight: .semibold))
+            .rotationEffect(.degrees(Double(p) * 270))
+            .foregroundStyle(ready ? AnyShapeStyle(Color.white) : AnyShapeStyle(.secondary))
+            .frame(width: 32, height: 32)
+            .background(Circle().fill(ready ? AnyShapeStyle(.tint) : AnyShapeStyle(.regularMaterial)))
+            .overlay(Circle().trim(from: 0, to: p).stroke(.tint, lineWidth: 2).rotationEffect(.degrees(-90)).opacity(ready ? 0 : 1))
+            .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
+            .scaleEffect(0.6 + 0.4 * p)
+            .opacity(Double(min(1, p * 2.5)))
+            .offset(y: -20 + 34 * p)
+            .animation(.spring(response: 0.25, dampingFraction: 0.8), value: ready)
+            .allowsHitTesting(false)
     }
 }

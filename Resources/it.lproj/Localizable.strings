@@ -267,6 +267,7 @@
 "Links from Mail, Messages and every other app will open in Lumen. You can change this anytime in System Settings." = "I link da Mail, Messaggi e ogni altra app si apriranno in Lumen. Puoi cambiarlo quando vuoi in Impostazioni di Sistema.";
 "Links you open in other apps go to your default browser." = "I link che apri da altre app vanno al browser predefinito.";
 "Lists are downloaded from easylist.to and refreshed weekly." = "Le liste vengono scaricate da easylist.to e aggiornate ogni settimana.";
+"Lock Window with Touch ID" = "Blocca finestra con Touch ID";
 "Lock private windows with Touch ID when Lumen is in the background" = "Blocca le finestre private con Touch ID quando Lumen è in background";
 "Look and feel" = "Aspetto";
 "Looks for a newer Lumen on GitHub" = "Cerca una versione più recente di Lumen su GitHub";
@@ -446,6 +447,7 @@
 "Save this password?" = "Salvare questa password?";
 "Saved passwords" = "Password salvate";
 "Saves and fills passwords for you. Recommended." = "Salva e compila le password per te. Consigliato.";
+"Scroll up at the top of a page to reload it" = "Scorri verso l'alto in cima a una pagina per ricaricarla";
 "Search" = "Cerca";
 "Search %@" = "Cerca con %@";
 "Search URL" = "URL di ricerca";
@@ -611,6 +613,7 @@
 "What you type in the command bar is searched here. Private options are marked." = "Ciò che scrivi nella barra dei comandi viene cercato qui. Le opzioni rispettose della privacy sono segnalate.";
 "What's new" = "Novità";
 "When three or more tabs are open from the same site, Lumen groups them, for example into “GitHub”." = "Quando hai aperto tre o più schede dello stesso sito, Lumen le raggruppa, per esempio in “GitHub”.";
+"Window locked" = "Finestra bloccata";
 "Window style" = "Stile della finestra";
 "Yellow" = "Giallo";
 "Yes, Use Lumen" = "Sì, usa Lumen";
@@ -640,6 +643,7 @@
 "microphone" = "il microfono";
 "show your password for %@" = "mostrare la password per %@";
 "this site" = "questo sito";
+"unlock this window" = "sbloccare questa finestra";
 "unlock your private window" = "sbloccare la finestra privata";
 "© 2026 Lumen · Made with Swift, SwiftUI and WebKit" = "© 2026 Lumen · Fatto con Swift, SwiftUI e WebKit";
 "“%@” can make changes to your Mac" = "“%@” può apportare modifiche al Mac";

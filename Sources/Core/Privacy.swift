@@ -10,10 +10,15 @@ enum URLCleaner {
         "mkt_tok", "oly_anon_id", "oly_enc_id", "vero_id", "vero_conv", "_openstat", "wickedid", "rb_clickid",
         "s_cid", "ef_id", "srsltid", "epik", "ncid", "sr_share", "spm", "scm", "trk", "trkCampaign",
         "ga_source", "ga_medium", "ga_campaign", "ga_content", "ga_term", "_ga", "_gl", "obOrigUrl",
+        "li_fat_id", "irclickid", "mc_tc", "_kx", "ml_subscriber", "ml_subscriber_hash", "wt_mc", "wt_zmc",
+        "cmpid", "zanpid", "dm_i", "tt_medium", "tt_content", "fb_source", "fb_ref", "action_object_map",
+        "action_type_map", "action_ref_map", "_bta_tid", "_bta_c",
+        "sms_click", "sms_source", "sms_uph", "ttd_id", "vgo_ee", "_ke", "redirect_log_mongo_id", "redirect_mongo_id",
     ]
-    static let prefixes = ["utm_", "mtm_", "pk_", "hsa_", "piwik_", "matomo_"]
+    static let prefixes = ["utm_", "mtm_", "pk_", "hsa_", "piwik_", "matomo_", "fb_action_", "_branch_", "itm_", "stm_"]
     /// Parameters that only track on specific sites.
     static let hostParams: [String: Set<String>] = [
+        "google.com": ["gs_l", "oq", "ved", "ei", "sca_esv", "sxsrf", "gs_lcrp", "sclient", "uact"],
         "youtube.com": ["si", "pp", "feature"],
         "youtu.be": ["si", "feature"],
         "open.spotify.com": ["si", "context"],
@@ -23,6 +28,37 @@ enum URLCleaner {
         "instagram.com": ["igsh", "img_index"],
         "linkedin.com": ["trk", "trackingId", "lipi", "refId"],
     ]
+
+    /// Link wrappers that only exist to log the click before sending you on: host suffix, path prefix, parameter.
+    static let redirectors: [(host: String, path: String, param: String)] = [
+        ("google.com", "/url", "q"), ("google.com", "/url", "url"), ("google.it", "/url", "q"),
+        ("google.fr", "/url", "q"), ("google.co.uk", "/url", "q"), ("google.de", "/url", "q"),
+        ("l.facebook.com", "/l.php", "u"), ("lm.facebook.com", "/l.php", "u"), ("l.messenger.com", "/l.php", "u"),
+        ("l.instagram.com", "/", "u"), ("youtube.com", "/redirect", "q"), ("out.reddit.com", "/", "url"),
+        ("steamcommunity.com", "/linkfilter", "url"), ("away.vk.com", "/away.php", "to"),
+        ("click.linksynergy.com", "/", "murl"), ("t.umblr.com", "/redirect", "z"), ("disq.us", "/url", "url"),
+        ("bing.com", "/ck/a", "u"), ("duckduckgo.com", "/l", "uddg"),
+    ]
+
+    /// The destination of a known click-tracking redirect, without tracking parameters, or nil.
+    static func unwrap(_ url: URL) -> URL? {
+        guard let host = url.host?.lowercased(),
+              let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems else { return nil }
+        for r in redirectors where (host == r.host || host.hasSuffix("." + r.host)) && url.path.hasPrefix(r.path) {
+            guard var value = items.first(where: { $0.name == r.param })?.value else { continue }
+            // Bing encodes the target as "a1" + base64.
+            if r.host == "bing.com", value.hasPrefix("a1") {
+                var b64 = String(value.dropFirst(2)).replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
+                b64 += String(repeating: "=", count: (4 - b64.count % 4) % 4)
+                guard let d = Data(base64Encoded: b64), let decoded = String(data: d, encoding: .utf8) else { continue }
+                value = decoded
+            }
+            guard let target = URL(string: value), ["http", "https"].contains(target.scheme?.lowercased() ?? ""),
+                  target.host != nil else { continue }
+            return clean(target) ?? target
+        }
+        return nil
+    }
 
     /// Returns the URL without tracking parameters, or nil when nothing changed.
     static func clean(_ url: URL) -> URL? {

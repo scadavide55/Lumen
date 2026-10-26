@@ -238,12 +238,7 @@ struct TabRow: View {
                 Image(systemName: "rectangle.split.2x1").font(.system(size: 10)).foregroundStyle(.secondary)
             }
             if hover || selected {
-                Button { b.close(tab) } label: {
-                    Image(systemName: "xmark").font(.system(size: 9, weight: .bold)).frame(width: 16, height: 16).contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(.secondary)
-                .help("Close tab (⌘W)")
+                CloseTabButton(iconSize: 9, visible: 16) { b.close(tab) }
             }
         }
         .padding(.horizontal, 8)
@@ -565,8 +560,7 @@ struct TabChip: View {
                         .onTapGesture { tab.setMuted(!tab.isMuted) }
                 }
                 if hover || selected {
-                    Button { b.close(tab) } label: { Image(systemName: "xmark").font(.system(size: 8, weight: .bold)).frame(width: 14, height: 14) }
-                        .buttonStyle(.plain).foregroundStyle(.secondary)
+                    CloseTabButton(iconSize: 8, visible: 14) { b.close(tab) }
                 }
             }
         }
@@ -592,5 +586,31 @@ struct TabChip: View {
             return b.handleDrop(items, on: tab, placement: placement, pinned: tab.isPinned)
         }
         .help(tab.title)
+    }
+}
+
+/// The ✕ on a tab. It keeps its small look but takes clicks from a wider area around it,
+/// without changing the row's layout.
+struct CloseTabButton: View {
+    let iconSize: CGFloat
+    let visible: CGFloat
+    let action: () -> Void
+    @State private var hover = false
+    private let slop: CGFloat = 5
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "xmark")
+                .font(.system(size: iconSize, weight: .bold))
+                .frame(width: visible, height: visible)
+                .background(Circle().fill(Color.primary.opacity(hover ? 0.12 : 0)))
+                .padding(slop)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(hover ? .primary : .secondary)
+        .onHover { hover = $0 }
+        .padding(-slop)
+        .help("Close tab (⌘W)")
     }
 }

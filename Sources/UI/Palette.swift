@@ -25,6 +25,10 @@ struct CommandPalette: View {
     @State private var selection = 0
     @State private var suggestions: [String] = []
     @State private var suggestTask: Task<Void, Never>?
+    @State private var historyHits: [HistoryEntry] = []
+    @State private var historyTask: Task<Void, Never>?
+    /// The rows, rebuilt only when the query or its async results change, never on hover or page loads.
+    @State private var list: [PaletteItem] = []
     @FocusState private var focused: Bool
 
     private static let suggestSession: URLSession = {
@@ -36,7 +40,6 @@ struct CommandPalette: View {
     }()
 
     var body: some View {
-        let list = items
         ZStack(alignment: .top) {
             Color.black.opacity(0.16)
                 .contentShape(Rectangle())
@@ -71,6 +74,7 @@ struct CommandPalette: View {
                             VStack(spacing: 2) {
                                 ForEach(Array(list.enumerated()), id: \.element.id) { i, item in
                                     PaletteRow(item: item, selected: i == selection)
+                                        .equatable()
                                         .contentShape(Rectangle())
                                         .onTapGesture {
                                             selection = i
@@ -109,12 +113,18 @@ struct CommandPalette: View {
         .onAppear {
             query = b.palettePrefill
             selection = 0
+            refresh()
+            fetchHistory(query)
             DispatchQueue.main.async { focused = true }
         }
         .onChange(of: query) { _, q in
             selection = 0
+            refresh()
+            fetchHistory(q)
             fetchSuggestions(q)
         }
+        .onChange(of: suggestions) { _, _ in refresh() }
+        .onChange(of: historyHits.map(\.id)) { _, _ in refresh() }
     }
 
     private func hint(_ key: String, _ label: String) -> some View {
@@ -136,6 +146,7 @@ struct CommandPalette: View {
 
     private func close() {
         suggestTask?.cancel()
+        historyTask?.cancel()
         b.paletteVisible = false
     }
 
@@ -176,7 +187,22 @@ struct CommandPalette: View {
         }
     }
 
+    private func fetchHistory(_ q: String) {
+        historyTask?.cancel()
+        let trimmed = q.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            historyHits = []
+            return
+        }
+        historyTask = Task {
+            let hits = await History.shared.searchInBackground(trimmed, limit: 6)
+            if !Task.isCancelled { historyHits = hits }
+        }
+    }
+
     // MARK: Results
+
+    private func refresh() { list = items }
 
     private var items: [PaletteItem] {
         let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -225,7 +251,13 @@ struct CommandPalette: View {
         }
         shown.formUnion(marks.map(\.url))
 
-        out += History.shared.search(q, limit: 6).filter { !shown.contains($0.url) }.map { h in
+        // Earlier hits that still match stay visible until the background search for this query lands.
+        let words = lower.split(separator: " ").map(String.init)
+        let hits = historyHits.filter { h in
+            let hay = (h.title + " " + h.url.absoluteString).lowercased()
+            return words.allSatisfy { hay.contains($0) }
+        }
+        out += hits.filter { !shown.contains($0.url) }.map { h in
             PaletteItem(id: "h" + h.id.uuidString, icon: favicon(h.url, fallback: "clock"),
                         title: h.title.isEmpty ? h.url.absoluteString : h.title,
                         subtitle: h.url.absoluteString, badge: "History",
@@ -274,6 +306,7 @@ struct CommandPalette: View {
             command("Keyboard Shortcuts", "keyboard", "Every shortcut in one place") { openWindow(id: "shortcuts") },
             command("Check for Updates", "arrow.down.app", "Looks for a newer Lumen on GitHub") { UpdateChecker.shared.check(force: true) { openWindow(id: "update") } },
             command(s.adBlock ? "Turn Off Ad Blocker" : "Turn On Ad Blocker", "shield.lefthalf.filled", "⇧⌘B") { s.adBlock.toggle() },
+            command("Lock Window with Touch ID", "lock", "⌃⌘L") { b.lock() },
             command("Hibernate Other Tabs", "moon.zzz", "Free memory used by background tabs") { b.hibernateOthers() },
             command("Close Duplicate Tabs", "square.on.square.dashed", "Keeps one tab per address") { b.closeDuplicates() },
             command("Dark Appearance", "moon", "Appearance") { s.theme = .dark },
@@ -322,9 +355,14 @@ struct CommandPalette: View {
     }
 }
 
-struct PaletteRow: View {
+struct PaletteRow: View, Equatable {
     let item: PaletteItem
     let selected: Bool
+
+    static func == (a: PaletteRow, b: PaletteRow) -> Bool {
+        a.selected == b.selected && a.item.id == b.item.id && a.item.title == b.item.title
+            && a.item.subtitle == b.item.subtitle && a.item.badge == b.item.badge
+    }
 
     var body: some View {
         HStack(spacing: 10) {

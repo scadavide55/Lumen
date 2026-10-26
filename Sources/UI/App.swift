@@ -145,6 +145,8 @@ struct LumenCommands: Commands {
             Button("Install Site as App…") { b?.showInstallApp = true }.disabled(b?.current?.url == nil || WebApp.isActive)
             Button("Export as PDF…") { b?.current?.exportPDF() }.keyboardShortcut("e", modifiers: [.command, .shift]).disabled(b == nil)
             Button("Take Screenshot of Page") { b?.current?.screenshot() }.keyboardShortcut("s", modifiers: [.command, .shift]).disabled(b == nil)
+            Divider()
+            Button("Lock Window with Touch ID") { b?.lock() }.keyboardShortcut("l", modifiers: [.command, .control]).disabled(b == nil || b?.locked == true)
         }
 
         CommandGroup(after: .pasteboard) {

@@ -51,6 +51,11 @@ enum BuiltInRules {
         "outbrain-analytics.com", "taboola-analytics.com", "branch.io", "adjust.com", "mparticle.com",
         "onesignal.com", "pushwoosh.com", "pushcrew.com", "webengage.com", "clevertap-prod.com",
         "smartlook.com", "logrocket.io", "lr-ingest.io", "posthog.com", "rudderstack.com",
+        // Fingerprinting and session-replay services
+        "fpjs.io", "fpcdn.io", "openfpcdn.io", "fpnpmcdn.net", "logrocket.com", "lr-intake.com", "sessioncam.com",
+        "decibelinsight.net", "glassboxdigital.io", "clicktale.com", "userreplay.net", "sessionstack.com",
+        "freshmarketer.com", "trackjs.com", "salesloft.com", "leadfeeder.com", "lfeeder.com", "albacross.com",
+        "reveal.clearbit.com", "dealfront.com", "demandbase.com", "company-target.com",
     ]
 
     /// Tracking endpoints that live on domains which are otherwise needed.
@@ -76,7 +81,7 @@ enum BuiltInRules {
         ".zergnet-widget", "[id^=\"ezoic-pub-ad\"]", ".ezoic-ad", ".adthrive-ad", ".mv-ad-box",
     ]
 
-    static var count: Int { adHosts.count + trackerHosts.count + pathFilters.count + selectors.count }
+    static var count: Int { adHosts.count + trackerHosts.count + pathFilters.count + selectors.count + 1 }
 
     static func hostFilter(_ host: String) -> String {
         "^[^:]+://+([^:/]+\\.)?" + host.replacingOccurrences(of: ".", with: "\\.") + "[/:]"
@@ -88,6 +93,9 @@ enum BuiltInRules {
              "action": ["type": "block"]]
         }
         rules += pathFilters.map { ["trigger": ["url-filter": $0], "action": ["type": "block"]] }
+        // Hyperlink auditing (<a ping>) and sendBeacon reports to other sites.
+        rules.append(["trigger": ["url-filter": ".*", "resource-type": ["ping"], "load-type": ["third-party"]],
+                      "action": ["type": "block"]])
         rules += selectors.map { ["trigger": ["url-filter": ".*"], "action": ["type": "css-display-none", "selector": $0]] }
         let data = try! JSONSerialization.data(withJSONObject: rules)
         return String(decoding: data, as: UTF8.self)

@@ -267,6 +267,7 @@
 "Links from Mail, Messages and every other app will open in Lumen. You can change this anytime in System Settings." = "Les liens de Mail, Messages et de toutes les autres apps s'ouvriront dans Lumen. Vous pouvez changer cela à tout moment dans Réglages Système.";
 "Links you open in other apps go to your default browser." = "Les liens ouverts depuis d'autres apps vont dans votre navigateur par défaut.";
 "Lists are downloaded from easylist.to and refreshed weekly." = "Les listes sont téléchargées depuis easylist.to et actualisées chaque semaine.";
+"Lock Window with Touch ID" = "Verrouiller la fenêtre avec Touch ID";
 "Lock private windows with Touch ID when Lumen is in the background" = "Verrouiller les fenêtres privées avec Touch ID quand Lumen est en arrière-plan";
 "Look and feel" = "Apparence";
 "Looks for a newer Lumen on GitHub" = "Recherche une version plus récente de Lumen sur GitHub";
@@ -446,6 +447,7 @@
 "Save this password?" = "Enregistrer ce mot de passe ?";
 "Saved passwords" = "Mots de passe enregistrés";
 "Saves and fills passwords for you. Recommended." = "Enregistre et remplit vos mots de passe. Recommandé.";
+"Scroll up at the top of a page to reload it" = "Faire défiler vers le haut en haut d'une page pour la recharger";
 "Search" = "Rechercher";
 "Search %@" = "Rechercher avec %@";
 "Search URL" = "URL de recherche";
@@ -611,6 +613,7 @@
 "What you type in the command bar is searched here. Private options are marked." = "Ce que vous tapez dans la barre de commandes est recherché ici. Les options privées sont indiquées.";
 "What's new" = "Nouveautés";
 "When three or more tabs are open from the same site, Lumen groups them, for example into “GitHub”." = "Quand trois onglets ou plus sont ouverts sur le même site, Lumen les regroupe, par exemple dans « GitHub ».";
+"Window locked" = "Fenêtre verrouillée";
 "Window style" = "Style de fenêtre";
 "Yellow" = "Jaune";
 "Yes, Use Lumen" = "Oui, utiliser Lumen";
@@ -640,6 +643,7 @@
 "microphone" = "micro";
 "show your password for %@" = "afficher votre mot de passe pour %@";
 "this site" = "ce site";
+"unlock this window" = "déverrouiller cette fenêtre";
 "unlock your private window" = "déverrouiller votre fenêtre privée";
 "© 2026 Lumen · Made with Swift, SwiftUI and WebKit" = "© 2026 Lumen · Fait avec Swift, SwiftUI et WebKit";
 "“%@” can make changes to your Mac" = "« %@ » peut modifier votre Mac";

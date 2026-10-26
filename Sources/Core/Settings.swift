@@ -214,6 +214,7 @@ final class Settings: ObservableObject {
     ]
 
     // Shield
+    @Pref("pullToRefresh") var pullToRefresh = true
     @Pref("adBlock") var adBlock = true
     @Pref("easyList") var easyList = false
     @Pref("easyPrivacy") var easyPrivacy = false

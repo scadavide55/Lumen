@@ -73,6 +73,18 @@ enum Scripts {
       document.documentElement.addEventListener('mouseleave', () => setHover(null));
       window.addEventListener('blur', () => setHover(null));
 
+      // Whether the page (or the panel last scrolled) is at its top, for pull to refresh.
+      let atTop = true, lastScroller = null;
+      const checkTop = () => {
+        const top = (window.scrollY || 0) <= 0 && (!lastScroller || lastScroller.scrollTop <= 0);
+        if (top !== atTop) { atTop = top; post({ type: 'top', top }); }
+      };
+      document.addEventListener('scroll', (e) => {
+        const t = e.target;
+        lastScroller = (t && t.nodeType === 1 && t !== document.documentElement && t !== document.body) ? t : null;
+        checkTop();
+      }, { capture: true, passive: true });
+
       let playing = false;
       const media = () => {
         const now = [...document.querySelectorAll('video, audio')].some(m =>

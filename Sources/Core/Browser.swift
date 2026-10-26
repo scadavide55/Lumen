@@ -488,20 +488,41 @@ final class BrowserState: ObservableObject {
         for t in tabs where !t.isSelected && !t.isPlayingAudio { t.hibernate() }
     }
 
-    // MARK: Private window lock
+    // MARK: Window lock
+
+    /// True when the user locked the window from the File menu, so the lock waits for them instead of asking right away.
+    @Published private(set) var lockedByUser = false
+
+    /// Covers the window until Touch ID or the Mac password unlocks it.
+    func lock() {
+        guard !locked else { return }
+        paletteVisible = false
+        findVisible = false
+        lockedByUser = true
+        locked = true
+        // Keys typed while locked must not reach the page underneath.
+        window?.makeFirstResponder(nil)
+    }
 
     func unlock() {
         let context = LAContext()
         var error: NSError?
-        guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else { locked = false; return }
-        context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: L("unlock your private window")) { ok, _ in
-            DispatchQueue.main.async { if ok { self.locked = false } }
+        guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else { finishUnlock(); return }
+        let reason = L(isPrivate ? "unlock your private window" : "unlock this window")
+        context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { ok, _ in
+            DispatchQueue.main.async { if ok { self.finishUnlock() } }
         }
+    }
+
+    private func finishUnlock() {
+        locked = false
+        lockedByUser = false
     }
 
     // MARK: Overlays
 
     func showPalette(_ prefill: String? = nil) {
+        guard !locked else { return }
         palettePrefill = prefill ?? current?.url?.absoluteString ?? ""
         findVisible = false
         paletteVisible = true

@@ -146,7 +146,7 @@ struct InsecurePasswordBanner: View {
     }
 }
 
-/// Covers a private window after Lumen goes to the background.
+/// Covers a locked window: a private one after Lumen goes to the background, or any window locked from the File menu.
 struct PrivateLockView: View {
     @EnvironmentObject var b: BrowserState
 
@@ -156,13 +156,14 @@ struct PrivateLockView: View {
             Color(red: 0.2, green: 0.12, blue: 0.36).opacity(0.5)
             VStack(spacing: 16) {
                 Image(systemName: "lock.fill").font(.system(size: 44)).foregroundStyle(.white)
-                Text("Private window locked").font(.system(size: 22, weight: .semibold)).foregroundStyle(.white)
+                Text(b.isPrivate ? "Private window locked" : "Window locked").font(.system(size: 22, weight: .semibold)).foregroundStyle(.white)
                 Text("Unlock with Touch ID or your Mac password to see these tabs.").foregroundStyle(.white.opacity(0.75))
                 Button("Unlock") { b.unlock() }.controlSize(.large).keyboardShortcut(.defaultAction)
             }
         }
         .ignoresSafeArea()
-        .onAppear { if NSApp.isActive { b.unlock() } }
+        .contentShape(Rectangle())
+        .onAppear { if NSApp.isActive && !b.lockedByUser { b.unlock() } }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in b.unlock() }
     }
 }

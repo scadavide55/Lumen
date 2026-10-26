@@ -198,50 +198,157 @@ struct AnimatedGradient: View {
     let blobs: [UInt32]
     let animated: Bool
 
-    var body: some View {
-        if animated {
-            TimelineView(.animation(minimumInterval: 1 / 30)) { ctx in layers(ctx.date.timeIntervalSinceReferenceDate) }
-        } else {
-            layers(nil)
-        }
-    }
-
-    private func layers(_ t: Double?) -> some View {
-        let a = t.map { UnitPoint(x: 0.2 + 0.18 * sin($0 / 6), y: 0.15 + 0.15 * cos($0 / 8)) } ?? UnitPoint(x: 0.15, y: 0.1)
-        let b = t.map { UnitPoint(x: 0.8 + 0.15 * cos($0 / 7), y: 0.85 + 0.12 * sin($0 / 5)) } ?? UnitPoint(x: 0.9, y: 0.95)
-        return GeometryReader { g in
-            let d = max(g.size.width, g.size.height)
-            ZStack {
-                LinearGradient(colors: base.map(StartBackgroundView.color), startPoint: .top, endPoint: .bottom)
-                RadialGradient(colors: [StartBackgroundView.color(blobs[0]).opacity(0.55), .clear], center: a, startRadius: 0, endRadius: d * 0.6)
-                RadialGradient(colors: [StartBackgroundView.color(blobs[1]).opacity(0.45), .clear], center: b, startRadius: 0, endRadius: d * 0.65)
-            }
-        }
-    }
+    var body: some View { GradientLayers(style: .preset(base: base, blobs: blobs, animated: animated)) }
 }
 
 /// Colours that slowly shift around the hue wheel.
 struct FlowGradient: View {
-    var body: some View {
-        TimelineView(.animation(minimumInterval: 1 / 30)) { ctx in
-            let t = ctx.date.timeIntervalSinceReferenceDate
-            let h = (t / 60).truncatingRemainder(dividingBy: 1)
-            GeometryReader { g in
-                let d = max(g.size.width, g.size.height)
-                ZStack {
-                    LinearGradient(colors: [hue(h, 0.55, 0.28), hue(h + 0.12, 0.6, 0.42)],
-                                   startPoint: UnitPoint(x: 0.5 + 0.5 * cos(t / 9), y: 0), endPoint: UnitPoint(x: 0.5 - 0.5 * cos(t / 9), y: 1))
-                    RadialGradient(colors: [hue(h + 0.3, 0.7, 0.75).opacity(0.5), .clear],
-                                   center: UnitPoint(x: 0.3 + 0.25 * sin(t / 7), y: 0.3 + 0.2 * cos(t / 11)), startRadius: 0, endRadius: d * 0.55)
-                    RadialGradient(colors: [hue(h + 0.55, 0.7, 0.7).opacity(0.45), .clear],
-                                   center: UnitPoint(x: 0.75 + 0.2 * cos(t / 8), y: 0.75 + 0.2 * sin(t / 10)), startRadius: 0, endRadius: d * 0.6)
-                }
-            }
+    var body: some View { GradientLayers(style: .flow) }
+}
+
+/// Draws the start page gradients with Core Animation. The motion runs in the window server,
+/// so it costs the app nothing per frame and never competes with typing or scrolling.
+struct GradientLayers: NSViewRepresentable {
+    enum Style: Equatable {
+        case preset(base: [UInt32], blobs: [UInt32], animated: Bool)
+        case flow
+    }
+    let style: Style
+
+    func makeNSView(context: Context) -> GradientLayerView { GradientLayerView(style: style) }
+    func updateNSView(_ v: GradientLayerView, context: Context) { if v.style != style { v.style = style } }
+}
+
+final class GradientLayerView: NSView {
+    var style: GradientLayers.Style { didSet { rebuild() } }
+    private let base = CAGradientLayer()
+    private let glows = [CAGradientLayer(), CAGradientLayer()]
+    private var builtSize = CGSize.zero
+
+    init(style: GradientLayers.Style) {
+        self.style = style
+        super.init(frame: .zero)
+        layer = CALayer()
+        wantsLayer = true
+        layer?.masksToBounds = true
+        layer?.addSublayer(base)
+        for g in glows {
+            g.type = .radial
+            g.startPoint = CGPoint(x: 0.5, y: 0.5)
+            g.endPoint = CGPoint(x: 1, y: 1)
+            layer?.addSublayer(g)
         }
     }
 
-    private func hue(_ h: Double, _ s: Double, _ b: Double) -> Color {
-        Color(hue: h.truncatingRemainder(dividingBy: 1), saturation: s, brightness: b)
+    required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
+
+    override func layout() {
+        super.layout()
+        if bounds.size != builtSize { rebuild() }
+    }
+
+    override func viewDidChangeBackingProperties() {
+        super.viewDidChangeBackingProperties()
+        let scale = window?.backingScaleFactor ?? 2
+        ([base] + glows).forEach { $0.contentsScale = scale }
+    }
+
+    private func rebuild() {
+        let size = bounds.size
+        builtSize = size
+        guard size.width > 0, size.height > 0 else { return }
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        ([base] + glows).forEach { $0.removeAllAnimations() }
+        base.frame = bounds
+        let d = max(size.width, size.height)
+        // SwiftUI unit points start at the top; layers start at the bottom.
+        func point(_ x: Double, _ y: Double) -> CGPoint { CGPoint(x: x * size.width, y: (1 - y) * size.height) }
+
+        switch style {
+        case .preset(let baseHex, let blobs, let animated):
+            base.colors = baseHex.map { Self.cg($0) }
+            base.startPoint = CGPoint(x: 0.5, y: 1)
+            base.endPoint = CGPoint(x: 0.5, y: 0)
+            let radii = [d * 0.6, d * 0.65]
+            let alphas = [0.55, 0.45]
+            let paths: [(Double) -> (Double, Double)] = [
+                { t in (0.2 + 0.18 * sin(t / 6), 0.15 + 0.15 * cos(t / 8)) },
+                { t in (0.8 + 0.15 * cos(t / 7), 0.85 + 0.12 * sin(t / 5)) },
+            ]
+            let still = [(0.15, 0.1), (0.9, 0.95)]
+            for (i, g) in glows.enumerated() {
+                g.bounds = CGRect(x: 0, y: 0, width: radii[i] * 2, height: radii[i] * 2)
+                g.colors = [Self.cg(blobs[i], alpha: alphas[i]), Self.cg(blobs[i], alpha: 0)]
+                if animated {
+                    let f = paths[i]
+                    let now = f(Self.now)
+                    g.position = point(now.0, now.1)
+                    let periods = i == 0 ? (6.0, 8.0) : (7.0, 5.0)
+                    g.add(Self.drift("position.x", period: 2 * .pi * periods.0) { t in point(f(t).0, 0).x }, forKey: "x")
+                    g.add(Self.drift("position.y", period: 2 * .pi * periods.1) { t in point(0, f(t).1).y }, forKey: "y")
+                } else {
+                    g.position = point(still[i].0, still[i].1)
+                }
+            }
+
+        case .flow:
+            func hue(_ h: Double, _ s: Double, _ b: Double, _ a: Double = 1) -> CGColor {
+                NSColor(colorSpace: .sRGB, hue: h.truncatingRemainder(dividingBy: 1), saturation: s, brightness: b, alpha: a).cgColor
+            }
+            func h(_ t: Double) -> Double { (t / 60).truncatingRemainder(dividingBy: 1) }
+            func baseColors(_ t: Double) -> [CGColor] { [hue(h(t), 0.55, 0.28), hue(h(t) + 0.12, 0.6, 0.42)] }
+            func ends(_ t: Double) -> (CGPoint, CGPoint) {
+                let c = cos(t / 9)
+                return (CGPoint(x: 0.5 + 0.5 * c, y: 1), CGPoint(x: 0.5 - 0.5 * c, y: 0))
+            }
+            let t0 = Self.now
+            base.colors = baseColors(t0)
+            (base.startPoint, base.endPoint) = ends(t0)
+            base.add(Self.drift("colors", period: 60) { baseColors($0) }, forKey: "colors")
+            base.add(Self.drift("startPoint", period: 2 * .pi * 9) { NSValue(point: ends($0).0) }, forKey: "start")
+            base.add(Self.drift("endPoint", period: 2 * .pi * 9) { NSValue(point: ends($0).1) }, forKey: "end")
+
+            let glowSpecs: [(radius: Double, shift: Double, b: Double, a: Double, x: (Double) -> Double, y: (Double) -> Double, px: Double, py: Double)] = [
+                (0.55, 0.3, 0.75, 0.5, { 0.3 + 0.25 * sin($0 / 7) }, { 0.3 + 0.2 * cos($0 / 11) }, 7, 11),
+                (0.6, 0.55, 0.7, 0.45, { 0.75 + 0.2 * cos($0 / 8) }, { 0.75 + 0.2 * sin($0 / 10) }, 8, 10),
+            ]
+            for (g, spec) in zip(glows, glowSpecs) {
+                let r = d * spec.radius
+                g.bounds = CGRect(x: 0, y: 0, width: r * 2, height: r * 2)
+                func colors(_ t: Double) -> [CGColor] {
+                    [hue(h(t) + spec.shift, 0.7, spec.b, spec.a), hue(h(t) + spec.shift, 0.7, spec.b, 0)]
+                }
+                g.colors = colors(t0)
+                g.position = point(spec.x(t0), spec.y(t0))
+                g.add(Self.drift("colors", period: 60) { colors($0) }, forKey: "colors")
+                g.add(Self.drift("position.x", period: 2 * .pi * spec.px) { point(spec.x($0), 0).x }, forKey: "x")
+                g.add(Self.drift("position.y", period: 2 * .pi * spec.py) { point(0, spec.y($0)).y }, forKey: "y")
+            }
+        }
+        CATransaction.commit()
+    }
+
+    private static var now: Double { Date.timeIntervalSinceReferenceDate }
+
+    /// A looping animation sampled from a periodic function of time, starting at the current phase.
+    private static func drift(_ key: String, period: Double, _ f: (Double) -> Any) -> CAKeyframeAnimation {
+        let samples = 72
+        let a = CAKeyframeAnimation(keyPath: key)
+        a.values = (0...samples).map { f(Double($0) / Double(samples) * period) }
+        a.duration = period
+        a.repeatCount = .infinity
+        a.calculationMode = .linear
+        a.isRemovedOnCompletion = false
+        a.timeOffset = now.truncatingRemainder(dividingBy: period)
+        // Slow drift doesn't need 120 Hz; this keeps ProMotion and Low Power Mode cheap.
+        a.preferredFrameRateRange = CAFrameRateRange(minimum: 10, maximum: 30, preferred: 30)
+        return a
+    }
+
+    static func cg(_ hex: UInt32, alpha: Double = 1) -> CGColor {
+        CGColor(srgbRed: Double((hex >> 16) & 0xFF) / 255, green: Double((hex >> 8) & 0xFF) / 255,
+                blue: Double(hex & 0xFF) / 255, alpha: alpha)
     }
 }
 
@@ -281,11 +388,26 @@ struct VideoBackground: NSViewRepresentable {
         func stop() {
             player.pause()
             looper = nil
+            if let occlusion { NotificationCenter.default.removeObserver(occlusion) }
+            occlusion = nil
         }
+
+        private var occlusion: NSObjectProtocol?
 
         override func viewDidMoveToWindow() {
             super.viewDidMoveToWindow()
-            window == nil ? player.pause() : player.play()
+            if let occlusion { NotificationCenter.default.removeObserver(occlusion) }
+            occlusion = nil
+            guard let window else { player.pause(); return }
+            // Decoding stops while the window is hidden, minimised or covered.
+            occlusion = NotificationCenter.default.addObserver(forName: NSWindow.didChangeOcclusionStateNotification,
+                                                               object: window, queue: .main) { [weak self] _ in self?.syncPlayback() }
+            syncPlayback()
+        }
+
+        private func syncPlayback() {
+            guard looper != nil, let window else { return }
+            window.occlusionState.contains(.visible) ? player.play() : player.pause()
         }
     }
 }

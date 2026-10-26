@@ -216,6 +216,7 @@ struct AppearancePane: View {
                 }
                 Toggle("Show the full address", isOn: $s.showFullURL)
                 Toggle("Show link addresses on hover", isOn: $s.statusBar)
+                Toggle("Scroll up at the top of a page to reload it", isOn: $s.pullToRefresh)
             }
             Section("Start page background") {
                 BackgroundPicker()
