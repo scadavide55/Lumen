@@ -870,7 +870,7 @@ final class PullToRefresh: ObservableObject {
     }
     private var pulling = false
     private var distance: CGFloat = 0
-    static let threshold: CGFloat = 110
+    static let threshold: CGFloat = 190
 
     /// Feeds a scroll event in. Returns true when the gesture ended past the threshold.
     func track(_ e: NSEvent) -> Bool {
