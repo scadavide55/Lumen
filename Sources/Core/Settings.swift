@@ -199,6 +199,7 @@ final class Settings: ObservableObject {
     @Pref("popupMode") var popupMode = PopupMode.automatic
     @Pref("autoCloseDays") var autoCloseDays = 0
     @Pref("alwaysShowTitles") var alwaysShowTitles = false
+    @Pref("pullToRefresh") var pullToRefresh = true
     @Pref("onboarded") var onboarded = false
 
     // Search
@@ -214,7 +215,6 @@ final class Settings: ObservableObject {
     ]
 
     // Shield
-    @Pref("pullToRefresh") var pullToRefresh = true
     @Pref("adBlock") var adBlock = true
     @Pref("easyList") var easyList = false
     @Pref("easyPrivacy") var easyPrivacy = false

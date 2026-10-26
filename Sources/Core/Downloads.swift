@@ -15,6 +15,7 @@ final class DownloadItem: NSObject, ObservableObject, Identifiable {
     @Published var state = State.active
     let started = Date()
     private var observation: NSKeyValueObservation?
+    private var lastUpdate = Date.distantPast
 
     init(_ download: WKDownload) {
         self.download = download
@@ -25,9 +26,14 @@ final class DownloadItem: NSObject, ObservableObject, Identifiable {
             let done = p.completedUnitCount
             let total = p.totalUnitCount
             DispatchQueue.main.async {
-                self?.fraction = fraction
-                self?.received = done
-                self?.total = total
+                guard let self else { return }
+                // Progress arrives for every chunk; ten redraws a second are plenty.
+                let now = Date()
+                guard fraction >= 1 || now.timeIntervalSince(self.lastUpdate) >= 0.1 else { return }
+                self.lastUpdate = now
+                self.fraction = fraction
+                self.received = done
+                self.total = total
             }
         }
     }

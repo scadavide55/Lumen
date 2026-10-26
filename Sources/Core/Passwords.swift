@@ -239,9 +239,12 @@ struct ExternalPasswordManager: Identifiable, Hashable {
         ("Strongbox", "Strongbox.app", .openApp),
     ]
 
+    /// The last `detect()` result, so sign-in fields don't search the disk each time they're focused.
+    private static var detected: [ExternalPasswordManager]?
+
     static func detect() -> [ExternalPasswordManager] {
         let folders = ["/Applications", NSHomeDirectory() + "/Applications", "/Applications/Setapp"]
-        return known.compactMap { name, file, fill in
+        let found = known.compactMap { name, file, fill -> ExternalPasswordManager? in
             for folder in folders {
                 let url = URL(fileURLWithPath: folder).appendingPathComponent(file)
                 if FileManager.default.fileExists(atPath: url.path) {
@@ -250,12 +253,14 @@ struct ExternalPasswordManager: Identifiable, Hashable {
             }
             return nil
         }
+        detected = found
+        return found
     }
 
     static var current: ExternalPasswordManager? {
         let id = Settings.shared.passwordManager
         guard !id.isEmpty else { return nil }
-        return detect().first { $0.id == id }
+        return (detected ?? detect()).first { $0.id == id }
     }
 
     func open() { NSWorkspace.shared.open(appURL) }

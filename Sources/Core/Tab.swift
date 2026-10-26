@@ -44,6 +44,7 @@ final class Tab: NSObject, ObservableObject, Identifiable {
     let pull = PullToRefresh()
     private var mediaPermissions: [String: Bool] = [:]
     private var rememberedUser: (host: String, name: String, at: Date)?
+    private var lastCrash: Date?
 
     /// Saved accounts shown under a focused sign-in field, in page-view coordinates.
     struct LoginMenu: Equatable {
@@ -398,11 +399,13 @@ final class Tab: NSObject, ObservableObject, Identifiable {
                 if self?.host == host { self?.favicon = img }
             }
         case "hover":
-            hoverURL = body["url"] as? String
+            let link = body["url"] as? String
+            if hoverURL != link { hoverURL = link }
         case "top":
             pull.atTop = body["top"] as? Bool ?? true
         case "media":
-            isPlayingAudio = body["playing"] as? Bool ?? false
+            let playing = body["playing"] as? Bool ?? false
+            if isPlayingAudio != playing { isPlayingAudio = playing }
         case "loginFocus":
             guard Settings.shared.autofillPasswords else { return }
             let isNew = body["newPassword"] as? Bool ?? false
@@ -412,13 +415,13 @@ final class Tab: NSObject, ObservableObject, Identifiable {
             let x = (body["x"] as? Double) ?? 0, y = (body["y"] as? Double) ?? 0, w = (body["w"] as? Double) ?? 200
             loginMenu = LoginMenu(origin: CGPoint(x: x * zoom, y: y * zoom + 4), width: max(260, w * zoom), logins: saved, strongPassword: strong)
         case "loginBlur":
-            loginMenu = nil
+            if loginMenu != nil { loginMenu = nil }
         case "insecurePassword":
             insecureWarning = true
         case "loginUsername":
             if let host, let name = body["username"] as? String, !name.isEmpty { rememberedUser = (host, name, Date()) }
         case "loginSubmit":
-            loginMenu = nil
+            if loginMenu != nil { loginMenu = nil }
             offerToSave(username: body["username"] as? String ?? "", password: body["password"] as? String ?? "")
         default:
             break
@@ -620,12 +623,13 @@ extension Tab: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-        hoverURL = nil
-        loginMenu = nil
-        insecureWarning = false
+        // Each assignment redraws the views watching the tab, so only changes are made.
+        if hoverURL != nil { hoverURL = nil }
+        if loginMenu != nil { loginMenu = nil }
+        if insecureWarning { insecureWarning = false }
         if navigation !== internalNavigation {
-            failedURL = nil
-            isReader = false
+            if failedURL != nil { failedURL = nil }
+            if isReader { isReader = false }
         }
     }
 
@@ -633,12 +637,12 @@ extension Tab: WKNavigationDelegate {
         let host = webView.url?.host?.lowercased()
         let z = host.flatMap { Settings.shared.siteZoom[$0] } ?? Settings.shared.defaultZoom
         if abs(webView.pageZoom - z) > 0.001 { webView.pageZoom = z }
-        zoom = z
+        if zoom != z { zoom = z }
         if host != faviconHost {
             faviconHost = nil
             favicon = Favicons.shared.cached(host)
         }
-        isPlayingAudio = false
+        if isPlayingAudio { isPlayingAudio = false }
         browser?.tabDidNavigate(self)
     }
 
@@ -652,6 +656,18 @@ extension Tab: WKNavigationDelegate {
     }
 
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        // A page that keeps crashing its process would otherwise reload forever, using all the CPU.
+        if let last = lastCrash, Date().timeIntervalSince(last) < 15, let u = url ?? webView.url {
+            lastCrash = nil
+            let e = NSError(domain: "WebKitErrorDomain", code: 0, userInfo: [
+                NSLocalizedDescriptionKey: L("This page stopped working more than once, so Lumen stopped reloading it."),
+            ])
+            failedURL = u
+            internalLoad = true
+            internalNavigation = webView.loadHTMLString(Scripts.errorPage(url: u, error: e), baseURL: u)
+            return
+        }
+        lastCrash = Date()
         webView.reload()
     }
 

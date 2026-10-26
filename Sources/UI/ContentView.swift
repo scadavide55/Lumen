@@ -51,8 +51,11 @@ struct ContentView: View {
 struct BrowserLayout: View {
     @EnvironmentObject var b: BrowserState
     @EnvironmentObject var s: Settings
+    /// The sidebar width while its edge is dragged, saved to settings only when the drag ends.
+    @State private var dragWidth: Double?
 
     private var vertical: Bool { s.tabLayout == .vertical }
+    private var sidebarWidth: Double { dragWidth ?? s.sidebarWidth }
     private var sidebarShown: Bool { vertical && b.sidebarVisible }
     private var left: Bool { s.sidebarSide == .left }
     /// Navigation and the address live in the sidebar only when it sits next to the traffic lights.
@@ -64,16 +67,16 @@ struct BrowserLayout: View {
             if vertical {
                 HStack(spacing: 0) {
                     if sidebarShown && left {
-                        Sidebar(showsControls: controlsInSidebar).frame(width: s.sidebarWidth)
-                        ResizeHandle(side: .left)
+                        Sidebar(showsControls: controlsInSidebar).frame(width: sidebarWidth)
+                        ResizeHandle(side: .left, width: $dragWidth)
                     }
                     MainColumn(toolbar: !controlsInSidebar,
                                trafficSpace: !(sidebarShown && left),
                                leadingFlush: sidebarShown && left,
                                trailingFlush: sidebarShown && !left)
                     if sidebarShown && !left {
-                        ResizeHandle(side: .right)
-                        Sidebar(showsControls: false).frame(width: s.sidebarWidth)
+                        ResizeHandle(side: .right, width: $dragWidth)
+                        Sidebar(showsControls: false).frame(width: sidebarWidth)
                     }
                 }
                 if !b.sidebarVisible { PeekSidebar() }
@@ -248,8 +251,6 @@ struct WindowDragArea: NSViewRepresentable {
     func updateNSView(_ nsView: NSView, context: Context) {}
 
     final class DragView: NSView {
-        override var mouseDownCanMoveWindow: Bool { true }
-
         /// Moves the window by hand, since browser windows are not movable by the system.
         private func moveWindow(from down: NSEvent) {
             guard let window else { return }
@@ -313,6 +314,7 @@ struct SiteTint: View {
 
 struct ResizeHandle: View {
     let side: SidebarSide
+    @Binding var width: Double?
     @EnvironmentObject var s: Settings
     @State private var start: Double?
 
@@ -332,9 +334,13 @@ struct ResizeHandle: View {
                     let base = start ?? s.sidebarWidth
                     if start == nil { start = base }
                     let delta = side == .left ? v.translation.width : -v.translation.width
-                    s.sidebarWidth = min(420, max(180, base + delta))
+                    width = min(420, max(180, base + delta))
                 }
-                .onEnded { _ in start = nil }
+                .onEnded { _ in
+                    if let width { s.sidebarWidth = width }
+                    width = nil
+                    start = nil
+                }
         )
     }
 }

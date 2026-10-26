@@ -275,10 +275,6 @@ struct LumenCommands: Commands {
         openWindow(id: "library")
     }
 
-    private func openSettingsWindow() {
-        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-    }
-
     private func findAgain(backwards: Bool) {
         guard let b else { return }
         if b.findVisible {

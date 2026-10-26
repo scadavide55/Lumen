@@ -131,6 +131,8 @@ enum Scripts {
         return { user, pw };
       };
 
+      // Only tells Lumen when a menu may be showing, so scrolling doesn't send a message every frame.
+      let menuOpen = false;
       document.addEventListener('focusin', (e) => {
         const t = e.target;
         if (!(t instanceof HTMLInputElement)) return;
@@ -145,8 +147,9 @@ enum Scripts {
           /sign.?up|register|create|join|iscri|registra|inscri|nuova password|new password|nouveau mot/i.test(
             [scope.action || '', scope.id || '', scope.className || '', t.name, t.id, t.placeholder].join(' ')));
         post({ type: 'loginFocus', x: r.left, y: r.bottom, w: r.width, newPassword: isNew });
+        menuOpen = true;
       }, true);
-      const hide = () => post({ type: 'loginBlur' });
+      const hide = () => { if (menuOpen) { menuOpen = false; post({ type: 'loginBlur' }); } };
       document.addEventListener('mousedown', (e) => { if (!(e.target instanceof HTMLInputElement)) hide(); }, true);
       window.addEventListener('scroll', hide, { passive: true, capture: true });
 
@@ -310,14 +313,27 @@ enum Scripts {
         });
       } catch (e) {}
 
-      // Anything that still slips through is fast-forwarded.
-      setInterval(() => {
-        const player = document.querySelector('.html5-video-player');
-        if (!player || !player.classList.contains('ad-showing')) return;
+      // Anything that still slips through is fast-forwarded. The player is watched for its
+      // 'ad-showing' class instead of polling, so idle and background tabs cost nothing.
+      const skip = (player) => {
+        if (!player.classList.contains('ad-showing')) return;
         document.querySelectorAll('.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button').forEach(b => b.click());
         const v = player.querySelector('video');
         if (v && isFinite(v.duration) && v.duration > 0) v.currentTime = v.duration;
-      }, 300);
+      };
+      let current = null;
+      const watch = () => {
+        if (current && current.isConnected) return;
+        const player = document.querySelector('.html5-video-player');
+        if (!player || player === current) return;
+        current = player;
+        new MutationObserver(() => skip(player)).observe(player, { attributes: true, attributeFilter: ['class'] });
+        // Skip buttons and the ad's length can arrive after the class does.
+        player.addEventListener('loadedmetadata', () => skip(player), true);
+        player.addEventListener('timeupdate', () => skip(player), true);
+        skip(player);
+      };
+      new MutationObserver(watch).observe(document, { childList: true, subtree: true });
 
       const css = [
         'ytd-ad-slot-renderer', 'ytd-in-feed-ad-layout-renderer', 'ytd-banner-promo-renderer',

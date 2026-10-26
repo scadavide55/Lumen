@@ -164,7 +164,11 @@ struct PrivateLockView: View {
         .ignoresSafeArea()
         .contentShape(Rectangle())
         .onAppear { if NSApp.isActive && !b.lockedByUser { b.unlock() } }
-        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in b.unlock() }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            // Only the front window asks, so several locked windows don't stack Touch ID prompts,
+            // and a window you locked yourself waits for you.
+            DispatchQueue.main.async { if b.window?.isKeyWindow == true && !b.lockedByUser { b.unlock() } }
+        }
     }
 }
 

@@ -69,14 +69,22 @@ struct Bookmark: Codable, Identifiable, Hashable {
 
 final class Bookmarks: ObservableObject {
     static let shared = Bookmarks()
-    @Published private(set) var items: [Bookmark]
+    @Published private(set) var items: [Bookmark] {
+        didSet { urls = Set(items.map(\.url)) }
+    }
+    /// For `contains`, which the address bar asks on every redraw.
+    private var urls: Set<URL>
     private let file = JSONFile<[Bookmark]>("bookmarks.json")
 
-    private init() { items = file.load() ?? [] }
+    private init() {
+        let loaded = file.load() ?? []
+        items = loaded
+        urls = Set(loaded.map(\.url))
+    }
 
     func contains(_ url: URL?) -> Bool {
         guard let url else { return false }
-        return items.contains { $0.url == url }
+        return urls.contains(url)
     }
 
     func toggle(url: URL?, title: String) {
@@ -109,15 +117,15 @@ final class Bookmarks: ObservableObject {
 
     /// Adds bookmarks from another browser, skipping URLs already saved. Returns how many were added.
     func importItems(_ list: [(String, URL)]) -> Int {
-        var known = Set(items.map(\.url))
-        var added = 0
-        for (title, url) in list where !known.contains(url) {
-            known.insert(url)
-            items.append(Bookmark(title: title.isEmpty ? (url.host ?? url.absoluteString) : title, url: url))
-            added += 1
+        var known = urls
+        var new: [Bookmark] = []
+        for (title, url) in list where known.insert(url).inserted {
+            new.append(Bookmark(title: title.isEmpty ? (url.host ?? url.absoluteString) : title, url: url))
         }
-        if added > 0 { persist() }
-        return added
+        guard !new.isEmpty else { return 0 }
+        items += new
+        persist()
+        return new.count
     }
 
     /// Imports a Netscape bookmark file (the format Safari, Chrome and Firefox export).
@@ -125,16 +133,17 @@ final class Bookmarks: ObservableObject {
         let pattern = #"<A[^>]*HREF="([^"]+)"[^>]*>(.*?)</A>"#
         guard let re = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive, .dotMatchesLineSeparators]) else { return 0 }
         let ns = html as NSString
-        var added = 0
+        var known = urls
+        var new: [Bookmark] = []
         for m in re.matches(in: html, range: NSRange(location: 0, length: ns.length)) {
             let href = ns.substring(with: m.range(at: 1))
             let title = Self.unescape(ns.substring(with: m.range(at: 2)))
-            guard let url = URL(string: href), ["http", "https"].contains(url.scheme ?? ""), !contains(url) else { continue }
-            items.append(Bookmark(title: title.isEmpty ? (url.host ?? href) : title, url: url))
-            added += 1
+            guard let url = URL(string: href), ["http", "https"].contains(url.scheme ?? ""), known.insert(url).inserted else { continue }
+            new.append(Bookmark(title: title.isEmpty ? (url.host ?? href) : title, url: url))
         }
+        items += new
         persist()
-        return added
+        return new.count
     }
 
     func exportHTML() -> String {
@@ -241,11 +250,24 @@ final class History: ObservableObject {
 
     /// `search` on a background thread, so typing never waits for a large history.
     func searchInBackground(_ query: String, limit: Int = 8) async -> [HistoryEntry] {
+        await inBackground { entries, hay in History.search(query, entries: entries, haystacks: hay, limit: limit) }
+    }
+
+    /// Entries containing every word of `query`, newest first, found on a background thread.
+    func filterInBackground(_ query: String, limit: Int = 500) async -> [HistoryEntry] {
+        await inBackground { entries, hay in
+            let words = query.lowercased().split(separator: " ").map(String.init)
+            return Array(entries.indices.lazy.filter { i in words.allSatisfy { hay[i].contains($0) } }.prefix(limit).map { entries[$0] })
+        }
+    }
+
+    /// Runs `work` off the main thread with the history and its lowercase index, building the index if needed.
+    private func inBackground(_ work: @escaping @Sendable ([HistoryEntry], [String]) -> [HistoryEntry]) async -> [HistoryEntry] {
         let entries = entries
         let cached = haystacks
         let (hits, built) = await Task.detached(priority: .userInitiated) {
             let hay = cached ?? History.haystacks(for: entries)
-            return (History.search(query, entries: entries, haystacks: hay, limit: limit), hay)
+            return (work(entries, hay), hay)
         }.value
         // Keep the index only if the history didn't change while it was being built.
         if cached == nil, built.count == self.entries.count, self.entries.first?.id == entries.first?.id { haystacks = built }
@@ -312,6 +334,7 @@ final class Session {
     private let file = JSONFile<[WindowSnapshot]>("session.json")
     private var pending: [WindowSnapshot] = []
     private var extraWindowsClaimed = false
+    private var pendingSave: DispatchWorkItem?
 
     private init() {
         if Settings.shared.restoreSession && !WebApp.isActive { pending = file.load() ?? [] }
@@ -326,15 +349,26 @@ final class Session {
         return pending.count
     }
 
+    /// Waits for things to settle before taking snapshots: reading every tab's back/forward
+    /// history is too costly to repeat on each navigation.
     func scheduleSave() {
         guard !WebApp.isActive else { return }
-        let snaps = WindowRegistry.shared.browsers.filter { !$0.isPrivate }.map { $0.snapshot() }
-        guard !snaps.isEmpty else { return }
-        file.save(snaps, delay: 2)
+        pendingSave?.cancel()
+        let item = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            self.pendingSave = nil
+            let snaps = WindowRegistry.shared.browsers.filter { !$0.isPrivate }.map { $0.snapshot() }
+            guard !snaps.isEmpty else { return }
+            self.file.save(snaps, delay: 0)
+        }
+        pendingSave = item
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: item)
     }
 
     func saveNow() {
         guard !WebApp.isActive else { return }
+        pendingSave?.cancel()
+        pendingSave = nil
         let snaps = WindowRegistry.shared.browsers.filter { !$0.isPrivate }.map { $0.snapshot() }
         guard !snaps.isEmpty else { return }
         file.saveNow(snaps)

@@ -554,6 +554,7 @@
 "Theme" = "Tema";
 "This page isn't secure. Passwords you type here can be read by others on your network." = "Questa pagina non è sicura. Le password che scrivi qui possono essere lette da altri sulla tua rete.";
 "This page says" = "Questa pagina dice";
+"This page stopped working more than once, so Lumen stopped reloading it." = "Questa pagina ha smesso di funzionare più volte, quindi Lumen ha smesso di ricaricarla.";
 "This site doesn't support a secure connection" = "Questo sito non supporta una connessione sicura";
 "This site requires a username and password." = "Questo sito richiede nome utente e password.";
 "Time range" = "Intervallo di tempo";

@@ -156,7 +156,7 @@ final class BrowserState: ObservableObject {
         switch WebApp.isActive ? .automatic : Settings.shared.popupMode {
         case .never, .automatic:
             guard Settings.shared.popupMode == .never || sized || WebApp.isActive else { break }
-            let popup = PopupWindow(configuration: configuration, features: features, parent: window) { [weak self] p in
+            let popup = PopupWindow(configuration: configuration, features: features, opener: self) { [weak self] p in
                 self?.popups.removeAll { $0 === p }
             }
             popups.append(popup)
@@ -240,6 +240,8 @@ final class BrowserState: ObservableObject {
         guard !closedTabs.isEmpty else { return }
         let (snap, index) = closedTabs.remove(at: position ?? closedTabs.count - 1)
         let tab = Tab(browser: self, url: snap.url, title: snap.title, state: snap.state, pinned: snap.pinned)
+        // Back into its group, if the group is still there.
+        if !snap.pinned, let g = snap.group, groups.contains(where: { $0.id == g }) { tab.groupID = g }
         tabs.insert(tab, at: min(index, tabs.count))
         normalizeOrder()
         select(tab)
@@ -506,13 +508,20 @@ final class BrowserState: ObservableObject {
         window?.makeFirstResponder(nil)
     }
 
+    private var unlocking = false
+
     func unlock() {
+        guard locked, !unlocking else { return }
         let context = LAContext()
         var error: NSError?
         guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else { finishUnlock(); return }
+        unlocking = true
         let reason = L(isPrivate ? "unlock your private window" : "unlock this window")
         context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { ok, _ in
-            DispatchQueue.main.async { if ok { self.finishUnlock() } }
+            DispatchQueue.main.async {
+                self.unlocking = false
+                if ok { self.finishUnlock() }
+            }
         }
     }
 

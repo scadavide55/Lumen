@@ -51,12 +51,11 @@ struct HistoryList: View {
     @ObservedObject private var history = History.shared
     @State private var query = ""
     @State private var selection = Set<UUID>()
+    /// Search results, found off the main thread; nil while the search field is empty.
+    @State private var results: [HistoryEntry]?
 
     private var groups: [(Date, [HistoryEntry])] {
-        let q = query.lowercased()
-        let list = q.isEmpty
-            ? Array(history.entries.prefix(3000))
-            : history.entries.filter { ($0.title + " " + $0.url.absoluteString).lowercased().contains(q) }
+        let list = query.isEmpty ? Array(history.entries.prefix(3000)) : (results ?? [])
         let cal = Calendar.current
         let grouped = Dictionary(grouping: list) { cal.startOfDay(for: $0.date) }
         return grouped.sorted { $0.key > $1.key }.map { ($0.key, $0.value.sorted { $0.date > $1.date }) }
@@ -90,7 +89,7 @@ struct HistoryList: View {
             }
         }
         .overlay {
-            if groups.isEmpty {
+            if groups.isEmpty && (query.isEmpty || results != nil) {
                 ContentUnavailableView(query.isEmpty ? LocalizedStringKey("No History") : "No Results", systemImage: "clock")
             }
         }
@@ -104,6 +103,14 @@ struct HistoryList: View {
         }
         .onDeleteCommand { history.remove(selection) }
         .searchable(text: $query, placement: .toolbar, prompt: "Search history")
+        .task(id: "\(query)\u{1}\(history.entries.count)") {
+            guard !query.isEmpty else { results = nil; return }
+            // Waits for a pause in typing; a newer keystroke cancels this one.
+            try? await Task.sleep(for: .milliseconds(120))
+            guard !Task.isCancelled else { return }
+            let found = await history.filterInBackground(query)
+            if !Task.isCancelled { results = found }
+        }
         .toolbar {
             Menu("Clear History") {
                 Button("Last Hour") { history.clear(since: Date().addingTimeInterval(-3600)) }

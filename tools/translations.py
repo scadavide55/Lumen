@@ -4,6 +4,7 @@ import os
 
 T = {
     '%@ is ready. You have Lumen %@.': ('%1$@ è pronto. Hai Lumen %2$@.', '%1$@ est prêt. Vous avez Lumen %2$@.'),
+    'This page stopped working more than once, so Lumen stopped reloading it.': ('Questa pagina ha smesso di funzionare più volte, quindi Lumen ha smesso di ricaricarla.', "Cette page a cessé de fonctionner plusieurs fois, donc Lumen a arrêté de la recharger."),
     'About Lumen': ('Informazioni su Lumen', 'À propos de Lumen'),
     'Add to New Group': ('Aggiungi a nuovo gruppo', 'Ajouter à un nouveau groupe'),
     'After One Day': ('Dopo un giorno', 'Après un jour'),

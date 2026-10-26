@@ -30,7 +30,11 @@ struct Sidebar: View {
                     ForEach(entries) { entry in
                         switch entry {
                         case .header(let g): GroupHeader(group: g)
-                        case .tab(let t, let grouped): TabRow(tab: t, grouped: grouped)
+                        case .tab(let t, let grouped):
+                            TabRow(tab: t, browser: b, grouped: grouped, selected: b.selectedID == t.id,
+                                   inSplit: b.splitID == t.id, groupTint: grouped ? b.groups.first { $0.id == t.groupID }?.tint : nil,
+                                   compact: s.compactTabs)
+                                .equatable()
                         }
                     }
                 }
@@ -208,15 +212,25 @@ struct GroupHeader: View {
     }
 }
 
-struct TabRow: View {
+/// Gets what it shows from the sidebar as plain values instead of watching the whole window,
+/// so opening the command bar or switching tabs only redraws the rows that change.
+struct TabRow: View, Equatable {
     @ObservedObject var tab: Tab
+    let browser: BrowserState
     var grouped = false
-    @EnvironmentObject var b: BrowserState
-    @EnvironmentObject var s: Settings
+    let selected: Bool
+    let inSplit: Bool
+    let groupTint: Color?
+    let compact: Bool
     @Environment(\.colorScheme) private var scheme
     @State private var hover = false
 
-    private var selected: Bool { b.selectedID == tab.id }
+    private var b: BrowserState { browser }
+
+    static func == (l: TabRow, r: TabRow) -> Bool {
+        l.tab === r.tab && l.browser === r.browser && l.grouped == r.grouped && l.selected == r.selected
+            && l.inSplit == r.inSplit && l.groupTint == r.groupTint && l.compact == r.compact
+    }
 
     var body: some View {
         HStack(spacing: 8) {
@@ -234,7 +248,7 @@ struct TabRow: View {
                 .foregroundStyle(.secondary)
                 .help(tab.isMuted ? LocalizedStringKey("Unmute tab") : "Mute tab")
             }
-            if b.splitID == tab.id {
+            if inSplit {
                 Image(systemName: "rectangle.split.2x1").font(.system(size: 10)).foregroundStyle(.secondary)
             }
             if hover || selected {
@@ -242,10 +256,10 @@ struct TabRow: View {
             }
         }
         .padding(.horizontal, 8)
-        .frame(height: s.compactTabs ? 28 : 34)
+        .frame(height: compact ? 28 : 34)
         .overlay(alignment: .leading) {
-            if grouped, let g = b.groups.first(where: { $0.id == tab.groupID }) {
-                Capsule().fill(g.tint).frame(width: 2.5).padding(.vertical, 7).offset(x: -6)
+            if grouped, let groupTint {
+                Capsule().fill(groupTint).frame(width: 2.5).padding(.vertical, 7).offset(x: -6)
             }
         }
         .padding(.leading, grouped ? 10 : 0)
@@ -258,12 +272,11 @@ struct TabRow: View {
         .onTapGesture { b.select(tab) }
         .onHover { hover = $0 }
         .contextMenu { TabMenu(tab: tab) }
-        .background(NoWindowDrag())
         .draggable(tab.id.uuidString) {
             Label(tab.title, systemImage: "globe").padding(6).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 6))
         }
         .dropDestination(for: String.self) { items, location in
-            let h: CGFloat = s.compactTabs ? 28 : 34
+            let h: CGFloat = compact ? 28 : 34
             let placement: BrowserState.DropPlacement = location.y < h * 0.28 ? .before : (location.y > h * 0.72 ? .after : .group)
             return b.handleDrop(items, on: tab, placement: placement, pinned: false)
         }
@@ -276,20 +289,26 @@ struct PinnedGrid: View {
 
     var body: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 44), spacing: 6)], spacing: 6) {
-            ForEach(b.pinnedTabs) { PinnedTile(tab: $0) }
+            ForEach(b.pinnedTabs) { t in PinnedTile(tab: t, browser: b, selected: b.selectedID == t.id).equatable() }
         }
         .dropDestination(for: String.self) { items, _ in b.handleDrop(items, before: nil, pinned: true) }
     }
 }
 
-struct PinnedTile: View {
+struct PinnedTile: View, Equatable {
     @ObservedObject var tab: Tab
-    @EnvironmentObject var b: BrowserState
+    let browser: BrowserState
+    let selected: Bool
     @Environment(\.colorScheme) private var scheme
     @State private var hover = false
 
+    private var b: BrowserState { browser }
+
+    static func == (l: PinnedTile, r: PinnedTile) -> Bool {
+        l.tab === r.tab && l.browser === r.browser && l.selected == r.selected
+    }
+
     var body: some View {
-        let selected = b.selectedID == tab.id
         RoundedRectangle(cornerRadius: 10, style: .continuous)
             .fill(selected ? Color.white.opacity(scheme == .dark ? 0.14 : 0.8) : Color.primary.opacity(hover ? 0.1 : 0.06))
             .frame(height: 40)
@@ -304,7 +323,6 @@ struct PinnedTile: View {
             .onTapGesture { b.select(tab) }
             .onHover { hover = $0 }
             .contextMenu { TabMenu(tab: tab) }
-            .background(NoWindowDrag())
             .draggable(tab.id.uuidString)
             .dropDestination(for: String.self) { items, _ in b.handleDrop(items, before: tab, pinned: true) }
             .help(tab.title)
@@ -406,6 +424,7 @@ struct TabStrip: View {
     /// Compact: the strip shares the toolbar row and the selected tab shows the address.
     var compact = false
     @EnvironmentObject var b: BrowserState
+    @EnvironmentObject var s: Settings
 
     var body: some View {
         GeometryReader { geo in
@@ -473,8 +492,11 @@ extension TabStrip {
     }
 
     func chip(_ t: Tab, _ width: CGFloat) -> some View {
-        let selectedWide = compact && t.id == b.selectedID
-        return TabChip(tab: t, width: t.isPinned ? 36 : (selectedWide ? min(420, max(220, width + 120)) : width), compact: compact)
+        let selected = t.id == b.selectedID
+        let selectedWide = compact && selected
+        return TabChip(tab: t, browser: b, selected: selected, alwaysShowTitles: s.alwaysShowTitles,
+                       width: t.isPinned ? 36 : (selectedWide ? min(420, max(220, width + 120)) : width), compact: compact)
+            .equatable()
     }
 }
 
@@ -556,27 +578,35 @@ struct CompactBar: View {
     }
 }
 
-struct TabChip: View {
+/// Like `TabRow`, takes plain values so only the chips that change are redrawn.
+struct TabChip: View, Equatable {
     @ObservedObject var tab: Tab
+    let browser: BrowserState
+    let selected: Bool
+    let alwaysShowTitles: Bool
     let width: CGFloat
     var compact = false
-    @EnvironmentObject var s: Settings
-    @EnvironmentObject var b: BrowserState
     @Environment(\.colorScheme) private var scheme
     @State private var hover = false
 
+    private var b: BrowserState { browser }
+
+    static func == (l: TabChip, r: TabChip) -> Bool {
+        l.tab === r.tab && l.browser === r.browser && l.selected == r.selected
+            && l.alwaysShowTitles == r.alwaysShowTitles && l.width == r.width && l.compact == r.compact
+    }
+
     var body: some View {
-        let selected = b.selectedID == tab.id
         let showsAddress = compact && selected && !tab.isPinned
         HStack(spacing: 6) {
-            if showsAddress && !s.alwaysShowTitles && tab.url != nil {
+            if showsAddress && !alwaysShowTitles && tab.url != nil {
                 Image(systemName: tab.url?.scheme == "https" ? "lock.fill" : "exclamationmark.triangle")
                     .font(.system(size: 10)).foregroundStyle(.secondary)
             } else {
                 FaviconView(tab: tab, size: 14)
             }
             if !tab.isPinned {
-                Text(showsAddress && !s.alwaysShowTitles ? (tab.url.map { InputResolver.displayHost($0) } ?? L("Search or enter address")) : tab.title)
+                Text(showsAddress && !alwaysShowTitles ? (tab.url.map { InputResolver.displayHost($0) } ?? L("Search or enter address")) : tab.title)
                     .font(.system(size: 12, weight: showsAddress ? .medium : .regular)).lineLimit(1)
                 Spacer(minLength: 0)
                 if tab.isPlayingAudio || tab.isMuted {
@@ -604,7 +634,6 @@ struct TabChip: View {
         }
         .onHover { hover = $0 }
         .contextMenu { TabMenu(tab: tab) }
-        .background(NoWindowDrag())
         .draggable(tab.id.uuidString)
         .dropDestination(for: String.self) { items, location in
             let placement: BrowserState.DropPlacement = tab.isPinned ? .before
@@ -612,19 +641,6 @@ struct TabChip: View {
             return b.handleDrop(items, on: tab, placement: placement, pinned: tab.isPinned)
         }
         .help(tab.title)
-    }
-}
-
-/// Marks a tab as a place where pressing and dragging moves the tab, not the window.
-/// Tabs along the top sit in the title bar, which macOS otherwise treats as a handle for the window.
-struct NoWindowDrag: NSViewRepresentable {
-    func makeNSView(context: Context) -> NSView { Blocker() }
-    func updateNSView(_ nsView: NSView, context: Context) {}
-
-    final class Blocker: NSView {
-        override var mouseDownCanMoveWindow: Bool { false }
-        // Clicks still go to the tab itself.
-        override func hitTest(_ point: NSPoint) -> NSView? { nil }
     }
 }
 
