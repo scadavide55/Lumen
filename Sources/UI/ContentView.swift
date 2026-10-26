@@ -250,9 +250,20 @@ struct WindowDragArea: NSViewRepresentable {
     final class DragView: NSView {
         override var mouseDownCanMoveWindow: Bool { true }
 
+        /// Moves the window by hand, since browser windows are not movable by the system.
+        private func moveWindow(from down: NSEvent) {
+            guard let window else { return }
+            let start = NSEvent.mouseLocation
+            let origin = window.frame.origin
+            while let e = window.nextEvent(matching: [.leftMouseDragged, .leftMouseUp]), e.type == .leftMouseDragged {
+                let now = NSEvent.mouseLocation
+                window.setFrameOrigin(NSPoint(x: origin.x + now.x - start.x, y: origin.y + now.y - start.y))
+            }
+        }
+
         override func mouseDown(with event: NSEvent) {
             guard event.clickCount == 2 else {
-                window?.performDrag(with: event)
+                moveWindow(from: event)
                 return
             }
             switch UserDefaults.standard.string(forKey: "AppleActionOnDoubleClick") ?? "Maximize" {

@@ -80,6 +80,8 @@ final class BrowserState: ObservableObject {
         self.window = window
         window.tabbingMode = .disallowed
         window.titlebarAppearsTransparent = true
+        // The title bar holds tabs, so macOS must not drag the window from it; WindowDragArea moves it instead.
+        window.isMovable = false
         window.titleVisibility = .hidden
         window.title = current?.title ?? "Lumen"
         WindowRegistry.shared.lastFocused = self
