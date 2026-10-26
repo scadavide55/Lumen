@@ -1,8 +1,29 @@
+<div align="center">
+
+<img src="docs/assets/icon.png" alt="Lumen icon" width="128" height="128">
+
 # Lumen
 
-A minimal, fast and light browser for macOS, built on WebKit. Lumen blocks ads and trackers natively, and you can turn the blocker off with one click.
+**The quiet browser for your Mac.**
 
-> **Status: 1.5.1 Beta.** Most features are in place, but some haven't been tested much yet. Expect bugs.
+A minimal, fast and private macOS browser built on WebKit, with a native ad blocker you can turn off in one click.
+
+[![Release](https://img.shields.io/github/v/release/scadavide55/Lumen?include_prereleases&label=release&style=flat-square&color=6e56cf)](https://github.com/scadavide55/Lumen/releases)
+[![Downloads](https://img.shields.io/github/downloads/scadavide55/Lumen/total?style=flat-square&color=2ea44f)](https://github.com/scadavide55/Lumen/releases)
+[![macOS](https://img.shields.io/badge/macOS-14%2B-000000?style=flat-square&logo=apple&logoColor=white)](#requirements)
+[![Universal](https://img.shields.io/badge/Apple%20silicon%20%2B%20Intel-universal-555555?style=flat-square)](#requirements)
+[![Swift](https://img.shields.io/badge/Swift-SwiftUI-F05138?style=flat-square&logo=swift&logoColor=white)](Sources)
+[![WebKit](https://img.shields.io/badge/engine-WebKit-1f6feb?style=flat-square&logo=safari&logoColor=white)](https://webkit.org)
+[![Website](https://img.shields.io/badge/website-online-0a7cff?style=flat-square)](https://scadavide55.github.io/Lumen/)
+
+[**Download**](https://github.com/scadavide55/Lumen/releases) · [**Website**](https://scadavide55.github.io/Lumen/) · [**Release notes**](https://github.com/scadavide55/Lumen/releases)
+
+<img src="docs/assets/screenshot.jpg" alt="The Lumen window with the sidebar and the start page" width="860">
+
+</div>
+
+> [!NOTE]
+> **Lumen 1.5.1 is a beta.** Most features are in place, but some haven't been tested much yet. Expect bugs, and please report them in [Issues](https://github.com/scadavide55/Lumen/issues).
 
 ## Features
 
