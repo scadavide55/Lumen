@@ -935,7 +935,8 @@ private struct TourStep: View {
                     .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
             }
-            .frame(width: 680)
+            // Fits beside the setup sidebar; a fixed wider grid pushed the whole sheet past its edges.
+            .frame(maxWidth: 600)
         }
     }
 }
@@ -969,7 +970,7 @@ struct ShortcutList: View {
                                 .padding(.horizontal, 6).padding(.vertical, 2)
                                 .background(Color.primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 5))
                                 .fixedSize()
-                            Text(item.1).font(.system(size: 12.5)).lineLimit(1)
+                            Text(item.1).font(.system(size: 12.5)).lineLimit(2).fixedSize(horizontal: false, vertical: true)
                         }
                     }
                 }
@@ -982,7 +983,7 @@ struct ShortcutList: View {
 private struct ShortcutsStep: View {
     var body: some View {
         StepPage(symbol: "keyboard", title: "Keyboard shortcuts", subtitle: "Everything has a shortcut. You'll find them all in the menus too.") {
-            ShortcutList().frame(width: 700)
+            ShortcutList().frame(maxWidth: 600)
         }
     }
 }
