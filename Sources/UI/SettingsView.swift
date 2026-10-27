@@ -11,6 +11,7 @@ struct SettingsView: View {
             SearchPane().tabItem { Label("Search", systemImage: "magnifyingglass") }
             SitesPane().tabItem { Label("Sites", systemImage: "globe") }
             AIPane().tabItem { Label("AI", systemImage: "sparkles") }
+            ExtensionsPane().tabItem { Label("Extensions", systemImage: "puzzlepiece.extension") }
             AdvancedPane().tabItem { Label("Advanced", systemImage: "wrench.and.screwdriver") }
         }
         .frame(width: 600, height: 560)
@@ -485,7 +486,27 @@ struct SearchPane: View {
 
 struct SitesPane: View {
     @Bindable private var s = Settings.shared
-    @State private var editing: SiteStyle?
+    @State private var editing: EditTarget?
+
+    struct EditTarget: Identifiable {
+        let id = UUID()
+        let host: String?
+    }
+
+    /// "Dark · 3 hidden · CSS"
+    static func summary(_ style: SiteStyle) -> String {
+        var parts: [String] = []
+        if style.theme == .dark { parts.append(L("Dark")) }
+        if style.font != .site { parts.append(L("Font")) }
+        if style.width != .site { parts.append(L("Width")) }
+        if style.hideFloating { parts.append(L("No pop-ups")) }
+        if style.hideImages { parts.append(L("No images")) }
+        if style.reduceMotion { parts.append(L("No animations")) }
+        if !style.hidden.isEmpty { parts.append(String(format: L("%d hidden"), style.hidden.count)) }
+        if !style.css.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { parts.append("CSS") }
+        if !style.js.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { parts.append("JavaScript") }
+        return parts.joined(separator: " · ")
+    }
 
     var body: some View {
         Form {
@@ -500,20 +521,24 @@ struct SitesPane: View {
                     HStack {
                         Toggle("", isOn: Binding(
                             get: { style.enabled },
-                            set: { on in s.siteStyles = s.siteStyles.map { $0.id == style.id ? SiteStyle(id: $0.id, host: $0.host, css: $0.css, enabled: on) : $0 } }
+                            set: { on in var copy = style; copy.enabled = on; s.saveSiteStyle(copy) }
                         )).labelsHidden()
-                        Text(style.host)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(style.host)
+                            Text(SitesPane.summary(style)).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                        }
                         Spacer()
-                        Button("Edit") { editing = style }
+                        Button("Edit…") { editing = EditTarget(host: style.host) }
                         Button { s.siteStyles.removeAll { $0.id == style.id } } label: { Image(systemName: "minus.circle.fill") }
                             .buttonStyle(.plain).foregroundStyle(.secondary)
+                            .help("Remove")
                     }
                 }
-                Button("Add Site Style…") { editing = SiteStyle(host: "", css: "") }
+                Button("Customize a Site…") { editing = EditTarget(host: nil) }
             } header: {
-                Text("Site styles")
+                Text("Customized sites")
             } footer: {
-                Text("Your own CSS for any site: hide distractions, change fonts, restyle pages. Applies to subdomains too.")
+                Text("Change a site's colours, font and width, hide parts of it, or add your own CSS and JavaScript. On any page, choose Customize This Site from the ⋯ menu or the command bar.")
             }
             Section("Camera and microphone") {
                 if s.mediaPermissions.isEmpty {
@@ -554,49 +579,9 @@ struct SitesPane: View {
             }
         }
         .formStyle(.grouped)
-        .sheet(item: $editing) { style in
-            SiteStyleEditor(style: style) { saved in
-                if let i = s.siteStyles.firstIndex(where: { $0.id == saved.id }) {
-                    s.siteStyles[i] = saved
-                } else {
-                    s.siteStyles.append(saved)
-                }
-            }
+        .sheet(item: $editing) { target in
+            SiteCustomizer(host: target.host)
         }
-    }
-}
-
-struct SiteStyleEditor: View {
-    @State var style: SiteStyle
-    let save: (SiteStyle) -> Void
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Site Style").font(.title3.weight(.semibold))
-            TextField("Site, for example youtube.com", text: $style.host)
-            TextEditor(text: $style.css)
-                .font(.system(size: 12, design: .monospaced))
-                .frame(minHeight: 220)
-                .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.primary.opacity(0.15)))
-            Text("Example: #comments, .sidebar { display: none !important; }").font(.caption).foregroundStyle(.secondary)
-            HStack {
-                Spacer()
-                Button("Cancel") { dismiss() }.keyboardShortcut(.cancelAction)
-                Button("Save") {
-                    var s = style
-                    let raw = s.host.trimmingCharacters(in: .whitespaces).lowercased()
-                    s.host = (URL(string: raw.contains("://") ? raw : "https://" + raw)?.host ?? raw)
-                        .replacingOccurrences(of: "www.", with: "", options: .anchored)
-                    save(s)
-                    dismiss()
-                }
-                .keyboardShortcut(.defaultAction)
-                .disabled(style.host.trimmingCharacters(in: .whitespaces).isEmpty)
-            }
-        }
-        .padding(20)
-        .frame(width: 480)
     }
 }
 

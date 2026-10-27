@@ -11,14 +11,26 @@ final class BrowserState {
     let profileID: UUID?
     var profile: Profile? { profileID.flatMap { id in Settings.shared.profiles.first { $0.id == id } } }
 
-    var tabs: [Tab] = [] { didSet { sessionChanged() } }
+    var tabs: [Tab] = [] {
+        didSet {
+            sessionChanged()
+            if !isPrivate { ExtensionEvents.tabsChanged(from: oldValue, to: tabs) }
+        }
+    }
     var groups: [TabGroup] = []
     /// Tabs picked with ⌘-click or ⇧-click, to move, group or close together.
     var marked: Set<UUID> = []
     /// Where ⇧-click ranges start.
     @ObservationIgnored var markAnchor: UUID?
     @ObservationIgnored private var popups: [PopupWindow] = []
-    var selectedID: UUID? { didSet { sessionChanged() } }
+    var selectedID: UUID? {
+        didSet {
+            sessionChanged()
+            if selectedID != oldValue, let t = current {
+                ExtensionEvents.activated(t, previous: oldValue.flatMap { id in tabs.first { $0.id == id } })
+            }
+        }
+    }
     var splitID: UUID? { didSet { sessionChanged() } }
     var sidebarVisible: Bool {
         didSet { if !isPrivate { Settings.shared.sidebarVisible = sidebarVisible } }
@@ -29,6 +41,8 @@ final class BrowserState {
     var showOnboarding = false
     var locked = false
     var showInstallApp = false
+    /// The Customize Site panel for the current tab's site.
+    var customizingSite = false
     var assistantVisible = false { didSet { if !assistantVisible { assistantExpanded = false } } }
     /// The assistant fills the window, as a chat app.
     var assistantExpanded = false
@@ -41,6 +55,9 @@ final class BrowserState {
     @ObservationIgnored private var lastOpened: (opener: UUID, tab: UUID)?
     @ObservationIgnored private var timer: Timer?
     @ObservationIgnored private var keyObserver: NSObjectProtocol?
+    @ObservationIgnored private var closeObserver: NSObjectProtocol?
+    /// Set when the window closes. Its state can outlive the window for a while, but it's never saved or offered again.
+    @ObservationIgnored private(set) var isClosed = false
     @ObservationIgnored private var lockObserver: NSObjectProtocol?
 
     var current: Tab? { tabs.first { $0.id == selectedID } }
@@ -59,6 +76,7 @@ final class BrowserState {
         dataStore = isPrivate ? .nonPersistent() : profile.map { WKWebsiteDataStore(forIdentifier: $0.id) } ?? .default()
         sidebarVisible = Settings.shared.sidebarVisible
         WindowRegistry.shared.add(self)
+        ExtensionEvents.openedWindow(self)
 
         if let app = WebApp.url {
             newTab(url: app)
@@ -96,6 +114,7 @@ final class BrowserState {
         timer?.invalidate()
         if let keyObserver { NotificationCenter.default.removeObserver(keyObserver) }
         if let lockObserver { NotificationCenter.default.removeObserver(lockObserver) }
+        if let closeObserver { NotificationCenter.default.removeObserver(closeObserver) }
         if let spareObserver { NotificationCenter.default.removeObserver(spareObserver) }
         tabs.forEach { $0.close() }
         // Closing a window changes what the next launch restores.
@@ -114,7 +133,22 @@ final class BrowserState {
         WindowRegistry.shared.lastFocused = self
         keyObserver = NotificationCenter.default.addObserver(forName: NSWindow.didBecomeKeyNotification, object: window, queue: .main) { [weak self] _ in
             WindowRegistry.shared.lastFocused = self
+            if let self { ExtensionEvents.focused(self) }
         }
+        closeObserver = NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: window, queue: .main) { [weak self] _ in
+            self?.windowClosed()
+        }
+    }
+
+    /// The window closed: it leaves the session and the extensions' window list, and its tabs stop.
+    private func windowClosed() {
+        guard !isClosed else { return }
+        isClosed = true
+        ExtensionEvents.closedWindow(self)
+        // Its pages stop now (sound, video, timers), even if something still holds on to the window's state.
+        for t in tabs { t.close() }
+        if WindowRegistry.shared.lastFocused === self { WindowRegistry.shared.lastFocused = nil }
+        if !isPrivate { Session.shared.scheduleSave() }
     }
 
     private func restore(_ snap: WindowSnapshot) {

@@ -179,11 +179,93 @@ enum MediaPermission {
     }
 }
 
+/// How a site looks in Lumen: ready-made options, elements picked on the page to hide, and your own CSS and JavaScript.
 struct SiteStyle: Codable, Identifiable, Hashable {
+    enum Theme: String, Codable, CaseIterable { case site, dark }
+    enum Font: String, Codable, CaseIterable { case site, system, serif, mono }
+    enum Width: String, Codable, CaseIterable { case site, narrow, medium }
+
     var id = UUID()
     var host: String
     var css: String
     var enabled = true
+    var theme = Theme.site
+    var font = Font.site
+    var width = Width.site
+    var hideFloating = false
+    var hideImages = false
+    var reduceMotion = false
+    /// CSS selectors of elements picked on the page to hide.
+    var hidden: [String] = []
+    /// Your own JavaScript, run in the page when it has loaded.
+    var js = ""
+
+    init(id: UUID = UUID(), host: String, css: String = "", enabled: Bool = true) {
+        self.id = id
+        self.host = host
+        self.css = css
+        self.enabled = enabled
+    }
+
+    // Styles saved before these options existed have only host, css and enabled.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        host = try c.decodeIfPresent(String.self, forKey: .host) ?? ""
+        css = try c.decodeIfPresent(String.self, forKey: .css) ?? ""
+        enabled = try c.decodeIfPresent(Bool.self, forKey: .enabled) ?? true
+        theme = (try? c.decodeIfPresent(Theme.self, forKey: .theme)) ?? .site
+        font = (try? c.decodeIfPresent(Font.self, forKey: .font)) ?? .site
+        width = (try? c.decodeIfPresent(Width.self, forKey: .width)) ?? .site
+        hideFloating = try c.decodeIfPresent(Bool.self, forKey: .hideFloating) ?? false
+        hideImages = try c.decodeIfPresent(Bool.self, forKey: .hideImages) ?? false
+        reduceMotion = try c.decodeIfPresent(Bool.self, forKey: .reduceMotion) ?? false
+        hidden = try c.decodeIfPresent([String].self, forKey: .hidden) ?? []
+        js = try c.decodeIfPresent(String.self, forKey: .js) ?? ""
+    }
+
+    /// "github.com" from "https://www.github.com/x".
+    static func normalizedHost(_ raw: String) -> String {
+        let r = raw.trimmingCharacters(in: .whitespaces).lowercased()
+        return (URL(string: r.contains("://") ? r : "https://" + r)?.host ?? r)
+            .replacingOccurrences(of: "www.", with: "", options: .anchored)
+    }
+
+    func matches(_ host: String?) -> Bool {
+        guard let h = host?.lowercased(), !self.host.isEmpty else { return false }
+        return h == self.host || h.hasSuffix("." + self.host)
+    }
+
+    var isEmpty: Bool {
+        theme == .site && font == .site && width == .site && !hideFloating && !hideImages && !reduceMotion
+            && hidden.isEmpty && css.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && js.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    /// The dark theme, applied by the page script only to pages that aren't dark already.
+    static let darkCSS = "html{filter:invert(.92) hue-rotate(180deg)!important;background:#fff!important}"
+        + "img,video,picture,canvas,iframe,embed,object,[style*=\"background-image\"]{filter:invert(1) hue-rotate(180deg)!important}"
+
+    /// Everything but the dark theme and your JavaScript, as one style sheet.
+    var effectiveCSS: String {
+        var parts: [String] = []
+        switch font {
+        case .site: break
+        case .system: parts.append("body,body *:not(code):not(pre):not(kbd):not(samp){font-family:-apple-system,system-ui,sans-serif!important}")
+        case .serif: parts.append("body,body *:not(code):not(pre):not(kbd):not(samp){font-family:'New York',ui-serif,Georgia,serif!important}")
+        case .mono: parts.append("body,body *{font-family:ui-monospace,Menlo,monospace!important}")
+        }
+        switch width {
+        case .site: break
+        case .narrow: parts.append("body{max-width:760px!important;margin-left:auto!important;margin-right:auto!important}")
+        case .medium: parts.append("body{max-width:1100px!important;margin-left:auto!important;margin-right:auto!important}")
+        }
+        if hideImages { parts.append("img,picture,video,svg image,[role=img]{visibility:hidden!important}") }
+        if reduceMotion { parts.append("*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}") }
+        if !hidden.isEmpty { parts.append(hidden.joined(separator: ",\n") + "{display:none!important}") }
+        if !css.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { parts.append(css) }
+        return parts.joined(separator: "\n")
+    }
 }
 
 // MARK: - Persisted preference wrapper
@@ -320,6 +402,18 @@ final class Settings: Observable {
 
     // Sites
     @Pref("siteStyles") var siteStyles: [SiteStyle] = []
+
+    /// The style for a site, if it has one.
+    func siteStyle(for host: String?) -> SiteStyle? {
+        siteStyles.filter { $0.matches(host) }.max { $0.host.count < $1.host.count }
+    }
+
+    /// Saves a style, replacing the one with the same id; an empty style is removed.
+    func saveSiteStyle(_ style: SiteStyle) {
+        var list = siteStyles.filter { $0.id != style.id }
+        if !style.isEmpty { list.append(style) }
+        siteStyles = list.sorted { $0.host < $1.host }
+    }
     @Pref("siteZoom") var siteZoom: [String: Double] = [:]
     @Pref("defaultZoom") var defaultZoom = 1.0
     /// Camera and microphone choices per site, keyed by `MediaPermission.key`.

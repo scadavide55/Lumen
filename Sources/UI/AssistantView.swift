@@ -129,7 +129,10 @@ struct AssistantSuggestions: View {
     var chat: AssistantChat
 
     private var prompts: [String] {
-        chat.pageToAttach != nil
+        if AssistantSources.isVideo(chat.browser?.current?.url) {
+            return ["Summarise this video", "What are the key moments, with timestamps?"]
+        }
+        return chat.pageToAttach != nil
             ? ["Summarise this page", "What are the key points?", "Explain the text I selected"]
             : ["What can you do?", "Explain the text I selected"]
     }
@@ -166,6 +169,10 @@ struct AssistantBubble: View {
                 VStack(alignment: .trailing, spacing: 6) {
                     if let page = message.pageTitle {
                         Label(page, systemImage: "doc.text").font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    }
+                    if let quote = message.quote {
+                        Text("“\(quote)”").font(.caption).italic().foregroundStyle(.secondary).lineLimit(3)
+                            .multilineTextAlignment(.trailing)
                     }
                     if !message.images.isEmpty {
                         HStack(spacing: 4) {
@@ -238,9 +245,13 @@ struct AssistantComposer: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            if chat.pageToAttach != nil || !chat.images.isEmpty {
+            if chat.pageToAttach != nil || !chat.images.isEmpty || chat.selection != nil {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 6) {
+                        if let selection = chat.selection {
+                            chip(title: "“" + AssistantChat.quote(selection) + "”", icon: nil, symbol: "text.quote",
+                                 help: "The selected text is sent with your next message") { chat.selection = nil }
+                        }
                         if let page = chat.pageToAttach {
                             chip(title: page.title, icon: page.favicon) { chat.removePageAttachment() }
                         }
@@ -269,7 +280,8 @@ struct AssistantComposer: View {
                     .focused($focused)
                     .onKeyPress(.return, phases: .down) { press in
                         if press.modifiers.contains(.shift) { return .ignored }
-                        chat.send()
+                        // After the key is handled, so the field shows the emptied draft.
+                        DispatchQueue.main.async { chat.send() }
                         return .handled
                     }
                     .padding(.vertical, 5)
@@ -295,16 +307,17 @@ struct AssistantComposer: View {
         .onAppear { focused = true }
     }
 
-    private func chip(title: String, icon: NSImage?, remove: @escaping () -> Void) -> some View {
+    private func chip(title: String, icon: NSImage?, symbol: String = "doc.text",
+                      help: LocalizedStringKey = "This page is sent with your next message", remove: @escaping () -> Void) -> some View {
         HStack(spacing: 5) {
-            if let icon { Image(nsImage: icon).resizable().frame(width: 12, height: 12) } else { Image(systemName: "doc.text").font(.caption) }
+            if let icon { Image(nsImage: icon).resizable().frame(width: 12, height: 12) } else { Image(systemName: symbol).font(.caption) }
             Text(title).font(.caption).lineLimit(1).frame(maxWidth: 200, alignment: .leading)
             Button(action: remove) { Image(systemName: "xmark").font(.system(size: 8, weight: .bold)) }
                 .buttonStyle(.plain).foregroundStyle(.secondary).help("Don't attach this page")
         }
         .padding(.horizontal, 8).padding(.vertical, 4)
         .background(Capsule().fill(Color.primary.opacity(0.07)))
-        .help("This page is sent with your next message")
+        .help(help)
     }
 
     private func pickImages() {
@@ -577,6 +590,9 @@ struct AIPane: View {
                 Picker("Provider", selection: $s.aiProvider) {
                     ForEach(AIProvider.allCases) { Text($0.name).tag($0) }
                 }
+                if s.aiProvider == .apple {
+                    AppleModelNotice()
+                }
                 if s.aiProvider == .custom {
                     LabeledContent("Server address") {
                         TextField("", text: $s.aiBaseURL, prompt: Text(AIProvider.custom.defaultBaseURL))
@@ -586,6 +602,7 @@ struct AIPane: View {
                     Text("Any server that speaks the OpenAI Chat Completions API, such as Ollama or LM Studio.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
+                if s.aiProvider != .apple {
                 LabeledContent(s.aiProvider.needsKey ? "API key" : "API key (optional)") {
                     HStack {
                         SecureField("", text: $key, prompt: Text("Paste your key here"))
@@ -601,6 +618,7 @@ struct AIPane: View {
                     Text(String(format: L("Couldn't load the models: %@"), error)).font(.caption).foregroundStyle(.orange)
                 }
                 Toggle("This model can read images", isOn: visionBinding)
+                }
             }
             Section {
                 Toggle("Web access: search the web and read pages", isOn: $s.aiWeb)
@@ -642,6 +660,27 @@ struct AIPane: View {
         AIKeys.set(key, for: s.aiProvider)
         saved = true
         AIModels.shared.refresh(s.aiProvider, force: true)
+    }
+}
+
+/// What the on-device model can and can't do, and whether this Mac can run it.
+struct AppleModelNotice: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let reason = AppleModel.unavailableReason {
+                Label(reason, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+            } else {
+                Label("Ready on this Mac", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
+            }
+            Label {
+                Text("Apple's model is free, works offline and nothing leaves your Mac, but it is limited: it is much smaller than cloud models, makes more mistakes, reads only the start of long pages and videos, can't see images, and is less reliable at using pages for you. For long or hard questions, use a cloud provider.")
+            } icon: {
+                Image(systemName: "info.circle")
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
+        .fixedSize(horizontal: false, vertical: true)
     }
 }
 

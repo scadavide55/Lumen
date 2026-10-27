@@ -84,9 +84,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            Self.handleExtraShortcut(event) ? nil : event
+            if Self.handleExtraShortcut(event) { return nil }
+            // Keyboard shortcuts that extensions define.
+            if #available(macOS 15.4, *), event.modifierFlags.contains(.command) || event.modifierFlags.contains(.option) {
+                for (_, context) in Extensions.shared.loaded where context.performCommand(for: event) { return nil }
+            }
+            return event
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) { ProfileCleanup.finishPending() }
+        if #available(macOS 15.4, *) { Extensions.shared.start() }
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
@@ -261,6 +267,9 @@ struct LumenCommands: Commands {
             .keyboardShortcut("d")
             .disabled(b == nil)
             Button("Show Bookmarks") { library(.bookmarks) }.keyboardShortcut("b", modifiers: [.command, .option])
+            Divider()
+            Button("Save for Offline") { b?.current?.saveForOffline() }.disabled(b == nil || b?.isPrivate == true || b?.current?.url == nil)
+            Button("Show Reading List") { library(.readingList) }
             if !bookmarks.items.isEmpty { Divider() }
             ForEach(bookmarks.items.prefix(30)) { bm in
                 Button(bm.title) {

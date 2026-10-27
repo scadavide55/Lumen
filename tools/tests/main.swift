@@ -123,6 +123,63 @@ eq(AssistantHistory.title(String(repeating: "a", count: 100)).count, 71, "chat t
 let cited = AIClient.citedSources([["type": "text", "text": "x", "citations": [["url": "https://a.com/1", "title": "A"], ["url": "https://a.com/1", "title": "A"], ["url": "https://b.com", "title": ""]]]])
 eq(cited.map(\.url.absoluteString), ["https://a.com/1", "https://b.com"], "citations become sources once each")
 
+for name in ["read_tab", "get_video_transcript", "search_history", "search_bookmarks"] {
+    check(AssistantPrompt.tools.contains { $0.name == name }, "tool \(name) exists")
+    check(AssistantPrompt.system(web: true, control: false).contains(name + ":"), "prompt explains \(name)")
+}
+check(AssistantPrompt.clientTools(provider: .openAI, web: false, control: false, vision: true).contains { $0.name == "take_screenshot" }, "screenshot tool for vision models")
+check(!AssistantPrompt.clientTools(provider: .openAI, web: false, control: false, vision: false).contains { $0.name == "take_screenshot" }, "no screenshot tool without vision")
+check(AssistantPrompt.system(web: false, control: false, vision: true).contains("take_screenshot:"), "prompt explains take_screenshot for vision models")
+check(!AssistantPrompt.system(web: false, control: false).contains("take_screenshot"), "no screenshot in prompt without vision")
+check(AssistantPrompt.system(web: false, control: false).contains("<selection>"), "prompt explains selections")
+for t in AssistantPrompt.tools + AssistantPrompt.visionTools { check(JSONSerialization.isValidJSONObject(AssistantPrompt.schema(t)), "schema \(t.name)") }
+eq(AssistantChat.number("3"), 3, "tool number from string")
+eq(AssistantChat.number(2.0), 2, "tool number from double")
+eq(AssistantChat.number(nil), 0, "tool number missing")
+
+let shotCall = AIClient.ToolCall(id: "c1", name: "take_screenshot", arguments: [:])
+let anthropicShot = AIClient.toolResults([(shotCall, "Screenshot", false)], provider: .anthropic, images: ["c1": Data([1, 2, 3])])
+let anthropicBlock = ((anthropicShot.first?["content"] as? [[String: Any]])?.first?["content"]) as? [[String: Any]]
+eq(anthropicBlock?.first?["type"] as? String, "image", "anthropic screenshot inside tool result")
+let openAIShot = AIClient.toolResults([(shotCall, "Screenshot", false)], provider: .openAI, images: ["c1": Data([1, 2, 3])])
+eq(openAIShot.map { $0["role"] as? String ?? "" }, ["tool", "user"], "openai screenshot follows as a user message")
+check(JSONSerialization.isValidJSONObject(anthropicShot) && JSONSerialization.isValidJSONObject(openAIShot), "screenshot results encode as JSON")
+
+check(AssistantSources.isVideo(URL(string: "https://www.youtube.com/watch?v=abc")), "youtube watch is a video")
+check(AssistantSources.isVideo(URL(string: "https://youtube.com/shorts/abc")), "youtube shorts is a video")
+check(!AssistantSources.isVideo(URL(string: "https://www.youtube.com/")), "youtube home isn't a video")
+check(!AssistantSources.isVideo(URL(string: "https://notyoutube.com/watch?v=1")), "other sites aren't youtube")
+eq(AssistantChat.quote("  hello\n   world  "), "hello world", "selection quote flattened")
+eq(AssistantChat.quote(String(repeating: "a", count: 300)).count, 141, "selection quote shortened")
+
+// Apple's on-device model
+check(!AIProvider.apple.needsKey, "apple model needs no key")
+check(!AIProvider.apple.supportsImages(AppleModel.modelID), "apple model reads no images")
+let appleTools = AppleModel.tools(web: true).map(\.name)
+check(appleTools.contains("read_tab") && appleTools.contains("web_search") && !appleTools.contains("click"), "apple model without browser use when it's off")
+check(!AppleModel.tools(web: false).contains { $0.name == "web_fetch" }, "apple model without web tools when web is off")
+check(AppleModel.shorten(String(repeating: "x", count: 10_000)).count < 6_100, "apple model text shortened")
+check(AppleModel.instructions(control: true).count < 1_400, "apple instructions stay short")
+check(AppleModel.instructions(control: true).contains("find_elements") && !AppleModel.instructions(control: false).contains("find_elements"), "apple instructions follow browser use")
+check(AppleModel.tools(web: false, control: true).contains { $0.name == "click" }, "apple model gets browser use when it's on")
+
+// Site styles
+let oldStyle = Data(#"{"id":"6C1E0D2A-5B7F-4E2D-9C1A-4C55E7A1B0F3","host":"example.com","css":"p{color:red}","enabled":true}"#.utf8)
+let decoded = try? JSONDecoder().decode(SiteStyle.self, from: oldStyle)
+eq(decoded?.css, "p{color:red}", "old site style still loads")
+eq(decoded?.theme, .site, "old site style gets default options")
+var styled = SiteStyle(host: "example.com")
+check(styled.isEmpty, "new style is empty")
+styled.theme = .dark
+styled.hidden = ["#comments", ".ad > div:nth-of-type(2)"]
+styled.reduceMotion = true
+check(styled.effectiveCSS.contains("#comments") && styled.effectiveCSS.contains("animation:none"), "style becomes CSS")
+check(!styled.effectiveCSS.contains("invert") && SiteStyle.darkCSS.contains("invert"), "dark theme kept apart for already-dark pages")
+check(styled.matches("www.example.com") && styled.matches("example.com") && !styled.matches("notexample.com"), "style matches its site and subdomains")
+eq(SiteStyle.normalizedHost("https://www.GitHub.com/x"), "github.com", "style host normalised")
+let roundTrip = try? JSONDecoder().decode(SiteStyle.self, from: JSONEncoder().encode(styled))
+eq(roundTrip, styled, "style round trip")
+
 // MARK: Web tools
 
 let ddg = """

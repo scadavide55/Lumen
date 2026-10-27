@@ -28,6 +28,8 @@ final class Tab: NSObject, Identifiable {
     var loginMenu: LoginMenu?
     var pendingSave: PendingLogin?
     var insecureWarning = false
+    /// Picking elements on the page to hide.
+    var pickingElements = false
     @ObservationIgnored var lastActive = Date()
 
     @ObservationIgnored private var restoreState: Data?
@@ -113,6 +115,10 @@ final class Tab: NSObject, Identifiable {
         c.mediaTypesRequiringUserActionForPlayback = Settings.shared.blockAutoplay ? .audio : []
         c.defaultWebpagePreferences.allowsContentJavaScript = Settings.shared.javaScript
         Scripts.install(on: c.userContentController)
+        // Extensions run in normal windows and profiles, never in private windows.
+        if #available(macOS 15.4, *), store.isPersistent {
+            c.webExtensionController = Extensions.shared.controller
+        }
         return c
     }
 
@@ -120,6 +126,14 @@ final class Tab: NSObject, Identifiable {
 
     func ensureWebView() {
         guard webView == nil, let browser else { return }
+        // An extension's own page (its settings, say) needs a web view made for that extension.
+        if let target = pendingURL ?? url, target.scheme == "webkit-extension", let config = Extensions.webViewConfiguration(for: target) {
+            attach(LumenWebView(frame: .zero, configuration: config))
+            pendingURL = nil
+            restoreState = nil
+            load(target)
+            return
+        }
         // A tab restoring its history needs a web view that has never loaded anything; a fresh tab can take the spare.
         let spare = restoreState == nil ? browser.takeSpareWebView() : nil
         let wv = spare ?? LumenWebView(frame: .zero, configuration: Tab.configuration(store: browser.dataStore))
@@ -150,9 +164,20 @@ final class Tab: NSObject, Identifiable {
         Tab.owners.setObject(self, forKey: wv)
         observers = [
             // Each assignment redraws every view watching the tab, so only real changes are passed on.
-            wv.observe(\.title) { [weak self] w, _ in self?.titleChanged(w.title) },
-            wv.observe(\.url) { [weak self] w, _ in if let u = w.url, self?.url != u { self?.url = u } },
-            wv.observe(\.isLoading) { [weak self] w, _ in if self?.isLoading != w.isLoading { self?.isLoading = w.isLoading } },
+            wv.observe(\.title) { [weak self] w, _ in
+                self?.titleChanged(w.title)
+                if let self { ExtensionEvents.changed(self, title: true) }
+            },
+            wv.observe(\.url) { [weak self] w, _ in
+                guard let self, let u = w.url, self.url != u else { return }
+                self.url = u
+                ExtensionEvents.changed(self, url: true)
+            },
+            wv.observe(\.isLoading) { [weak self] w, _ in
+                guard let self, self.isLoading != w.isLoading else { return }
+                self.isLoading = w.isLoading
+                ExtensionEvents.changed(self, loading: true)
+            },
             wv.observe(\.estimatedProgress) { [weak self] w, _ in
                 guard let load = self?.load else { return }
                 let p = w.estimatedProgress
@@ -239,17 +264,31 @@ final class Tab: NSObject, Identifiable {
         webView?.evaluateJavaScript("window.__lumenSetMuted && window.__lumenSetMuted(\(muted))", in: nil, in: .defaultClient)
     }
 
-    func toggleReader() {
-        guard let wv = webView else { return }
+    /// Throws the web view away and makes a new one for the same address, with the right settings for it.
+    func remakeWebView() {
+        guard let u = url ?? pendingURL else { return }
+        tearDown()
+        restoreState = nil
+        pendingURL = u
+        if isSelected { ensureWebView() }
+    }
+
+    /// The page Reader shows, while it shows one.
+    var readerSource: URL? { isReader ? readerOrigin : nil }
+
+    func toggleReader(completion: ((Bool) -> Void)? = nil) {
+        guard let wv = webView else { completion?(false); return }
         if isReader {
             isReader = false
             if let o = readerOrigin { load(o) }
+            completion?(false)
             return
         }
         wv.evaluateJavaScript(Scripts.reader, in: nil, in: .defaultClient) { [weak self] result in
             guard let self, case .success(let value) = result, let d = value as? [String: Any],
                   let html = d["html"] as? String, let origin = wv.url else {
                 NSSound.beep()
+                completion?(false)
                 return
             }
             let words = (d["words"] as? Int) ?? (d["words"] as? Double).map(Int.init) ?? 0
@@ -257,11 +296,49 @@ final class Tab: NSObject, Identifiable {
                                           site: d["site"] as? String ?? "",
                                           byline: d["byline"] as? String ?? "",
                                           html: html, minutes: max(1, words / 230))
-            self.readerOrigin = origin
-            self.internalLoad = true
-            self.internalNavigation = wv.loadHTMLString(page, baseURL: origin)
-            self.isReader = true
+            self.showReader(html: page, origin: origin)
+            completion?(true)
         }
+    }
+
+    // MARK: Site styles
+
+    /// Applies this site's style to the open page without reloading it.
+    func applySiteStyleLive() {
+        guard let wv = webView, url != nil, !isReader else { return }
+        let style = Settings.shared.siteStyle(for: host).flatMap { $0.enabled ? $0 : nil }
+        let args: [String: Any] = ["css": style?.effectiveCSS ?? "", "floating": style?.hideFloating ?? false,
+                                   "dark": style?.theme == .dark]
+        Task { @MainActor in
+            _ = try? await wv.callAsyncJavaScript("if (window.__lumenSiteStyle) window.__lumenSiteStyle(css, floating, dark);",
+                                                  arguments: args, in: nil, contentWorld: .defaultClient)
+        }
+    }
+
+    /// Lets the user click elements on the page to hide them on this site; Esc or `stopPickingElements` ends it.
+    func startPickingElements() {
+        guard let wv = webView, url != nil, !isReader, !pickingElements else { return }
+        pickingElements = true
+        let tip = L("Click what you want to hide on this site · ↑ for a bigger block · Esc when you're done")
+        let data = (try? JSONSerialization.data(withJSONObject: [tip])).map { String(decoding: $0, as: UTF8.self) } ?? "[\"\"]"
+        wv.evaluateJavaScript(Scripts.picker.replacingOccurrences(of: "__TIP__", with: data + "[0]"), in: nil, in: .defaultClient)
+        wv.window?.makeFirstResponder(wv)
+    }
+
+    func stopPickingElements() {
+        guard pickingElements else { return }
+        pickingElements = false
+        webView?.evaluateJavaScript("window.__lumenPicker && window.__lumenPicker.stop()", in: nil, in: .defaultClient)
+    }
+
+    /// Shows a Reader page (live or saved offline) in place of `origin`, which Reader's exit goes back to.
+    func showReader(html: String, origin: URL) {
+        ensureWebView()
+        guard let wv = webView else { return }
+        readerOrigin = origin
+        internalLoad = true
+        internalNavigation = wv.loadHTMLString(html, baseURL: origin)
+        isReader = true
     }
 
     func zoom(_ direction: Int) {
@@ -379,7 +456,12 @@ final class Tab: NSObject, Identifiable {
             switch key {
             case "gpc", "cookieBanners", "youtubeAds", "forceDark", "siteStyles", "adBlock", "allowlist":
                 Scripts.install(on: wv.configuration.userContentController)
-                if ["forceDark", "siteStyles", "cookieBanners", "youtubeAds", "gpc"].contains(key), self.isSelected, self.url != nil { wv.reload() }
+                if key == "siteStyles" {
+                    // The page follows style changes as they're made; your JavaScript waits for the next load.
+                    self.applySiteStyleLive()
+                } else if ["forceDark", "cookieBanners", "youtubeAds", "gpc"].contains(key), self.isSelected, self.url != nil {
+                    wv.reload()
+                }
             case "developer":
                 wv.isInspectable = Settings.shared.developer
             case "uaMode", "customUA":
@@ -394,6 +476,16 @@ final class Tab: NSObject, Identifiable {
 
     func handleMessage(_ type: String, _ body: [String: Any]) {
         switch type {
+        case "pickedElement":
+            guard pickingElements, let selector = body["selector"] as? String, !selector.isEmpty, selector.count < 600,
+                  let host else { return }
+            let s = Settings.shared
+            var style = s.siteStyle(for: host) ?? SiteStyle(host: SiteStyle.normalizedHost(host))
+            if !style.hidden.contains(selector) { style.hidden.append(selector) }
+            style.enabled = true
+            s.saveSiteStyle(style)
+        case "pickerDone":
+            pickingElements = false
         case "favicon":
             guard let href = body["href"] as? String, let iconURL = URL(string: href), let host else { return }
             if faviconHost == host, favicon != nil { return }
@@ -553,7 +645,8 @@ extension Tab: WKNavigationDelegate {
             }
             return
         }
-        if !["http", "https", "file", "about", "data", "blob", "javascript"].contains(scheme) {
+        // Extension pages (settings, popups opened in a tab) use their own scheme.
+        if !["http", "https", "file", "about", "data", "blob", "javascript", "webkit-extension"].contains(scheme) {
             decisionHandler(.cancel, preferences)
             if action.navigationType == .linkActivated || action.targetFrame?.isMainFrame == true { openExternal(url) }
             return
@@ -786,6 +879,8 @@ final class LumenWebView: WKWebView {
         for item in menu.items {
             if let id = item.identifier?.rawValue, let title = renames[id] { item.title = title }
         }
+        addAssistantItems(to: menu)
+        addExtensionItems(to: menu)
         guard let tab, let browser = tab.browser, let link = tab.hoverURL, let url = URL(string: link) else { return }
         let anchor = menu.items.firstIndex { $0.identifier?.rawValue == "WKMenuItemIdentifierOpenLinkInNewWindow" }
         var index = (anchor ?? -1) + 1
@@ -804,6 +899,38 @@ final class LumenWebView: WKWebView {
             menu.insertItem(item, at: min(index, menu.items.count))
             index += 1
         }
+    }
+}
+
+extension LumenWebView {
+    /// The items extensions add to the page's right-click menu, at the end.
+    func addExtensionItems(to menu: NSMenu) {
+        guard #available(macOS 15.4, *), let tab, tab.browser?.isPrivate == false else { return }
+        let items = Extensions.shared.loaded.flatMap { $0.context.menuItems(for: tab) }
+        guard !items.isEmpty else { return }
+        menu.addItem(.separator())
+        items.forEach(menu.addItem)
+    }
+
+    /// One quiet item for selected text, after Copy: Lumen Assistant › Explain, Translate, Summarise, Ask About It.
+    func addAssistantItems(to menu: NSMenu) {
+        guard Settings.shared.aiEnabled, let tab, let browser = tab.browser,
+              let copy = menu.items.firstIndex(where: { $0.identifier?.rawValue == "WKMenuItemIdentifierCopy" }) else { return }
+        let sub = NSMenu()
+        for action in AssistantChat.SelectionAction.allCases {
+            sub.addItem(ActionMenuItem(action.title) { [weak self] in
+                self?.evaluateJavaScript("String(window.getSelection ? window.getSelection() : '')", in: nil, in: .defaultClient) { result in
+                    guard case .success(let value) = result, let text = value as? String,
+                          !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+                    browser.assistantVisible = true
+                    browser.assistant.act(on: text, action)
+                }
+            })
+        }
+        let item = NSMenuItem(title: L("Lumen Assistant"), action: nil, keyEquivalent: "")
+        item.image = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
+        item.submenu = sub
+        menu.insertItem(item, at: copy + 1)
     }
 }
 

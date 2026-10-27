@@ -401,7 +401,7 @@ final class Session {
 
     /// The windows to save: the open ones, and saved ones that haven't reopened yet, which would be lost otherwise.
     private func snapshots() -> [WindowSnapshot] {
-        WindowRegistry.shared.browsers.filter { !$0.isPrivate }.map { $0.snapshot() } + pending
+        WindowRegistry.shared.browsers.filter { !$0.isPrivate && !$0.isClosed }.map { $0.snapshot() } + pending
     }
 
     /// Waits for things to settle before taking snapshots: reading every tab's back/forward
@@ -438,7 +438,8 @@ final class WindowRegistry {
     weak var lastFocused: BrowserState?
     private(set) var pendingURLs: [URL] = []
 
-    var browsers: [BrowserState] { table.allObjects }
+    /// Open windows; a closed window's state that hasn't gone away yet isn't one.
+    var browsers: [BrowserState] { table.allObjects.filter { !$0.isClosed } }
 
     func add(_ b: BrowserState) { table.add(b) }
 

@@ -849,6 +849,7 @@ struct CompactBar: View {
             TabStrip(compact: true)
             if let p = b.profile { ProfileBadge(profile: p, compact: true).fixedSize() }
             if let tab = b.current {
+                ExtensionButtons(tab: tab)
                 ShieldButton(tab: tab)
                 DownloadsButton()
                 AssistantButton()

@@ -253,6 +253,16 @@ struct CommandPalette: View {
         }
         shown.formUnion(marks.map(\.url))
 
+        if !b.isPrivate {
+            out += ReadingList.shared.items.filter { matches($0.title, $0.url) }.prefix(3).map { a in
+                PaletteItem(id: "r" + a.id.uuidString, icon: .symbol("eyeglasses"), title: a.title, subtitle: a.site,
+                            badge: "Offline", run: { newTab in
+                                let tab = newTab || b.current == nil ? b.newTab() : b.current!
+                                tab.openOffline(a)
+                            })
+            }
+        }
+
         // Earlier hits that still match stay visible until the background search for this query lands.
         let words = lower.split(separator: " ").map(String.init)
         let hits = historyHits.filter { h in
@@ -302,6 +312,7 @@ struct CommandPalette: View {
             command("Show History", "clock", "⌘Y") { LibraryView.requestedSection = .history; openWindow(id: "library") },
             command("Show Bookmarks", "book", "⌥⌘B") { LibraryView.requestedSection = .bookmarks; openWindow(id: "library") },
             command("Show Downloads", "arrow.down.circle", "⌥⌘L") { LibraryView.requestedSection = .downloads; openWindow(id: "library") },
+            command("Show Reading List", "eyeglasses", "Articles saved for offline reading") { LibraryView.requestedSection = .readingList; openWindow(id: "library") },
             command("Settings", "gearshape", "⌘,") { openSettings() },
             command("Import from Another Browser", "square.and.arrow.down", "Safari, Chrome, Firefox, Opera…") { openWindow(id: "import") },
             command("Welcome Tour", "sparkles", "Setup and how Lumen works") { b.showOnboarding = true },
@@ -326,6 +337,9 @@ struct CommandPalette: View {
             list.insert(contentsOf: [
                 command(tab.isReader ? "Exit Reader" : "Reader", "doc.plaintext", "⇧⌘R") { tab.toggleReader() },
                 command("Find on Page", "text.magnifyingglass", "⌘F") { b.showFind() },
+                command("Save for Offline", "arrow.down.circle", "Reading List") { tab.saveForOffline() },
+                command("Customize This Site", "paintbrush", "Colours, fonts, hidden elements, CSS and JavaScript") { b.customizingSite = true },
+                command("Pick Elements to Hide", "cursorarrow.rays", "Click parts of the page to hide them on this site") { tab.startPickingElements() },
                 command(Bookmarks.shared.contains(tab.url) ? "Remove Bookmark" : "Bookmark This Page", "star", "⌘D") {
                     Bookmarks.shared.toggle(url: tab.url, title: tab.title)
                 },

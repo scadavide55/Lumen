@@ -62,6 +62,9 @@ struct ContentView: View {
             }
             .sheet(isPresented: Bindable(browser).showOnboarding) { OnboardingView() }
             .sheet(isPresented: Bindable(browser).showAssistantIntro, onDismiss: { settings.aiIntroduced = true }) { AssistantIntro() }
+            .sheet(isPresented: Bindable(browser).customizingSite) {
+                if let tab = browser.current, tab.host != nil { SiteCustomizer(host: tab.host, tab: tab) }
+            }
             .sheet(isPresented: Bindable(browser).showInstallApp) {
                 if let tab = browser.current { InstallAppSheet(tab: tab) }
             }
@@ -208,6 +211,9 @@ struct TabPane: View {
             }
             .animation(.easeOut(duration: 0.2), value: tab.pendingSave)
             .animation(.easeOut(duration: 0.2), value: tab.insecureWarning)
+        }
+        .overlay(alignment: .bottomTrailing) {
+            if tab.isReader && !tab.isPrivate { ReaderSaveButton(tab: tab) }
         }
         .overlay(alignment: .topTrailing) {
             if isSplit {
@@ -528,5 +534,41 @@ struct PullIndicator: View {
             .offset(y: -20 + 34 * p)
             .animation(.spring(response: 0.25, dampingFraction: 0.8), value: ready)
             .allowsHitTesting(false)
+    }
+}
+
+
+/// In Reader, a quiet button that saves the article to read offline.
+struct ReaderSaveButton: View {
+    var tab: Tab
+    private var list = ReadingList.shared
+    @State private var hover = false
+
+    init(tab: Tab) { self.tab = tab }
+
+    var body: some View {
+        let source = tab.readerSource
+        let saved = list.article(for: source) != nil
+        let saving = source.map { list.saving.contains($0) } ?? false
+        Button { tab.saveForOffline() } label: {
+            HStack(spacing: 6) {
+                if saving {
+                    ProgressView().controlSize(.small)
+                } else {
+                    Image(systemName: saved ? "checkmark.circle.fill" : "arrow.down.circle")
+                }
+                Text(saving ? LocalizedStringKey("Saving…") : (saved ? "Saved for Offline" : "Save for Offline"))
+            }
+            .font(.system(size: 12, weight: .medium))
+            .padding(.horizontal, 12).frame(height: 30)
+            .background(.regularMaterial, in: Capsule())
+            .overlay(Capsule().stroke(Color.primary.opacity(0.1)))
+            .opacity(hover || !saved ? 1 : 0.75)
+        }
+        .buttonStyle(.plain)
+        .disabled(saving)
+        .onHover { hover = $0 }
+        .padding(16)
+        .help(saved ? "Saved in the Reading List. Click to save it again." : "Saves the article with its images, to read without a connection")
     }
 }

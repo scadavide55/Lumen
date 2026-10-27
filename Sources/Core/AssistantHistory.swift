@@ -19,6 +19,7 @@ final class AssistantHistory {
         var text: String
         var images: [Data]
         var pageTitle: String?
+        var quote: String?
         var activity: [String]
         var links: [SavedLink]
         var sources: [SavedLink]

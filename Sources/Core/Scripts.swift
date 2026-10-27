@@ -27,11 +27,18 @@ enum Scripts {
         if s.forceDark {
             c.addUserScript(WKUserScript(source: forceDark, injectionTime: .atDocumentStart, forMainFrameOnly: true, in: .defaultClient))
         }
-        let styles = s.siteStyles.filter { $0.enabled && !$0.host.isEmpty && !$0.css.isEmpty }
-            .map { ["host": $0.host.lowercased(), "css": $0.css] }
-        if !styles.isEmpty {
-            c.addUserScript(WKUserScript(source: siteStyles.replacingOccurrences(of: "__RULES__", with: json(styles)),
-                                         injectionTime: .atDocumentStart, forMainFrameOnly: false, in: .defaultClient))
+        // Always installed, so a style made while a page is open applies to it right away.
+        let active = s.siteStyles.filter { $0.enabled && !$0.host.isEmpty }
+        let styles = active.map { ["host": $0.host.lowercased(), "css": $0.effectiveCSS, "floating": $0.hideFloating,
+                                   "dark": $0.theme == .dark] as [String: Any] }
+        c.addUserScript(WKUserScript(source: siteStyles.replacingOccurrences(of: "__RULES__", with: json(styles))
+                                        .replacingOccurrences(of: "__DARK__", with: json([SiteStyle.darkCSS])),
+                                     injectionTime: .atDocumentStart, forMainFrameOnly: false, in: .defaultClient))
+        // Your own JavaScript runs in the page itself, on its site only, once the page has loaded.
+        for style in active where !style.js.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            let source = "(() => { const h = location.hostname.toLowerCase(); const site = \(json([style.host.lowercased()]))[0];\n"
+                + "if (h !== site && !h.endsWith('.' + site)) return;\n" + style.js + "\n})();"
+            c.addUserScript(WKUserScript(source: source, injectionTime: .atDocumentEnd, forMainFrameOnly: true, in: .page))
         }
     }
 
@@ -385,12 +392,160 @@ enum Scripts {
     (() => {
       const rules = __RULES__;
       const h = location.hostname.toLowerCase();
-      const css = rules.filter(r => h === r.host || h.endsWith('.' + r.host)).map(r => r.css).join('\n');
-      if (!css) return;
-      const s = document.createElement('style');
-      s.id = 'lumen-site-style';
-      s.textContent = css;
-      (document.head || document.documentElement).appendChild(s);
+      const mine = rules.filter(r => h === r.host || h.endsWith('.' + r.host));
+      let style = null, darkStyle = null, floating = false, timer = null, observer = null;
+      const darkCSS = __DARK__[0];
+      // Pages that are dark already stay as they are; inverting them would make them light.
+      const isDark = (el) => {
+        if (!el) return null;
+        const m = getComputedStyle(el).backgroundColor.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?/);
+        if (!m || (m[4] !== undefined && parseFloat(m[4]) < 0.5)) return null;
+        return (0.2126 * m[1] + 0.7152 * m[2] + 0.0722 * m[3]) / 255 < 0.4;
+      };
+      const setDark = (on) => {
+        if (!on) { if (darkStyle) darkStyle.remove(); darkStyle = null; return; }
+        if (!darkStyle) { darkStyle = document.createElement('style'); darkStyle.id = 'lumen-site-dark'; darkStyle.textContent = darkCSS; }
+        if (!darkStyle.isConnected) document.documentElement.appendChild(darkStyle);
+        const check = () => {
+          if (!darkStyle) return;
+          darkStyle.disabled = true;
+          const meta = document.querySelector('meta[name="color-scheme"]');
+          const already = isDark(document.body) ?? isDark(document.documentElement) ?? (meta && /^\s*dark/.test(meta.content));
+          darkStyle.disabled = !!already;
+        };
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', check, { once: true }); else check();
+      };
+      const sheet = () => {
+        if (!style) { style = document.createElement('style'); style.id = 'lumen-site-style'; }
+        if (!style.isConnected) (document.head || document.documentElement).appendChild(style);
+        return style;
+      };
+      // Bars and pop-ups that stay on screen: fixed or sticky boxes that don't take up most of the window.
+      const hideFloating = () => {
+        if (!floating || !document.body) return;
+        for (const el of document.body.querySelectorAll('*')) {
+          if (el.hasAttribute('data-lumen-floating')) continue;
+          const cs = getComputedStyle(el);
+          if (cs.position !== 'fixed' && cs.position !== 'sticky') continue;
+          const r = el.getBoundingClientRect();
+          if (r.width * r.height > innerWidth * innerHeight * 0.6 && cs.position === 'sticky') continue;
+          el.setAttribute('data-lumen-floating', '');
+        }
+        for (const el of [document.documentElement, document.body]) {
+          if (getComputedStyle(el).overflow === 'hidden') el.style.setProperty('overflow', 'auto', 'important');
+        }
+      };
+      const watch = () => {
+        if (observer || !floating) return;
+        const later = () => { clearTimeout(timer); timer = setTimeout(hideFloating, 700); };
+        observer = new MutationObserver(later);
+        // Bars often become fixed by a class or style change while you scroll, not only when they're added.
+        observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+        addEventListener('scroll', later, { passive: true });
+      };
+      const apply = (css, hide, dark) => {
+        floating = hide;
+        setDark(!!dark);
+        sheet().textContent = css + (hide ? '\n[data-lumen-floating]{display:none!important}' : '');
+        if (hide) {
+          if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { hideFloating(); watch(); }, { once: true });
+          else { hideFloating(); watch(); }
+        } else if (observer) { observer.disconnect(); observer = null; }
+      };
+      // Lumen calls this when you change the style, so the page follows without reloading.
+      window.__lumenSiteStyle = apply;
+      if (mine.length) apply(mine.map(r => r.css).join('\n'), mine.some(r => r.floating), mine.some(r => r.dark));
+    })();
+    """#
+
+    /// Highlights what the pointer is over; a click hides it and reports a selector for it. Esc stops.
+    static let picker = #"""
+    (() => {
+      if (window.__lumenPicker) return;
+      const box = document.createElement('div');
+      box.style.cssText = 'position:fixed;pointer-events:none;z-index:2147483647;border:2px solid #5e5ce6;background:rgba(94,92,230,.18);border-radius:3px;transition:all .06s';
+      const tip = document.createElement('div');
+      tip.style.cssText = 'position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:2147483647;background:rgba(30,30,32,.92);color:#fff;font:500 13px -apple-system,system-ui;padding:8px 14px;border-radius:18px;pointer-events:none;box-shadow:0 4px 18px rgba(0,0,0,.3)';
+      tip.textContent = __TIP__;
+      document.documentElement.append(box, tip);
+      let target = null;
+      const esc = CSS.escape;
+      const unstable = c => /^(is-|has-|js-)|active|hover|focus|open|show|visible|selected|\d{4,}/.test(c) || c.length > 40;
+      const part = el => {
+        if (el.id && !/\d{3,}/.test(el.id) && document.querySelectorAll('#' + esc(el.id)).length === 1) return '#' + esc(el.id);
+        let p = el.tagName.toLowerCase();
+        const cls = [...el.classList].filter(c => !unstable(c)).slice(0, 3);
+        if (cls.length) p += '.' + cls.map(esc).join('.');
+        const parent = el.parentElement;
+        if (parent) {
+          const same = [...parent.children].filter(c => c.tagName === el.tagName);
+          if (same.length > 1 && (!cls.length || parent.querySelectorAll(':scope > ' + p).length > 1)) p += ':nth-of-type(' + (same.indexOf(el) + 1) + ')';
+        }
+        return p;
+      };
+      const selector = el => {
+        const path = [];
+        for (let cur = el; cur && cur.nodeType === 1 && cur !== document.body && cur !== document.documentElement && path.length < 6; cur = cur.parentElement) {
+          const p = part(cur);
+          path.unshift(p);
+          const s = path.join(' > ');
+          try { if (document.querySelectorAll(s).length === 1) return s; } catch (e) {}
+          if (p.startsWith('#')) break;
+        }
+        return path.join(' > ');
+      };
+      // ↑ picks the block around the highlighted element, ↓ goes back in.
+      let trail = [];
+      const show = el => {
+        target = el;
+        const r = el.getBoundingClientRect();
+        Object.assign(box.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px', display: 'block' });
+      };
+      const move = e => {
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        if (!el || el === box || el === tip || el === document.body || el === document.documentElement) return;
+        if (trail.length && trail[0] === el) return;
+        trail = [el];
+        show(el);
+      };
+      const stop = (report) => {
+        removeEventListener('mousemove', move, true);
+        removeEventListener('click', click, true);
+        removeEventListener('keydown', key, true);
+        presses.forEach(t => removeEventListener(t, swallow, true));
+        box.remove(); tip.remove();
+        delete window.__lumenPicker;
+        if (report) window.webkit.messageHandlers.lumen.postMessage({ type: 'pickerDone' });
+      };
+      const click = e => {
+        e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+        if (!target) return;
+        const s = selector(target);
+        target.style.setProperty('display', 'none', 'important');
+        box.style.display = 'none';
+        window.webkit.messageHandlers.lumen.postMessage({ type: 'pickedElement', selector: s });
+      };
+      const key = e => {
+        if (e.key === 'Escape') { e.preventDefault(); stop(true); return; }
+        if (!target) return;
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          const up = target.parentElement;
+          if (up && up !== document.body && up !== document.documentElement) { trail.push(up); show(up); }
+        } else if (e.key === 'ArrowDown' && trail.length > 1) {
+          e.preventDefault();
+          trail.pop();
+          show(trail[trail.length - 1]);
+        }
+      };
+      // The page mustn't react to the clicks that pick elements.
+      const swallow = e => { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); };
+      const presses = ['mousedown', 'mouseup', 'pointerdown', 'pointerup', 'auxclick', 'dblclick', 'contextmenu'];
+      presses.forEach(t => addEventListener(t, swallow, true));
+      addEventListener('mousemove', move, true);
+      addEventListener('click', click, true);
+      addEventListener('keydown', key, true);
+      window.__lumenPicker = { stop: () => stop(false) };
     })();
     """#
 

@@ -30,6 +30,7 @@ struct ToolbarContent: View {
             AddressPill(tab: tab).frame(maxWidth: horizontal ? 720 : .infinity)
             if horizontal { Spacer(minLength: 8) }
             if horizontal, let p = b.profile { ProfileBadge(profile: p, compact: true).fixedSize() }
+            ExtensionButtons(tab: tab)
             ShieldButton(tab: tab)
             DownloadsButton()
             AssistantButton()
@@ -372,6 +373,9 @@ struct PageMenu: View {
     var body: some View {
         Menu {
             Button(tab.isReader ? LocalizedStringKey("Exit Reader") : "Reader") { tab.toggleReader() }.disabled(tab.url == nil)
+            if !b.isPrivate {
+                Button("Save for Offline") { tab.saveForOffline() }.disabled(tab.url == nil)
+            }
             Button("Find on Page…") { b.showFind() }.disabled(tab.url == nil)
             Menu("Zoom") {
                 Button("Zoom In") { tab.zoom(1) }
@@ -386,6 +390,7 @@ struct PageMenu: View {
             }
             Button("Print…") { tab.printPage() }.disabled(tab.url == nil)
             Button("Export as PDF…") { tab.exportPDF() }.disabled(tab.url == nil)
+            Button("Customize This Site…") { b.customizingSite = true }.disabled(tab.host == nil || tab.isReader)
             Button("Install as App…") { b.showInstallApp = true }.disabled(tab.url == nil || WebApp.isActive)
             Button("Take Screenshot of Page") { tab.screenshot() }.disabled(tab.url == nil)
             Divider()
@@ -397,6 +402,10 @@ struct PageMenu: View {
             Divider()
             Button("History and Bookmarks") {
                 LibraryView.requestedSection = .history
+                openWindow(id: "library")
+            }
+            Button("Reading List") {
+                LibraryView.requestedSection = .readingList
                 openWindow(id: "library")
             }
             SettingsLink { Text("Settings…") }

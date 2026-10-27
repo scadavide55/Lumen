@@ -9,10 +9,10 @@ final class LibraryRouter {
 
 struct LibraryView: View {
     enum Section: String, CaseIterable, Identifiable {
-        case history, bookmarks, downloads
+        case history, bookmarks, readingList, downloads
         var id: String { rawValue }
-        var label: String { L(rawValue.capitalized) }
-        var symbol: String { ["history": "clock", "bookmarks": "book", "downloads": "arrow.down.circle"][rawValue]! }
+        var label: String { self == .readingList ? L("Reading List") : L(rawValue.capitalized) }
+        var symbol: String { ["history": "clock", "bookmarks": "book", "readingList": "eyeglasses", "downloads": "arrow.down.circle"][rawValue]! }
     }
 
     static var requestedSection: Section {
@@ -33,6 +33,7 @@ struct LibraryView: View {
             switch router.section {
             case .history: HistoryList(open: open)
             case .bookmarks: BookmarkList(open: open)
+            case .readingList: ReadingListView(openOnline: open)
             case .downloads: DownloadsList()
             }
         }
@@ -214,5 +215,91 @@ struct BookmarkList: View {
         panel.nameFieldStringValue = "Lumen Bookmarks.html"
         guard panel.runModal() == .OK, let url = panel.url else { return }
         try? bookmarks.exportHTML().write(to: url, atomically: true, encoding: .utf8)
+    }
+}
+
+
+// MARK: - Reading list
+
+/// Articles saved from Reader, to read without a connection.
+struct ReadingListView: View {
+    let openOnline: ([URL]) -> Void
+    private var list = ReadingList.shared
+    @State private var query = ""
+    @State private var selection = Set<UUID>()
+    @State private var confirmClear = false
+    @Environment(\.openWindow) private var openWindow
+
+    init(openOnline: @escaping ([URL]) -> Void) { self.openOnline = openOnline }
+
+    private var shown: [ReadingList.Article] {
+        let q = query.trimmingCharacters(in: .whitespaces).lowercased()
+        return q.isEmpty ? list.items : list.items.filter { ($0.title + " " + $0.site).lowercased().contains(q) }
+    }
+
+    var body: some View {
+        List(selection: $selection) {
+            ForEach(shown) { a in
+                HStack(spacing: 10) {
+                    Circle().fill(Color.accentColor).frame(width: 7, height: 7).opacity(a.read ? 0 : 1)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(a.title).lineLimit(1).fontWeight(a.read ? .regular : .medium)
+                        Text(a.site + " · " + a.saved.formatted(date: .abbreviated, time: .omitted) + " · "
+                             + ByteCountFormatter.string(fromByteCount: Int64(a.bytes), countStyle: .file))
+                            .font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    }
+                    Spacer()
+                    Image(systemName: "arrow.down.circle.fill").foregroundStyle(.secondary).help("Saved for offline reading")
+                }
+                .tag(a.id)
+            }
+        }
+        .overlay {
+            if shown.isEmpty {
+                ContentUnavailableView {
+                    Label(query.isEmpty ? LocalizedStringKey("No Saved Articles") : "No Results", systemImage: "eyeglasses")
+                } description: {
+                    if query.isEmpty { Text("Open an article in Reader (⇧⌘R) and choose Save for Offline to read it later, even without a connection.") }
+                }
+            }
+        }
+        .contextMenu(forSelectionType: UUID.self) { ids in
+            Button("Open") { open(ids) }
+            Button("Open Original Page") { openOnline(articles(ids).map(\.url)) }
+            Divider()
+            if articles(ids).contains(where: { !$0.read }) {
+                Button("Mark as Read") { for a in articles(ids) { list.markRead(a.id) } }
+            } else {
+                Button("Mark as Unread") { for a in articles(ids) { list.markRead(a.id, false) } }
+            }
+            Divider()
+            Button("Delete") { for id in ids { list.remove(id) } }
+        } primaryAction: { ids in
+            open(ids)
+        }
+        .onDeleteCommand { for id in selection { list.remove(id) } }
+        .searchable(text: $query, placement: .toolbar, prompt: "Search reading list")
+        .toolbar {
+            Button("Delete All…") { confirmClear = true }.disabled(list.items.isEmpty)
+        }
+        .confirmationDialog("Delete all saved articles?", isPresented: $confirmClear) {
+            Button("Delete All", role: .destructive) { list.removeAll() }
+        } message: {
+            Text("This can't be undone.")
+        }
+        .navigationTitle("Reading List")
+    }
+
+    private func articles(_ ids: Set<UUID>) -> [ReadingList.Article] { list.items.filter { ids.contains($0.id) } }
+
+    private func open(_ ids: Set<UUID>) {
+        let target = WindowRegistry.shared.lastFocused.flatMap { $0.isPrivate ? nil : $0 }
+            ?? WindowRegistry.shared.browsers.first { !$0.isPrivate }
+        guard let b = target else { openWindow(id: "main"); return }
+        for a in articles(ids) {
+            let tab = b.newTab()
+            tab.openOffline(a)
+        }
+        b.window?.makeKeyAndOrderFront(nil)
     }
 }
