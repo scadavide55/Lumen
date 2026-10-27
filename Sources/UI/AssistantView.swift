@@ -11,7 +11,7 @@ struct AssistantPanel: View {
     @State private var dragWidth: Double?
     @State private var dragStart: Double?
 
-    static let minWidth = 320.0
+    static let minWidth = 340.0
     private var width: Double { min(max(Self.minWidth, dragWidth ?? s.assistantWidth), max(Self.minWidth, maxWidth)) }
 
     private var chat: AssistantChat { b.assistant }
@@ -473,6 +473,7 @@ struct ChatModelMenu: View {
 struct BetaBadge: View {
     var body: some View {
         Text("Beta").font(.system(size: 9.5, weight: .bold)).textCase(.uppercase)
+            .lineLimit(1).fixedSize()
             .padding(.horizontal, 5).padding(.vertical, 1.5)
             .background(Capsule().fill(Color.accentColor.opacity(0.18)))
             .foregroundStyle(.tint)
