@@ -755,6 +755,7 @@ T = {
     'Off until you turn it on. Nothing is sent until you ask something': ('Spento finché non lo attivi. Non viene inviato nulla finché non chiedi qualcosa', "Désactivé tant que vous ne l'activez pas. Rien n'est envoyé avant que vous posiez une question"),
     'Turn On…': ('Attiva…', 'Activer…'),
     'You can change this anytime in Settings › AI.': ('Puoi cambiarlo quando vuoi in Impostazioni › AI.', 'Vous pouvez changer cela à tout moment dans Réglages › IA.'),
+    'Lumen Setup': ('Configurazione di Lumen', 'Configuration de Lumen'),
 }
 
 

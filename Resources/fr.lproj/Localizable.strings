@@ -314,6 +314,7 @@
 "Lumen Assistant answers questions about the page you're reading in a panel on the right (⇧⌘A). It is off unless you turn it on, and nothing is sent until you ask something." = "L'Assistant Lumen répond aux questions sur la page que vous lisez, dans un panneau à droite (⇧⌘A). Il reste désactivé tant que vous ne l'activez pas, et rien n'est envoyé avant que vous posiez une question.";
 "Lumen Assistant uses your own key from Anthropic, OpenAI, OpenRouter, DeepSeek or any OpenAI-compatible server. The key stays in your Keychain." = "L'Assistant Lumen utilise votre propre clé Anthropic, OpenAI, OpenRouter, DeepSeek ou d'un serveur compatible OpenAI. La clé reste dans votre trousseau.";
 "Lumen Bookmarks.html" = "Signets Lumen.html";
+"Lumen Setup" = "Configuration de Lumen";
 "Lumen Shield is blocking ads and trackers · %@ rules" = "Lumen Shield bloque les publicités et les traqueurs · %@ règles";
 "Lumen Shield is off" = "Lumen Shield est désactivé";
 "Lumen Shield is off for this page" = "Lumen Shield est désactivé pour cette page";
