@@ -5,14 +5,14 @@ import WebKit
 /// First-launch setup, organised in sections with a sidebar, and a tour of Lumen.
 struct OnboardingView: View {
     enum Step: Int, CaseIterable {
-        case welcome, switchOver, importData, google, passwords, theme, background, tabs, search, shield, tour, shortcuts, done
+        case welcome, switchOver, importData, google, passwords, theme, background, tabs, search, shield, assistant, tour, shortcuts, done
 
         var section: Section {
             switch self {
             case .welcome: .welcome
             case .switchOver, .importData, .google, .passwords: .moveIn
             case .theme, .background, .tabs: .look
-            case .search, .shield: .privacy
+            case .search, .shield, .assistant: .privacy
             case .tour, .shortcuts: .learn
             case .done: .done
             }
@@ -104,6 +104,7 @@ struct OnboardingView: View {
         case .tabs: TabsStep()
         case .search: SearchStep()
         case .shield: ShieldStep()
+        case .assistant: AssistantStep()
         case .tour: TourStep()
         case .shortcuts: ShortcutsStep()
         case .done: DoneStep(finish: finish)
@@ -118,6 +119,7 @@ struct OnboardingView: View {
 
     private func finish() {
         s.onboarded = true
+        s.aiIntroduced = true
         dismiss()
     }
 }
@@ -831,6 +833,55 @@ private struct ShieldStep: View {
                 .font(.system(size: 12.5))
                 .disabled(!s.adBlock)
             }
+        }
+    }
+}
+
+private struct AssistantStep: View {
+    @Bindable private var s = Settings.shared
+    @State private var key = ""
+
+    var body: some View {
+        StepPage(symbol: "sparkles", title: "Lumen Assistant (beta)",
+                 subtitle: "Ask questions about the page you're reading, get summaries and explanations, in a panel beside the page. It uses your own API key, and it stays off unless you turn it on.") {
+            VStack(spacing: 16) {
+                HStack(spacing: 14) {
+                    ChoiceCard(title: "Turn on", detail: "Open it with ⇧⌘A or the sparkles button. You can turn it off in Settings › AI.",
+                               selected: s.aiEnabled, action: { s.aiEnabled = true }) { AssistantArt(on: true) }
+                    ChoiceCard(title: "Not now", detail: "Nothing is sent anywhere. You can turn it on later in Settings › AI.",
+                               selected: !s.aiEnabled, action: { s.aiEnabled = false }) { AssistantArt(on: false) }
+                }
+                .frame(maxWidth: 520)
+                if s.aiEnabled {
+                    HStack(spacing: 10) {
+                        Picker("Provider", selection: $s.aiProvider) {
+                            ForEach(AIProvider.allCases) { Text($0.name).tag($0) }
+                        }
+                        .labelsHidden()
+                        .frame(width: 170)
+                        SecureField(s.aiProvider.needsKey ? "API key" : "API key (optional)", text: $key)
+                            .frame(width: 260)
+                            .onChange(of: key) { _, k in AIKeys.set(k, for: s.aiProvider) }
+                    }
+                    Text(s.aiProvider == .custom ? "Set the server address and model in Settings › AI." : "The key is saved in your Keychain. You can change the model in Settings › AI.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+            }
+        }
+        .onAppear { key = AIKeys.get(s.aiProvider) ?? "" }
+        .onChange(of: s.aiProvider) { _, p in key = AIKeys.get(p) ?? "" }
+    }
+}
+
+private struct AssistantArt: View {
+    let on: Bool
+
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: [Color.accentColor.opacity(on ? 0.28 : 0.08), Color.accentColor.opacity(0.05)], startPoint: .top, endPoint: .bottom)
+            Image(systemName: on ? "sparkles" : "moon.zzz")
+                .font(.system(size: 34))
+                .foregroundStyle(on ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
         }
     }
 }

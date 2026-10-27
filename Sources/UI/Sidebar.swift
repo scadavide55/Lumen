@@ -410,6 +410,7 @@ struct SidebarFooter: View {
                 openWindow(id: "library")
             }
             if showsDownloads { DownloadsButton() }
+            if showsDownloads { AssistantButton() }
             Spacer()
             if s.adBlock {
                 Label("\(blocker.ruleCount.formatted())", systemImage: "shield.lefthalf.filled")
@@ -590,6 +591,7 @@ struct CompactBar: View {
             if let tab = b.current {
                 ShieldButton(tab: tab)
                 DownloadsButton()
+                AssistantButton()
                 PageMenu(tab: tab)
             }
         }

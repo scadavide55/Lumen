@@ -10,6 +10,7 @@ struct SettingsView: View {
             PasswordsPane().tabItem { Label("Passwords", systemImage: "key") }
             SearchPane().tabItem { Label("Search", systemImage: "magnifyingglass") }
             SitesPane().tabItem { Label("Sites", systemImage: "globe") }
+            AIPane().tabItem { Label("AI", systemImage: "sparkles") }
             AdvancedPane().tabItem { Label("Advanced", systemImage: "wrench.and.screwdriver") }
         }
         .frame(width: 600, height: 560)

@@ -49,9 +49,16 @@ struct ContentView: View {
                     ContentView.onboardingShown = true
                     browser.paletteVisible = false
                     browser.showOnboarding = true
+                } else if settings.onboarded && !settings.aiIntroduced && settings.aiEnabled {
+                    settings.aiIntroduced = true
+                } else if settings.onboarded && !settings.aiIntroduced && !ContentView.onboardingShown {
+                    // People who set Lumen up before 1.5.4 hear about the assistant once.
+                    ContentView.onboardingShown = true
+                    browser.showAssistantIntro = true
                 }
             }
             .sheet(isPresented: Bindable(browser).showOnboarding) { OnboardingView() }
+            .sheet(isPresented: Bindable(browser).showAssistantIntro, onDismiss: { settings.aiIntroduced = true }) { AssistantIntro() }
             .sheet(isPresented: Bindable(browser).showInstallApp) {
                 if let tab = browser.current { InstallAppSheet(tab: tab) }
             }
@@ -76,6 +83,25 @@ struct BrowserLayout: View {
     var body: some View {
         ZStack {
             ChromeBackground()
+            HStack(spacing: 0) {
+                layout
+                if b.assistantVisible && s.aiEnabled {
+                    AssistantPanel().transition(.move(edge: .trailing))
+                }
+            }
+            if b.paletteVisible {
+                CommandPalette().transition(.opacity.combined(with: .scale(scale: 0.98)))
+            }
+            if b.locked { PrivateLockView() }
+        }
+        .animation(.easeOut(duration: 0.18), value: b.sidebarVisible)
+        .animation(.easeOut(duration: 0.15), value: b.paletteVisible)
+        .animation(.easeOut(duration: 0.15), value: b.peekSidebar)
+        .animation(.easeOut(duration: 0.18), value: b.assistantVisible)
+    }
+
+    @ViewBuilder private var layout: some View {
+        ZStack {
             if vertical {
                 HStack(spacing: 0) {
                     if sidebarShown && left {
@@ -104,14 +130,7 @@ struct BrowserLayout: View {
                     MainColumn(toolbar: false, trafficSpace: false, leadingFlush: false, trailingFlush: false)
                 }
             }
-            if b.paletteVisible {
-                CommandPalette().transition(.opacity.combined(with: .scale(scale: 0.98)))
-            }
-            if b.locked { PrivateLockView() }
         }
-        .animation(.easeOut(duration: 0.18), value: b.sidebarVisible)
-        .animation(.easeOut(duration: 0.15), value: b.paletteVisible)
-        .animation(.easeOut(duration: 0.15), value: b.peekSidebar)
     }
 }
 

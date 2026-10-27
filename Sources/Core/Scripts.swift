@@ -20,8 +20,9 @@ enum Scripts {
                                          injectionTime: .atDocumentStart, forMainFrameOnly: true, in: .defaultClient))
         }
         if s.adBlock && s.youtubeAds {
+            // Not main-frame only: videos embedded on other sites (Reddit, blogs) play in a YouTube frame.
             c.addUserScript(WKUserScript(source: youtube.replacingOccurrences(of: "__ALLOW__", with: allow),
-                                         injectionTime: .atDocumentStart, forMainFrameOnly: true, in: .page))
+                                         injectionTime: .atDocumentStart, forMainFrameOnly: false, in: .page))
         }
         if s.forceDark {
             c.addUserScript(WKUserScript(source: forceDark, injectionTime: .atDocumentStart, forMainFrameOnly: true, in: .defaultClient))
@@ -291,9 +292,12 @@ enum Scripts {
     static let youtube = #"""
     (() => {
       const h = location.hostname;
-      if (!/(^|\.)youtube\.com$/.test(h)) return;
+      if (!/(^|\.)youtube(-nocookie)?\.com$/.test(h)) return;
+      // In a video embedded on another site, Shield being off for that site counts too.
+      const origins = location.ancestorOrigins || [];
+      const top = origins.length ? new URL(origins[origins.length - 1]).hostname : h;
       const allow = __ALLOW__;
-      if (allow.some(d => h === d || h.endsWith('.' + d))) return;
+      if ([h, top].some(x => allow.some(d => x === d || x.endsWith('.' + d)))) return;
 
       const keys = ['adPlacements', 'adSlots', 'playerAds', 'adBreakHeartbeatParams'];
       const strip = (o) => {

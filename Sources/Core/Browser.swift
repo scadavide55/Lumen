@@ -25,6 +25,9 @@ final class BrowserState {
     var showOnboarding = false
     var locked = false
     var showInstallApp = false
+    var assistantVisible = false
+    var showAssistantIntro = false
+    @ObservationIgnored private(set) lazy var assistant = AssistantChat(browser: self)
     @ObservationIgnored var palettePrefill = ""
     @ObservationIgnored weak var window: NSWindow?
 

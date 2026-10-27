@@ -181,6 +181,9 @@ struct LumenCommands: Commands {
         CommandGroup(replacing: .sidebar) {
             Button("Toggle Sidebar") { b?.sidebarVisible.toggle() }.keyboardShortcut("s").disabled(b == nil)
             Button("Command Bar") { b?.togglePalette("") }.keyboardShortcut("k").disabled(b == nil)
+            if s.aiEnabled {
+                Button("Lumen Assistant") { b?.assistantVisible.toggle() }.keyboardShortcut("a", modifiers: [.command, .shift]).disabled(b == nil)
+            }
             Divider()
             Button("Reader") { b?.current?.toggleReader() }.keyboardShortcut("r", modifiers: [.command, .shift]).disabled(b == nil)
             Button("Split View") {

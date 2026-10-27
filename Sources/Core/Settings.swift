@@ -322,6 +322,22 @@ final class Settings: Observable {
     @Pref("mediaPermissions") var mediaPermissions: [String: Bool] = [:]
     @Pref("forceDark") var forceDark = false
 
+    // AI assistant
+    @Pref("aiEnabled") var aiEnabled = false
+    /// Whether the user has been told about the assistant, in the setup or after updating to 1.5.4.
+    @Pref("aiIntroduced") var aiIntroduced = false
+    @Pref("aiProvider") var aiProvider = AIProvider.anthropic
+    /// The model chosen for each provider, keyed by `AIProvider.rawValue`.
+    @Pref("aiModels") var aiModels: [String: String] = [:]
+    @Pref("aiBaseURL") var aiBaseURL = AIProvider.custom.defaultBaseURL
+    /// Image support the user set by hand, keyed by `AIProvider.visionKey`; other models are detected.
+    @Pref("aiVision") var aiVision: [String: Bool] = [:]
+
+    var aiModelName: String {
+        let m = (aiModels[aiProvider.rawValue] ?? "").trimmingCharacters(in: .whitespaces)
+        return m.isEmpty ? aiProvider.defaultModel : m
+    }
+
     // Advanced
     @Pref("developer") var developer = false
     @Pref("javaScript") var javaScript = true
