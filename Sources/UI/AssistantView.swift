@@ -5,7 +5,14 @@ import UniformTypeIdentifiers
 struct AssistantPanel: View {
     @Environment(BrowserState.self) var b
     @Bindable var s = Settings.shared
+    var maxWidth: Double = .infinity
     @State private var showHistory = false
+    /// The width while the edge is dragged, saved to settings only when the drag ends.
+    @State private var dragWidth: Double?
+    @State private var dragStart: Double?
+
+    static let minWidth = 320.0
+    private var width: Double { min(max(Self.minWidth, dragWidth ?? s.assistantWidth), max(Self.minWidth, maxWidth)) }
 
     private var chat: AssistantChat { b.assistant }
     private var configured: Bool { !s.aiProvider.needsKey || AIKeys.has(s.aiProvider) }
@@ -21,9 +28,33 @@ struct AssistantPanel: View {
                 setup
             }
         }
-        .frame(width: 380)
+        .frame(width: width)
         .background(VisualEffect(material: .sidebar, blending: .withinWindow))
-        .overlay(alignment: .leading) { Rectangle().fill(Color.primary.opacity(0.08)).frame(width: 1) }
+        .overlay(alignment: .leading) {
+            ZStack(alignment: .leading) {
+                Color.clear
+                Rectangle().fill(Color.primary.opacity(0.08)).frame(width: 1)
+            }
+                .frame(width: 7)
+                .contentShape(Rectangle())
+                .onHover { inside in
+                    if inside { NSCursor.resizeLeftRight.push() } else { NSCursor.pop() }
+                }
+                .gesture(
+                    DragGesture(minimumDistance: 1, coordinateSpace: .global)
+                        .onChanged { v in
+                            let base = dragStart ?? width
+                            if dragStart == nil { dragStart = base }
+                            dragWidth = min(max(Self.minWidth, maxWidth), max(Self.minWidth, base - v.translation.width))
+                        }
+                        .onEnded { _ in
+                            if let dragWidth { s.assistantWidth = dragWidth }
+                            dragWidth = nil
+                            dragStart = nil
+                        }
+                )
+                .help("Drag to resize")
+        }
         .onDrop(of: [.image, .fileURL], isTargeted: nil) { providers in
             guard chat.canAttachImages else { return false }
             AssistantComposer.load(providers, into: chat)

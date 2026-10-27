@@ -334,6 +334,8 @@ final class Settings: Observable {
     @Pref("aiVision") var aiVision: [String: Bool] = [:]
     /// Lets the assistant search the web and read pages by itself.
     @Pref("aiWeb") var aiWeb = true
+    /// The assistant panel's width, set by dragging its edge.
+    @Pref("assistantWidth") var assistantWidth = 380.0
     /// Lets the assistant click, type, scroll and drag on the current page. Off by default.
     @Pref("aiControl") var aiControl = false
     /// Whether the user has read what page control means, before turning it on for the first time.

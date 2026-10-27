@@ -83,10 +83,13 @@ struct BrowserLayout: View {
     var body: some View {
         ZStack {
             ChromeBackground()
-            HStack(spacing: 0) {
-                layout
-                if b.assistantVisible && s.aiEnabled {
-                    AssistantPanel().transition(.move(edge: .trailing))
+            GeometryReader { geo in
+                HStack(spacing: 0) {
+                    layout
+                    if b.assistantVisible && s.aiEnabled {
+                        // The panel can take a little less than half the window.
+                        AssistantPanel(maxWidth: geo.size.width * 0.45).transition(.move(edge: .trailing))
+                    }
                 }
             }
             if b.assistantVisible && b.assistantExpanded && s.aiEnabled {

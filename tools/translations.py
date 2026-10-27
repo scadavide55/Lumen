@@ -774,6 +774,7 @@ T = {
     'Hide Chats': ('Nascondi chat', 'Masquer les discussions'),
     'Show Chats': ('Mostra chat', 'Afficher les discussions'),
     'Delete All': ('Elimina tutto', 'Tout supprimer'),
+    'Drag to resize': ('Trascina per ridimensionare', 'Faites glisser pour redimensionner'),
     'Chat History': ('Cronologia chat', 'Historique des discussions'),
     'Delete All…': ('Elimina tutto…', 'Tout supprimer…'),
     'Search chats': ('Cerca nelle chat', 'Rechercher dans les discussions'),
