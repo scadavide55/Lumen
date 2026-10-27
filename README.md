@@ -111,3 +111,7 @@ open Lumen.app
 ## Installing a downloaded build
 
 Open the `.dmg` and drag Lumen to Applications. Release builds are not notarized yet, so macOS warns you the first time you open one: right-click `Lumen.app` and choose **Open**. After that, Lumen tells you about new versions and can install them for you.
+
+## License
+
+Lumen is free software, released under the [GNU General Public License v3.0](LICENSE).
