@@ -3,3 +3,4 @@ Lumen.app/
 *.dmg
 build/
 *.dmg.sha256
+*.dmg.sig
