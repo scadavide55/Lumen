@@ -12,8 +12,8 @@ final class UpdateChecker: ObservableObject {
         let notes: String
         let page: URL
         let asset: URL?
-        /// "<asset>.sha256" published next to the asset, holding its SHA-256.
-        let checksum: URL?
+        /// "<asset>.sig" published next to the asset, holding its Ed25519 signature.
+        let signature: URL?
     }
 
     @Published private(set) var available: Release?
@@ -79,9 +79,9 @@ final class UpdateChecker: ObservableObject {
             return (name.lowercased(), url)
         }
         let picked = assets.first { $0.0.hasSuffix(".dmg") } ?? assets.first { $0.0.hasSuffix(".zip") }
-        let checksum = picked.flatMap { p in assets.first { $0.0 == p.0 + ".sha256" }?.1 }
+        let signature = picked.flatMap { p in assets.first { $0.0 == p.0 + ".sig" }?.1 }
         return Release(version: version(fromTag: tag), name: r["name"] as? String ?? tag,
-                       notes: r["body"] as? String ?? "", page: page, asset: picked?.1, checksum: checksum)
+                       notes: r["body"] as? String ?? "", page: page, asset: picked?.1, signature: signature)
     }
 
     /// "v1.5-beta" → "1.5"
@@ -117,6 +117,10 @@ final class UpdateInstaller: NSObject, ObservableObject, URLSessionDownloadDeleg
     @Published private(set) var state = State.idle
     private var release: UpdateChecker.Release?
     private lazy var session = URLSession(configuration: .ephemeral, delegate: self, delegateQueue: .main)
+
+    /// Public half of the key that signs Lumen updates (see tools/sign-update.swift).
+    /// Updates not signed with the matching private key are refused.
+    private static let signingKey = "F+nRdeNu8pDKHPW5IepLoLSrTmiMkV6CatzvXsCLgHA="
 
     private static let trustedHosts = ["github.com", "objects.githubusercontent.com", "release-assets.githubusercontent.com"]
 
@@ -160,9 +164,9 @@ final class UpdateInstaller: NSObject, ObservableObject, URLSessionDownloadDeleg
             return
         }
         state = .installing
-        let checksum = release?.checksum
+        let signature = release?.signature
         DispatchQueue.global(qos: .userInitiated).async {
-            let result = Self.verify(archive: archive, checksum: checksum).flatMap { Self.prepare(archive: archive, ext: ext, work: work) }
+            let result = Self.verify(archive: archive, signature: signature).flatMap { Self.prepare(archive: archive, ext: ext, work: work) }
             DispatchQueue.main.async {
                 switch result {
                 case .success(let app): self.relaunch(into: app)
@@ -174,16 +178,17 @@ final class UpdateInstaller: NSObject, ObservableObject, URLSessionDownloadDeleg
 
     struct Message: Error { let text: String }
 
-    /// When the release publishes a SHA-256 for the download, the file must match it.
-    private static func verify(archive: URL, checksum: URL?) -> Result<Void, Message> {
-        guard let checksum else { return .success(()) }
+    /// The download must carry a signature made with Lumen's update key. A checksum next to the file
+    /// would not do: whoever can change the release can change that too.
+    private static func verify(archive: URL, signature: URL?) -> Result<Void, Message> {
         let damaged = Message(text: L("The update couldn't be verified. It may be damaged or changed; try again later."))
-        guard checksum.scheme == "https", trustedHosts.contains(checksum.host ?? ""),
-              let text = try? String(contentsOf: checksum, encoding: .utf8),
-              let expected = text.split(whereSeparator: \.isWhitespace).first?.lowercased(),
+        guard let signature, signature.scheme == "https", trustedHosts.contains(signature.host ?? ""),
+              let text = try? String(contentsOf: signature, encoding: .utf8),
+              let sig = Data(base64Encoded: text.trimmingCharacters(in: .whitespacesAndNewlines)),
+              let keyData = Data(base64Encoded: signingKey),
+              let key = try? Curve25519.Signing.PublicKey(rawRepresentation: keyData),
               let data = try? Data(contentsOf: archive, options: .mappedIfSafe) else { return .failure(damaged) }
-        let actual = SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
-        return actual == expected ? .success(()) : .failure(damaged)
+        return key.isValidSignature(sig, for: data) ? .success(()) : .failure(damaged)
     }
 
     /// Extracts the new Lumen.app and checks its identity and version.
