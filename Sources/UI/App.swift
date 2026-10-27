@@ -190,7 +190,7 @@ struct LumenCommands: Commands {
                 guard let b else { return }
                 b.splitTab == nil ? b.splitWithNewTab() : b.closeSplit()
             }
-            .keyboardShortcut("\\", modifiers: [.command, .shift])
+            .keyboardShortcut("s", modifiers: [.command, .option])
             .disabled(b == nil)
             Divider()
             Button("Zoom In") { b?.current?.zoom(1) }.keyboardShortcut("+").disabled(b == nil)

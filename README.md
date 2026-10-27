@@ -95,7 +95,7 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 | ⌘[ / ⌘] | Back / forward |
 | ⌘F, ⌘G | Find on page, find next |
 | ⇧⌘R | Reader |
-| ⇧⌘\ | Split view |
+| ⌥⌘S | Split view |
 | ⌘D | Bookmark the page |
 | ⌘Y | History |
 | ⇧⌘B | Turn the ad blocker on or off |

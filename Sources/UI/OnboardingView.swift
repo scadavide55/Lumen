@@ -944,7 +944,7 @@ struct ShortcutList: View {
         ("Tabs and windows", [
             ("⌘T", "New tab"), ("⌘W", "Close tab"), ("⇧⌘T", "Reopen closed tab"), ("⌘N", "New window"),
             ("⇧⌘N", "New private window"), ("⌃⇥", "Next tab"), ("⌃⇧⇥", "Previous tab"), ("⌘1…⌘9", "Go to tab"),
-            ("⇧⌘M", "Mute tab"), ("⇧⌘\\", "Split view"),
+            ("⇧⌘M", "Mute tab"), ("⌥⌘S", "Split view"),
         ]),
         ("Browsing", [
             ("⌘L / ⌘K", "Command bar"), ("⌘[ / ⌘]", "Back / forward"), ("⌘R", "Reload"), ("⌥⌘R", "Reload ignoring cache"),
