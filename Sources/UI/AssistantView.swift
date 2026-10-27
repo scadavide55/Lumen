@@ -33,7 +33,7 @@ struct AssistantPanel: View {
     private var header: some View {
         HStack(spacing: 6) {
             Image(systemName: "sparkles").foregroundStyle(.tint)
-            Text("Lumen Assistant").font(.system(size: 13, weight: .semibold))
+            Text("Lumen Assistant").font(.system(size: 13, weight: .semibold)).lineLimit(1).fixedSize()
             BetaBadge()
             ChatModelMenu(chat: chat)
             Spacer(minLength: 4)

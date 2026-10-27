@@ -400,15 +400,17 @@ enum Scripts {
     static let reader = #"""
     (() => {
       const pick = () => {
-        const arts = [...document.querySelectorAll('article, [itemprop="articleBody"], main')];
-        const best = arts.sort((a, b) => b.innerText.length - a.innerText.length)[0];
-        if (best && best.innerText.length > 800) return best;
+        // The block holding the most paragraph text.
         let el = null, top = 0;
         for (const c of document.querySelectorAll('div, section')) {
           let n = 0;
           for (const p of c.children) if (p.tagName === 'P') n += p.innerText.length;
           if (n > top) { top = n; el = c; }
         }
+        const arts = [...document.querySelectorAll('article, [itemprop="articleBody"], main')];
+        const best = arts.sort((a, b) => b.innerText.length - a.innerText.length)[0];
+        // A <main> often also holds menus and language lists (Wikipedia): prefer the paragraph block inside it.
+        if (best && best.innerText.length > 800) return el && top > 500 && best.contains(el) ? el : best;
         return top > 500 ? el : null;
       };
       const root = pick();
@@ -416,7 +418,7 @@ enum Scripts {
       const keep = new Set(['P','H1','H2','H3','H4','H5','BLOCKQUOTE','PRE','CODE','UL','OL','LI','FIGURE','FIGCAPTION',
         'IMG','A','EM','STRONG','B','I','U','BR','HR','TABLE','THEAD','TBODY','TR','TD','TH','SUP','SUB','DL','DT','DD']);
       const drop = new Set(['SCRIPT','STYLE','NOSCRIPT','IFRAME','FORM','BUTTON','INPUT','NAV','ASIDE','FOOTER','SVG','CANVAS','VIDEO','AUDIO','SELECT','TEXTAREA']);
-      const junk = /(share|social|related|promo|advert|newsletter|comment|subscribe|sidebar|cookie|banner|popup|footer|byline-share|recirc)/i;
+      const junk = /(share|social|related|promo|advert|newsletter|comment|subscribe|sidebar|cookie|banner|popup|footer|byline-share|recirc|navbox|catlinks|interlanguage|mw-editsection|language-list)/i;
       const clone = (node) => {
         if (node.nodeType === 3) return document.createTextNode(node.textContent);
         if (node.nodeType !== 1 || drop.has(node.tagName)) return null;
@@ -439,7 +441,10 @@ enum Scripts {
       const box = document.createElement('div');
       box.appendChild(clone(root));
       const meta = (n) => { const m = document.querySelector(`meta[property="${n}"], meta[name="${n}"]`); return m ? m.content : ''; };
-      const title = meta('og:title') || document.title;
+      let title = meta('og:title') || document.title;
+      // The page's own heading is the title; "Lumen - Wikipedia" becomes "Lumen" and isn't shown twice.
+      const heading = (document.querySelector('h1') || {}).textContent;
+      if (heading && heading.trim() && title.includes(heading.trim())) title = heading.trim();
       const h1 = box.querySelector('h1');
       if (h1 && h1.textContent.trim() === title.trim()) h1.remove();
       return {

@@ -117,7 +117,8 @@ struct FavoriteTile: View {
                         Image(nsImage: icon).resizable().interpolation(.high).frame(width: 28, height: 28)
                             .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                     } else {
-                        Text(String(InputResolver.displayHost(bookmark.url).prefix(1)).uppercased())
+                        // The name, not the host: "it.yahoo.com" would show an I for Yahoo.
+                        Text(String((bookmark.title.isEmpty ? InputResolver.displayHost(bookmark.url) : bookmark.title).prefix(1)).uppercased())
                             .font(.system(size: 22, weight: .semibold, design: .rounded))
                     }
                 }
