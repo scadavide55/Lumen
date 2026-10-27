@@ -2,7 +2,7 @@
 
 <img src="docs/assets/icon.png" alt="Lumen icon" width="128" height="128">
 
-# Lumen
+# Tacet ( formerly Lumen ) 
 
 **The quiet browser for your Mac.**
 
@@ -29,7 +29,7 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 
 ## Features
 
-**Lumen Assistant (beta)**
+**Tacet Assistant (beta)**
 - An AI assistant in a panel beside the page (⇧⌘A): summaries, answers and explanations about what you're reading
 - Bring your own key: Anthropic, OpenAI, OpenRouter, DeepSeek or any OpenAI-compatible server (Ollama, LM Studio)
 - **Apple's on-device model** (macOS 26 with Apple Intelligence): free, offline and private, with no key. It's smaller, so it's best for short tasks
