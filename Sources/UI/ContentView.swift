@@ -89,6 +89,9 @@ struct BrowserLayout: View {
                     AssistantPanel().transition(.move(edge: .trailing))
                 }
             }
+            if b.assistantVisible && b.assistantExpanded && s.aiEnabled {
+                AssistantFullView().transition(.opacity.combined(with: .scale(scale: 0.98)))
+            }
             if b.paletteVisible {
                 CommandPalette().transition(.opacity.combined(with: .scale(scale: 0.98)))
             }
@@ -98,6 +101,7 @@ struct BrowserLayout: View {
         .animation(.easeOut(duration: 0.15), value: b.paletteVisible)
         .animation(.easeOut(duration: 0.15), value: b.peekSidebar)
         .animation(.easeOut(duration: 0.18), value: b.assistantVisible)
+        .animation(.easeOut(duration: 0.2), value: b.assistantExpanded)
     }
 
     @ViewBuilder private var layout: some View {

@@ -86,6 +86,8 @@
 "Bookmarks, history and sign-ins from Safari, Chrome, Firefox, Opera and more." = "Signets, historique et connexions de Safari, Chrome, Firefox, Opera et d'autres.";
 "Bring everything with you" = "Emportez tout avec vous";
 "Bring your bookmarks, history and sign-ins into Lumen. Nothing leaves your Mac." = "Importez vos signets, votre historique et vos connexions dans Lumen. Rien ne quitte votre Mac.";
+"Browser use" = "Contrôle du navigateur";
+"Browser use: let the assistant click, type and scroll on pages" = "Contrôle du navigateur : autoriser l'assistant à cliquer, écrire et faire défiler les pages";
 "Browsing" = "Navigation";
 "Built-in list. Works offline, breaks almost nothing." = "Liste intégrée. Fonctionne hors ligne et ne casse presque rien.";
 "Cached images and files" = "Images et fichiers en cache";
@@ -94,6 +96,8 @@
 "Can't open this page" = "Impossible d'ouvrir cette page";
 "Cancel" = "Annuler";
 "Cancelled" = "Annulé";
+"Chat History" = "Historique des discussions";
+"Chats in private windows aren't saved." = "Les discussions des fenêtres privées ne sont pas enregistrées.";
 "Check Now" = "Vérifier";
 "Check for Updates" = "Rechercher les mises à jour";
 "Check for Updates…" = "Rechercher les mises à jour…";
@@ -114,6 +118,7 @@
 "Clear data for %@?" = "Effacer les données de %@ ?";
 "Click the page icon in the address, or press ⇧⌘R, for a clean reading view." = "Cliquez sur l'icône de page dans l'adresse, ou appuyez sur ⇧⌘R, pour une lecture épurée.";
 "Click to collapse, double-click to rename" = "Cliquez pour réduire, double-cliquez pour renommer";
+"Clicking “%@”" = "Clic sur « %@ »";
 "Close" = "Fermer";
 "Close (⇧⌘A)" = "Fermer (⇧⌘A)";
 "Close Duplicate Tabs" = "Fermer les onglets en double";
@@ -167,7 +172,11 @@
 "Default model" = "Modèle par défaut";
 "Default zoom" = "Zoom par défaut";
 "Delete" = "Supprimer";
+"Delete All" = "Tout supprimer";
+"Delete All…" = "Tout supprimer…";
+"Delete Chat" = "Supprimer la discussion";
 "Delete Profile" = "Supprimer le profil";
+"Delete all saved chats?" = "Supprimer toutes les discussions enregistrées ?";
 "Delete “%@”?" = "Supprimer « %@ » ?";
 "Developer" = "Développeur";
 "Don't Allow" = "Refuser";
@@ -179,6 +188,7 @@
 "Downloading…" = "Téléchargement…";
 "Downloads" = "Téléchargements";
 "Downloads (⌥⌘L)" = "Téléchargements (⌥⌘L)";
+"Dragging on the page" = "Glisser-déposer dans la page";
 "Duplicate Tab" = "Dupliquer l'onglet";
 "Dusk" = "Crépuscule";
 "Each profile keeps its own cookies, sign-ins and site data, so you can be signed in to different accounts at the same time. History, bookmarks, passwords and settings are shared." = "Chaque profil a ses propres cookies, connexions et données de sites, pour être connecté à plusieurs comptes en même temps. L'historique, les signets, les mots de passe et les réglages sont partagés.";
@@ -193,6 +203,7 @@
 "Everything has a shortcut. You'll find them all in the menus too." = "Tout a un raccourci. Vous les trouverez aussi dans les menus.";
 "Everything stays on your Mac. Lumen has no accounts and no analytics." = "Tout reste sur votre Mac. Lumen n'a ni compte ni statistiques.";
 "Example: #comments, .sidebar { display: none !important; }" = "Exemple : #comments, .sidebar { display: none !important; }";
+"Exit Full Screen Chat" = "Quitter la discussion en plein écran";
 "Exit Reader" = "Quitter le lecteur";
 "Expand Group" = "Développer le groupe";
 "Explain the text I selected" = "Explique le texte que j'ai sélectionné";
@@ -224,6 +235,7 @@
 "Forward (⌘])" = "Avant (⌘])";
 "Free memory used by background tabs" = "Libérer la mémoire des onglets en arrière-plan";
 "Free software under the GNU GPL v3" = "Logiciel libre sous GNU GPL v3";
+"Full Screen Chat" = "Discussion en plein écran";
 "General" = "Général";
 "Get Started" = "Commencer";
 "Go Back" = "Revenir en arrière";
@@ -245,6 +257,7 @@
 "Hibernate tabs you haven't used for 15 minutes to save memory" = "Mettre en veille les onglets inutilisés depuis 15 minutes pour économiser la mémoire";
 "Hibernated tabs keep their place and history but release memory until you open them again." = "Les onglets en veille gardent leur place et leur historique, mais libèrent la mémoire jusqu'à ce que vous les rouvriez.";
 "Hibernation" = "Mise en veille";
+"Hide Chats" = "Masquer les discussions";
 "Hide Cookie Banners" = "Masquer les bannières de cookies";
 "Hide cookie banners" = "Masquer les bannières de cookies";
 "Hide cookie consent banners" = "Masquer les bannières de consentement aux cookies";
@@ -294,6 +307,8 @@
 "Layout" = "Disposition";
 "Learn Lumen" = "Découvrir Lumen";
 "Left" = "Gauche";
+"Let the assistant click, type and scroll on the current page" = "Autoriser l'assistant à cliquer, écrire et faire défiler la page actuelle";
+"Let the assistant search the web and read pages" = "Autoriser l'assistant à rechercher sur le web et lire les pages";
 "Library" = "Bibliothèque";
 "Light" = "Clair";
 "Light Appearance" = "Apparence claire";
@@ -304,6 +319,7 @@
 "Lock Window with Touch ID" = "Verrouiller la fenêtre avec Touch ID";
 "Lock private windows with Touch ID when Lumen is in the background" = "Verrouiller les fenêtres privées avec Touch ID quand Lumen est en arrière-plan";
 "Look and feel" = "Apparence";
+"Looking at the page" = "Analyse de la page";
 "Looking at your tabs" = "Consultation de vos onglets";
 "Looks for a newer Lumen on GitHub" = "Recherche une version plus récente de Lumen sur GitHub";
 "Lumen %@" = "Lumen %@";
@@ -381,6 +397,7 @@
 "No problem. Your current browser stays the default." = "Pas de problème. Votre navigateur actuel reste celui par défaut.";
 "No release notes." = "Aucune note de version.";
 "No rules could be compiled." = "Aucune règle n'a pu être compilée.";
+"No saved chats yet." = "Aucune discussion enregistrée.";
 "No saved passwords yet." = "Aucun mot de passe enregistré.";
 "No site loaded" = "Aucun site chargé";
 "No web apps yet. Open a site and choose Install as App from the page menu." = "Aucune web app pour l'instant. Ouvrez un site et choisissez Installer comme app dans le menu de la page.";
@@ -420,6 +437,8 @@
 "Open the command bar on every new tab" = "Ouvrir la barre de commandes à chaque nouvel onglet";
 "Open “%@”?" = "Ouvrir « %@ » ?";
 "OpenAI-compatible" = "Compatible OpenAI";
+"Opening %@" = "Ouverture de %@";
+"Opening a new tab" = "Ouverture d'un nouvel onglet";
 "Optional" = "Facultatif";
 "Optional. Lumen never sees your password: you type it on Google's own page." = "Facultatif. Lumen ne voit jamais votre mot de passe : vous le saisissez sur la page de Google.";
 "Orange" = "Orange";
@@ -468,6 +487,7 @@
 "Put the address bar in the sidebar" = "Placer la barre d'adresse dans la barre latérale";
 "Reader" = "Lecteur";
 "Reader (⇧⌘R)" = "Lecteur (⇧⌘R)";
+"Reading %@" = "Lecture de %@";
 "Reading the page" = "Lecture de la page";
 "Reading the selection" = "Lecture de la sélection";
 "Ready" = "Prêt";
@@ -512,10 +532,12 @@
 "Saved passwords" = "Mots de passe enregistrés";
 "Saves and fills passwords for you. Recommended." = "Enregistre et remplit vos mots de passe. Recommandé.";
 "Scroll up at the top of a page to reload it" = "Faire défiler vers le haut en haut d'une page pour la recharger";
+"Scrolling the page" = "Défilement de la page";
 "Search" = "Rechercher";
 "Search %@" = "Rechercher avec %@";
 "Search URL" = "URL de recherche";
 "Search and privacy" = "Recherche et confidentialité";
+"Search chats" = "Rechercher dans les discussions";
 "Search engine" = "Moteur de recherche";
 "Search history" = "Rechercher dans l'historique";
 "Search or enter address" = "Rechercher ou saisir une adresse";
@@ -525,6 +547,8 @@
 "Search with" = "Rechercher avec";
 "Search with %@ or enter an address" = "Rechercher avec %@ ou saisir une adresse";
 "Search, enter an address, or run a command" = "Recherchez, saisissez une adresse ou lancez une commande";
+"Searching for “%@”" = "Recherche de « %@ »";
+"Searching the web for “%@”" = "Recherche sur le web : « %@ »";
 "Select" = "Sélectionner";
 "Send" = "Envoyer";
 "Separate" = "Séparé";
@@ -541,6 +565,7 @@
 "Shield stops ads and trackers before they load, using the content blocker built into WebKit. Pages load faster, and you can switch it off for any site from the shield button." = "Shield arrête les publicités et les traqueurs avant leur chargement, grâce au bloqueur de contenu intégré à WebKit. Les pages se chargent plus vite, et vous pouvez le désactiver pour n'importe quel site avec le bouton bouclier.";
 "Show All History" = "Afficher tout l'historique";
 "Show Bookmarks" = "Afficher les signets";
+"Show Chats" = "Afficher les discussions";
 "Show Downloads" = "Afficher les téléchargements";
 "Show History" = "Afficher l'historique";
 "Show clock" = "Afficher l'horloge";
@@ -584,6 +609,7 @@
 "Skip YouTube ads" = "Passer les publicités YouTube";
 "Software Update" = "Mise à jour logicielle";
 "Solid" = "Opaque";
+"Sources" = "Sources";
 "Split View" = "Vue partagée";
 "Split View with New Tab" = "Vue partagée avec un nouvel onglet";
 "Split view" = "Vue partagée";
@@ -604,6 +630,7 @@
 "Supported by this model" = "Prises en charge par ce modèle";
 "Swap panes" = "Inverser les panneaux";
 "Switch to Tab" = "Aller à l'onglet";
+"Switching to %@" = "Passage à %@";
 "System" = "Système";
 "System Appearance" = "Apparence du système";
 "Tab" = "Onglet";
@@ -618,6 +645,10 @@
 "The answer was cut off because it reached the length limit." = "La réponse a été coupée car elle a atteint la limite de longueur.";
 "The app gets its own window and Dock icon, and opens in ~/Applications/Lumen Apps. Sign in once inside the app: it keeps its own cookies." = "L'app a sa propre fenêtre et icône dans le Dock, dans ~/Applications/Lumen Apps. Connectez-vous une fois dans l'app : elle garde ses propres cookies.";
 "The app needs a name." = "L'app a besoin d'un nom.";
+"The assistant can click, type and scroll on the current page. Click to turn off." = "L'assistant peut cliquer, écrire et faire défiler la page actuelle. Cliquez pour désactiver.";
+"The assistant can look things up and open pages that appear in the chat. Searches go to DuckDuckGo, and pages are downloaded by your Mac without cookies or logins." = "L'assistant peut faire des recherches et ouvrir les pages qui apparaissent dans la discussion. Les recherches passent par DuckDuckGo, et les pages sont téléchargées par votre Mac sans cookies ni identifiants.";
+"The assistant can look things up and open pages that appear in the chat. With Anthropic, searches and pages are handled on Anthropic's servers." = "L'assistant peut faire des recherches et ouvrir les pages qui apparaissent dans la discussion. Avec Anthropic, les recherches et les pages passent par les serveurs d'Anthropic.";
+"The assistant can search the web and read pages. Click to turn off." = "L'assistant peut rechercher sur le web et lire les pages. Cliquez pour désactiver.";
 "The built-in list works offline. Filter lists add tens of thousands of community-maintained rules." = "La liste intégrée fonctionne hors ligne. Les listes de filtres ajoutent des dizaines de milliers de règles maintenues par la communauté.";
 "The download doesn't contain Lumen." = "Le téléchargement ne contient pas Lumen.";
 "The downloaded version isn't newer than this one." = "La version téléchargée n'est pas plus récente que celle-ci.";
@@ -631,6 +662,7 @@
 "The update doesn't come from GitHub." = "La mise à jour ne provient pas de GitHub.";
 "Theme" = "Thème";
 "This address uses letters from other alphabets, which can be made to look like a familiar site. Check that it's the site you meant to visit." = "Cette adresse utilise des lettres d'autres alphabets, qui peuvent imiter un site connu. Vérifiez qu'il s'agit bien du site voulu.";
+"This can't be undone." = "Cette action est irréversible.";
 "This model can read images" = "Ce modèle sait lire les images";
 "This page is sent with your next message" = "Cette page est envoyée avec votre prochain message";
 "This page isn't secure. Passwords you type here can be read by others on your network." = "Cette page n'est pas sécurisée. Les mots de passe saisis ici peuvent être lus par d'autres sur votre réseau.";
@@ -654,14 +686,17 @@
 "Translucent" = "Translucide";
 "Try Again" = "Réessayer";
 "Turn Off Ad Blocker" = "Désactiver le bloqueur de publicités";
+"Turn On" = "Activer";
 "Turn On Ad Blocker" = "Activer le bloqueur de publicités";
 "Turn On…" = "Activer…";
 "Turn on" = "Activer";
 "Turn on Lumen Assistant" = "Activer l'Assistant Lumen";
 "Turn on Lumen in the list, quit and reopen Lumen, then import again." = "Activez Lumen dans la liste, quittez puis rouvrez Lumen, et importez à nouveau.";
+"Turn on browser use?" = "Activer le contrôle du navigateur ?";
 "Two pages side by side. Right-click a tab and choose Open in Split View." = "Deux pages côte à côte. Cliquez avec le bouton droit sur un onglet et choisissez Ouvrir en vue partagée.";
 "Type a keyword, a space and your search in the command bar. For example: yt lofi beats" = "Tapez un mot-clé, une espace et votre recherche dans la barre de commandes. Par exemple : yt lofi beats";
 "Type a model name" = "Saisissez un nom de modèle";
+"Typing in “%@”" = "Saisie dans « %@ »";
 "URL with %s" = "URL avec %s";
 "Ungroup Tabs" = "Dissocier les onglets";
 "Unlock" = "Déverrouiller";
@@ -669,6 +704,7 @@
 "Unmute Tab" = "Rétablir le son de l'onglet";
 "Unmute tab" = "Rétablir le son de l'onglet";
 "Unpin Tab" = "Détacher l'onglet";
+"Untitled chat" = "Discussion sans titre";
 "Unused tabs sleep to free memory, then wake up right where you left them." = "Les onglets inutilisés se mettent en veille pour libérer la mémoire, puis reprennent là où vous les aviez laissés.";
 "Update" = "Mettre à jour";
 "Update Now" = "Mettre à jour";
@@ -692,6 +728,8 @@
 "Video…" = "Vidéo…";
 "View release on GitHub" = "Voir la version sur GitHub";
 "Web Apps" = "Web apps";
+"Web access" = "Accès au web";
+"Web access: search the web and read pages" = "Accès au web : rechercher sur le web et lire les pages";
 "Web content" = "Contenu web";
 "Website" = "Site web";
 "Welcome" = "Bienvenue";
@@ -703,7 +741,8 @@
 "What you type in the command bar is searched here. Private options are marked." = "Ce que vous tapez dans la barre de commandes est recherché ici. Les options privées sont indiquées.";
 "What's new" = "Nouveautés";
 "When three or more tabs are open from the same site, Lumen groups them, for example into “GitHub”." = "Quand trois onglets ou plus sont ouverts sur le même site, Lumen les regroupe, par exemple dans « GitHub ».";
-"When you ask something, your message, the attached page and any images are sent to the provider you chose, under their privacy terms. With a server on your own Mac, such as Ollama, nothing leaves your computer. Your API key is kept in the macOS Keychain." = "Quand vous posez une question, votre message, la page jointe et les éventuelles images sont envoyés au fournisseur choisi, selon ses conditions de confidentialité. Avec un serveur sur votre Mac, comme Ollama, rien ne quitte votre ordinateur. Votre clé API est conservée dans le trousseau macOS.";
+"When you ask something, your message, the attached page and any images are sent to the provider you chose, under their privacy terms. With a server on your own Mac, such as Ollama, nothing leaves your computer unless the assistant searches the web. Your API key is kept in the macOS Keychain." = "Quand vous posez une question, votre message, la page jointe et les éventuelles images sont envoyés au fournisseur choisi, selon ses conditions de confidentialité. Avec un serveur sur votre Mac, comme Ollama, rien ne quitte votre ordinateur, sauf si l'assistant fait une recherche sur le web. Votre clé API est conservée dans le trousseau macOS.";
+"When you ask, the assistant can use the page in the current tab for you, where you're signed in. It asks before sending, buying or deleting anything, and never fills in passwords or card numbers. A page can try to trick it, so watch what it does and press Stop if needed." = "Quand vous le demandez, l'assistant peut utiliser pour vous la page de l'onglet actuel, où vous êtes connecté. Il demande confirmation avant d'envoyer, d'acheter ou de supprimer quoi que ce soit, et ne saisit jamais de mots de passe ni de numéros de carte. Une page peut tenter de le tromper : surveillez ce qu'il fait et appuyez sur Arrêter si besoin.";
 "Window locked" = "Fenêtre verrouillée";
 "Window style" = "Style de fenêtre";
 "Yellow" = "Jaune";

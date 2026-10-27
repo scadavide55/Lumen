@@ -103,6 +103,75 @@ check((oaMsg["content"] as? [[String: Any]])?.first?["type"] as? String == "imag
 check(JSONSerialization.isValidJSONObject(userMsg) && JSONSerialization.isValidJSONObject(oaMsg), "messages encode as JSON")
 for t in AssistantPrompt.tools { check(JSONSerialization.isValidJSONObject(AssistantPrompt.schema(t)), "tool schema \(t.name)") }
 
+let allNames = AssistantPrompt.clientTools(provider: .openAI, web: true, control: true).map(\.name)
+eq(Set(allNames).count, allNames.count, "tool names are unique")
+for t in AssistantPrompt.webTools + AssistantPrompt.controlTools { check(JSONSerialization.isValidJSONObject(AssistantPrompt.schema(t)), "tool schema \(t.name)") }
+check(!AssistantPrompt.clientTools(provider: .anthropic, web: true, control: false).contains { $0.name == "web_search" }, "anthropic uses its own web tools")
+check(!AssistantPrompt.clientTools(provider: .openAI, web: false, control: false).contains { ["web_fetch", "click"].contains($0.name) }, "web and control tools off when turned off")
+eq(AssistantPrompt.anthropicWebTools(model: "claude-opus-5-5").first?["type"] as? String, "web_search_20260209", "web search with filtering on opus 5.5")
+eq(AssistantPrompt.anthropicWebTools(model: "claude-haiku-4-5").first?["type"] as? String, "web_search_20250305", "basic web search on older models")
+for name in allNames + ["web_search", "web_fetch"] {
+    check(AssistantPrompt.system(web: true, control: true).contains(name + ":"), "system prompt explains \(name)")
+}
+let offPrompt = AssistantPrompt.system(web: false, control: false)
+check(!offPrompt.contains("- find_elements:") && !offPrompt.contains("- web_search:"), "prompt without web and control tools")
+check(offPrompt.contains("Web access") && offPrompt.contains("Right now it is off") && offPrompt.contains("Browser use"), "prompt knows the chat buttons")
+check(AssistantPrompt.system(web: true, control: false).contains("Web access, on unless the user turned it off: web_search and web_fetch. Right now it is on"), "prompt knows web access is on")
+eq(AssistantHistory.title("  How does this work?\nmore"), "How does this work?", "chat title: first line")
+eq(AssistantHistory.title(String(repeating: "a", count: 100)).count, 71, "chat title: shortened")
+let cited = AIClient.citedSources([["type": "text", "text": "x", "citations": [["url": "https://a.com/1", "title": "A"], ["url": "https://a.com/1", "title": "A"], ["url": "https://b.com", "title": ""]]]])
+eq(cited.map(\.url.absoluteString), ["https://a.com/1", "https://b.com"], "citations become sources once each")
+
+// MARK: Web tools
+
+let ddg = """
+<div class="result results_links results_links_deep result--ad "><a class="result__a" href="https://duckduckgo.com/y.js?ad_domain=x.com">Ad</a></div>
+<div class="result results_links results_links_deep web-result "><h2 class="result__title"><a rel="nofollow" class="result__a" href="https://developer.apple.com/documentation/observation">Observation | <b>Apple</b> Developer</a></h2>
+<a class="result__snippet" href="https://developer.apple.com/documentation/observation">Make responsive apps that update the presentation when underlying data changes &amp; more.</a></div>
+<div class="result results_links results_links_deep web-result "><a class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fexample.com%2Fa%3Fb%3D1&amp;rut=abc">Example</a><a class="result__snippet" href="x">Snip</a></div>
+"""
+let parsed = WebTools.parseResults(ddg)
+eq(parsed.map(\.url), ["https://developer.apple.com/documentation/observation", "https://example.com/a?b=1"], "search: results without ads, redirect unwrapped")
+eq(parsed.first?.title, "Observation | Apple Developer", "search: title without tags")
+eq(parsed.first?.snippet, "Make responsive apps that update the presentation when underlying data changes & more.", "search: snippet entities")
+
+let html = """
+<html><head><title>My &amp; Page</title><style>.a{}</style></head><body><nav>Menu</nav><script>alert(1)</script>
+<h1>Hello</h1><p>First&nbsp;line<br>second &#8220;quoted&#x201D;</p><ul><li>One</li><li>Two</li></ul>
+<a href="/docs#top">Docs</a> <a href="https://other.org/x">Other</a> <a href="javascript:evil()">JS</a><!-- hidden --></body></html>
+"""
+let plain = WebTools.plainText(html: html)
+eq(plain.title, "My & Page", "html: title")
+check(plain.text.contains("Hello") && plain.text.contains("First\u{00A0}line".replacingOccurrences(of: "\u{00A0}", with: " ")), "html: text kept", plain.text)
+check(!plain.text.contains("alert") && !plain.text.contains("Menu") && !plain.text.contains(".a{}") && !plain.text.contains("hidden"), "html: scripts, styles, nav, comments removed", plain.text)
+check(plain.text.contains("“quoted”") && plain.text.contains("- One\n- Two"), "html: entities and lists", plain.text)
+let pageLinks = WebTools.links(in: html, base: URL(string: "https://site.com/a/b")!)
+eq(pageLinks.map(\.url), ["https://site.com/docs", "https://other.org/x"], "html: links resolved, no javascript")
+
+for (u, ok) in [("https://example.com", true), ("http://93.184.216.34/x", true), ("http://localhost:3000", false), ("http://127.0.0.1", false),
+                ("http://192.168.1.1", false), ("http://10.0.0.1", false), ("http://172.20.1.1", false), ("http://169.254.169.254/latest", false),
+                ("http://[::1]/", false), ("http://router.local", false), ("http://intranet", false), ("http://0x7f.1", false),
+                ("http://2130706433", false), ("file:///etc/passwd", false), ("ftp://example.com", false), ("http://printer.lan", false)] {
+    eq(WebTools.isPublic(URL(string: u)!), ok, "public address \(u)")
+}
+
+let convo: [[String: Any]] = [
+    ["role": "user", "content": "<page url=\"https://news.com/a\">see https://docs.site.org/guide/</page> what is this"],
+    ["role": "assistant", "content": [["type": "text", "text": "Let me read https://evil.com/?secret=1"],
+                                      ["type": "web_search_tool_result", "content": [["type": "web_search_result", "url": "https://found.com/r"]]]]],
+    ["role": "tool", "content": "1. Result\nhttps://result.net/page?id=4"],
+]
+check(WebTools.mayOpen("https://docs.site.org/guide/", in: convo), "fetch: address from page")
+check(WebTools.mayOpen("https://docs.site.org/guide", in: convo), "fetch: without trailing slash")
+check(WebTools.mayOpen("https://result.net/page?id=4", in: convo), "fetch: address from tool result")
+check(WebTools.mayOpen("https://found.com/r", in: convo), "fetch: address from Anthropic search results")
+check(!WebTools.mayOpen("https://evil.com/?secret=1", in: convo), "fetch: not an address the model wrote itself")
+check(!WebTools.mayOpen("https://result.net/page?id=4&leak=x", in: convo), "fetch: not an address with added data")
+check(WebTools.mayOpen("https://www.apple.com", in: convo) && WebTools.mayOpen("https://github.com/", in: convo), "open: home pages")
+check(!WebTools.mayOpen("https://secret-data.evil.com/", in: convo), "open: no data in a subdomain")
+check(!WebTools.mayOpen("https://apple.com/?q=x", in: convo), "open: no query on a home page")
+check(WebTools.format([], query: "x").contains("No results"), "search: empty")
+
 // MARK: Filter lists
 
 let list = """
@@ -173,6 +242,94 @@ compiles(BuiltInRules.json(), "built-in rules")
 compiles(BuiltInRules.cookieJSON, "cookie rules")
 let converted = String(decoding: try! JSONSerialization.data(withJSONObject: out.block + out.allow + out.hide), as: UTF8.self)
 compiles(converted, "converted filters")
+
+// MARK: Page control, in a real web view
+
+let wv = WKWebView(frame: NSRect(x: 0, y: 0, width: 800, height: 600))
+var loadedPage = false
+final class LoadWaiter: NSObject, WKNavigationDelegate {
+    var done: () -> Void = {}
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) { done() }
+}
+let waiter = LoadWaiter()
+waiter.done = { loadedPage = true }
+wv.navigationDelegate = waiter
+wv.loadHTMLString("""
+<html><body style="height:3000px">
+<input id="q" placeholder="Search" value="old">
+<label for="pw">Password</label><input id="pw" type="password">
+<input autocomplete="cc-number" name="card">
+<textarea aria-label="Notes"></textarea>
+<select id="s"><option value="a">Apple</option><option value="b">Banana</option></select>
+<button id="b" onclick="window.clicked=(window.clicked||0)+1; document.title='clicked'">Go now</button>
+<div id="ed" contenteditable="true">x</div>
+<div id="d1" draggable="true">Card</div><div id="d2" ondragover="event.preventDefault()" ondrop="document.title='dropped'" tabindex="0">Column</div>
+<form onsubmit="event.preventDefault(); document.title='submitted:' + this.elements[0].value"><input name="f" aria-label="Form field"></form>
+<a href="https://example.com/x">Example link</a>
+<p data-lumen-ref="1">fake</p>
+</body></html>
+""", baseURL: URL(string: "https://test.lumen/"))
+let loadDeadline = Date().addingTimeInterval(20)
+while !loadedPage && Date() < loadDeadline { RunLoop.main.run(until: Date().addingTimeInterval(0.05)) }
+check(loadedPage, "page control: test page loads")
+
+func control(_ action: PageControl.Action, _ args: [String: Any]) -> (String, Bool) {
+    var out: (String, Bool)?
+    Task { @MainActor in out = await PageControl.run(action, args: args, in: wv) }
+    let deadline = Date().addingTimeInterval(10)
+    while out == nil && Date() < deadline { RunLoop.main.run(until: Date().addingTimeInterval(0.02)) }
+    return out ?? ("timeout", true)
+}
+func js(_ code: String) -> Any? {
+    var out: Any?, done = false
+    wv.evaluateJavaScript(code) { r, _ in out = r; done = true }
+    while !done { RunLoop.main.run(until: Date().addingTimeInterval(0.02)) }
+    return out
+}
+func refFor(_ listing: String, _ needle: String) -> Int? {
+    listing.split(separator: "\n").first { $0.contains(needle) }.flatMap { line in
+        line.firstIndex(of: "]").flatMap { Int(line[line.index(after: line.startIndex)..<$0]) }
+    }
+}
+
+let (listing, listErr) = control(.find, [:])
+check(!listErr && listing.contains("\"Go now\"") && listing.contains("value=\"old\""), "find_elements lists elements", listing)
+check(listing.contains("off limits") && !listing.contains("fake"), "find_elements marks secrets, ignores page-made refs", listing)
+check(listing.contains("options=[\"Apple\",\"Banana\"]"), "find_elements lists menu options", listing)
+let filtered = control(.find, ["query": "banana"]).0
+check(filtered.contains("select") && !filtered.contains("Go now"), "find_elements query", filtered)
+
+if let q = refFor(listing, "Search"), let pw = refFor(listing, "type=password"), let card = refFor(listing, "card"),
+   let b = refFor(listing, "Go now"), let sel = refFor(listing, "select"), let ed = refFor(listing, "editable"),
+   let notes = refFor(listing, "Notes"), let d1 = refFor(listing, "Card"), let d2 = refFor(listing, "Column"),
+   let form = refFor(listing, "Form field") {
+    check(!control(.type, ["ref": q, "text": "lumen browser"]).1, "type: text field")
+    eq(js("document.getElementById('q').value") as? String, "lumen browser", "type: value replaced")
+    _ = control(.type, ["ref": q, "text": "!", "clear": false])
+    eq(js("document.getElementById('q').value") as? String, "lumen browser!", "type: append")
+    check(control(.type, ["ref": pw, "text": "hunter2"]).1, "type: refuses password field")
+    check(control(.type, ["ref": card, "text": "4111111111111111"]).1, "type: refuses card field")
+    eq(js("document.getElementById('pw').value") as? String, "", "type: password stays empty")
+    _ = control(.type, ["ref": sel, "text": "banana"])
+    eq(js("document.getElementById('s').value") as? String, "b", "type: chooses menu option")
+    _ = control(.type, ["ref": ed, "text": "edited"])
+    eq(js("document.getElementById('ed').innerText") as? String, "edited", "type: editable text")
+    _ = control(.type, ["ref": notes, "text": "line"])
+    eq(js("document.querySelector('textarea').value") as? String, "line", "type: textarea")
+    _ = control(.type, ["ref": form, "text": "sent", "submit": true])
+    eq(js("document.title") as? String, "submitted:sent", "type: submit presses Return")
+    check(!control(.click, ["ref": b]).1, "click: runs")
+    eq(js("window.clicked") as? Int, 1, "click: exactly one click")
+    _ = control(.drag, ["from_ref": d1, "to_ref": d2])
+    eq(js("document.title") as? String, "dropped", "drag: drop event")
+    let s1 = control(.scroll, ["direction": "down", "pages": 2])
+    check(!s1.1 && ((js("window.scrollY") as? Double) ?? 0) > 500, "scroll: down", s1.0)
+    _ = control(.scroll, ["direction": "up", "pages": 10])
+    eq(js("window.scrollY") as? Double, 0, "scroll: up to the top")
+    check(control(.click, ["ref": 99999]).1, "click: unknown element is an error")
+} else {
+    check(false, "page control: refs found", listing)
+}
 
 print("\(passed) passed, \(failures) failed")
 exit(failures == 0 ? 0 : 1)

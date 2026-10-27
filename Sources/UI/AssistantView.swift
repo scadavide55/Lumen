@@ -5,6 +5,7 @@ import UniformTypeIdentifiers
 struct AssistantPanel: View {
     @Environment(BrowserState.self) var b
     @Bindable var s = Settings.shared
+    @State private var showHistory = false
 
     private var chat: AssistantChat { b.assistant }
     private var configured: Bool { !s.aiProvider.needsKey || AIKeys.has(s.aiProvider) }
@@ -37,8 +38,13 @@ struct AssistantPanel: View {
             BetaBadge()
             ChatModelMenu(chat: chat)
             Spacer(minLength: 4)
+            IconButton(systemName: "clock.arrow.circlepath", help: "Chat History") { showHistory.toggle() }
+                .popover(isPresented: $showHistory, arrowEdge: .bottom) {
+                    AssistantHistoryList(chat: chat) { showHistory = false }
+                }
             IconButton(systemName: "square.and.pencil", help: "New Chat") { chat.newChat() }
                 .disabled(chat.messages.isEmpty && chat.draft.isEmpty)
+            IconButton(systemName: "arrow.up.left.and.arrow.down.right", help: "Full Screen Chat") { b.assistantExpanded = true }
             IconButton(systemName: "xmark", help: "Close (⇧⌘A)") { b.assistantVisible = false }
         }
         .padding(.horizontal, 10)
@@ -64,6 +70,8 @@ struct AssistantPanel: View {
 
 struct AssistantMessages: View {
     var chat: AssistantChat
+    /// The conversation's width in the full-window chat; the panel uses all of its width.
+    var maxWidth: CGFloat = .infinity
     @Environment(BrowserState.self) var b
 
     var body: some View {
@@ -78,6 +86,8 @@ struct AssistantMessages: View {
                     Color.clear.frame(height: 1).id("end")
                 }
                 .padding(12)
+                .frame(maxWidth: maxWidth)
+                .frame(maxWidth: .infinity)
             }
             .onChange(of: chat.messages.last?.text) { _, _ in proxy.scrollTo("end", anchor: .bottom) }
             .onChange(of: chat.messages.count) { _, _ in withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo("end", anchor: .bottom) } }
@@ -158,6 +168,19 @@ struct AssistantBubble: View {
                     }
                     .help(link.url.absoluteString)
                 }
+                if !message.sources.isEmpty {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Sources").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                        ForEach(Array(message.sources.enumerated()), id: \.offset) { _, source in
+                            Button { b.newTab(url: source.url) } label: {
+                                Text(source.title).font(.caption).lineLimit(1).truncationMode(.tail)
+                            }
+                            .buttonStyle(.link)
+                            .help(source.url.absoluteString)
+                        }
+                    }
+                    .padding(.top, 2)
+                }
                 if let error = message.error {
                     Label(error, systemImage: "exclamationmark.triangle").font(.callout).foregroundStyle(.orange)
                 }
@@ -229,8 +252,13 @@ struct AssistantComposer: View {
             }
             .padding(.horizontal, 8).padding(.vertical, 4)
             .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.primary.opacity(0.06)))
-            Text("Answers come from your AI provider and can be wrong.")
-                .font(.system(size: 10)).foregroundStyle(.tertiary)
+            HStack(spacing: 6) {
+                WebAccessButton()
+                BrowserUseButton()
+                Text("Answers come from your AI provider and can be wrong.")
+                    .font(.system(size: 10)).foregroundStyle(.tertiary)
+                    .lineLimit(2)
+            }
         }
         .padding(10)
         .onAppear { focused = true }
@@ -267,6 +295,113 @@ struct AssistantComposer: View {
                     if let url, let img = NSImage(contentsOf: url) { DispatchQueue.main.async { chat.addImage(img) } }
                 }
             }
+        }
+    }
+}
+
+/// Past chats, newest first, to reopen or delete.
+struct AssistantHistoryList: View {
+    var chat: AssistantChat
+    var close: () -> Void
+    @Environment(BrowserState.self) var b
+    private var history = AssistantHistory.shared
+    @State private var query = ""
+    @State private var confirmClear = false
+
+    init(chat: AssistantChat, close: @escaping () -> Void) {
+        self.chat = chat
+        self.close = close
+    }
+
+    private var shown: [AssistantHistory.Summary] {
+        let q = query.trimmingCharacters(in: .whitespaces)
+        return q.isEmpty ? history.chats : history.chats.filter { $0.title.localizedCaseInsensitiveContains(q) }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Chat History").font(.headline)
+                Spacer()
+                if !history.chats.isEmpty {
+                    Button("Delete All…") { confirmClear = true }.buttonStyle(.link).font(.caption)
+                }
+            }
+            if history.chats.count > 6 {
+                TextField("Search chats", text: $query).textFieldStyle(.roundedBorder)
+            }
+            if b.isPrivate {
+                Text("Chats in private windows aren't saved.").font(.caption).foregroundStyle(.secondary)
+            }
+            if history.chats.isEmpty {
+                Text("No saved chats yet.").foregroundStyle(.secondary).frame(maxWidth: .infinity, minHeight: 60)
+            } else {
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 2) {
+                        ForEach(shown) { c in AssistantHistoryRow(summary: c, chat: chat, opened: close) }
+                    }
+                }
+                .frame(maxHeight: 360)
+            }
+        }
+        .padding(12)
+        .frame(width: 320)
+        .confirmationDialog("Delete all saved chats?", isPresented: $confirmClear) {
+            Button("Delete All", role: .destructive) { history.clear() }
+        } message: {
+            Text("This can't be undone.")
+        }
+    }
+}
+
+/// A small switch below the chat box, tinted when on.
+struct ChatSwitch: View {
+    let title: LocalizedStringKey
+    let symbol: String
+    let on: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Label(title, systemImage: symbol)
+                .font(.system(size: 10.5, weight: .medium))
+                .padding(.horizontal, 7).padding(.vertical, 3)
+                .background(Capsule().fill(on ? Color.accentColor.opacity(0.2) : Color.primary.opacity(0.06)))
+                .foregroundStyle(on ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
+                .fixedSize()
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+/// Turns the assistant's web search and fetch on and off from the chat.
+struct WebAccessButton: View {
+    @Bindable private var s = Settings.shared
+
+    var body: some View {
+        ChatSwitch(title: "Web access", symbol: "globe", on: s.aiWeb) { s.aiWeb.toggle() }
+            .help(s.aiWeb ? "The assistant can search the web and read pages. Click to turn off." : "Let the assistant search the web and read pages")
+    }
+}
+
+/// Turns page control on and off from the chat. The first time, it explains what that means.
+struct BrowserUseButton: View {
+    @Bindable private var s = Settings.shared
+    @State private var explaining = false
+
+    var body: some View {
+        ChatSwitch(title: "Browser use", symbol: "cursorarrow.click.2", on: s.aiControl) {
+            if s.aiControl { s.aiControl = false } else if s.aiControlExplained { s.aiControl = true } else { explaining = true }
+        }
+        .help(s.aiControl ? "The assistant can click, type and scroll on the current page. Click to turn off." : "Let the assistant click, type and scroll on the current page")
+        .alert("Turn on browser use?", isPresented: $explaining) {
+            Button("Turn On") {
+                s.aiControlExplained = true
+                s.aiControl = true
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("When you ask, the assistant can use the page in the current tab for you, where you're signed in. It asks before sending, buying or deleting anything, and never fills in passwords or card numbers. A page can try to trick it, so watch what it does and press Stop if needed.")
         }
     }
 }
@@ -435,8 +570,22 @@ struct AIPane: View {
                 }
                 Toggle("This model can read images", isOn: visionBinding)
             }
+            Section {
+                Toggle("Web access: search the web and read pages", isOn: $s.aiWeb)
+            } footer: {
+                Text(s.aiProvider == .anthropic
+                     ? "The assistant can look things up and open pages that appear in the chat. With Anthropic, searches and pages are handled on Anthropic's servers."
+                     : "The assistant can look things up and open pages that appear in the chat. Searches go to DuckDuckGo, and pages are downloaded by your Mac without cookies or logins.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            Section {
+                Toggle("Browser use: let the assistant click, type and scroll on pages", isOn: $s.aiControl)
+            } footer: {
+                Text("When you ask, the assistant can use the page in the current tab for you, where you're signed in. It asks before sending, buying or deleting anything, and never fills in passwords or card numbers. A page can try to trick it, so watch what it does and press Stop if needed.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
             Section("Privacy") {
-                Text("When you ask something, your message, the attached page and any images are sent to the provider you chose, under their privacy terms. With a server on your own Mac, such as Ollama, nothing leaves your computer. Your API key is kept in the macOS Keychain.")
+                Text("When you ask something, your message, the attached page and any images are sent to the provider you chose, under their privacy terms. With a server on your own Mac, such as Ollama, nothing leaves your computer unless the assistant searches the web. Your API key is kept in the macOS Keychain.")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }

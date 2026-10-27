@@ -197,6 +197,7 @@ enum DataCleaner {
     static func clear(range: Range, history: Bool, cookies: Bool, cache: Bool, done: @escaping () -> Void) {
         if history {
             History.shared.clear(since: range == .all ? nil : range.since)
+            AssistantHistory.shared.clear(since: range == .all ? nil : range.since)
         }
         var types = Set<String>()
         let cacheTypes: Set<String> = [WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache,

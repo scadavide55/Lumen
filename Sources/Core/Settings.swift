@@ -332,6 +332,12 @@ final class Settings: Observable {
     @Pref("aiBaseURL") var aiBaseURL = AIProvider.custom.defaultBaseURL
     /// Image support the user set by hand, keyed by `AIProvider.visionKey`; other models are detected.
     @Pref("aiVision") var aiVision: [String: Bool] = [:]
+    /// Lets the assistant search the web and read pages by itself.
+    @Pref("aiWeb") var aiWeb = true
+    /// Lets the assistant click, type, scroll and drag on the current page. Off by default.
+    @Pref("aiControl") var aiControl = false
+    /// Whether the user has read what page control means, before turning it on for the first time.
+    @Pref("aiControlExplained") var aiControlExplained = false
 
     var aiModelName: String {
         let m = (aiModels[aiProvider.rawValue] ?? "").trimmingCharacters(in: .whitespaces)
