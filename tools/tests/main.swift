@@ -89,6 +89,12 @@ check(UpdateChecker.isNewer("1.10", than: "1.9"), "1.10 > 1.9")
 check(!UpdateChecker.isNewer("1.5", than: "1.5.0"), "1.5 == 1.5.0")
 check(!UpdateChecker.isNewer("1.5.3", than: "1.5.4"), "1.5.3 < 1.5.4")
 
+// MARK: Welcome pages
+eq(WhatsNew.pages(since: "1.6.1").map(\.version), ["1.6.2", "1.6.2"], "welcome after 1.6.1: only 1.6.2 pages")
+eq(WhatsNew.pages(since: "1.6").count, WhatsNew.all.count, "welcome after 1.6: every page")
+eq(WhatsNew.pages(since: "").count, WhatsNew.all.count, "welcome never seen: every page")
+check(WhatsNew.pages(since: "1.6.2").isEmpty, "welcome already seen: nothing")
+
 // MARK: AI providers
 
 check(AIProvider.anthropic.guessesImages("claude-opus-5-5"), "vision: claude")
