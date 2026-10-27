@@ -217,7 +217,6 @@ final class History: ObservableObject {
     /// Lowercased "title url" per entry, built once and reused by every search until the history changes.
     private var haystacks: [String]?
     private let db = HistoryDB(Paths.file("history.sqlite"))
-    private let limit = 10_000
 
     private init() {
         // History used to be one JSON file rewritten after every visit; it moves into the database once.
@@ -227,7 +226,7 @@ final class History: ObservableObject {
             db.flush()
             legacy.delete()
         }
-        entries = db?.load(limit: limit) ?? []
+        entries = db?.load() ?? []
     }
 
     func record(url: URL, title: String) {
@@ -241,10 +240,6 @@ final class History: ObservableObject {
         }
         entries.insert(entry, at: 0)
         db?.save([entry])
-        if entries.count > limit {
-            entries.removeLast(entries.count - limit)
-            db?.trim(to: limit)
-        }
     }
 
     /// Merges history from another browser, keeping the newest visit per URL. Returns how many entries were new.
@@ -263,9 +258,8 @@ final class History: ObservableObject {
                 added += 1
             }
         }
-        entries = Array(byURL.values.sorted { $0.date > $1.date }.prefix(limit))
+        entries = byURL.values.sorted { $0.date > $1.date }
         db?.save(entries)
-        db?.trim(to: limit)
         return added
     }
 

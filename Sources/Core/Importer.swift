@@ -230,7 +230,6 @@ enum BrowserImporter {
         return db
     }
 
-    private static let historyLimit = 10_000
 
     // MARK: Chromium
 
@@ -260,7 +259,7 @@ enum BrowserImporter {
     private static func chromiumHistory(_ profile: URL) throws -> [HistoryEntry] {
         let db = try open(profile.appendingPathComponent("History"))
         var out: [HistoryEntry] = []
-        db.rows("SELECT url, title, visit_count, last_visit_time FROM urls WHERE hidden = 0 AND last_visit_time > 0 ORDER BY last_visit_time DESC LIMIT \(historyLimit)") { r in
+        db.rows("SELECT url, title, visit_count, last_visit_time FROM urls WHERE hidden = 0 AND last_visit_time > 0 ORDER BY last_visit_time DESC") { r in
             guard let s = r.text(0), let u = URL(string: s) else { return }
             out.append(HistoryEntry(url: u, title: r.text(1) ?? "", date: chromeDate(r.int(3)), visits: max(1, Int(r.int(2)))))
         }
@@ -350,7 +349,7 @@ enum BrowserImporter {
     private static func firefoxHistory(_ profile: URL) throws -> [HistoryEntry] {
         let db = try open(profile.appendingPathComponent("places.sqlite"))
         var out: [HistoryEntry] = []
-        db.rows("SELECT url, title, visit_count, last_visit_date FROM moz_places WHERE last_visit_date IS NOT NULL AND hidden = 0 AND url LIKE 'http%' ORDER BY last_visit_date DESC LIMIT \(historyLimit)") { r in
+        db.rows("SELECT url, title, visit_count, last_visit_date FROM moz_places WHERE last_visit_date IS NOT NULL AND hidden = 0 AND url LIKE 'http%' ORDER BY last_visit_date DESC") { r in
             guard let s = r.text(0), let u = URL(string: s) else { return }
             out.append(HistoryEntry(url: u, title: r.text(1) ?? "", date: Date(timeIntervalSince1970: Double(r.int(3)) / 1_000_000),
                                     visits: max(1, Int(r.int(2)))))
@@ -400,7 +399,7 @@ enum BrowserImporter {
         _ = try read(dir.appendingPathComponent("History.db"))
         let db = try open(dir.appendingPathComponent("History.db"))
         var out: [HistoryEntry] = []
-        db.rows("SELECT i.url, v.title, i.visit_count, MAX(v.visit_time) AS t FROM history_items i JOIN history_visits v ON v.history_item = i.id GROUP BY i.id ORDER BY t DESC LIMIT \(historyLimit)") { r in
+        db.rows("SELECT i.url, v.title, i.visit_count, MAX(v.visit_time) AS t FROM history_items i JOIN history_visits v ON v.history_item = i.id GROUP BY i.id ORDER BY t DESC") { r in
             guard let s = r.text(0), let u = URL(string: s) else { return }
             out.append(HistoryEntry(url: u, title: r.text(1) ?? "", date: Date(timeIntervalSinceReferenceDate: r.double(3)),
                                     visits: max(1, Int(r.int(2)))))

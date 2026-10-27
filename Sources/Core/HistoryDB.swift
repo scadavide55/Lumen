@@ -21,10 +21,10 @@ final class HistoryDB {
 
     deinit { sqlite3_close(db) }
 
-    /// The newest `limit` entries, newest first.
-    func load(limit: Int) -> [HistoryEntry] {
+    /// Every entry, newest first.
+    func load() -> [HistoryEntry] {
         var out: [HistoryEntry] = []
-        query("SELECT id, url, title, date, visits FROM visits ORDER BY date DESC LIMIT ?", [limit]) { s in
+        query("SELECT id, url, title, date, visits FROM visits ORDER BY date DESC", []) { s in
             guard let idText = Self.text(s, 0), let id = UUID(uuidString: idText),
                   let urlText = Self.text(s, 1), let url = URL(string: urlText) else { return }
             out.append(HistoryEntry(id: id, url: url, title: Self.text(s, 2) ?? "",
@@ -65,13 +65,6 @@ final class HistoryDB {
         queue.sync {
             if let date { run("DELETE FROM visits WHERE date >= ?", [date.timeIntervalSince1970]) } else { run("DELETE FROM visits", []) }
             exec("PRAGMA wal_checkpoint(TRUNCATE)")
-        }
-    }
-
-    /// Keeps only the newest `limit` rows.
-    func trim(to limit: Int) {
-        queue.async { [self] in
-            run("DELETE FROM visits WHERE id NOT IN (SELECT id FROM visits ORDER BY date DESC LIMIT ?)", [limit])
         }
     }
 
