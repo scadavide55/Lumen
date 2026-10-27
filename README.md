@@ -20,6 +20,8 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 
 <img src="docs/assets/screenshot.jpg" alt="The Lumen window with the sidebar and the start page" width="860">
 
+<img src="docs/assets/screenshot2.jpg" alt="Lumen with the tabs along the top, grouped by colour" width="860">
+
 </div>
 
 > [!NOTE]
