@@ -63,12 +63,17 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 - A guided setup on first launch, in English, Italian or French
 
 **Tabs and windows**
-- Tab groups: drag a tab onto another, or let Lumen group tabs from the same site
+- Tab groups: drag a tab onto another, or let Lumen group tabs from the same site once there are 2, 3 or 5 of them, except sites you exclude
+- Save a group and close it, then open it again later with all its tabs; open a new tab inside a group
+- Pick several tabs with ⌘-click and ⇧-click to group, move, pin or close them together
+- Move tabs or whole groups to another window or profile
+- Sort tabs by site, title or last opened, and close duplicate tabs in one click
+- Lumen Assistant can group tabs by topic when you ask, such as "Rome trip"
 - Sidebar, separate or compact tab layouts
 - Install any site as an app with its own window and Dock icon
 - Vertical tabs in a resizable sidebar, or tabs along the top
 - Pinned tabs, drag to reorder, split view, reopen closed tabs
-- Background tabs hibernate to save memory and wake up where you left them
+- Background tabs hibernate to save memory, shown in grey, and wake up where you left them
 - Windows and tabs come back when you reopen Lumen
 
 **Getting around**

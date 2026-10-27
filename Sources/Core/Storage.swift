@@ -382,7 +382,6 @@ final class Session {
     static let shared = Session()
     private let file = StoredFile<[WindowSnapshot]>("session.plist", format: .binaryPlist)
     private var pending: [WindowSnapshot] = []
-    private var extraWindowsClaimed = false
     private var pendingSave: DispatchWorkItem?
 
     private init() {
@@ -397,11 +396,12 @@ final class Session {
 
     func takePending() -> WindowSnapshot? { pending.isEmpty ? nil : pending.removeFirst() }
 
-    /// Number of extra windows to open at launch. Returns non-zero only once.
-    func claimExtraWindows() -> Int {
-        guard !extraWindowsClaimed else { return 0 }
-        extraWindowsClaimed = true
-        return pending.count
+    /// Whether saved windows are still waiting to be reopened at launch.
+    var hasPendingWindows: Bool { !pending.isEmpty }
+
+    /// The windows to save: the open ones, and saved ones that haven't reopened yet, which would be lost otherwise.
+    private func snapshots() -> [WindowSnapshot] {
+        WindowRegistry.shared.browsers.filter { !$0.isPrivate }.map { $0.snapshot() } + pending
     }
 
     /// Waits for things to settle before taking snapshots: reading every tab's back/forward
@@ -412,7 +412,7 @@ final class Session {
         let item = DispatchWorkItem { [weak self] in
             guard let self else { return }
             self.pendingSave = nil
-            let snaps = WindowRegistry.shared.browsers.filter { !$0.isPrivate }.map { $0.snapshot() }
+            let snaps = self.snapshots()
             guard !snaps.isEmpty else { return }
             self.file.save(snaps, delay: 0)
         }
@@ -424,7 +424,7 @@ final class Session {
         guard !WebApp.isActive else { return }
         pendingSave?.cancel()
         pendingSave = nil
-        let snaps = WindowRegistry.shared.browsers.filter { !$0.isPrivate }.map { $0.snapshot() }
+        let snaps = snapshots()
         guard !snaps.isEmpty else { return }
         file.saveNow(snaps)
     }

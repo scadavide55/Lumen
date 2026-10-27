@@ -37,8 +37,11 @@ struct ContentView: View {
             .ignoresSafeArea()
             .onAppear {
                 guard !browser.isPrivate, !WebApp.isActive else { return }
-                let extra = Session.shared.claimExtraWindows()
-                for _ in 0..<extra { openWindow(id: "main") }
+                // Saved windows reopen one at a time: each one opens the next, since macOS can drop
+                // windows asked for all at once.
+                if Session.shared.hasPendingWindows {
+                    DispatchQueue.main.async { openWindow(id: "main") }
+                }
                 if !ContentView.updateChecked && settings.checkUpdates {
                     ContentView.updateChecked = true
                     UpdateChecker.shared.check {

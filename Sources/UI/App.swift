@@ -9,6 +9,9 @@ struct LumenApp: App {
         WindowGroup("Lumen", id: "main") {
             ContentView(isPrivate: false)
         }
+        // Links opened from other apps go to the app delegate, which puts them in tabs; without this
+        // SwiftUI would also open an empty window for each one.
+        .handlesExternalEvents(matching: [])
         .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 1280, height: 820)
         .commands { LumenCommands() }
@@ -16,39 +19,46 @@ struct LumenApp: App {
         WindowGroup("Lumen", id: "profile", for: UUID.self) { $profile in
             ContentView(isPrivate: false, profileID: profile)
         }
+        .handlesExternalEvents(matching: [])
         .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 1280, height: 820)
 
         WindowGroup("Private Window", id: "private") {
             ContentView(isPrivate: true)
         }
+        .handlesExternalEvents(matching: [])
         .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 1180, height: 780)
 
         Window("Library", id: "library") {
             LibraryView()
         }
+        .handlesExternalEvents(matching: [])
         .defaultSize(width: 820, height: 560)
 
         Window("Keyboard Shortcuts", id: "shortcuts") {
             ShortcutList().padding(24).frame(width: 760)
         }
+        .handlesExternalEvents(matching: [])
         .windowResizability(.contentSize)
 
         Window("About Lumen", id: "about") {
             AboutView()
         }
+        .handlesExternalEvents(matching: [])
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
 
         Window("Software Update", id: "update") {
             UpdateView()
         }
+        .handlesExternalEvents(matching: [])
         .windowResizability(.contentSize)
 
         Window("Import", id: "import") {
             ImportView()
         }
+        .handlesExternalEvents(matching: [])
         .windowResizability(.contentSize)
 
         SwiftUI.Settings {
@@ -85,7 +95,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func application(_ application: NSApplication, open urls: [URL]) {
         if WebApp.isActive { urls.forEach(WebApp.openInBrowser); return }
-        if !WindowRegistry.shared.open(urls) { Self.openNewWindow() }
+        if !WindowRegistry.shared.open(urls) { Self.openWindowWhenReady() }
+    }
+
+    /// Opening Lumen from a link can leave it without a window, since no window claims the link at launch.
+    /// The new window picks up the link (and the saved session) once the menus exist.
+    private static func openWindowWhenReady(attempt: Int = 0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            guard !WindowRegistry.shared.browsers.contains(where: { !$0.isPrivate }) else {
+                // A window opened meanwhile: it takes the links waiting for it.
+                if !WindowRegistry.shared.pendingURLs.isEmpty { WindowRegistry.shared.open(WindowRegistry.shared.takePendingURLs()) }
+                return
+            }
+            if NSApp.mainMenu?.items.isEmpty == false {
+                openNewWindow()
+            } else if attempt < 25 {
+                openWindowWhenReady(attempt: attempt + 1)
+            }
+        }
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
@@ -99,9 +126,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     /// Opens a browser window from AppKit code, through the File menu's New Window item.
+    /// Found by its ⌘N shortcut, since the title changes with the language.
     static func openNewWindow() {
-        guard let file = NSApp.mainMenu?.items.first(where: { $0.submenu?.items.contains { $0.title == "New Window" } == true })?.submenu,
-              let index = file.items.firstIndex(where: { $0.title == "New Window" }) else { return }
+        let isNewWindow: (NSMenuItem) -> Bool = {
+            $0.keyEquivalent == "n" && $0.keyEquivalentModifierMask.intersection(.deviceIndependentFlagsMask) == .command
+        }
+        guard let file = NSApp.mainMenu?.items.first(where: { $0.submenu?.items.contains(where: isNewWindow) == true })?.submenu,
+              let index = file.items.firstIndex(where: isNewWindow) else { return }
         file.performActionForItem(at: index)
     }
 

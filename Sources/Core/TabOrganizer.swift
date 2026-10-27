@@ -78,13 +78,18 @@ extension BrowserState {
         }
     }
 
+    /// The keys held for the click being handled, read from the click itself.
+    static var clickModifiers: NSEvent.ModifierFlags {
+        (NSApp.currentEvent?.modifierFlags ?? NSEvent.modifierFlags).intersection([.command, .shift])
+    }
+
     /// Tabs in the order the tab list shows them.
     var orderedTabs: [Tab] { pinnedTabs + regularTabs }
 
     // MARK: Picking several tabs
 
     /// A click on a tab: ⌘ adds or removes it from the picked tabs, ⇧ picks the range from the last one, a plain click selects it.
-    func click(_ tab: Tab, modifiers: NSEvent.ModifierFlags = NSEvent.modifierFlags) {
+    func click(_ tab: Tab, modifiers: NSEvent.ModifierFlags = BrowserState.clickModifiers) {
         if modifiers.contains(.command) {
             if marked.isEmpty, let c = selectedID { marked.insert(c) }
             if marked.contains(tab.id) { marked.remove(tab.id) } else { marked.insert(tab.id) }
@@ -260,11 +265,13 @@ extension BrowserState {
 
     // MARK: Moving to another window
 
-    /// Takes tabs out of this window without adding them to recently closed tabs.
-    private func detach(_ list: [Tab]) -> [TabSnapshot] {
+    /// Takes tabs out of this window without adding them to recently closed tabs. Going to another profile,
+    /// a tab leaves its page history behind (which can hold what was typed into forms) and loads its address afresh.
+    private func detach(_ list: [Tab], keepHistory: Bool) -> [TabSnapshot] {
         let snaps = list.map { t -> TabSnapshot in
             var s = t.snapshot()
             s.group = nil
+            if !keepHistory { s.state = nil }
             return s
         }
         let ids = Set(list.map(\.id))
@@ -306,12 +313,13 @@ extension BrowserState {
 
     func move(_ list: [Tab], group: TabGroup?, to other: BrowserState) {
         guard other !== self, !isPrivate, !other.isPrivate else { return }
-        other.adopt(TabMove(tabs: detach(list), group: group.map { ($0.name, $0.color) }))
+        other.adopt(TabMove(tabs: detach(list, keepHistory: other.profileID == profileID), group: group.map { ($0.name, $0.color) }))
     }
 
     /// Sends tabs to a window that is about to open in `profile` (nil for the main one); the caller opens it.
     func prepareMove(_ list: [Tab], group: TabGroup?, profile: UUID?) {
         guard !isPrivate else { return }
-        WindowRegistry.shared.setPendingMove(TabMove(tabs: detach(list), group: group.map { ($0.name, $0.color) }), profile: profile)
+        WindowRegistry.shared.setPendingMove(TabMove(tabs: detach(list, keepHistory: profile == profileID), group: group.map { ($0.name, $0.color) }),
+                                             profile: profile)
     }
 }

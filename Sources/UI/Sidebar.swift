@@ -519,8 +519,11 @@ struct MoveToWindowMenu: View {
         if let profile { openWindow(id: "profile", value: profile) } else { openWindow(id: "main") }
     }
 
+    /// "Window with “Rome – Wikipedia” (4 tabs)", and the profile when it has one.
     static func label(_ w: BrowserState) -> String {
-        let title = w.current?.title ?? "Lumen"
+        let name = w.current?.title ?? "Lumen"
+        let title = w.tabs.count == 1 ? String(format: L("Window with “%@” (1 tab)"), name)
+            : String(format: L("Window with “%@” (%d tabs)"), name, w.tabs.count)
         return w.profile.map { "\(title) — \($0.name)" } ?? title
     }
 }
@@ -719,6 +722,22 @@ struct TabStrip: View {
                         }
                     }
                     IconButton(systemName: "plus", help: "New tab (⌘T)") { b.newTabWithPalette() }
+                    if b.duplicateCount > 0 {
+                        Button { withAnimation(.easeOut(duration: 0.15)) { b.closeDuplicates() } } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "square.on.square.dashed")
+                                Text("\(b.duplicateCount)")
+                            }
+                                .font(.system(size: 11, weight: .medium))
+                                .fixedSize()
+                                .padding(.horizontal, 7).frame(height: 24)
+                                .background(Capsule().fill(Color.primary.opacity(0.07)))
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.secondary)
+                        .help(b.duplicateCount == 1 ? L("1 duplicate tab") + " · " + L("Close Duplicate Tabs")
+                              : String(format: L("%d duplicate tabs"), b.duplicateCount) + " · " + L("Close Duplicate Tabs"))
+                    }
                 }
                 .padding(.horizontal, compact ? 2 : 8)
             }
@@ -902,7 +921,7 @@ struct TabChip: View, Equatable {
         }
         .contentShape(Rectangle())
         .onTapGesture {
-            let mods = NSEvent.modifierFlags
+            let mods = BrowserState.clickModifiers
             if showsAddress && !mods.contains(.command) && !mods.contains(.shift) {
                 b.showPalette(tab.url?.absoluteString)
             } else {

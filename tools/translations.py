@@ -837,6 +837,8 @@ T = {
     'Sort Tabs by Title': ('Ordina schede per titolo', 'Trier les onglets par titre'),
     'Tabs that show the same address as another tab': ("Schede con lo stesso indirizzo di un'altra scheda", "Onglets qui affichent la même adresse qu'un autre onglet"),
     'When %d or more tabs are open from the same site, Lumen groups them, for example into “GitHub”.': ('Quando sono aperte %d o più schede dello stesso sito, Lumen le raggruppa, per esempio in “GitHub”.', 'Quand %d onglets ou plus sont ouverts sur le même site, Lumen les regroupe, par exemple dans « GitHub ».'),
+    'Window with “%@” (%d tabs)': ('Finestra con “%1$@” (%2$d schede)', 'Fenêtre avec « %1$@ » (%2$d onglets)'),
+    'Window with “%@” (1 tab)': ('Finestra con “%@” (1 scheda)', 'Fenêtre avec « %@ » (1 onglet)'),
     'Move to Window': ('Sposta in finestra', 'Déplacer dans une fenêtre'),
     'Move Group to Window': ('Sposta gruppo in finestra', 'Déplacer le groupe dans une fenêtre'),
 }

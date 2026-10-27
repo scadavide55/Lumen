@@ -789,6 +789,8 @@
 "When you ask, the assistant can use the page in the current tab for you, where you're signed in. It asks before sending, buying or deleting anything, and never fills in passwords or card numbers. A page can try to trick it, so watch what it does and press Stop if needed." = "Quand vous le demandez, l'assistant peut utiliser pour vous la page de l'onglet actuel, où vous êtes connecté. Il demande confirmation avant d'envoyer, d'acheter ou de supprimer quoi que ce soit, et ne saisit jamais de mots de passe ni de numéros de carte. Une page peut tenter de le tromper : surveillez ce qu'il fait et appuyez sur Arrêter si besoin.";
 "Window locked" = "Fenêtre verrouillée";
 "Window style" = "Style de fenêtre";
+"Window with “%@” (%d tabs)" = "Fenêtre avec « %1$@ » (%2$d onglets)";
+"Window with “%@” (1 tab)" = "Fenêtre avec « %@ » (1 onglet)";
 "Yellow" = "Jaune";
 "Yes, Use Lumen" = "Oui, utiliser Lumen";
 "You can change any choice later in Settings." = "Vous pourrez modifier chaque choix plus tard dans les Réglages.";
