@@ -120,6 +120,7 @@ struct OnboardingView: View {
     private func finish() {
         s.onboarded = true
         s.aiIntroduced = true
+        s.welcomedVersion = UpdateChecker.currentVersion
         dismiss()
     }
 }

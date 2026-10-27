@@ -52,6 +52,11 @@ struct ContentView: View {
                     ContentView.onboardingShown = true
                     browser.paletteVisible = false
                     browser.showOnboarding = true
+                } else if settings.onboarded && settings.welcomedVersion != UpdateChecker.currentVersion && !ContentView.onboardingShown {
+                    // Once per update, for people coming from an earlier version.
+                    ContentView.onboardingShown = true
+                    settings.aiIntroduced = true
+                    if WhatsNew.pages.isEmpty { settings.welcomedVersion = UpdateChecker.currentVersion } else { browser.showWhatsNew = true }
                 } else if settings.onboarded && !settings.aiIntroduced && settings.aiEnabled {
                     settings.aiIntroduced = true
                 } else if settings.onboarded && !settings.aiIntroduced && !ContentView.onboardingShown {
@@ -61,6 +66,7 @@ struct ContentView: View {
                 }
             }
             .sheet(isPresented: Bindable(browser).showOnboarding) { OnboardingView() }
+            .sheet(isPresented: Bindable(browser).showWhatsNew, onDismiss: { settings.welcomedVersion = UpdateChecker.currentVersion }) { WhatsNewView() }
             .sheet(isPresented: Bindable(browser).showAssistantIntro, onDismiss: { settings.aiIntroduced = true }) { AssistantIntro() }
             .sheet(isPresented: Bindable(browser).customizingSite) {
                 if let tab = browser.current, tab.host != nil { SiteCustomizer(host: tab.host, tab: tab) }

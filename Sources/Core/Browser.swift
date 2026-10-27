@@ -47,6 +47,8 @@ final class BrowserState {
     /// The assistant fills the window, as a chat app.
     var assistantExpanded = false
     var showAssistantIntro = false
+    /// "Welcome to Lumen <version>": what's new, once after an update.
+    var showWhatsNew = false
     @ObservationIgnored private(set) lazy var assistant = AssistantChat(browser: self)
     @ObservationIgnored var palettePrefill = ""
     @ObservationIgnored weak var window: NSWindow?

@@ -424,6 +424,8 @@ final class Settings: Observable {
     @Pref("aiEnabled") var aiEnabled = false
     /// Whether the user has been told about the assistant, in the setup or after updating to 1.5.4.
     @Pref("aiIntroduced") var aiIntroduced = false
+    /// The version whose "Welcome to Lumen" screen was shown, or that was set up fresh.
+    @Pref("welcomedVersion") var welcomedVersion = ""
     @Pref("aiProvider") var aiProvider = AIProvider.anthropic
     /// The model chosen for each provider, keyed by `AIProvider.rawValue`.
     @Pref("aiModels") var aiModels: [String: String] = [:]

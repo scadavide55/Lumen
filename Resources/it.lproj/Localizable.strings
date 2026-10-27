@@ -38,8 +38,10 @@
 "Add an API key to start" = "Aggiungi una chiave API per iniziare";
 "Add from a File or Folder…" = "Aggiungi da un file o una cartella…";
 "Add items to the right-click menu" = "Aggiungere voci al menu del tasto destro";
+"Add the Safari extensions that come with your apps in one click, or Chrome, Firefox and other WebExtensions from a file. They never run in private windows." = "Aggiungi con un clic le estensioni Safari che arrivano con le tue app, o estensioni Chrome, Firefox e altre da un file. Non funzionano mai nelle finestre private.";
 "Add to New Group" = "Aggiungi a nuovo gruppo";
 "Add your API key in Settings › AI." = "Aggiungi la tua chiave API in Impostazioni › AI.";
+"Add your own CSS and JavaScript under Advanced" = "Aggiungi CSS e JavaScript tuoi in Avanzate";
 "Add “%@”?" = "Aggiungere “%@”?";
 "Adds EasyList and EasyPrivacy: tens of thousands of rules, updated weekly." = "Aggiunge EasyList ed EasyPrivacy: decine di migliaia di regole, aggiornate ogni settimana.";
 "Add…" = "Aggiungi…";
@@ -69,6 +71,7 @@
 "Apple (on this Mac)" = "Apple (su questo Mac)";
 "Apple Passwords and other managers" = "Password di Apple e altri gestori";
 "Apple's model is free, works offline and nothing leaves your Mac, but it is limited: it is much smaller than cloud models, makes more mistakes, reads only the start of long pages and videos, can't see images, and is less reliable at using pages for you. For long or hard questions, use a cloud provider." = "Il modello di Apple è gratuito, funziona offline e niente esce dal Mac, ma è limitato: è molto più piccolo dei modelli cloud, sbaglia più spesso, legge solo l'inizio delle pagine e dei video lunghi, non vede le immagini ed è meno affidabile quando usa le pagine per te. Per domande lunghe o difficili usa un fornitore cloud.";
+"Apple's model, on your Mac" = "Il modello di Apple, sul tuo Mac";
 "Apps, installers and scripts can harm your Mac. Download it only if you trust %@." = "App, programmi di installazione e script possono danneggiare il Mac. Scaricalo solo se ti fidi di %@.";
 "Arrange your tabs" = "Disponi le schede";
 "Articles saved for offline reading" = "Articoli salvati da leggere offline";
@@ -128,6 +131,7 @@
 "Check for Updates" = "Controlla aggiornamenti";
 "Check for Updates…" = "Controlla aggiornamenti…";
 "Check for updates automatically" = "Controlla automaticamente gli aggiornamenti";
+"Choose Apple (on this Mac) in Settings › AI to use the assistant for free, offline, with nothing leaving your Mac. It's smaller than cloud models, so it's best for short, simple questions." = "Scegli Apple (su questo Mac) in Impostazioni › AI per usare l’assistente gratis, offline, senza che niente esca dal Mac. È più piccolo dei modelli cloud, quindi va meglio per domande brevi e semplici.";
 "Choose a model in Settings › AI." = "Scegli un modello in Impostazioni › AI.";
 "Choose a start page" = "Scegli la pagina iniziale";
 "Choose light or dark, and a colour for Lumen's accents." = "Scegli chiaro o scuro e un colore per i dettagli di Lumen.";
@@ -159,6 +163,7 @@
 "Close Tabs Below" = "Chiudi le schede sotto";
 "Close Tabs to the Right" = "Chiudi le schede a destra";
 "Close Window" = "Chiudi finestra";
+"Close duplicate tabs and sort tabs from the Tab menu or the command bar" = "Chiudi le schede doppie e ordina le schede dal menu Scheda o dalla barra dei comandi";
 "Close split view" = "Chiudi vista divisa";
 "Close tab" = "Chiudi scheda";
 "Close tab (⌘W)" = "Chiudi scheda (⌘W)";
@@ -202,6 +207,7 @@
 "Custom JavaScript" = "JavaScript personalizzato";
 "Customize Site" = "Personalizza sito";
 "Customize This Site" = "Personalizza questo sito";
+"Customize This Site changes a site's colours, font and width, hides pop-ups and floating bars, and hides anything you click. Changes show as you make them." = "Personalizza questo sito cambia colori, carattere e larghezza di un sito, nasconde pop-up e barre flottanti e tutto quello che clicchi. Le modifiche si vedono subito.";
 "Customize This Site…" = "Personalizza questo sito…";
 "Customize a Site…" = "Personalizza un sito…";
 "Customized sites" = "Siti personalizzati";
@@ -245,6 +251,7 @@
 "Enable Web Inspector" = "Abilita Web Inspector";
 "Engine" = "Motore";
 "Every shortcut in one place" = "Tutte le scorciatoie in un posto";
+"Every window comes back when Lumen opens, closed windows stay closed, and links from other apps open as tabs instead of empty windows." = "Tutte le finestre tornano quando apri Lumen, quelle chiuse restano chiuse, e i link da altre app si aprono come schede invece che in finestre vuote.";
 "Everything has a shortcut. You'll find them all in the menus too." = "Tutto ha una scorciatoia. Le trovi anche nei menu.";
 "Everything stays on your Mac. Lumen has no accounts and no analytics." = "Tutto resta sul tuo Mac. Lumen non ha account né statistiche.";
 "Example: #comments, .sidebar { display: none !important; }" = "Esempio: #comments, .sidebar { display: none !important; }";
@@ -275,6 +282,7 @@
 "Find on Page" = "Trova nella pagina";
 "Find on Page…" = "Trova nella pagina…";
 "Find on page" = "Trova nella pagina";
+"Find your articles in the Library › Reading List" = "Trovi gli articoli in Libreria › Elenco di lettura";
 "Find…" = "Trova…";
 "Float pages with rounded corners" = "Pagine fluttuanti con angoli arrotondati";
 "Float the page with rounded corners" = "Pagina fluttuante con angoli arrotondati";
@@ -344,6 +352,7 @@
 "Imported 1 bookmark." = "Importato 1 segnalibro.";
 "Imported from %@: %lld bookmarks, %lld history items, %lld sign-in cookies." = "Importato da %1$@: %2$lld segnalibri, %3$lld voci di cronologia, %4$lld cookie di accesso.";
 "Import…" = "Importa…";
+"In Reader, choose Save for Offline: the article and its images are kept on your Mac, ready without a connection." = "In Lettura scegli Salva offline: l’articolo e le immagini restano sul tuo Mac, pronti anche senza connessione.";
 "In the Passwords app choose File › Export All Passwords, then pick that file here. Apple doesn't let other browsers read Passwords directly." = "Nell'app Password scegli File › Esporta tutte le password, poi seleziona qui quel file. Apple non permette agli altri browser di leggere direttamente Password.";
 "Install" = "Installa";
 "Install Site as App…" = "Installa sito come app…";
@@ -353,6 +362,7 @@
 "Installed" = "Installate";
 "Installing… Lumen will restart." = "Installazione… Lumen si riavvierà.";
 "It doesn't ask for any permissions." = "Non chiede alcun permesso.";
+"It reads your other tabs, finds pages in your history and bookmarks, summarises YouTube videos from their transcript, takes screenshots, and groups tabs by topic." = "Legge le altre schede, trova pagine nella cronologia e nei segnalibri, riassume i video YouTube dalla trascrizione, fa screenshot e raggruppa le schede per argomento.";
 "It will be able to:" = "Potrà:";
 "Its cookies, sign-ins and site data will be removed. Saved passwords stay in Lumen." = "I suoi cookie, accessi e dati dei siti verranno rimossi. Le password salvate restano in Lumen.";
 "Its own window and Dock icon" = "Finestra e icona nel Dock tutte sue";
@@ -395,6 +405,7 @@
 "Lumen Assistant (beta)" = "Lumen Assistant (beta)";
 "Lumen Assistant (⇧⌘A)" = "Lumen Assistant (⇧⌘A)";
 "Lumen Assistant answers questions about the page you're reading in a panel on the right (⇧⌘A). It is off unless you turn it on, and nothing is sent until you ask something." = "Lumen Assistant risponde a domande sulla pagina che stai leggendo, in un pannello a destra (⇧⌘A). È spento finché non lo attivi, e non viene inviato nulla finché non chiedi qualcosa.";
+"Lumen Assistant does more" = "Lumen Assistant fa di più";
 "Lumen Assistant uses your own key from Anthropic, OpenAI, OpenRouter, DeepSeek or any OpenAI-compatible server. The key stays in your Keychain." = "Lumen Assistant usa la tua chiave di Anthropic, OpenAI, OpenRouter, DeepSeek o di un server compatibile con OpenAI. La chiave resta nel tuo Portachiavi.";
 "Lumen Bookmarks.html" = "Segnalibri Lumen.html";
 "Lumen Setup" = "Configurazione di Lumen";
@@ -420,6 +431,7 @@
 "Main Profile" = "Profilo principale";
 "Make Default" = "Imposta come predefinito";
 "Make Lumen your default browser?" = "Vuoi impostare Lumen come browser predefinito?";
+"Make any site yours" = "Ogni sito come piace a te";
 "Manage Extensions…" = "Gestisci estensioni…";
 "Manage Passwords…" = "Gestisci password…";
 "Manually" = "Manualmente";
@@ -445,6 +457,7 @@
 "Mute tab" = "Silenzia scheda";
 "Name" = "Nome";
 "Narrow, for reading" = "Stretta, per leggere";
+"Needs Apple Intelligence turned on" = "Serve Apple Intelligence attivo";
 "Never" = "Mai";
 "Never Group This Site" = "Non raggruppare mai questo sito";
 "Never for This Site" = "Mai per questo sito";
@@ -466,6 +479,7 @@
 "New update available" = "Nuovo aggiornamento disponibile";
 "New window" = "Nuova finestra";
 "New: Lumen Assistant" = "Novità: Lumen Assistant";
+"Next" = "Avanti";
 "Next (⌘G)" = "Successivo (⌘G)";
 "Next Tab" = "Scheda successiva";
 "Next tab" = "Scheda successiva";
@@ -524,6 +538,7 @@
 "Open Link in Split View" = "Apri link nella vista divisa";
 "Open Location…" = "Apri indirizzo…";
 "Open Original Page" = "Apri la pagina originale";
+"Open Reader with ⇧⌘R, then Save for Offline at the bottom right" = "Apri Lettura con ⇧⌘R, poi Salva offline in basso a destra";
 "Open Saved Group “%@”" = "Apri il gruppo salvato “%@”";
 "Open Settings" = "Apri impostazioni";
 "Open Video in New Tab" = "Apri video in una nuova scheda";
@@ -558,8 +573,10 @@
 "Permission denied" = "Permesso negato";
 "Photo…" = "Foto…";
 "Pick Elements to Hide" = "Scegli elementi da nascondere";
+"Pick Elements to Hide, then ↑ for a bigger block and Esc when done" = "Scegli elementi da nascondere, poi ↑ per un blocco più grande ed Esc per finire";
 "Pick Elements to Hide…" = "Scegli elementi da nascondere…";
 "Pick a gradient, let it move, or use your own photo or a short video." = "Scegli un gradiente, fallo muovere, o usa una tua foto o un breve video.";
+"Pick several tabs at once" = "Più schede insieme";
 "Pick your look" = "Scegli il tuo stile";
 "Pin Tab" = "Fissa scheda";
 "Pin Tabs" = "Fissa schede";
@@ -594,6 +611,7 @@
 "Read and change all websites you visit" = "Leggere e modificare tutti i siti che visiti";
 "Read and change cookies" = "Leggere e modificare i cookie";
 "Read and change: %@" = "Leggere e modificare: %@";
+"Read later, even offline" = "Leggi dopo, anche offline";
 "Reader" = "Lettura";
 "Reader (⇧⌘R)" = "Lettura (⇧⌘R)";
 "Reading %@" = "Lettura di %@";
@@ -638,7 +656,9 @@
 "Restore windows and tabs when Lumen opens" = "Ripristina finestre e schede all'apertura di Lumen";
 "Resume" = "Riprendi";
 "Right" = "Destra";
+"Right-click a group: New Tab in Group, Save and Close Group, Move Group to Window" = "Tasto destro su un gruppo: Nuova scheda nel gruppo, Salva e chiudi gruppo, Sposta gruppo in finestra";
 "Right-click a page and choose Inspect Element." = "Fai clic destro su una pagina e scegli Ispeziona elemento.";
+"Right-click a picked tab for everything you can do with them" = "Tasto destro su una scheda selezionata per tutto quello che puoi fare";
 "Run scripts on pages" = "Eseguire script nelle pagine";
 "Run tasks on a schedule" = "Eseguire attività programmate";
 "Runs in the page on this site every time it loads, with access to everything on it. Only add code you wrote or trust." = "Viene eseguito nella pagina di questo sito ogni volta che si carica, con accesso a tutto il suo contenuto. Aggiungi solo codice scritto da te o di cui ti fidi.";
@@ -686,6 +706,7 @@
 "See when pages load" = "Vedere quando le pagine si caricano";
 "See which requests it blocked" = "Vedere quali richieste ha bloccato";
 "Select" = "Seleziona";
+"Select text and right-click › Lumen Assistant" = "Seleziona del testo, tasto destro › Lumen Assistant";
 "Send" = "Invia";
 "Separate" = "Separato";
 "Serif" = "Con grazie";
@@ -694,6 +715,8 @@
 "Set up Lumen Shield" = "Configura Lumen Shield";
 "Settings" = "Impostazioni";
 "Settings (⌘,)" = "Impostazioni (⌘,)";
+"Settings › Extensions" = "Impostazioni › Estensioni";
+"Settings › General › Tabs: when to group, and sites never to group" = "Impostazioni › Generali › Schede: quando raggruppare e quali siti mai";
 "Settings…" = "Impostazioni…";
 "Setup and how Lumen works" = "Configurazione e funzionamento di Lumen";
 "Shield" = "Shield";
@@ -742,6 +765,7 @@
 "Sites where Shield is off" = "Siti in cui Shield è disattivato";
 "Sites you allow or block from using your camera or microphone are remembered here." = "Qui trovi i siti a cui hai consentito o bloccato l'uso di fotocamera o microfono.";
 "Sites you zoom in or out are remembered here." = "Qui vengono ricordati i siti di cui cambi lo zoom.";
+"Skip" = "Salta";
 "Skip Setup" = "Salta configurazione";
 "Skip This Version" = "Salta questa versione";
 "Skip YouTube Ads" = "Salta pubblicità di YouTube";
@@ -761,6 +785,7 @@
 "Start Browsing" = "Inizia a navigare";
 "Start page" = "Pagina iniziale";
 "Start page background" = "Sfondo della pagina iniziale";
+"Steadier than ever" = "Più stabile che mai";
 "Step %lld of %lld" = "Passaggio %1$lld di %2$lld";
 "Stop" = "Interrompi";
 "Stop Loading" = "Interrompi caricamento";
@@ -786,8 +811,10 @@
 "Tab %lld" = "Scheda %lld";
 "Tabs" = "Schede";
 "Tabs and windows" = "Schede e finestre";
+"Tabs from the same site gather into a group once there are 2, 3 or 5 of them, as you choose. Groups can be saved, closed and opened again later, whole." = "Le schede dello stesso sito si raccolgono in un gruppo quando sono 2, 3 o 5, come preferisci. I gruppi si possono salvare, chiudere e riaprire più tardi, interi.";
 "Tabs on top" = "Schede in alto";
 "Tabs that show the same address as another tab" = "Schede con lo stesso indirizzo di un'altra scheda";
+"Tabs that tidy themselves" = "Schede che si mettono in ordine";
 "Take Screenshot of Page" = "Fai uno screenshot della pagina";
 "Taking a screenshot of the page" = "Screenshot della pagina";
 "Talk to its app on your Mac" = "Comunicare con la sua app sul Mac";
@@ -823,6 +850,7 @@
 "The site's" = "Quello del sito";
 "The update couldn't be verified. It may be damaged or changed; try again later." = "Impossibile verificare l'aggiornamento. Potrebbe essere danneggiato o modificato; riprova più tardi.";
 "The update doesn't come from GitHub." = "L'aggiornamento non proviene da GitHub.";
+"Their buttons appear next to the shield" = "I loro pulsanti compaiono accanto allo scudo";
 "Theme" = "Tema";
 "This Mac can't run the Apple model. It needs Apple silicon." = "Questo Mac non può usare il modello Apple: serve Apple silicon.";
 "This address uses letters from other alphabets, which can be made to look like a familiar site. Check that it's the site you meant to visit." = "Questo indirizzo usa lettere di altri alfabeti, che possono imitare un sito conosciuto. Controlla che sia il sito che volevi visitare.";
@@ -893,6 +921,7 @@
 "Use Sidebar Tabs" = "Usa schede nella barra laterale";
 "Use Strong Password" = "Usa password sicura";
 "Use Top Tabs" = "Usa schede in alto";
+"Use a cloud provider for long pages and hard questions" = "Per pagine lunghe e domande difficili usa un fornitore cloud";
 "Use the page you're on when you click it" = "Usare la pagina in cui sei quando la clicchi";
 "User agent" = "User agent";
 "Username" = "Nome utente";
@@ -914,6 +943,7 @@
 "Welcome" = "Benvenuto";
 "Welcome Tour" = "Guida di benvenuto";
 "Welcome to Lumen" = "Benvenuto in Lumen";
+"Welcome to Lumen %@" = "Benvenuto in Lumen %@";
 "Welcome to Lumen…" = "Benvenuto in Lumen…";
 "What are the key moments, with timestamps?" = "Quali sono i momenti principali, con i minuti?";
 "What are the key points?" = "Quali sono i punti principali?";
@@ -966,4 +996,10 @@
 "“%@” can make changes to your Mac" = "“%@” può apportare modifiche al Mac";
 "“%@” wants to read and change these sites:" = "“%@” vuole leggere e modificare questi siti:";
 "“%@” wants to:" = "“%@” vuole:";
+"“Compare the products in my tabs”" = "“Confronta i prodotti nelle mie schede”";
+"“Find that SwiftUI article I read yesterday”" = "“Trova l’articolo su SwiftUI che ho letto ieri”";
+"“Summarise this video”" = "“Riassumi questo video”";
 "⇧⌘N opens a window that forgets everything when you close it." = "⇧⌘N apre una finestra che dimentica tutto quando la chiudi.";
+"⋯ menu › Customize This Site…" = "Menu ⋯ › Personalizza questo sito…";
+"⌘-click adds a tab, ⇧-click picks a range" = "⌘-clic aggiunge una scheda, ⇧-clic seleziona un intervallo";
+"⌘-click or ⇧-click tabs to pick them, then group, move, pin or close them together. Drag them all at once too." = "Con ⌘-clic o ⇧-clic selezioni più schede, poi le raggruppi, sposti, fissi o chiudi insieme. Puoi anche trascinarle tutte insieme.";
