@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Lumen — Prisma: a white beam enters an indigo prism and leaves as the site palette. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c1f45"/><stop offset="1" stop-color="#07080f"/></linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9c9aff" stop-opacity="0.92"/><stop offset="1" stop-color="#2b2d7a" stop-opacity="0.92"/></linearGradient>
+    <clipPath id="body"><rect x="100" y="100" width="824" height="824" rx="184"/></clipPath>
+    <filter id="blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="24"/></filter>
+  </defs>
+  <rect x="100" y="100" width="824" height="824" rx="184" fill="url(#bg)"/>
+  <g clip-path="url(#body)">
+    <g opacity="0.95">
+      <polygon points="613,505 924,360 924,436" fill="#ffd68a"/>
+      <polygon points="613,505 924,436 924,512" fill="#f0b04a"/>
+      <polygon points="613,505 924,512 924,588" fill="#ff6b35"/>
+      <polygon points="613,505 924,588 924,664" fill="#bf5af2"/>
+      <polygon points="613,505 924,664 924,740" fill="#7b79f2"/>
+    </g>
+    <line x1="100" y1="520" x2="402" y2="520" stroke="#ffffff" stroke-opacity="0.5" stroke-width="80" filter="url(#blur)"/>
+    <line x1="100" y1="520" x2="402" y2="520" stroke="#ffffff" stroke-width="44"/>
+  </g>
+  <polygon points="512,330 712,676 312,676" fill="url(#glass)" stroke="#ffffff" stroke-opacity="0.85" stroke-width="20" stroke-linejoin="round"/>
+  <line x1="402" y1="520" x2="613" y2="505" stroke="#ffffff" stroke-opacity="0.6" stroke-width="22"/>
+</svg>

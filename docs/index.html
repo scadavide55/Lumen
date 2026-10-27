@@ -169,12 +169,17 @@ nav .wrap { display: flex; align-items: center; gap: 24px; height: 60px; }
 }
 @keyframes drift { to { transform: translateX(-50%) translateY(30px) rotate(4deg) scale(1.05); } }
 .orb {
-  width: 76px; height: 76px; margin: 0 auto 28px; border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #fff, #ffe2a3 55%, #f0b04a);
-  box-shadow: 0 0 60px 10px rgba(255, 214, 138, 0.35), 0 0 0 10px rgba(255, 255, 255, 0.04), 0 0 0 11px rgba(255, 255, 255, 0.1);
+  position: relative; width: 76px; height: 76px; margin: 0 auto 28px; border-radius: 50%;
+  background: linear-gradient(135deg, #ffc24a, #ff5a2a);
+  box-shadow: 0 0 60px 10px rgba(255, 122, 58, 0.35);
   animation: breathe 6s ease-in-out infinite;
 }
-@keyframes breathe { 50% { box-shadow: 0 0 80px 18px rgba(255, 214, 138, 0.45), 0 0 0 14px rgba(255, 255, 255, 0.03), 0 0 0 15px rgba(255, 255, 255, 0.08); } }
+.orb::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  transform: translate(-11px, 10px);
+  background: radial-gradient(circle at 35% 30%, #3b3752, #14121d 90%);
+}
+@keyframes breathe { 50% { box-shadow: 0 0 80px 18px rgba(255, 122, 58, 0.45); } }
 .pill {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 5px 12px 5px 6px; border-radius: 999px;

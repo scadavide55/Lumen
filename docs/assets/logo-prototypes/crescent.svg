@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Lumen — Eclissi: a dark disc covering a sun, leaving a crescent of light. Palette: cream / coral / charcoal. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf4e6"/><stop offset="1" stop-color="#eadcc2"/></linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffc24a"/><stop offset="1" stop-color="#ff5a2a"/></linearGradient>
+    <radialGradient id="halo" cx="0.5" cy="0.5" r="0.5"><stop offset="0.55" stop-color="#ff7a3a" stop-opacity="0.4"/><stop offset="1" stop-color="#ff7a3a" stop-opacity="0"/></radialGradient>
+    <radialGradient id="disc" cx="0.35" cy="0.3" r="0.9"><stop offset="0" stop-color="#3b3752"/><stop offset="1" stop-color="#14121d"/></radialGradient>
+  </defs>
+  <rect x="100" y="100" width="824" height="824" rx="184" fill="url(#bg)"/>
+  <circle cx="552" cy="472" r="430" fill="url(#halo)"/>
+  <circle cx="552" cy="472" r="300" fill="url(#sun)"/>
+  <circle cx="462" cy="552" r="300" fill="url(#disc)"/>
+</svg>

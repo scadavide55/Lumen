@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Lumen — Raggio L: a single ray falls from above and lights the floor, drawing an L. Palette: ink / ice. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#171a22"/><stop offset="1" stop-color="#05060a"/></linearGradient>
+    <linearGradient id="stem" gradientUnits="userSpaceOnUse" x1="0" y1="245" x2="0" y2="780"><stop offset="0" stop-color="#7df9ff" stop-opacity="0.3"/><stop offset="0.75" stop-color="#d9fdff"/><stop offset="1" stop-color="#ffffff"/></linearGradient>
+    <radialGradient id="pool" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#7df9ff" stop-opacity="0.4"/><stop offset="1" stop-color="#7df9ff" stop-opacity="0"/></radialGradient>
+    <filter id="blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="36"/></filter>
+  </defs>
+  <rect x="100" y="100" width="824" height="824" rx="184" fill="url(#bg)"/>
+  <ellipse cx="530" cy="760" rx="340" ry="150" fill="url(#pool)"/>
+  <path d="M393 310 V715 H640" fill="none" stroke="#7df9ff" stroke-opacity="0.7" stroke-width="150" stroke-linecap="round" stroke-linejoin="round" filter="url(#blur)"/>
+  <path d="M393 310 V715 H640" fill="none" stroke="url(#stem)" stroke-width="130" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

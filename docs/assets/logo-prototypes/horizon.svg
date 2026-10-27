@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Lumen — Orizzonte: a sun on the horizon with its reflection, sunset gradient. Palette: violet / coral / cream. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a0f5e"/><stop offset="0.45" stop-color="#8a2fa0"/><stop offset="0.8" stop-color="#ff6b4a"/><stop offset="1" stop-color="#ffb15c"/></linearGradient>
+    <radialGradient id="sun" cx="0.5" cy="0.4" r="0.6"><stop offset="0" stop-color="#fffaf0"/><stop offset="1" stop-color="#ffd68a"/></radialGradient>
+    <radialGradient id="halo" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#fff0c8" stop-opacity="0.5"/><stop offset="1" stop-color="#fff0c8" stop-opacity="0"/></radialGradient>
+    <clipPath id="body"><rect x="100" y="100" width="824" height="824" rx="184"/></clipPath>
+  </defs>
+  <rect x="100" y="100" width="824" height="824" rx="184" fill="url(#sky)"/>
+  <g clip-path="url(#body)">
+    <circle cx="512" cy="560" r="400" fill="url(#halo)"/>
+    <circle cx="512" cy="560" r="260" fill="url(#sun)"/>
+    <rect x="100" y="560" width="824" height="364" fill="#161235"/>
+    <rect x="300" y="598" width="424" height="24" rx="12" fill="#ffd68a" opacity="0.75"/>
+    <rect x="340" y="654" width="344" height="18" rx="9" fill="#ffd68a" opacity="0.45"/>
+    <rect x="380" y="704" width="264" height="14" rx="7" fill="#ffd68a" opacity="0.25"/>
+  </g>
+</svg>

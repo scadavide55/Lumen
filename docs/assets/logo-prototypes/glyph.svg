@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Lumen — Glifo mono: flat indigo, a white source with three rays. One colour, no gradients. -->
+  <rect x="100" y="100" width="824" height="824" rx="184" fill="#7b79f2"/>
+  <g transform="translate(-20 20)" fill="#ffffff" stroke="#ffffff" stroke-width="74" stroke-linecap="round">
+    <circle cx="470" cy="560" r="200" stroke="none"/>
+    <line x1="733" y1="464" x2="836" y2="427"/>
+    <line x1="650" y1="345" x2="721" y2="261"/>
+    <line x1="519" y1="284" x2="538" y2="176"/>
+  </g>
+</svg>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Lumen — Lanterna: a brass lantern with a warm glass body. Palette: deep green / brass / amber. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#143d35"/><stop offset="1" stop-color="#061411"/></linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ffc95c" stop-opacity="0.55"/><stop offset="1" stop-color="#ffc95c" stop-opacity="0"/></radialGradient>
+    <radialGradient id="flame" cx="0.5" cy="0.62" r="0.6"><stop offset="0" stop-color="#fff7dc"/><stop offset="0.4" stop-color="#ffd068"/><stop offset="1" stop-color="#f08a2a"/></radialGradient>
+    <linearGradient id="brass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#efcf86"/><stop offset="1" stop-color="#8a5a22"/></linearGradient>
+  </defs>
+  <rect x="100" y="100" width="824" height="824" rx="184" fill="url(#bg)"/>
+  <circle cx="512" cy="540" r="410" fill="url(#glow)"/>
+  <path d="M452 292 A60 60 0 0 1 572 292" fill="none" stroke="url(#brass)" stroke-width="30" stroke-linecap="round"/>
+  <path d="M442 292 H582 L622 348 H402 Z" fill="url(#brass)"/>
+  <rect x="402" y="348" width="220" height="360" rx="30" fill="url(#flame)"/>
+  <rect x="402" y="348" width="220" height="360" rx="30" fill="none" stroke="url(#brass)" stroke-width="24"/>
+  <line x1="475" y1="348" x2="475" y2="708" stroke="url(#brass)" stroke-width="14" opacity="0.8"/>
+  <line x1="549" y1="348" x2="549" y2="708" stroke="url(#brass)" stroke-width="14" opacity="0.8"/>
+  <rect x="372" y="708" width="280" height="50" rx="14" fill="url(#brass)"/>
+</svg>

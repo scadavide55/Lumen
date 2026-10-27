@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Lumen — Diaframma: six blades of an aperture around a warm core. Palette: amber / indigo. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a2f63"/><stop offset="1" stop-color="#0a0c1a"/></linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ffd68a" stop-opacity="0.5"/><stop offset="1" stop-color="#ffd68a" stop-opacity="0"/></radialGradient>
+    <radialGradient id="core" cx="0.42" cy="0.4" r="0.6"><stop offset="0" stop-color="#ffffff"/><stop offset="0.45" stop-color="#ffe2a3"/><stop offset="1" stop-color="#f0b04a"/></radialGradient>
+    <linearGradient id="blade" gradientUnits="userSpaceOnUse" x1="-320" y1="-320" x2="320" y2="320"><stop offset="0" stop-color="#ffe9bd"/><stop offset="1" stop-color="#e0902a"/></linearGradient>
+  </defs>
+  <rect x="100" y="100" width="824" height="824" rx="184" fill="url(#bg)"/>
+  <circle cx="512" cy="512" r="420" fill="url(#glow)"/>
+  <circle cx="512" cy="512" r="200" fill="url(#core)"/>
+  <g transform="translate(512 512)" stroke="url(#blade)" stroke-width="78" stroke-linecap="round" fill="none">
+    <path d="M310 0 L0 179"/>
+    <path d="M310 0 L0 179" transform="rotate(60)"/>
+    <path d="M310 0 L0 179" transform="rotate(120)"/>
+    <path d="M310 0 L0 179" transform="rotate(180)"/>
+    <path d="M310 0 L0 179" transform="rotate(240)"/>
+    <path d="M310 0 L0 179" transform="rotate(300)"/>
+  </g>
+  <circle cx="512" cy="512" r="376" fill="none" stroke="#ffffff" stroke-opacity="0.2" stroke-width="12"/>
+</svg>

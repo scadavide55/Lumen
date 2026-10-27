@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Lumen — Scintilla: two sharp four-point stars, amber over indigo, with a white core. Palette: amber / indigo. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#262b5a"/><stop offset="1" stop-color="#0a0c1a"/></linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ffd68a" stop-opacity="0.45"/><stop offset="1" stop-color="#ffd68a" stop-opacity="0"/></radialGradient>
+    <linearGradient id="amber" gradientUnits="userSpaceOnUse" x1="0" y1="-360" x2="0" y2="360"><stop offset="0" stop-color="#fff1cf"/><stop offset="0.5" stop-color="#ffd68a"/><stop offset="1" stop-color="#e8962e"/></linearGradient>
+    <linearGradient id="indigo" gradientUnits="userSpaceOnUse" x1="-330" y1="-330" x2="330" y2="330"><stop offset="0" stop-color="#b3b1ff"/><stop offset="1" stop-color="#5553d1"/></linearGradient>
+  </defs>
+  <rect x="100" y="100" width="824" height="824" rx="184" fill="url(#bg)"/>
+  <circle cx="512" cy="512" r="430" fill="url(#glow)"/>
+  <g transform="translate(512 512)">
+    <path d="M0,-330 L64,-64 L330,0 L64,64 L0,330 L-64,64 L-330,0 L-64,-64 Z" fill="url(#indigo)" transform="rotate(45)"/>
+    <path d="M0,-360 L71,-71 L360,0 L71,71 L0,360 L-71,71 L-360,0 L-71,-71 Z" fill="url(#amber)"/>
+    <path d="M0,-84 L84,0 L0,84 L-84,0 Z" fill="#ffffff"/>
+  </g>
+</svg>

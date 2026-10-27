@@ -1,4 +1,5 @@
-// Draws the Lumen app icon and writes an .iconset folder.
+// Draws the Lumen app icon ("Eclissi": a crescent of light on cream) and writes an .iconset folder.
+// The same design as an SVG is docs/assets/logo-prototypes/crescent.svg.
 // Usage: swift tools/make-icon.swift <output.iconset>
 import AppKit
 
@@ -26,35 +27,32 @@ func render(pixels px: Int) -> Data {
     NSGraphicsContext.saveGraphicsState()
     body.addClip()
 
-    NSGradient(colors: [color(0x23284F), color(0x090B16)])!
+    // "Eclissi": a dark disc covers a sun and leaves a crescent of light on a cream body.
+    NSGradient(colors: [color(0xFBF4E6), color(0xEADCC2)])!
         .draw(in: NSRect(x: 100, y: 100, width: 824, height: 824), angle: -90)
 
-    // Soft warm glow behind the orb.
-    NSGradient(colors: [color(0xFFD68A, 0.55), color(0xFFD68A, 0)])!
-        .draw(fromCenter: NSPoint(x: 512, y: 530), radius: 0,
-              toCenter: NSPoint(x: 512, y: 530), radius: 430, options: [])
+    // Coral halo around the sun.
+    let sun = NSPoint(x: 552, y: 552)
+    NSGradient(colorsAndLocations: (color(0xFF7A3A, 0.4), 0), (color(0xFF7A3A, 0.4), 0.55), (color(0xFF7A3A, 0), 1))!
+        .draw(fromCenter: sun, radius: 0, toCenter: sun, radius: 430, options: [])
 
-    // Thin ring.
-    let ring = NSBezierPath(ovalIn: NSRect(x: 512 - 235, y: 530 - 235, width: 470, height: 470))
-    ring.lineWidth = 10
-    color(0xFFFFFF, 0.28).setStroke()
-    ring.stroke()
-
-    // Orb.
-    NSGradient(colors: [color(0xFFFFFF), color(0xFFE2A3)])!
-        .draw(fromCenter: NSPoint(x: 490, y: 565), radius: 0,
-              toCenter: NSPoint(x: 512, y: 530), radius: 160, options: [])
-    let orb = NSBezierPath(ovalIn: NSRect(x: 512 - 160, y: 530 - 160, width: 320, height: 320))
+    // Sun: amber at top-left to coral at bottom-right.
+    let sunPath = NSBezierPath(ovalIn: NSRect(x: sun.x - 300, y: sun.y - 300, width: 600, height: 600))
     NSGraphicsContext.saveGraphicsState()
-    orb.addClip()
-    NSGradient(colors: [color(0xFFFFFF), color(0xFFD98A)])!
-        .draw(fromCenter: NSPoint(x: 470, y: 590), radius: 0,
-              toCenter: NSPoint(x: 512, y: 530), radius: 170, options: [])
+    sunPath.addClip()
+    NSGradient(colors: [color(0xFFC24A), color(0xFF5A2A)])!
+        .draw(in: NSRect(x: sun.x - 300, y: sun.y - 300, width: 600, height: 600), angle: -45)
     NSGraphicsContext.restoreGraphicsState()
 
-    // Subtle top sheen on the body.
-    NSGradient(colors: [color(0xFFFFFF, 0.10), color(0xFFFFFF, 0)])!
-        .draw(in: NSRect(x: 100, y: 512, width: 824, height: 412), angle: -90)
+    // Dark disc, offset towards the bottom-left, with a faint highlight at its top-left.
+    let disc = NSPoint(x: 462, y: 472)
+    let discPath = NSBezierPath(ovalIn: NSRect(x: disc.x - 300, y: disc.y - 300, width: 600, height: 600))
+    NSGraphicsContext.saveGraphicsState()
+    discPath.addClip()
+    NSGradient(colors: [color(0x3B3752), color(0x14121D)])!
+        .draw(fromCenter: NSPoint(x: disc.x - 90, y: disc.y + 120), radius: 0,
+              toCenter: NSPoint(x: disc.x - 90, y: disc.y + 120), radius: 540, options: [])
+    NSGraphicsContext.restoreGraphicsState()
 
     NSGraphicsContext.restoreGraphicsState()
     NSGraphicsContext.restoreGraphicsState()
