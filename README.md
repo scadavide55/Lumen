@@ -20,6 +20,7 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 
 [**Download**](https://github.com/scadavide55/Tacet/releases) · [**Website**](https://scadavide55.github.io/Tacet/) · [**Release notes**](https://github.com/scadavide55/Tacet/releases)
 
+*Image from Lumen 1.5.3 Developer Beta*
 <img src="docs/assets/screenshot.jpg" alt="The Tacet window with tabs along the top" width="860">
 
 <img src="docs/assets/groups.png" alt="Tab groups along the top of the Tacet window, each in its own colour" width="860">
