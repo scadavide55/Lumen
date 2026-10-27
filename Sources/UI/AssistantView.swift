@@ -36,7 +36,6 @@ struct AssistantPanel: View {
             Image(systemName: "sparkles").foregroundStyle(.tint)
             Text("Lumen Assistant").font(.system(size: 13, weight: .semibold)).lineLimit(1).fixedSize()
             BetaBadge()
-            ChatModelMenu(chat: chat)
             Spacer(minLength: 4)
             IconButton(systemName: "clock.arrow.circlepath", help: "Chat History") { showHistory.toggle() }
                 .popover(isPresented: $showHistory, arrowEdge: .bottom) {
@@ -255,10 +254,11 @@ struct AssistantComposer: View {
             HStack(spacing: 6) {
                 WebAccessButton()
                 BrowserUseButton()
-                Text("Answers come from your AI provider and can be wrong.")
-                    .font(.system(size: 10)).foregroundStyle(.tertiary)
-                    .lineLimit(2)
+                Spacer(minLength: 4)
+                ChatModelMenu(chat: chat)
             }
+            Text("Answers come from your AI provider and can be wrong.")
+                .font(.system(size: 10)).foregroundStyle(.tertiary)
         }
         .padding(10)
         .onAppear { focused = true }
@@ -433,7 +433,7 @@ struct ChatModelMenu: View {
         .menuIndicator(.visible)
         .foregroundStyle(.secondary)
         .fixedSize(horizontal: false, vertical: true)
-        .frame(maxWidth: 150)
+        .frame(maxWidth: 130)
         .help("Model for this chat")
         .onAppear { models.refresh(s.aiProvider) }
     }

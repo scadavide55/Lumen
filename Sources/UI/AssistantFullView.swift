@@ -109,7 +109,6 @@ struct AssistantFullView: View {
             if !listVisible { Spacer().frame(width: 70) }
             IconButton(systemName: "sidebar.left", help: listVisible ? "Hide Chats" : "Show Chats") { listVisible.toggle() }
             Text(title).font(.system(size: 14, weight: .semibold)).lineLimit(1)
-            ChatModelMenu(chat: chat)
             Spacer()
             IconButton(systemName: "arrow.down.right.and.arrow.up.left", help: "Exit Full Screen Chat") { b.assistantExpanded = false }
             IconButton(systemName: "xmark", help: "Close (⇧⌘A)") {

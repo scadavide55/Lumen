@@ -250,11 +250,13 @@ enum AssistantPrompt {
         """
         Below the chat box the user has two buttons that turn groups of your tools on and off. They change only when \
         the user clicks them; you can't change them yourself.
-        - Web access, on unless the user turned it off: web_search and web_fetch. Right now it is \(web ? "on" : "off").
-        - Browser use, off unless the user turns it on: find_elements, click, type, scroll and drag, to use the page \
+        - Web access (labelled "\(L("Web access"))" in the user's language), on unless the user turned it off: \
+        web_search and web_fetch. Right now it is \(web ? "on" : "off").
+        - Browser use (labelled "\(L("Browser use"))"), off unless the user turns it on: find_elements, click, type, scroll and drag, to use the page \
         in the current tab. Right now it is \(control ? "on" : "off").
         Either can change between messages, so trust what this says now over earlier turns. If the user asks for \
-        something that needs a group that is off, say which button turns it on instead of attempting it another way.
+        something that needs a group that is off, say which button turns it on, by its label, instead of attempting it \
+        another way.
 
 
         """
@@ -474,6 +476,7 @@ final class AssistantChat {
     private var sentPageURL: URL?
     private var dismissedPageURL: URL?
     @ObservationIgnored private var task: Task<Void, Never>?
+    @ObservationIgnored private var paragraphBreak = false
 
     init(browser: BrowserState) { self.browser = browser }
 
@@ -800,12 +803,18 @@ final class AssistantChat {
 
     private func appendToReply(_ delta: String) {
         guard let i = messages.indices.last else { return }
+        // Text written after a tool starts a new paragraph instead of running on from the text before it.
+        if paragraphBreak, !messages[i].text.isEmpty, !messages[i].text.hasSuffix("\n"), !delta.hasPrefix("\n") {
+            messages[i].text += "\n\n"
+        }
+        paragraphBreak = false
         messages[i].text += delta
     }
 
     private func noteActivity(_ note: String) {
         guard let i = messages.indices.last else { return }
         messages[i].activity.append(note)
+        paragraphBreak = true
     }
 
     private func fail(_ message: String) {

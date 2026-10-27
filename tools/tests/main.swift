@@ -116,7 +116,7 @@ for name in allNames + ["web_search", "web_fetch"] {
 let offPrompt = AssistantPrompt.system(web: false, control: false)
 check(!offPrompt.contains("- find_elements:") && !offPrompt.contains("- web_search:"), "prompt without web and control tools")
 check(offPrompt.contains("Web access") && offPrompt.contains("Right now it is off") && offPrompt.contains("Browser use"), "prompt knows the chat buttons")
-check(AssistantPrompt.system(web: true, control: false).contains("Web access, on unless the user turned it off: web_search and web_fetch. Right now it is on"), "prompt knows web access is on")
+check(AssistantPrompt.system(web: true, control: false).contains("web_search and web_fetch. Right now it is on"), "prompt knows web access is on")
 eq(AssistantHistory.title("  How does this work?\nmore"), "How does this work?", "chat title: first line")
 eq(AssistantHistory.title(String(repeating: "a", count: 100)).count, 71, "chat title: shortened")
 let cited = AIClient.citedSources([["type": "text", "text": "x", "citations": [["url": "https://a.com/1", "title": "A"], ["url": "https://a.com/1", "title": "A"], ["url": "https://b.com", "title": ""]]]])
