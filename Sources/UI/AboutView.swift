@@ -60,12 +60,7 @@ struct AboutView: View {
                     .rotationEffect(.degrees(appeared ? 0 : -8))
             }
             .frame(height: 140)
-            HStack(spacing: 8) {
-                Text("Lumen").font(.system(size: 34, weight: .bold, design: .rounded))
-                Text("BETA").font(.system(size: 10, weight: .heavy)).tracking(1)
-                    .padding(.horizontal, 7).padding(.vertical, 3)
-                    .background(Color.white.opacity(0.2), in: Capsule())
-            }
+            Text("Lumen").font(.system(size: 34, weight: .bold, design: .rounded))
             Text("The quiet browser for your Mac").font(.system(size: 14)).opacity(0.8)
             Text(String(format: L("Version %@ (%@)"), UpdateChecker.currentVersion, build))
                 .font(.system(size: 12, weight: .medium, design: .monospaced)).opacity(0.7)

@@ -25,7 +25,7 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 </div>
 
 > [!NOTE]
-> **Lumen 1.5.4 is a beta.** Most features are in place, but some haven't been tested much yet. Expect bugs, and please report them in [Issues](https://github.com/scadavide55/Lumen/issues).
+> **Lumen 1.6 is the first stable release.** Lumen Assistant is still a beta. If something doesn't work, please report it in [Issues](https://github.com/scadavide55/Lumen/issues).
 
 ## Features
 
