@@ -87,7 +87,7 @@ final class DownloadManager: NSObject, ObservableObject, WKDownloadDelegate {
 
     func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String,
                   completionHandler: @escaping (URL?) -> Void) {
-        let name = suggestedFilename.isEmpty ? L("Download") : suggestedFilename
+        let name = Self.safeName(suggestedFilename) ?? L("Download")
         item(for: download)?.filename = name
         if Settings.shared.confirmDangerousDownloads, Self.isDangerous(name) {
             let host = download.originalRequest?.url?.host ?? ""
@@ -195,13 +195,22 @@ final class DownloadManager: NSObject, ObservableObject, WKDownloadDelegate {
         items.removeAll { $0.state != .active }
     }
 
+    /// A file name the server suggested, reduced to a plain name that can't leave the Downloads folder.
+    static func safeName(_ suggested: String) -> String? {
+        let last = suggested.replacingOccurrences(of: ":", with: "-").split(separator: "/").last.map(String.init) ?? ""
+        let name = String(last.drop { $0 == "." }).trimmingCharacters(in: .whitespacesAndNewlines)
+        return name.isEmpty ? nil : name
+    }
+
+    /// A free name in Downloads, also free of other downloads still in progress (their files don't exist yet).
     static func uniqueURL(_ name: String) -> URL {
         let folder = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0]
-        var url = folder.appendingPathComponent(name)
+        let inProgress = Set(shared.items.filter { $0.state == .active }.compactMap { $0.destination?.path })
+        var url = folder.appendingPathComponent(safeName(name) ?? L("Download"))
         let base = url.deletingPathExtension().lastPathComponent
         let ext = url.pathExtension
         var n = 1
-        while FileManager.default.fileExists(atPath: url.path) {
+        while FileManager.default.fileExists(atPath: url.path) || inProgress.contains(url.path) {
             url = folder.appendingPathComponent(ext.isEmpty ? "\(base) (\(n))" : "\(base) (\(n)).\(ext)")
             n += 1
         }

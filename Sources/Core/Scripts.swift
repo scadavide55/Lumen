@@ -515,6 +515,9 @@ final class ScriptBridge: NSObject, WKScriptMessageHandler {
     func userContentController(_ controller: WKUserContentController, didReceive message: WKScriptMessage) {
         guard let webView = message.webView, let tab = Tab.owner(of: webView),
               let body = message.body as? [String: Any], let type = body["type"] as? String else { return }
+        // Scripts are only injected into the page itself; a message from an embedded frame (an ad, say)
+        // must not be able to touch passwords or the tab.
+        guard message.frameInfo.isMainFrame else { return }
         tab.handleMessage(type, body)
     }
 }

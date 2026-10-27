@@ -48,13 +48,8 @@ final class PasswordStore: ObservableObject {
     }
 
     /// The registrable part of a host: "www.bbc.co.uk" → "bbc.co.uk", "mail.google.com" → "google.com".
-    static func site(_ host: String) -> String {
-        let labels = host.lowercased().split(separator: ".")
-        guard labels.count > 2 else { return labels.joined(separator: ".") }
-        let secondLevel = ["co", "com", "net", "org", "gov", "ac", "edu"]
-        let take = labels[labels.count - 2].count <= 3 && secondLevel.contains(String(labels[labels.count - 2])) ? 3 : 2
-        return labels.suffix(take).joined(separator: ".")
-    }
+    /// Sites on a shared domain stay apart: "alice.github.io" ≠ "evil.github.io".
+    static func site(_ host: String) -> String { PublicSuffix.registrable(host) }
 
     private func baseQuery(_ host: String, _ username: String) -> [String: Any] {
         [kSecClass as String: kSecClassInternetPassword,
@@ -65,19 +60,26 @@ final class PasswordStore: ObservableObject {
 
     /// Saves or updates a password. Returns false if the Keychain refused.
     @discardableResult
-    func save(host: String, username: String, password: String) -> Bool {
+    func save(host: String, username: String, password: String, reload shouldReload: Bool = true) -> Bool {
         let host = host.lowercased()
         let data = Data(password.utf8)
         let update: [String: Any] = [kSecValueData as String: data]
         var status = SecItemUpdate(baseQuery(host, username) as CFDictionary, update as CFDictionary)
+        // An item written by an earlier build (Lumen is signed ad hoc, so every build is a different app)
+        // can refuse the update; it is replaced instead.
+        if status != errSecSuccess && status != errSecItemNotFound {
+            SecItemDelete(baseQuery(host, username) as CFDictionary)
+            status = errSecItemNotFound
+        }
         if status == errSecItemNotFound {
             var add = baseQuery(host, username)
             add[kSecValueData as String] = data
             add[kSecAttrProtocol as String] = kSecAttrProtocolHTTPS
             add[kSecAttrLabel as String] = host
+            add[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
             status = SecItemAdd(add as CFDictionary, nil)
         }
-        reload()
+        if shouldReload { reload() }
         return status == errSecSuccess
     }
 
@@ -153,8 +155,9 @@ final class PasswordStore: ObservableObject {
             let raw = row[u].trimmingCharacters(in: .whitespaces)
             let url = URL(string: raw.contains("://") ? raw : "https://" + raw)
             guard let host = url?.host, !row[pass].isEmpty else { continue }
-            if save(host: host, username: row[user], password: row[pass]) { added += 1 }
+            if save(host: host, username: row[user], password: row[pass], reload: false) { added += 1 }
         }
+        reload()
         return added
     }
 
