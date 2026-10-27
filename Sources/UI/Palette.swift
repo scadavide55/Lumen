@@ -311,6 +311,10 @@ struct CommandPalette: View {
             command("Lock Window with Touch ID", "lock", "⌃⌘L") { b.lock() },
             command("Hibernate Other Tabs", "moon.zzz", "Free memory used by background tabs") { b.hibernateOthers() },
             command("Close Duplicate Tabs", "square.on.square.dashed", "Keeps one tab per address") { b.closeDuplicates() },
+            command("Group Tabs by Site", "square.grid.3x1.folder.badge.plus", "Groups tabs from the same site now") { b.groupBySiteNow() },
+            command("Sort Tabs by Site", "arrow.up.arrow.down", "Sort Tabs") { b.sortTabs(by: .site) },
+            command("Sort Tabs by Title", "arrow.up.arrow.down", "Sort Tabs") { b.sortTabs(by: .title) },
+            command("Sort Tabs by Last Opened", "arrow.up.arrow.down", "Sort Tabs") { b.sortTabs(by: .recent) },
             command("Dark Appearance", "moon", "Appearance") { s.theme = .dark },
             command("Light Appearance", "sun.max", "Appearance") { s.theme = .light },
             command("System Appearance", "circle.lefthalf.filled", "Appearance") { s.theme = .system },
@@ -347,7 +351,38 @@ struct CommandPalette: View {
                 command("Take Screenshot of Page", "camera.viewfinder", "⇧⌘S") { tab.screenshot() },
             ], at: 1)
         }
+        list += groupCommands
         return list
+    }
+
+    /// Moving the current tab (or the picked ones) into a group, and the group commands.
+    private var groupCommands: [PaletteItem] {
+        guard let tab = b.current else { return [] }
+        let targets = b.marked.count > 1 ? b.orderedTabs.filter { b.marked.contains($0.id) } : [tab]
+        var out: [PaletteItem] = []
+        for g in b.groups where targets.contains(where: { $0.groupID != g.id }) {
+            out.append(PaletteItem(id: "mg" + g.id.uuidString, icon: .symbol("folder"),
+                                   title: String(format: L("Move to Group “%@”"), g.name), subtitle: L("Move to Group…"),
+                                   badge: "Command", run: { _ in b.move(targets, toGroup: g.id) }))
+        }
+        out.append(command("Move to New Group", "folder.badge.plus", "Move to Group…") { b.group(targets) })
+        if let gid = tab.groupID, let g = b.groups.first(where: { $0.id == gid }) {
+            out.append(command("New Tab in Group", "plus.square", g.name) { b.newTab(inGroup: gid) })
+            if !b.isPrivate {
+                out.append(PaletteItem(id: "sg" + g.id.uuidString, icon: .symbol("archivebox"),
+                                       title: String(format: L("Save and Close “%@”"), g.name), subtitle: L("Saved Groups"),
+                                       badge: "Command", run: { _ in b.saveAndClose(gid) }))
+            }
+        }
+        if !b.isPrivate {
+            for saved in SavedGroups.shared.items {
+                out.append(PaletteItem(id: "og" + saved.id.uuidString, icon: .symbol("folder.fill"),
+                                       title: String(format: L("Open Saved Group “%@”"), saved.name),
+                                       subtitle: String(format: L("%d Tabs"), saved.tabs.count),
+                                       badge: "Command", run: { _ in b.open(saved) }))
+            }
+        }
+        return out
     }
 
     private func copy(_ url: URL?) {

@@ -464,7 +464,9 @@ struct FaviconView: View {
         }
         .frame(width: size, height: size)
         .clipShape(RoundedRectangle(cornerRadius: size / 5, style: .continuous))
-        .opacity(tab.isHibernated && tab.url != nil ? 0.75 : 1)
+        // Hibernated tabs show in grey until they wake up.
+        .saturation(tab.isHibernated && tab.url != nil ? 0 : 1)
+        .opacity(tab.isHibernated && tab.url != nil ? 0.55 : 1)
     }
 }
 

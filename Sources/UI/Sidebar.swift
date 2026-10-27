@@ -28,16 +28,18 @@ struct Sidebar: View {
             ScrollView {
                 LazyVStack(spacing: 2) {
                     NewTabRow()
+                    if b.duplicateCount > 0 { DuplicatesRow(count: b.duplicateCount) }
                     ForEach(entries) { entry in
                         switch entry {
                         case .header(let g): GroupHeader(group: g)
                         case .tab(let t, let grouped):
                             TabRow(tab: t, browser: b, grouped: grouped, selected: b.selectedID == t.id,
                                    inSplit: b.splitID == t.id, groupTint: grouped ? b.groups.first { $0.id == t.groupID }?.tint : nil,
-                                   compact: s.compactTabs)
+                                   compact: s.compactTabs, marked: b.marked.contains(t.id))
                                 .equatable()
                         }
                     }
+                    if !b.isPrivate { SavedGroupsSection() }
                 }
                 .padding(.vertical, 2)
             }
@@ -201,15 +203,7 @@ struct GroupHeader: View {
         .onHover { hover = $0 }
         .contextMenu {
             Button("Rename Group…") { startRename() }
-            Menu("Colour") {
-                ForEach(0..<TabGroup.colors.count, id: \.self) { i in
-                    Button { b.setColor(group.id, i) } label: { Text(Self.colorNames[i]) }
-                }
-            }
-            Button(group.collapsed ? "Expand Group" : "Collapse Group") { b.toggleCollapsed(group.id) }
-            Divider()
-            Button("Ungroup Tabs") { b.ungroup(group.id) }
-            Button("Close Group") { b.closeGroup(group.id) }
+            GroupMenu(group: group)
         }
         .dropDestination(for: String.self) { items, _ in
             guard let last = b.tabs(in: group).last else { return false }
@@ -242,6 +236,7 @@ struct TabRow: View, Equatable {
     let inSplit: Bool
     let groupTint: Color?
     let compact: Bool
+    var marked = false
     @Environment(\.colorScheme) private var scheme
     @State private var hover = false
 
@@ -249,7 +244,7 @@ struct TabRow: View, Equatable {
 
     static func == (l: TabRow, r: TabRow) -> Bool {
         l.tab === r.tab && l.browser === r.browser && l.grouped == r.grouped && l.selected == r.selected
-            && l.inSplit == r.inSplit && l.groupTint == r.groupTint && l.compact == r.compact
+            && l.inSplit == r.inSplit && l.groupTint == r.groupTint && l.compact == r.compact && l.marked == r.marked
     }
 
     var body: some View {
@@ -288,11 +283,18 @@ struct TabRow: View, Equatable {
                 .fill(selected ? Color.white.opacity(scheme == .dark ? 0.12 : 0.75) : Color.primary.opacity(hover ? 0.06 : 0))
                 .shadow(color: .black.opacity(selected ? 0.07 : 0), radius: 1, y: 0.5)
         }
+        .overlay {
+            if marked {
+                RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Color.accentColor.opacity(0.16))
+                    .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Color.accentColor.opacity(0.5), lineWidth: 1))
+                    .allowsHitTesting(false)
+            }
+        }
         .contentShape(Rectangle())
-        .onTapGesture { b.select(tab) }
+        .onTapGesture { b.click(tab) }
         .onHover { hover = $0 }
         .contextMenu { TabMenu(tab: tab) }
-        .draggable(tab.id.uuidString) {
+        .draggable(b.dragPayload(for: tab)) {
             Label(tab.title, systemImage: "globe").padding(6).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 6))
         }
         .dropDestination(for: String.self) { items, location in
@@ -339,11 +341,16 @@ struct PinnedTile: View, Equatable {
                         .font(.system(size: 8)).foregroundStyle(.secondary).padding(4)
                 }
             }
+            .overlay {
+                if b.marked.contains(tab.id) {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(Color.accentColor, lineWidth: 1.5)
+                }
+            }
             .contentShape(Rectangle())
-            .onTapGesture { b.select(tab) }
+            .onTapGesture { b.click(tab) }
             .onHover { hover = $0 }
             .contextMenu { TabMenu(tab: tab) }
-            .draggable(tab.id.uuidString)
+            .draggable(b.dragPayload(for: tab))
             .dropDestination(for: String.self) { items, _ in b.handleDrop(items, before: tab, pinned: true) }
             .help(tab.title)
     }
@@ -354,12 +361,35 @@ struct TabMenu: View {
     @Environment(BrowserState.self) var b
 
     var body: some View {
+        let targets = b.actionTabs(for: tab)
+        if targets.count > 1 {
+            ManyTabsMenu(tabs: targets)
+        } else {
+            OneTabMenu(tab: tab)
+        }
+    }
+}
+
+/// The menu of one tab.
+struct OneTabMenu: View {
+    var tab: Tab
+    @Environment(BrowserState.self) var b
+    @Bindable private var s = Settings.shared
+
+    var body: some View {
         Button(tab.isPinned ? LocalizedStringKey("Unpin Tab") : "Pin Tab") { b.togglePin(tab) }
         Button("Duplicate Tab") { b.duplicate(tab) }
         if tab.groupID != nil {
             Button("Remove from Group") { b.removeFromGroup(tab) }
         } else if !tab.isPinned {
             Button("Add to New Group") { b.newGroup(with: tab) }
+        }
+        MoveToGroupMenu(tabs: [tab])
+        if let host = tab.host {
+            Button(s.isGroupException(host) ? LocalizedStringKey("Allow Grouping This Site") : "Never Group This Site") {
+                s.setGroupException(host, !s.isGroupException(host))
+                BrowserState.groupingChanged()
+            }
         }
         Button(tab.isMuted ? LocalizedStringKey("Unmute Tab") : "Mute Tab") { tab.setMuted(!tab.isMuted) }
         if b.selectedID != tab.id {
@@ -369,6 +399,7 @@ struct TabMenu: View {
                 Button("Open in Split View") { b.openSplit(tab) }
             }
         }
+        MoveToWindowMenu(tabs: [tab], group: nil)
         Divider()
         Button("Copy Link") {
             NSPasteboard.general.clearContents()
@@ -383,15 +414,226 @@ struct TabMenu: View {
         if !tab.isHibernated && !tab.isSelected {
             Button("Hibernate Tab") { tab.hibernate() }
         }
+        SortTabsMenu()
         Divider()
         Button("Close Tab") { b.close(tab) }
         Button("Close Other Tabs") { b.closeOthers(tab) }
-        Button("Close Duplicate Tabs") { b.closeDuplicates() }
+        Button("Close Duplicate Tabs") { b.closeDuplicates() }.disabled(b.duplicateCount == 0)
         if Settings.shared.tabLayout != .vertical {
             Button("Close Tabs to the Right") { b.closeBelow(tab) }
         } else {
             Button("Close Tabs Below") { b.closeBelow(tab) }
         }
+    }
+}
+
+/// The menu of several picked tabs.
+struct ManyTabsMenu: View {
+    var tabs: [Tab]
+    @Environment(BrowserState.self) var b
+
+    var body: some View {
+        Text(String(format: L("%d Tabs"), tabs.count))
+        Button("Add to New Group") { b.group(tabs) }
+        MoveToGroupMenu(tabs: tabs)
+        if tabs.contains(where: { !$0.isPinned }) {
+            Button("Pin Tabs") { b.setPinned(tabs, true) }
+        } else {
+            Button("Unpin Tabs") { b.setPinned(tabs, false) }
+        }
+        MoveToWindowMenu(tabs: tabs, group: nil)
+        Button("Hibernate Tabs") { for t in tabs where !t.isSelected { t.hibernate() } }
+        Divider()
+        Button(String(format: L("Close %d Tabs"), tabs.count)) { b.close(tabs) }
+        Button("Deselect Tabs") { b.marked = [] }
+    }
+}
+
+/// Moves tabs into one of this window's groups.
+struct MoveToGroupMenu: View {
+    var tabs: [Tab]
+    @Environment(BrowserState.self) var b
+
+    var body: some View {
+        let others = b.groups.filter { g in tabs.contains { $0.groupID != g.id } }
+        if !others.isEmpty {
+            Menu("Move to Group") {
+                ForEach(others) { g in Button(g.name) { b.move(tabs, toGroup: g.id) } }
+            }
+        }
+    }
+}
+
+/// Sorts this window's tabs.
+struct SortTabsMenu: View {
+    @Environment(BrowserState.self) var b
+
+    var body: some View {
+        Menu("Sort Tabs") {
+            ForEach(BrowserState.TabSort.allCases) { o in Button(o.label) { b.sortTabs(by: o) } }
+        }
+    }
+}
+
+/// Moves tabs, or a whole group, to another window or profile.
+struct MoveToWindowMenu: View {
+    var tabs: [Tab]
+    var group: TabGroup?
+    @Environment(BrowserState.self) var b
+    @Environment(\.openWindow) private var openWindow
+    private var s = Settings.shared
+
+    init(tabs: [Tab], group: TabGroup?) {
+        self.tabs = tabs
+        self.group = group
+    }
+
+    var body: some View {
+        if !b.isPrivate {
+            let others = WindowRegistry.shared.destinations(from: b)
+            Menu(group == nil ? "Move to Window" : "Move Group to Window") {
+                Button("New Window") { toNewWindow(profile: b.profileID) }
+                if !others.isEmpty { Divider() }
+                ForEach(Array(others.enumerated()), id: \.offset) { _, w in
+                    Button(Self.label(w)) { b.move(tabs, group: group, to: w) }
+                }
+                let profiles = profileChoices(others)
+                if !profiles.isEmpty {
+                    Divider()
+                    ForEach(profiles, id: \.id) { p in
+                        Button(String(format: L("New Window in %@"), p.name)) { toNewWindow(profile: p.id) }
+                    }
+                }
+            }
+        }
+    }
+
+    /// Profiles (and the main one) without a window of their own, other than this window's.
+    private func profileChoices(_ open: [BrowserState]) -> [(id: UUID?, name: String)] {
+        let all: [(id: UUID?, name: String)] = [(nil, L("Main Profile"))] + s.profiles.map { ($0.id, $0.name) }
+        return all.filter { p in p.id != b.profileID && !open.contains { $0.profileID == p.id } }
+    }
+
+    private func toNewWindow(profile: UUID?) {
+        b.prepareMove(tabs, group: group, profile: profile)
+        if let profile { openWindow(id: "profile", value: profile) } else { openWindow(id: "main") }
+    }
+
+    static func label(_ w: BrowserState) -> String {
+        let title = w.current?.title ?? "Lumen"
+        return w.profile.map { "\(title) — \($0.name)" } ?? title
+    }
+}
+
+/// What a group's menu offers, in the sidebar and the top bar.
+struct GroupMenu: View {
+    let group: TabGroup
+    @Environment(BrowserState.self) var b
+    @Bindable private var s = Settings.shared
+
+    var body: some View {
+        Button("New Tab in Group") { b.newTab(inGroup: group.id) }
+        Menu("Colour") {
+            ForEach(0..<TabGroup.colors.count, id: \.self) { i in
+                Button { b.setColor(group.id, i) } label: { Text(GroupHeader.colorNames[i]) }
+            }
+        }
+        Button(group.collapsed ? "Expand Group" : "Collapse Group") { b.toggleCollapsed(group.id) }
+        MoveToWindowMenu(tabs: b.tabs(in: group), group: group)
+        if let site = group.site {
+            Button("Never Group This Site") {
+                s.setGroupException(site, true)
+                BrowserState.groupingChanged()
+            }
+        }
+        Divider()
+        Button("Ungroup Tabs") { b.ungroup(group.id) }
+        if !b.isPrivate {
+            Button("Save and Close Group") { b.saveAndClose(group.id) }
+        }
+        Button("Close Group") { b.closeGroup(group.id) }
+    }
+}
+
+/// Says how many tabs repeat another tab's address, with a button to close them.
+struct DuplicatesRow: View {
+    let count: Int
+    @Environment(BrowserState.self) var b
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "square.on.square.dashed").font(.system(size: 11))
+            Text(count == 1 ? L("1 duplicate tab") : String(format: L("%d duplicate tabs"), count))
+                .font(.system(size: 11.5)).lineLimit(1)
+            Spacer(minLength: 4)
+            Button("Close") { withAnimation(.easeOut(duration: 0.15)) { b.closeDuplicates() } }
+                .buttonStyle(.link).font(.system(size: 11.5, weight: .medium))
+        }
+        .foregroundStyle(.secondary)
+        .padding(.horizontal, 8)
+        .frame(height: 24)
+        .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(Color.primary.opacity(0.04)))
+        .help("Tabs that show the same address as another tab")
+    }
+}
+
+/// Groups put away with Save and Close Group, to open again.
+struct SavedGroupsSection: View {
+    @Environment(BrowserState.self) var b
+    private var saved = SavedGroups.shared
+    @State private var expanded = false
+
+    var body: some View {
+        if !saved.items.isEmpty {
+            VStack(alignment: .leading, spacing: 2) {
+                Button {
+                    withAnimation(.easeOut(duration: 0.15)) { expanded.toggle() }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "chevron.right").font(.system(size: 9, weight: .bold))
+                            .rotationEffect(.degrees(expanded ? 90 : 0)).frame(width: 12)
+                        Text("Saved Groups").font(.system(size: 11.5, weight: .semibold))
+                        Text("\(saved.items.count)").font(.system(size: 10.5)).foregroundStyle(.tertiary)
+                        Spacer()
+                    }
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 8)
+                    .frame(height: 24)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                if expanded {
+                    ForEach(saved.items) { g in SavedGroupRow(group: g) }
+                }
+            }
+            .padding(.top, 8)
+        }
+    }
+}
+
+struct SavedGroupRow: View {
+    let group: SavedGroup
+    @Environment(BrowserState.self) var b
+    @State private var hover = false
+
+    var body: some View {
+        HStack(spacing: 7) {
+            Circle().fill(TabGroup.colors[group.color % TabGroup.colors.count]).frame(width: 8, height: 8)
+            Text(group.name).font(.system(size: 12)).lineLimit(1)
+            Spacer(minLength: 0)
+            Text("\(group.tabs.count)").font(.system(size: 10.5)).foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 8).padding(.leading, 12)
+        .frame(height: 26)
+        .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(Color.primary.opacity(hover ? 0.06 : 0)))
+        .contentShape(Rectangle())
+        .onTapGesture { b.open(group) }
+        .onHover { hover = $0 }
+        .contextMenu {
+            Button("Open Group") { b.open(group) }
+            Button("Delete Saved Group") { SavedGroups.shared.remove(group.id) }
+        }
+        .help(group.tabs.map(\.title).joined(separator: "\n"))
     }
 }
 
@@ -516,7 +758,8 @@ extension TabStrip {
         let selected = t.id == b.selectedID
         let selectedWide = compact && selected
         return TabChip(tab: t, browser: b, selected: selected, alwaysShowTitles: s.alwaysShowTitles,
-                       width: t.isPinned ? 36 : (selectedWide ? min(420, max(220, width + 120)) : width), compact: compact)
+                       width: t.isPinned ? 36 : (selectedWide ? min(420, max(220, width + 120)) : width), compact: compact,
+                       marked: b.marked.contains(t.id))
             .equatable()
     }
 }
@@ -555,9 +798,7 @@ struct GroupChip: View {
         }
         .contextMenu {
             Button("Rename Group…") { startRename() }
-            Button(group.collapsed ? "Expand Group" : "Collapse Group") { b.toggleCollapsed(group.id) }
-            Button("Ungroup Tabs") { b.ungroup(group.id) }
-            Button("Close Group") { b.closeGroup(group.id) }
+            GroupMenu(group: group)
         }
         .dropDestination(for: String.self) { items, _ in
             guard let last = b.tabs(in: group).last else { return false }
@@ -609,6 +850,7 @@ struct TabChip: View, Equatable {
     let alwaysShowTitles: Bool
     let width: CGFloat
     var compact = false
+    var marked = false
     @Environment(\.colorScheme) private var scheme
     @State private var hover = false
 
@@ -616,7 +858,7 @@ struct TabChip: View, Equatable {
 
     static func == (l: TabChip, r: TabChip) -> Bool {
         l.tab === r.tab && l.browser === r.browser && l.selected == r.selected
-            && l.alwaysShowTitles == r.alwaysShowTitles && l.width == r.width && l.compact == r.compact
+            && l.alwaysShowTitles == r.alwaysShowTitles && l.width == r.width && l.compact == r.compact && l.marked == r.marked
     }
 
     var body: some View {
@@ -631,6 +873,7 @@ struct TabChip: View, Equatable {
             if !tab.isPinned {
                 Text(showsAddress && !alwaysShowTitles ? (tab.url.map { InputResolver.displayHost($0) } ?? L("Search or enter address")) : tab.title)
                     .font(.system(size: 12, weight: showsAddress ? .medium : .regular)).lineLimit(1)
+                    .foregroundStyle(tab.isHibernated && !selected ? .secondary : .primary)
                 Spacer(minLength: 0)
                 if tab.isPlayingAudio || tab.isMuted {
                     Image(systemName: tab.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
@@ -651,13 +894,24 @@ struct TabChip: View, Equatable {
                 LoadingLine(load: tab.load).padding(.horizontal, 6)
             }
         }
+        .overlay {
+            if marked {
+                RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Color.accentColor.opacity(0.7), lineWidth: 1.5)
+                    .allowsHitTesting(false)
+            }
+        }
         .contentShape(Rectangle())
         .onTapGesture {
-            if showsAddress { b.showPalette(tab.url?.absoluteString) } else { b.select(tab) }
+            let mods = NSEvent.modifierFlags
+            if showsAddress && !mods.contains(.command) && !mods.contains(.shift) {
+                b.showPalette(tab.url?.absoluteString)
+            } else {
+                b.click(tab, modifiers: mods)
+            }
         }
         .onHover { hover = $0 }
         .contextMenu { TabMenu(tab: tab) }
-        .draggable(tab.id.uuidString)
+        .draggable(b.dragPayload(for: tab))
         .dropDestination(for: String.self) { items, location in
             let placement: BrowserState.DropPlacement = tab.isPinned ? .before
                 : (location.x < width * 0.25 ? .before : (location.x > width * 0.75 ? .after : .group))

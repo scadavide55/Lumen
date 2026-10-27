@@ -79,9 +79,16 @@ struct GeneralPane: View {
                     Text("Automatically by site").tag(true)
                 }
                 if s.organizeTabs {
-                    Text("When three or more tabs are open from the same site, Lumen groups them, for example into “GitHub”.")
+                    Picker("Group when a site has", selection: $s.groupThreshold) {
+                        Text("2 tabs").tag(2)
+                        Text("3 tabs").tag(3)
+                        Text("5 tabs").tag(5)
+                    }
+                    .onChange(of: s.groupThreshold) { _, _ in BrowserState.groupingChanged() }
+                    Text(String(format: L("When %d or more tabs are open from the same site, Lumen groups them, for example into “GitHub”."), s.groupThreshold))
                         .font(.caption).foregroundStyle(.secondary)
                 }
+                GroupExceptionsRow()
                 Picker("Open pages in tabs instead of windows", selection: $s.popupMode) {
                     ForEach(PopupMode.allCases) { Text($0.label).tag($0) }
                 }
@@ -627,5 +634,42 @@ struct AdvancedPane: View {
             }
         }
         .formStyle(.grouped)
+    }
+}
+
+
+/// Sites Lumen never groups by site, with a field to add one.
+struct GroupExceptionsRow: View {
+    @Bindable private var s = Settings.shared
+    @State private var adding = ""
+
+    var body: some View {
+        LabeledContent("Never group these sites") {
+            VStack(alignment: .trailing, spacing: 6) {
+                ForEach(s.groupExceptions, id: \.self) { site in
+                    HStack(spacing: 6) {
+                        Text(site)
+                        Button {
+                            s.setGroupException(site, false)
+                            BrowserState.groupingChanged()
+                        } label: { Image(systemName: "minus.circle.fill") }
+                            .buttonStyle(.borderless)
+                            .help("Remove")
+                    }
+                }
+                TextField("", text: $adding, prompt: Text("example.com"))
+                    .textFieldStyle(.roundedBorder).frame(width: 180)
+                    .onSubmit(add)
+            }
+        }
+    }
+
+    private func add() {
+        let raw = adding.trimmingCharacters(in: .whitespaces).lowercased()
+        let host = URL(string: raw.contains("://") ? raw : "https://" + raw)?.host ?? raw
+        guard host.contains(".") else { return }
+        s.setGroupException(host, true)
+        adding = ""
+        BrowserState.groupingChanged()
     }
 }

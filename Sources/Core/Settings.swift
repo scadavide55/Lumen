@@ -272,6 +272,10 @@ final class Settings: Observable {
     @Pref("checkUpdates") var checkUpdates = true
     @Pref("paletteOnNewTab") var paletteOnNewTab = true
     @Pref("organizeTabs") var organizeTabs = false
+    /// How many tabs from one site make a group: 2, 3 or 5.
+    @Pref("groupThreshold") var groupThreshold = 3
+    /// Sites never grouped by site, as registrable domains ("github.com").
+    @Pref("groupExceptions") var groupExceptions: [String] = []
     @Pref("popupMode") var popupMode = PopupMode.automatic
     @Pref("autoCloseDays") var autoCloseDays = 0
     @Pref("alwaysShowTitles") var alwaysShowTitles = false
@@ -363,6 +367,18 @@ final class Settings: Observable {
     func isAllowlisted(_ host: String?) -> Bool {
         guard let host = host?.lowercased() else { return false }
         return allowlist.contains { host == $0 || host.hasSuffix("." + $0) }
+    }
+
+    func isGroupException(_ host: String?) -> Bool {
+        guard let host else { return false }
+        return groupExceptions.contains(PasswordStore.site(host))
+    }
+
+    func setGroupException(_ host: String, _ excepted: Bool) {
+        let site = PasswordStore.site(host)
+        var list = groupExceptions.filter { $0 != site }
+        if excepted { list.append(site) }
+        groupExceptions = list.sorted()
     }
 
     func setAllowlisted(_ host: String, _ allowed: Bool) {

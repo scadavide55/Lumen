@@ -13,6 +13,10 @@ final class BrowserState {
 
     var tabs: [Tab] = [] { didSet { sessionChanged() } }
     var groups: [TabGroup] = []
+    /// Tabs picked with ⌘-click or ⇧-click, to move, group or close together.
+    var marked: Set<UUID> = []
+    /// Where ⇧-click ranges start.
+    @ObservationIgnored var markAnchor: UUID?
     @ObservationIgnored private var popups: [PopupWindow] = []
     var selectedID: UUID? { didSet { sessionChanged() } }
     var splitID: UUID? { didSet { sessionChanged() } }
@@ -63,6 +67,8 @@ final class BrowserState {
         }
         if !isPrivate {
             for u in WindowRegistry.shared.takePendingURLs() { newTab(url: u) }
+            // Tabs moved here from another window, which opened this one for them.
+            if let move = WindowRegistry.shared.takePendingMove(profile: profileID) { adopt(move) }
         }
         if tabs.isEmpty { newTab() }
 
@@ -295,6 +301,9 @@ final class BrowserState {
 
     /// Moves or opens dropped tabs. Dropping onto the middle of a tab groups the two.
     func handleDrop(_ items: [String], on target: Tab?, placement: DropPlacement, pinned: Bool) -> Bool {
+        // Several picked tabs are dragged as one line per tab.
+        let items = items.flatMap { $0.split(separator: "\n").map(String.init) }
+        marked = []
         if placement == .group, let target, !target.isPinned {
             var handled = false
             for item in items {
@@ -355,7 +364,7 @@ final class BrowserState {
     }
 
     /// Pinned tabs first, and the tabs of each group kept together where the group first appears.
-    private func normalizeOrder() {
+    func normalizeOrder() {
         var regular: [Tab] = []
         var placed = Set<UUID>()
         let unpinned = tabs.filter { !$0.isPinned }
@@ -444,17 +453,30 @@ final class BrowserState {
         normalizeOrder()
     }
 
-    /// Groups three or more ungrouped tabs from the same site under the site's name.
+    /// Groups ungrouped tabs from the same site under the site's name, once there are as many as the user chose
+    /// (three unless they changed it). Sites the user excluded are never grouped.
     func autoOrganize() {
+        let threshold = max(2, Settings.shared.groupThreshold)
+        var changed = dropExceptedGroups()
+        // A tab that left its site group's site, or was opened from it on another site, leaves the group.
+        for t in tabs {
+            guard let g = t.groupID, let site = groups.first(where: { $0.id == g })?.site,
+                  let host = t.host, ["http", "https"].contains(t.url?.scheme ?? ""),
+                  PasswordStore.site(host) != site else { continue }
+            t.groupID = nil
+            changed = true
+        }
         var bySite: [String: [Tab]] = [:]
         for t in tabs where !t.isPinned {
             guard let host = t.host, ["http", "https"].contains(t.url?.scheme ?? "") else { continue }
             let auto = t.groupID.flatMap { g in groups.first { $0.id == g } }?.site
             if t.groupID != nil && auto == nil { continue } // grouped by you: leave it alone
-            bySite[PasswordStore.site(host), default: []].append(t)
+            let site = PasswordStore.site(host)
+            if Settings.shared.groupExceptions.contains(site) { continue }
+            bySite[site, default: []].append(t)
         }
-        var changed = false
-        for (site, members) in bySite where members.count >= 3 {
+        // Sorted, so groups are made in the same order every time.
+        for (site, members) in bySite.sorted(by: { $0.key < $1.key }) where members.count >= threshold {
             let group: TabGroup
             if let existing = groups.first(where: { $0.site == site }) {
                 group = existing

@@ -103,6 +103,7 @@ check((oaMsg["content"] as? [[String: Any]])?.first?["type"] as? String == "imag
 check(JSONSerialization.isValidJSONObject(userMsg) && JSONSerialization.isValidJSONObject(oaMsg), "messages encode as JSON")
 for t in AssistantPrompt.tools { check(JSONSerialization.isValidJSONObject(AssistantPrompt.schema(t)), "tool schema \(t.name)") }
 
+check(AssistantPrompt.tools.contains { $0.name == "group_tabs" }, "group_tabs tool exists")
 let allNames = AssistantPrompt.clientTools(provider: .openAI, web: true, control: true).map(\.name)
 eq(Set(allNames).count, allNames.count, "tool names are unique")
 for t in AssistantPrompt.webTools + AssistantPrompt.controlTools { check(JSONSerialization.isValidJSONObject(AssistantPrompt.schema(t)), "tool schema \(t.name)") }
@@ -242,6 +243,75 @@ compiles(BuiltInRules.json(), "built-in rules")
 compiles(BuiltInRules.cookieJSON, "cookie rules")
 let converted = String(decoding: try! JSONSerialization.data(withJSONObject: out.block + out.allow + out.hide), as: UTF8.self)
 compiles(converted, "converted filters")
+
+// MARK: Organising tabs (a private window, so nothing is saved)
+
+func tabsWindow(_ urls: [String]) -> BrowserState {
+    let w = BrowserState(isPrivate: true)
+    let blank = w.tabs
+    for u in urls { w.tabs.append(Tab(browser: w, url: URL(string: u)!)) }
+    w.tabs.removeAll { t in blank.contains { $0 === t } }
+    w.select(w.tabs[0])
+    return w
+}
+let settingsBefore = (Settings.shared.groupThreshold, Settings.shared.groupExceptions)
+Settings.shared.groupExceptions = []
+
+Settings.shared.groupThreshold = 3
+let tw = tabsWindow(["https://github.com/a", "https://www.github.com/b", "https://news.ycombinator.com", "https://github.com/c", "https://apple.com"])
+tw.autoOrganize()
+eq(tw.groups.map(\.name), ["GitHub"], "group by site at 3 tabs")
+eq(tw.tabs.filter { $0.groupID != nil }.count, 3, "three GitHub tabs grouped")
+Settings.shared.groupThreshold = 5
+let tw5 = tabsWindow(["https://github.com/a", "https://github.com/b", "https://github.com/c"])
+tw5.autoOrganize()
+check(tw5.groups.isEmpty, "no group below a threshold of 5")
+Settings.shared.groupThreshold = 2
+let tw2 = tabsWindow(["https://youtube.com/1", "https://youtube.com/2", "https://github.com/x", "https://github.com/y"])
+tw2.autoOrganize()
+eq(Set(tw2.groups.map(\.name)), ["YouTube", "GitHub"], "threshold of 2 groups pairs")
+Settings.shared.setGroupException("www.youtube.com", true)
+eq(Settings.shared.groupExceptions, ["youtube.com"], "exception stored as the site")
+tw2.autoOrganize()
+eq(tw2.groups.map(\.name), ["GitHub"], "excepted site's group undone")
+check(tw2.tabs.filter { $0.host?.contains("youtube") == true }.allSatisfy { $0.groupID == nil }, "excepted tabs left ungrouped")
+Settings.shared.groupExceptions = []
+
+let tt = tabsWindow(["https://b.com/x", "https://a.com/y", "https://c.com/z", "https://a.com/y"])
+eq(tt.duplicateCount, 1, "one duplicate tab")
+tt.closeDuplicates()
+eq(tt.duplicateCount, 0, "duplicates closed")
+tt.tabs[0].title = "Zeta"; tt.tabs[1].title = "alpha"; tt.tabs[2].title = "Beta"
+tt.sortTabs(by: .title)
+eq(tt.tabs.map(\.title), ["alpha", "Beta", "Zeta"], "sort by title, ignoring case")
+tt.sortTabs(by: .site)
+eq(tt.tabs.compactMap(\.host), ["a.com", "b.com", "c.com"], "sort by site")
+let topic = tt.group([tt.tabs[0], tt.tabs[2]], named: "Rome trip")
+eq(topic?.name, "Rome trip", "group named by topic")
+eq(tt.tabs.map { $0.groupID == topic?.id }, [true, true, false], "group's tabs kept together")
+tt.group([tt.tabs[2]], named: "rome TRIP")
+eq(tt.groups.count, 1, "same name adds to the existing group")
+eq(tt.tabs(in: tt.groups[0]).count, 3, "group has three tabs")
+tt.newTab(inGroup: tt.groups[0].id)
+eq(tt.tabs(in: tt.groups[0]).count, 4, "new tab inside the group")
+eq(tt.tabs.last?.groupID, tt.groups[0].id, "new tab at the end of the group")
+
+let ms = tabsWindow(["https://a.com", "https://b.com", "https://c.com", "https://d.com"])
+ms.click(ms.tabs[0], modifiers: [])
+ms.click(ms.tabs[2], modifiers: .shift)
+eq(ms.marked.count, 3, "shift-click picks a range")
+ms.click(ms.tabs[1], modifiers: .command)
+eq(ms.marked.count, 2, "command-click removes a picked tab")
+eq(ms.actionTabs(for: ms.tabs[2]).count, 2, "menu acts on picked tabs")
+eq(ms.actionTabs(for: ms.tabs[3]).count, 1, "menu on another tab acts on it alone")
+eq(ms.dragPayload(for: ms.tabs[0]).split(separator: "\n").count, 2, "dragging carries every picked tab")
+ms.close(ms.actionTabs(for: ms.tabs[0]))
+eq(ms.tabs.compactMap(\.host), ["b.com", "d.com"], "close picked tabs")
+check(ms.marked.isEmpty, "picking cleared after closing")
+ms.click(ms.tabs[1], modifiers: [])
+check(ms.marked.isEmpty && ms.selectedID == ms.tabs[1].id, "plain click selects")
+Settings.shared.groupThreshold = settingsBefore.0
+Settings.shared.groupExceptions = settingsBefore.1
 
 // MARK: Page control, in a real web view
 

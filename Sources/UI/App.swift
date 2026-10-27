@@ -248,6 +248,18 @@ struct LumenCommands: Commands {
                 .keyboardShortcut("m", modifiers: [.command, .shift]).disabled(b == nil)
             Button("Hibernate Other Tabs") { b?.hibernateOthers() }.disabled(b == nil)
             Divider()
+            Button("Group Tabs by Site") { b?.groupBySiteNow() }.disabled(b == nil)
+            Button("Close Duplicate Tabs") { b?.closeDuplicates() }.disabled(b == nil || b?.duplicateCount == 0)
+            Menu("Sort Tabs") {
+                ForEach(BrowserState.TabSort.allCases) { o in Button(o.label) { b?.sortTabs(by: o) } }
+            }
+            .disabled(b == nil)
+            if let b, !b.isPrivate, !SavedGroups.shared.items.isEmpty {
+                Menu("Saved Groups") {
+                    ForEach(SavedGroups.shared.items) { g in Button(g.name) { b.open(g) } }
+                }
+            }
+            Divider()
             ForEach(1...9, id: \.self) { i in
                 Button(i == 9 ? LocalizedStringKey("Last Tab") : "Tab \(i)") { b?.select(index: i) }
                     .keyboardShortcut(KeyEquivalent(Character(String(i))))

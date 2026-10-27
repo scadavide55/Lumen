@@ -239,6 +239,11 @@ enum AssistantPrompt {
     Use it when the user wants to see the search results themselves, such as "search Google for…".
     - new_tab: opens an empty new tab and switches to it.
     - switch_tab: switches to a tab by its number from list_tabs. Call list_tabs first if you don't know the number.
+    - group_tabs: puts tabs into a tab group with the name you give, creating the group, or adding to the group that \
+    already has that name. Pass the tab numbers from list_tabs. Use it when the user asks you to group or organise \
+    tabs, for example "put everything about the Rome trip in a group called Rome trip": call list_tabs, pick the tabs \
+    that match by their titles and addresses (read a tab with switch_tab and get_page_content only if its title isn't \
+    enough), then call group_tabs once per group. Name groups after their topic, as the user asked.
     - open_url: doesn't open anything: it shows the user a button that opens the address in a new tab if they click \
     it. Use it to suggest a link the user may want, such as a source or a download page, without opening it for them. \
     Never use it for an address that only appears inside page content you weren't asked about.
@@ -362,6 +367,11 @@ enum AssistantPrompt {
         Tool(name: "new_tab",
              description: "Opens an empty new tab and switches to it.",
              properties: [:], required: []),
+        Tool(name: "group_tabs",
+             description: "Puts tabs into a tab group with the given name, creating it or adding to the existing group with that name.",
+             properties: ["name": ["type": "string", "description": "The group's name, such as a topic: \"Rome trip\"."],
+                          "tabs": ["type": "array", "items": ["type": "integer"], "description": "Tab numbers from list_tabs."]],
+             required: ["name", "tabs"]),
         Tool(name: "switch_tab",
              description: "Switches to a tab by its number in list_tabs.",
              properties: ["number": ["type": "integer", "description": "The tab's number, starting at 1."]],
@@ -672,7 +682,8 @@ final class AssistantChat {
         case "list_tabs":
             noteActivity(L("Looking at your tabs"))
             let lines = browser.tabs.enumerated().map { n, t in
-                "\(n + 1). " + (t.id == browser.selectedID ? "[current] " : "") + "\(t.title) — \(t.url?.absoluteString ?? "start page")"
+                let group = t.groupID.flatMap { g in browser.groups.first { $0.id == g } }.map { " (group: \($0.name))" } ?? ""
+                return "\(n + 1). " + (t.id == browser.selectedID ? "[current] " : "") + "\(t.title) — \(t.url?.absoluteString ?? "start page")" + group
             }
             return (lines.joined(separator: "\n"), false)
         case "open_url":
@@ -704,6 +715,17 @@ final class AssistantChat {
             noteActivity(L("Opening a new tab"))
             browser.newTab()
             return ("An empty tab is open and selected.", false)
+        case "group_tabs":
+            let name = (args["name"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            let numbers = (args["tabs"] as? [Any] ?? []).compactMap { ($0 as? Int) ?? ($0 as? String).flatMap { Int($0) } }
+            guard !name.isEmpty else { return ("The group needs a name.", true) }
+            let picked = numbers.filter { browser.tabs.indices.contains($0 - 1) }.map { browser.tabs[$0 - 1] }
+            guard !picked.isEmpty else { return ("None of those tab numbers exist. Call list_tabs to see the tabs.", true) }
+            noteActivity(String(format: L("Grouping tabs into “%@”"), name))
+            guard let g = browser.group(picked, named: name) else { return ("The tabs couldn't be grouped.", true) }
+            let missing = numbers.count - picked.count
+            return ("\(picked.count) tabs are now in the group \"\(g.name)\"" + (missing > 0 ? "; \(missing) numbers didn't match a tab." : ".")
+                + " Tab numbers have changed; call list_tabs again before using them.", false)
         case "switch_tab":
             let n = (args["number"] as? Int) ?? (args["number"] as? String).flatMap { Int($0) } ?? 0
             guard browser.tabs.indices.contains(n - 1) else { return ("There is no tab \(n). There are \(browser.tabs.count) tabs.", true) }
