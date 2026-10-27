@@ -18,9 +18,9 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 
 [**Download**](https://github.com/scadavide55/Lumen/releases) · [**Website**](https://scadavide55.github.io/Lumen/) · [**Release notes**](https://github.com/scadavide55/Lumen/releases)
 
-<img src="docs/assets/screenshot.jpg" alt="The Lumen window with the sidebar and the start page" width="860">
+<img src="docs/assets/screenshot.jpg" alt="The Lumen window with tabs along the top" width="860">
 
-<img src="docs/assets/screenshot2.jpg" alt="Lumen with the tabs along the top, grouped by colour" width="860">
+<img src="docs/assets/groups.png" alt="Tab groups along the top of the Lumen window, each in its own colour" width="860">
 
 </div>
 
