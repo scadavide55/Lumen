@@ -32,6 +32,10 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 **Lumen Assistant (beta)**
 - An AI assistant in a panel beside the page (⇧⌘A): summaries, answers and explanations about what you're reading
 - Bring your own key: Anthropic, OpenAI, OpenRouter, DeepSeek or any OpenAI-compatible server (Ollama, LM Studio)
+- **Web access** (on by default): searches the web and reads pages, with the sources listed under each answer
+- Opens pages and searches in new tabs, and switches between your tabs when you ask
+- **Browser use** (off by default): clicks, types, scrolls and drags on the current page for you. It never fills in passwords or card numbers, and asks before sending, buying or deleting anything
+- Chat history on your Mac (not in private windows), a full-window chat view, and a panel you can resize
 - Off by default; page content is treated as data, never as instructions
 
 **Lumen Shield**

@@ -95,8 +95,11 @@ enum WebTools {
         guard type.isEmpty || type.contains("html") else {
             return Page(url: finalURL, title: "", text: body, links: [])
         }
-        let (title, text) = plainText(html: body)
-        return Page(url: finalURL, title: title, text: text, links: links(in: body, base: finalURL))
+        // Converting a large page takes a moment, so it happens off the main thread.
+        return await Task.detached(priority: .userInitiated) {
+            let (title, text) = plainText(html: body)
+            return Page(url: finalURL, title: title, text: text, links: links(in: body, base: finalURL))
+        }.value
     }
 
     static func format(_ page: Page) -> String {

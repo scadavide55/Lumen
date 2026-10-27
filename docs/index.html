@@ -463,12 +463,13 @@ footer .links a:hover { color: var(--fg); }
     <div class="reveal">
       <div class="eyebrow">Lumen Assistant · Beta</div>
       <h2>Ask the page you're reading.</h2>
-      <p class="sub">Open a panel beside any page with ⇧⌘A and ask for a summary, the key points or an explanation of what you selected. The page comes along automatically, so you don't have to copy anything.</p>
+      <p class="sub">Open a panel beside any page with ⇧⌘A and ask for a summary, the key points or an explanation of what you selected. The page comes along automatically, so you don't have to copy anything. It can look things up on the web, open tabs, and with Browser use turned on, click and type on the page for you.</p>
       <ul class="checks">
         <li><span>Your own key: <b>Anthropic</b>, <b>OpenAI</b>, <b>OpenRouter</b>, <b>DeepSeek</b>, or a model on your Mac with <b>Ollama</b> or <b>LM Studio</b></span></li>
-        <li><span>Pick any model your provider offers, and attach images when it can read them</span></li>
-        <li><span>Text hidden in web pages is treated as content, never as instructions. It can't click or open anything by itself</span></li>
-        <li><span>Off until you turn it on. Nothing is sent until you ask, and only to the provider you chose</span></li>
+        <li><span><b>Web access</b> searches the web and reads pages, and lists its sources under the answer</span></li>
+        <li><span><b>Browser use</b>, off until you turn it on, clicks, types and scrolls for you. It never touches password or card fields, and asks before sending, buying or deleting</span></li>
+        <li><span>Chat history on your Mac, a full-window chat, and a panel you can resize</span></li>
+        <li><span>Text in web pages is treated as content, never as instructions. Off until you turn it on, and nothing is sent until you ask</span></li>
       </ul>
     </div>
     <div class="stage reveal">
@@ -574,7 +575,7 @@ footer .links a:hover { color: var(--fg); }
       </details>
       <details class="reveal">
         <summary>Does Lumen collect any data?</summary>
-        <p>No. There are no analytics and no accounts. Lumen only talks to the sites you visit. If you turn them on, it also downloads filter lists from easylist.to and fetches search suggestions from your search engine. Suggestions are off by default. Lumen Assistant (beta) is off too; if you turn it on, your questions and the page you attach go only to the AI provider you chose, with your own key.</p>
+        <p>No. There are no analytics and no accounts. Lumen only talks to the sites you visit. If you turn them on, it also downloads filter lists from easylist.to and fetches search suggestions from your search engine. Suggestions are off by default. Lumen Assistant (beta) is off too; if you turn it on, your questions and the page you attach go only to the AI provider you chose, with your own key. When it searches the web for you, the search goes to your provider (Anthropic) or to DuckDuckGo (other providers).</p>
       </details>
       <details class="reveal">
         <summary>Why does macOS warn me when I open it?</summary>

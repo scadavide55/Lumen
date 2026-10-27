@@ -63,7 +63,8 @@ final class AssistantHistory {
         }
         chats.removeAll { $0.id == chat.summary.id }
         chats.insert(chat.summary, at: 0)
-        index.save(chats)
+        // Written at once, so a chat saved just before quitting stays listed.
+        index.saveNow(chats)
     }
 
     func load(_ summary: Summary) -> Saved? {
@@ -77,7 +78,7 @@ final class AssistantHistory {
 
     func delete(_ id: UUID) {
         chats.removeAll { $0.id == id }
-        index.save(chats)
+        index.saveNow(chats)
         let url = file(id)
         queue.async { try? FileManager.default.removeItem(at: url) }
     }
