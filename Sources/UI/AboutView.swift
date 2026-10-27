@@ -48,7 +48,7 @@ struct AboutView: View {
         VStack(spacing: 10) {
             ZStack {
                 Circle()
-                    .fill(RadialGradient(colors: [Color(red: 1, green: 0.84, blue: 0.54).opacity(0.55), .clear], center: .center, startRadius: 0, endRadius: 90))
+                    .fill(RadialGradient(colors: [EclipseMark.coral.opacity(0.4), .clear], center: .center, startRadius: 0, endRadius: 90))
                     .frame(width: 180, height: 180)
                     .scaleEffect(appeared ? 1 : 0.6)
                     .opacity(appeared ? 1 : 0)

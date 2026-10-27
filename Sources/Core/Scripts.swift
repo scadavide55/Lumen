@@ -656,8 +656,10 @@ enum Scripts {
         body { margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center;
                font: 15px -apple-system, sans-serif; color: #6e6e73; background: Canvas; }
         .box { max-width: 460px; text-align: center; padding: 24px; }
-        .orb { width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 24px;
-               background: radial-gradient(circle at 40% 35%, #fff, #ffd98a 60%, #f0a830); box-shadow: 0 0 40px #ffd68a88; }
+        .orb { position: relative; width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 24px;
+               background: linear-gradient(135deg, #ffc24a, #ff5a2a); box-shadow: 0 0 40px 6px rgba(255, 122, 58, 0.35); }
+        .orb::after { content: ""; position: absolute; inset: 0; border-radius: 50%; transform: translate(-8px, 7px);
+               background: radial-gradient(circle at 35% 30%, #3b3752, #14121d 90%); }
         h1 { color: CanvasText; font-size: 24px; font-weight: 600; margin: 0 0 10px; }
         p { line-height: 1.5; margin: 0 0 24px; }
         a.btn { display: inline-block; padding: 8px 18px; border-radius: 8px; background: #5e5ce6; color: white; text-decoration: none; font-weight: 500; }

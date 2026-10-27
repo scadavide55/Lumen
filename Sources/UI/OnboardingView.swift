@@ -317,11 +317,8 @@ private struct WelcomeStep: View {
                 Spacer()
                 TimelineView(.animation(minimumInterval: 1 / 30)) { ctx in
                     let pulse = (sin(ctx.date.timeIntervalSinceReferenceDate * 1.6) + 1) / 2
-                    Circle()
-                        .fill(RadialGradient(colors: [.white, Color(red: 1, green: 0.88, blue: 0.64), Color(red: 0.94, green: 0.69, blue: 0.29)],
-                                             center: UnitPoint(x: 0.4, y: 0.35), startRadius: 0, endRadius: 55))
-                        .frame(width: 96, height: 96)
-                        .shadow(color: Color(red: 1, green: 0.84, blue: 0.54).opacity(0.5 + 0.35 * pulse), radius: 30 + 20 * pulse)
+                    EclipseMark(size: 96, glow: pulse)
+                        .shadow(color: EclipseMark.coral.opacity(0.35 + 0.3 * pulse), radius: 24 + 16 * pulse)
                 }
                 .scaleEffect(phase >= 1 ? 1 : 0.2)
                 .opacity(phase >= 1 ? 1 : 0)
