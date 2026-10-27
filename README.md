@@ -112,7 +112,13 @@ open Lumen.app
 
 ## Installing a downloaded build
 
-Open the `.dmg` and drag Lumen to Applications. Release builds are not notarized yet, so macOS warns you the first time you open one: right-click `Lumen.app` and choose **Open**. After that, Lumen tells you about new versions and can install them for you.
+Open the `.dmg` and drag Lumen to Applications. Release builds are not notarized yet, so on recent versions of macOS the first launch says Lumen "is damaged and can't be opened". The download is fine: macOS blocks apps from the internet that Apple hasn't notarized. Run this once in Terminal, then open Lumen normally:
+
+```bash
+xattr -dr com.apple.quarantine /Applications/Lumen.app
+```
+
+After that, Lumen tells you about new versions and can install them for you.
 
 ## License
 

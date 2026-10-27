@@ -164,6 +164,7 @@ h2 { font-size: clamp(34px, 4.6vw, 54px); line-height: 1.06; letter-spacing: -0.
 .checks li b { color: var(--fg); font-weight: 600; }
 
 /* Shield popover mock */
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .88em; background: rgba(255, 255, 255, 0.08); padding: 1px 6px; border-radius: 5px; overflow-wrap: anywhere; }
 .wide { margin: 64px auto 0; max-width: 1040px; }
 .wide img {
   width: 100%; border-radius: 14px;
@@ -517,7 +518,7 @@ footer .links a:hover { color: var(--fg); }
       <div class="steps">
         <div class="step"><b><i>1</i>Download and open</b>Open Lumen-1.5.3.dmg, about 6 MB.</div>
         <div class="step"><b><i>2</i>Drag it to Applications</b>Drop Lumen onto the Applications shortcut.</div>
-        <div class="step"><b><i>3</i>Open it the first time</b>Right-click Lumen and choose Open. The beta isn't notarized by Apple yet.</div>
+        <div class="step"><b><i>3</i>Open it the first time</b>If macOS says Lumen is damaged, run <code>xattr -dr com.apple.quarantine /Applications/Lumen.app</code> once in Terminal. The beta isn't notarized by Apple yet.</div>
       </div>
     </div>
   </div>
@@ -540,7 +541,7 @@ footer .links a:hover { color: var(--fg); }
       </details>
       <details class="reveal">
         <summary>Why does macOS warn me when I open it?</summary>
-        <p>The beta isn't notarized by Apple yet. Right-click Lumen.app and choose Open, and macOS remembers your choice from then on.</p>
+        <p>The beta isn't notarized by Apple yet, so macOS may say Lumen &ldquo;is damaged and can&rsquo;t be opened&rdquo;. The download is fine. Open Terminal and run <code>xattr -dr com.apple.quarantine /Applications/Lumen.app</code> once, then open Lumen as usual. Lumen&rsquo;s own updates keep working after that.</p>
       </details>
       <details class="reveal">
         <summary>Which engine does Lumen use?</summary>
