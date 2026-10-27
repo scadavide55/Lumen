@@ -172,6 +172,17 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .
   box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.8), 0 30px 80px -40px rgba(94, 92, 230, 0.45);
 }
 .wide figcaption { margin-top: 16px; text-align: center; font-size: 14px; color: var(--faint); }
+.chat { position: relative; max-width: 360px; margin: 0 auto; display: grid; gap: 12px; font-size: 14px; }
+.chat .head { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; }
+.chat .head svg { width: 18px; height: 18px; color: var(--accent); }
+.chat .badge { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, transparent); padding: 2px 6px; border-radius: 999px; }
+.chat .model { margin-left: auto; font-size: 12px; font-weight: 500; color: var(--muted); }
+.chat .page { justify-self: end; font-size: 12px; color: var(--muted); }
+.chat .you { justify-self: end; background: color-mix(in srgb, var(--accent) 22%, transparent); padding: 8px 12px; border-radius: 14px; }
+.chat .ai { line-height: 1.55; color: var(--fg); }
+.chat .ai b { font-weight: 600; }
+.chat .tool { font-size: 12px; color: var(--muted); }
+.chat .box { margin-top: 6px; padding: 9px 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.06); color: var(--faint); font-size: 13px; }
 .stage {
   position: relative; border-radius: 24px; padding: 48px 32px;
   background: linear-gradient(160deg, #141833, #0b0d1a 60%);
@@ -309,6 +320,7 @@ footer .links a:hover { color: var(--fg); }
     <div class="navlinks">
       <a href="#features">Features</a>
       <a href="#shield">Shield</a>
+      <a href="#assistant">Assistant</a>
       <a href="#customise">Customise</a>
       <a href="#faq">FAQ</a>
       <a href="https://github.com/scadavide55/Lumen">GitHub</a>
@@ -442,6 +454,31 @@ footer .links a:hover { color: var(--fg); }
     <div class="reveal">
       <div class="url-label"><span>Link you clicked</span><span id="url-state">Cleaning…</span></div>
       <div class="url" id="url"><span class="host">https://shop.example.com/item</span><span class="keep">?id=42</span><span class="junk">&amp;utm_source=newsletter&amp;utm_medium=email&amp;utm_campaign=autumn_sale</span><span class="junk">&amp;fbclid=IwAR2xK9vQ7mT3pL</span><span class="junk">&amp;gclid=Cj0KCQjw8eTFBhCX</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="assistant">
+  <div class="wrap row">
+    <div class="reveal">
+      <div class="eyebrow">Lumen Assistant · Beta</div>
+      <h2>Ask the page you're reading.</h2>
+      <p class="sub">Open a panel beside any page with ⇧⌘A and ask for a summary, the key points or an explanation of what you selected. The page comes along automatically, so you don't have to copy anything.</p>
+      <ul class="checks">
+        <li><span>Your own key: <b>Anthropic</b>, <b>OpenAI</b>, <b>OpenRouter</b>, <b>DeepSeek</b>, or a model on your Mac with <b>Ollama</b> or <b>LM Studio</b></span></li>
+        <li><span>Pick any model your provider offers, and attach images when it can read them</span></li>
+        <li><span>Text hidden in web pages is treated as content, never as instructions. It can't click or open anything by itself</span></li>
+        <li><span>Off until you turn it on. Nothing is sent until you ask, and only to the provider you chose</span></li>
+      </ul>
+    </div>
+    <div class="stage reveal">
+      <div class="chat">
+        <div class="head"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.8 5.4L19 9l-5.2 1.6L12 16l-1.8-5.4L5 9l5.2-1.6zM19 14l.9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9z"/></svg>Lumen Assistant <span class="badge">Beta</span><span class="model">claude-opus-5-5</span></div>
+        <div class="page">📄 Lumen – Wikipedia</div>
+        <div class="you">Summarise this page</div>
+        <div class="ai"><b>Lumen (lm)</b> is the SI unit of luminous flux: how much light a source gives off, weighted by how sensitive the eye is to each colour. A 1 candela source shining in every direction gives off 4π lumens.</div>
+        <div class="box">Ask Lumen Assistant…</div>
+      </div>
     </div>
   </div>
 </section>
