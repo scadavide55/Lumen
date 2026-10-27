@@ -29,7 +29,7 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 > [!NOTE]
 > **Lumen is now Tacet.** Same browser, new name: there were already other browsers called Lumen, and the name sounded too much like an AI product. Updating keeps all your tabs, passwords and settings.
 >
-> **1.6.1** brought web extensions, an offline Reading List, Customize Site, tab organising and a much more capable Tacet Assistant, including Apple's on-device model. Tacet Assistant is still a beta. If something doesn't work, please report it in [Issues](https://github.com/scadavide55/Tacet/issues).
+> **1.6.2** has a new icon and a few fixes. **1.6.1** brought web extensions, an offline Reading List, Customize Site, tab organising and a much more capable Tacet Assistant, including Apple's on-device model. Tacet Assistant is still a beta. If something doesn't work, please report it in [Issues](https://github.com/scadavide55/Tacet/issues).
 
 ## Features
 
