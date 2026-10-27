@@ -131,7 +131,7 @@ struct TabLayoutPicker: View {
     }
 }
 
-/// A small drawing of a Lumen window in each tab layout, over the Dusk background like Safari's previews.
+/// A small drawing of a Tacet window in each tab layout, over the Dusk background like Safari's previews.
 struct LayoutSketch: View {
     let layout: TabLayout
 

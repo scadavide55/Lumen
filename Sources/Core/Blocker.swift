@@ -241,7 +241,7 @@ final class ContentBlocker {
         store.lookUpContentRuleList(forIdentifier: id) { list, _ in
             if let list { done(list); return }
             self.store.compileContentRuleList(forIdentifier: id, encodedContentRuleList: json) { list, error in
-                if let error { NSLog("Lumen: rule list \(id) failed: \(error)") }
+                if let error { NSLog("Tacet: rule list \(id) failed: \(error)") }
                 done(list)
             }
             self.store.getAvailableContentRuleListIdentifiers { ids in

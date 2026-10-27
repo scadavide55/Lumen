@@ -3,31 +3,31 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lumen — the quiet browser for Mac</title>
-<meta name="description" content="Lumen is a minimal, fast browser for macOS built on WebKit. It blocks ads and trackers out of the box, turns off with one click, and has an AI assistant that reads the page for you.">
+<title>Tacet (formerly Lumen) — the quiet browser for Mac</title>
+<meta name="description" content="Tacet is a minimal, fast browser for macOS built on WebKit. It blocks ads and trackers out of the box, turns off with one click, and has an AI assistant that reads the page for you.">
 <meta name="theme-color" content="#07080f" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f6f5f2" media="(prefers-color-scheme: light)">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Lumen — the quiet browser for Mac">
+<meta property="og:title" content="Tacet — the quiet browser for Mac">
 <meta property="og:description" content="Minimal, fast and private. Ads and trackers blocked out of the box, an assistant that reads the page for you.">
-<meta property="og:image" content="https://scadavide55.github.io/Lumen/assets/screenshot.jpg">
-<meta property="og:url" content="https://scadavide55.github.io/Lumen/">
+<meta property="og:image" content="https://scadavide55.github.io/Tacet/assets/screenshot.jpg">
+<meta property="og:url" content="https://scadavide55.github.io/Tacet/">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="canonical" href="https://scadavide55.github.io/Lumen/">
+<link rel="canonical" href="https://scadavide55.github.io/Tacet/">
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="apple-touch-icon" href="assets/icon.png">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "Lumen",
+  "name": "Tacet",
   "operatingSystem": "macOS 14 or later",
   "applicationCategory": "BrowserApplication",
   "softwareVersion": "1.6.1",
   "license": "https://www.gnu.org/licenses/gpl-3.0.html",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-  "downloadUrl": "https://github.com/scadavide55/Lumen/releases/download/v1.6.1/Lumen-1.6.1.dmg",
-  "url": "https://scadavide55.github.io/Lumen/",
+  "downloadUrl": "https://github.com/scadavide55/Tacet/releases/download/v1.6.1/Lumen-1.6.1.dmg",
+  "url": "https://scadavide55.github.io/Tacet/",
   "description": "A minimal, fast and private macOS browser built on WebKit, with a native ad blocker you can turn off in one click."
 }
 </script>
@@ -119,6 +119,7 @@ nav.scrolled { border-bottom-color: var(--line); background: var(--glass); }
 nav .wrap { display: flex; align-items: center; gap: 24px; height: 60px; }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; letter-spacing: -0.01em; }
 .brand img { width: 28px; height: 28px; }
+.brand .was { font-weight: 500; font-size: 12.5px; color: var(--muted); letter-spacing: 0; }
 .navlinks { display: flex; gap: 22px; margin-left: auto; font-size: 14.5px; color: var(--muted); }
 .navlinks a:hover { color: var(--fg); }
 .nav-cta { font-size: 14px; padding: 7px 14px; border-radius: 999px; background: var(--fg); color: var(--btn-fg); font-weight: 600; white-space: nowrap; }
@@ -557,7 +558,7 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
 <a class="sr" href="#features">Skip to content</a>
 <nav id="nav">
   <div class="wrap">
-    <a class="brand" href="#top"><img src="assets/icon.png" alt="">Lumen</a>
+    <a class="brand" href="#top"><img src="assets/icon.png" alt="">Tacet</a>
     <div class="navlinks">
       <a href="#features">Features</a>
       <a href="#command">Command bar</a>
@@ -565,7 +566,7 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
       <a href="#assistant">Assistant</a>
       <a href="#compare">Compare</a>
       <a href="#faq">FAQ</a>
-      <a href="https://github.com/scadavide55/Lumen">GitHub</a>
+      <a href="https://github.com/scadavide55/Tacet">GitHub</a>
     </div>
     <button class="iconbtn" id="theme" aria-label="Switch between light and dark" title="Light or dark">
       <svg class="moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>
@@ -577,25 +578,25 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
   </div>
 </nav>
 <div class="sheet" id="sheet">
-  <a href="#features">Features</a><a href="#command">Command bar</a><a href="#shield">Shield</a><a href="#assistant">Assistant</a><a href="#compare">Compare</a><a href="#shortcuts">Shortcuts</a><a href="#faq">FAQ</a><a href="https://github.com/scadavide55/Lumen">GitHub</a>
+  <a href="#features">Features</a><a href="#command">Command bar</a><a href="#shield">Shield</a><a href="#assistant">Assistant</a><a href="#compare">Compare</a><a href="#shortcuts">Shortcuts</a><a href="#faq">FAQ</a><a href="https://github.com/scadavide55/Tacet">GitHub</a>
 </div>
 
 <header class="hero" id="top">
   <div class="wrap">
     <div class="orb" aria-hidden="true"></div>
-    <a class="pill" href="#release"><b>NEW</b> Lumen <span id="pill-v">1.6.1</span> is here</a>
+    <a class="pill" href="#release"><b>NEW</b> Tacet <span id="pill-v">1.6.1</span> is here</a>
     <h1><span class="soft">The quiet browser</span><br>for your Mac.</h1>
-    <p class="lead">Lumen is a minimal, fast browser built on WebKit. Ads and trackers are blocked before they load, the blocker turns off in one click, and an assistant reads the page so you don't have to.</p>
+    <p class="lead">Tacet, formerly Lumen, is a minimal, fast browser built on WebKit. Ads and trackers are blocked before they load, the blocker turns off in one click, and an assistant reads the page so you don't have to.</p>
     <div class="cta">
-      <a class="btn primary" id="dl-top" href="https://github.com/scadavide55/Lumen/releases/download/v1.6.1/Lumen-1.6.1.dmg">
+      <a class="btn primary" id="dl-top" href="https://github.com/scadavide55/Tacet/releases/download/v1.6.1/Lumen-1.6.1.dmg">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8-1.6 0-3.1 1-4 2.4-1.7 3-.4 7.4 1.2 9.8.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8s1.9.8 3.2.8c1.3 0 2.1-1.2 2.9-2.4.9-1.4 1.3-2.7 1.3-2.8-.1 0-2.5-1-2.4-3.9zM14 5.5c.7-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1.1.1 2.1-.6 2.8-1.4z"/></svg>
         Download for Mac
       </a>
-      <a class="btn ghost" href="https://github.com/scadavide55/Lumen">View on GitHub</a>
+      <a class="btn ghost" href="https://github.com/scadavide55/Tacet">View on GitHub</a>
     </div>
     <p class="fine">Free and open source · macOS 14 or later · Apple silicon and Intel · <a href="#download">about 9 MB</a></p>
     <figure class="shot" id="shot">
-      <div class="frame"><img src="assets/screenshot.jpg" width="2000" height="1300" alt="The Lumen window with tabs along the top and the Lumen website open" fetchpriority="high"></div>
+      <div class="frame"><img src="assets/screenshot.jpg" width="2000" height="1300" alt="The Tacet window with tabs along the top and the Tacet website open" fetchpriority="high"></div>
       <div class="chip c1" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l8 3.4v5.8c0 5-3.4 9.5-8 10.8-4.6-1.3-8-5.8-8-10.8V5.4L12 2z" opacity=".35"/><path d="M12 2v20c-4.6-1.3-8-5.8-8-10.8V5.4L12 2z"/></svg>
         <div><b><span id="chip-n">0</span> blocked</b><span>on this page</span></div>
@@ -606,7 +607,7 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
       </div>
     </figure>
     <div class="stats" aria-label="At a glance">
-      <div class="stat reveal"><b data-count="0" data-suffix="">0</b><span>analytics, accounts or trackers in Lumen itself</span></div>
+      <div class="stat reveal"><b data-count="0" data-suffix="">0</b><span>analytics, accounts or trackers in Tacet itself</span></div>
       <div class="stat reveal"><b data-count="1" data-suffix=" click">1 click</b><span>to turn the blocker off for a site</span></div>
       <div class="stat reveal"><b data-count="9" data-suffix=" MB">9 MB</b><span>download, universal for Apple silicon and Intel</span></div>
       <div class="stat reveal"><b data-count="100" data-suffix="%">100%</b><span>WebKit, the engine behind Safari</span></div>
@@ -617,7 +618,7 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
 <section id="features">
   <div class="wrap">
     <div class="center reveal">
-      <div class="eyebrow">Why Lumen</div>
+      <div class="eyebrow">Why Tacet</div>
       <h2>Everything you need.<br>Nothing that gets in the way.</h2>
       <p class="sub">The speed and battery life of WebKit, with the features Safari is missing and none of the noise Chrome brings.</p>
     </div>
@@ -625,10 +626,10 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
       <div class="card w3 reveal">
         <div class="icon"><svg viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/></svg></div>
         <h3>Tabs that tidy themselves</h3>
-        <p>Drag a tab onto another to make a group, or let Lumen group tabs from the same site. Save a group and close it, reopen it later with every tab, pick several with ⌘-click, sort by site or title, close duplicates in one click.</p>
+        <p>Drag a tab onto another to make a group, or let Tacet group tabs from the same site. Save a group and close it, reopen it later with every tab, pick several with ⌘-click, sort by site or title, close duplicates in one click.</p>
         <div class="art tabs" aria-hidden="true">
           <div class="tab grp" style="--c:#ff9f0a">Work</div>
-          <div class="tab on" style="--c:#ff9f0a"><i></i>Lumen · GitHub</div>
+          <div class="tab on" style="--c:#ff9f0a"><i></i>Tacet · GitHub</div>
           <div class="tab" style="--c:#ff9f0a"><i></i>WebKit Blog</div>
           <div class="tab grp" style="--c:#30b0c7">Rome trip</div>
           <div class="tab zz" style="--c:#30b0c7"><i></i>Trenitalia</div>
@@ -690,7 +691,7 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
     <div class="center reveal">
       <div class="eyebrow">One bar for everything</div>
       <h2>Type. It's already there.</h2>
-      <p class="sub">Addresses, searches, open tabs, bookmarks, history, Reading List and every command live in one bar. Press ⌘L or ⌘K in Lumen. Try it here: press <kbd>⌘K</kbd> or type below.</p>
+      <p class="sub">Addresses, searches, open tabs, bookmarks, history, Reading List and every command live in one bar. Press ⌘L or ⌘K in Tacet. Try it here: press <kbd>⌘K</kbd> or type below.</p>
     </div>
     <div class="cmdwrap reveal">
       <div class="cmd" id="cmd" role="combobox" aria-expanded="true" aria-haspopup="listbox">
@@ -703,7 +704,7 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
       </div>
       <div class="tries">
         <button data-q="yt lofi">yt lofi</button>
-        <button data-q="w Lumen">w Lumen</button>
+        <button data-q="w Tacet">w Tacet</button>
         <button data-q="reader">reader</button>
         <button data-q="private">private</button>
         <button data-q="group">group</button>
@@ -717,7 +718,7 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
 <section id="shield">
   <div class="wrap row">
     <div class="reveal">
-      <div class="eyebrow">Lumen Shield</div>
+      <div class="eyebrow">Tacet Shield</div>
       <h2>Ad blocking you can actually switch off.</h2>
       <p class="sub">Most blockers are all or nothing. Shield gives you a clear switch for every site, and sensible defaults everywhere else. Try the switches.</p>
       <ul class="checks">
@@ -733,7 +734,7 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
       <div class="popover" id="popover">
         <header>
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l8 3.4v5.8c0 5-3.4 9.5-8 10.8-4.6-1.3-8-5.8-8-10.8V5.4L12 2z" opacity=".35"/><path d="M12 2v20c-4.6-1.3-8-5.8-8-10.8V5.4L12 2z"/></svg>
-          <div><b>Lumen Shield</b><span>news.example.com</span></div>
+          <div><b>Tacet Shield</b><span>news.example.com</span></div>
         </header>
         <div class="tg on" id="tg-site" role="switch" aria-checked="true" tabindex="0"><span>Protection on this site</span><i class="switch"></i></div>
         <hr>
@@ -754,7 +755,7 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
     <div class="reveal">
       <div class="eyebrow">Clean links</div>
       <h2>Links without the luggage.</h2>
-      <p class="sub">Shared links are stuffed with tags that tell advertisers where you came from. Lumen strips them before the page even loads, so you land on the same page, minus the tracking.</p>
+      <p class="sub">Shared links are stuffed with tags that tell advertisers where you came from. Tacet strips them before the page even loads, so you land on the same page, minus the tracking.</p>
       <ul class="checks">
         <li><span>Removes <b>utm_</b>, <b>fbclid</b>, <b>gclid</b>, <b>msclkid</b> and dozens more</span></li>
         <li><span>Knows the site-specific ones on YouTube, Spotify, Amazon and X</span></li>
@@ -772,7 +773,7 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
 <section id="assistant">
   <div class="wrap row">
     <div class="reveal">
-      <div class="eyebrow">Lumen Assistant · Beta</div>
+      <div class="eyebrow">Tacet Assistant · Beta</div>
       <h2>Ask the page you're reading.</h2>
       <p class="sub">Open a panel beside any page with ⇧⌘A. The page comes along automatically. It can read your other tabs, your history and bookmarks, the transcript of a YouTube video, look things up on the web, and with Browser use turned on, click and type for you.</p>
       <ul class="checks">
@@ -789,9 +790,9 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
     </div>
     <div class="stage reveal">
       <div class="chat" id="chat" aria-live="polite">
-        <div class="head"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.8 5.4L19 9l-5.2 1.6L12 16l-1.8-5.4L5 9l5.2-1.6zM19 14l.9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9z"/></svg>Lumen Assistant <span class="badge">Beta</span><span class="model" id="chat-model">claude-opus-5-5</span></div>
+        <div class="head"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.8 5.4L19 9l-5.2 1.6L12 16l-1.8-5.4L5 9l5.2-1.6zM19 14l.9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9z"/></svg>Tacet Assistant <span class="badge">Beta</span><span class="model" id="chat-model">claude-opus-5-5</span></div>
         <div id="chat-body"></div>
-        <div class="box"><span>Ask Lumen Assistant…</span><kbd>⇧⌘A</kbd></div>
+        <div class="box"><span>Ask Tacet Assistant…</span><kbd>⇧⌘A</kbd></div>
       </div>
       <div class="dots" id="chat-dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
     </div>
@@ -841,7 +842,7 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
   </div>
   <div class="wrap">
     <figure class="wide reveal">
-      <img src="assets/groups.png" width="2410" height="88" loading="lazy" alt="Tab groups along the top of the Lumen window, each in its own colour">
+      <img src="assets/groups.png" width="2410" height="88" loading="lazy" alt="Tab groups along the top of the Tacet window, each in its own colour">
       <figcaption>Tab groups, each in its own colour.</figcaption>
     </figure>
   </div>
@@ -856,7 +857,7 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
     </div>
     <div class="compare reveal">
       <table>
-        <thead><tr><th>Out of the box</th><th class="lumen">Lumen</th><th>Safari</th><th>Chrome</th><th>Arc</th></tr></thead>
+        <thead><tr><th>Out of the box</th><th class="lumen">Tacet</th><th>Safari</th><th>Chrome</th><th>Arc</th></tr></thead>
         <tbody>
           <tr><td>Ads and trackers blocked</td><td class="lumen"><i class="yes">✓</i></td><td><i class="no">✕</i></td><td><i class="no">✕</i></td><td><i class="yes">✓</i></td></tr>
           <tr><td>Blocker off per site, one click</td><td class="lumen"><i class="yes">✓</i></td><td><i class="no">✕</i></td><td><i class="no">✕</i></td><td><i class="yes">✓</i></td></tr>
@@ -901,7 +902,7 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
       <div class="key reveal"><kbd>⌘ F</kbd><div>Find on page</div></div>
       <div class="key reveal"><kbd>⇧ ⌘ R</kbd><div>Reader</div></div>
       <div class="key reveal"><kbd>⌥ ⌘ S</kbd><div>Split view</div></div>
-      <div class="key reveal"><kbd>⇧ ⌘ A</kbd><div>Lumen Assistant</div></div>
+      <div class="key reveal"><kbd>⇧ ⌘ A</kbd><div>Tacet Assistant</div></div>
       <div class="key reveal"><kbd>⇧ ⌘ B</kbd><div>Ad blocker on or off</div></div>
       <div class="key reveal"><kbd>⌘ D</kbd><div>Bookmark the page</div></div>
       <div class="key reveal"><kbd>⌘ Y</kbd><div>History</div></div>
@@ -917,7 +918,7 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
     <div class="center reveal">
       <div class="eyebrow">Latest release</div>
       <h2>Always moving.</h2>
-      <p class="sub">Lumen checks for updates itself and installs them for you. Here's what the newest one brings.</p>
+      <p class="sub">Tacet checks for updates itself and installs them for you. Here's what the newest one brings.</p>
     </div>
     <div class="release reveal">
       <div class="relcard">
@@ -931,14 +932,14 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
         </div>
       </div>
       <div class="relcard relnotes" id="rel-notes">
-        <h4>Lumen 1.6.1</h4>
+        <h4>Tacet 1.6.1</h4>
         <ul>
           <li>Every window comes back at launch, and none is dropped if it hasn't reopened yet</li>
-          <li>Links from other apps open as tabs instead of extra windows, also when Lumen is closed</li>
+          <li>Links from other apps open as tabs instead of extra windows, also when Tacet is closed</li>
           <li>Web extensions, an offline Reading List, Customize Site and tab organising</li>
-          <li>Lumen Assistant reads other tabs, history, bookmarks, YouTube transcripts and screenshots, and can use Apple's on-device model</li>
+          <li>Tacet Assistant reads other tabs, history, bookmarks, YouTube transcripts and screenshots, and can use Apple's on-device model</li>
         </ul>
-        <a class="more" href="https://github.com/scadavide55/Lumen/releases">All release notes →</a>
+        <a class="more" href="https://github.com/scadavide55/Tacet/releases">All release notes →</a>
       </div>
     </div>
   </div>
@@ -947,21 +948,21 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
 <section id="download">
   <div class="wrap">
     <div class="download reveal">
-      <img src="assets/icon.png" alt="Lumen app icon" width="112" height="112">
-      <h2>Try Lumen today.</h2>
+      <img src="assets/icon.png" alt="Tacet app icon" width="112" height="112">
+      <h2>Try Tacet today.</h2>
       <p class="version">Version <span id="dl-v">1.6.1</span> · free · macOS 14 or later · Apple silicon and Intel</p>
       <div class="cta">
-        <a class="btn primary" id="dl-main" href="https://github.com/scadavide55/Lumen/releases/download/v1.6.1/Lumen-1.6.1.dmg">Download Lumen <span id="dl-v2">1.6.1</span></a>
-        <a class="btn ghost" href="https://github.com/scadavide55/Lumen/releases">All releases</a>
+        <a class="btn primary" id="dl-main" href="https://github.com/scadavide55/Tacet/releases/download/v1.6.1/Lumen-1.6.1.dmg">Download Tacet <span id="dl-v2">1.6.1</span></a>
+        <a class="btn ghost" href="https://github.com/scadavide55/Tacet/releases">All releases</a>
       </div>
       <div class="steps">
         <div class="step"><b><i>1</i>Download and open</b>Open <span id="dl-name">Lumen-1.6.1.dmg</span>, about 9 MB.</div>
-        <div class="step"><b><i>2</i>Drag it to Applications</b>Drop Lumen onto the Applications shortcut, then eject the disk image.</div>
-        <div class="step"><b><i>3</i>Open it the first time</b>If macOS says Lumen is damaged, run this once in Terminal. Lumen isn't notarized by Apple yet; after this, its own updates just work.
-          <div class="copy"><span>xattr -dr com.apple.quarantine /Applications/Lumen.app</span><button id="copy-btn" type="button">Copy</button></div>
+        <div class="step"><b><i>2</i>Drag it to Applications</b>Drop Tacet onto the Applications shortcut, then eject the disk image.</div>
+        <div class="step"><b><i>3</i>Open it the first time</b>If macOS says Tacet is damaged, run this once in Terminal. Tacet isn't notarized by Apple yet; after this, its own updates just work.
+          <div class="copy"><span>xattr -dr com.apple.quarantine /Applications/Tacet.app</span><button id="copy-btn" type="button">Copy</button></div>
         </div>
       </div>
-      <p class="srcnote">Prefer to build it yourself? <code>git clone https://github.com/scadavide55/Lumen && cd Lumen && ./build.sh</code> makes a universal Lumen.app with just the Xcode command line tools.</p>
+      <p class="srcnote">Prefer to build it yourself? <code>git clone https://github.com/scadavide55/Tacet && cd Tacet && ./build.sh</code> makes a universal Tacet.app with just the Xcode command line tools.</p>
     </div>
   </div>
 </section>
@@ -974,32 +975,36 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
     </div>
     <div class="faq">
       <details class="reveal">
-        <summary>Is Lumen free?</summary>
-        <p>Yes. Lumen is free to download and use, and open source under the GPL-3.0 license.</p>
+        <summary>Why did Lumen become Tacet?</summary>
+        <p>There were already other browsers called Lumen, and the name sounded too much like an AI product. Tacet is the mark in music for silence, where an instrument stays quiet. It&rsquo;s the same browser: updating from Lumen keeps your tabs, passwords, settings and extensions.</p>
       </details>
       <details class="reveal">
-        <summary>Does Lumen collect any data?</summary>
-        <p>No. There are no analytics and no accounts. Lumen only talks to the sites you visit. If you turn them on, it also downloads filter lists from easylist.to and fetches search suggestions from your search engine. Suggestions are off by default. Lumen Assistant (beta) is off too; if you turn it on, your questions and the page you attach go only to the AI provider you chose, with your own key. When it searches the web for you, the search goes to your provider (Anthropic) or to DuckDuckGo (other providers). With Apple's on-device model, nothing leaves your Mac.</p>
+        <summary>Is Tacet free?</summary>
+        <p>Yes. Tacet is free to download and use, and open source under the GPL-3.0 license.</p>
+      </details>
+      <details class="reveal">
+        <summary>Does Tacet collect any data?</summary>
+        <p>No. There are no analytics and no accounts. Tacet only talks to the sites you visit. If you turn them on, it also downloads filter lists from easylist.to and fetches search suggestions from your search engine. Suggestions are off by default. Tacet Assistant (beta) is off too; if you turn it on, your questions and the page you attach go only to the AI provider you chose, with your own key. When it searches the web for you, the search goes to your provider (Anthropic) or to DuckDuckGo (other providers). With Apple's on-device model, nothing leaves your Mac.</p>
       </details>
       <details class="reveal">
         <summary>Why does macOS warn me when I open it?</summary>
-        <p>Lumen isn't notarized by Apple yet, so macOS may say Lumen &ldquo;is damaged and can&rsquo;t be opened&rdquo;. The download is fine. Open Terminal and run <code>xattr -dr com.apple.quarantine /Applications/Lumen.app</code> once, then open Lumen as usual. Lumen&rsquo;s own updates keep working after that.</p>
+        <p>Tacet isn't notarized by Apple yet, so macOS may say Tacet &ldquo;is damaged and can&rsquo;t be opened&rdquo;. The download is fine. Open Terminal and run <code>xattr -dr com.apple.quarantine /Applications/Tacet.app</code> once, then open Tacet as usual. Tacet&rsquo;s own updates keep working after that.</p>
       </details>
       <details class="reveal">
-        <summary>Which engine does Lumen use?</summary>
+        <summary>Which engine does Tacet use?</summary>
         <p>WebKit, the same engine as Safari. Sites look and behave the way they do in Safari, and you get its speed and battery life.</p>
       </details>
       <details class="reveal">
         <summary>Can I bring my bookmarks and passwords?</summary>
-        <p>Yes. Lumen imports bookmarks, history and sign-ins straight from Safari, Chrome, Firefox, Opera, Brave, Edge and Arc. Passwords come across from a CSV exported by the Passwords app or your old browser, and are kept in your Mac's Keychain behind Touch ID.</p>
+        <p>Yes. Tacet imports bookmarks, history and sign-ins straight from Safari, Chrome, Firefox, Opera, Brave, Edge and Arc. Passwords come across from a CSV exported by the Passwords app or your old browser, and are kept in your Mac's Keychain behind Touch ID.</p>
       </details>
       <details class="reveal">
-        <summary>Does Lumen support extensions?</summary>
-        <p>Yes, on macOS 15.4 or later. Lumen runs web extensions, the same kind Safari, Chrome and Firefox use. Add the Safari extensions that come with apps on your Mac in one click from Settings › Extensions, or add a Chrome (.crx), Firefox (.xpi) or unpacked extension from a file. Most work; a few features only Chrome or Firefox have may not. Extensions never run in private windows.</p>
+        <summary>Does Tacet support extensions?</summary>
+        <p>Yes, on macOS 15.4 or later. Tacet runs web extensions, the same kind Safari, Chrome and Firefox use. Add the Safari extensions that come with apps on your Mac in one click from Settings › Extensions, or add a Chrome (.crx), Firefox (.xpi) or unpacked extension from a file. Most work; a few features only Chrome or Firefox have may not. Extensions never run in private windows.</p>
       </details>
       <details class="reveal">
         <summary>What does the assistant cost?</summary>
-        <p>Nothing from Lumen. With Apple's on-device model on macOS 26 it's free and offline. With Anthropic, OpenAI, OpenRouter or DeepSeek you pay the provider for what you use with your own key. With Ollama or LM Studio the model runs on your Mac.</p>
+        <p>Nothing from Tacet. With Apple's on-device model on macOS 26 it's free and offline. With Anthropic, OpenAI, OpenRouter or DeepSeek you pay the provider for what you use with your own key. With Ollama or LM Studio the model runs on your Mac.</p>
       </details>
       <details class="reveal">
         <summary>Does it block every YouTube ad?</summary>
@@ -1013,15 +1018,15 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
   <div class="wrap">
     <div class="cols">
       <div>
-        <a class="brand" href="#top"><img src="assets/icon.png" alt="">Lumen</a>
+        <a class="brand" href="#top"><img src="assets/icon.png" alt="">Tacet <span class="was">formerly Lumen</span></a>
         <p style="margin:0;max-width:320px">The quiet browser for your Mac. Built on WebKit, written in Swift, free software under GPL-3.0.</p>
       </div>
       <div><h5>Product</h5><ul><li><a href="#features">Features</a></li><li><a href="#shield">Shield</a></li><li><a href="#assistant">Assistant</a></li><li><a href="#shortcuts">Shortcuts</a></li><li><a href="#download">Download</a></li></ul></div>
-      <div><h5>Project</h5><ul><li><a href="https://github.com/scadavide55/Lumen">GitHub</a></li><li><a href="https://github.com/scadavide55/Lumen/releases">Releases</a></li><li><a href="https://github.com/scadavide55/Lumen/blob/main/README.md">README</a></li><li><a href="https://github.com/scadavide55/Lumen/blob/main/LICENSE">License</a></li></ul></div>
-      <div><h5>Help</h5><ul><li><a href="#faq">FAQ</a></li><li><a href="https://github.com/scadavide55/Lumen/issues">Report a bug</a></li><li><a href="https://github.com/scadavide55/Lumen/issues/new">Request a feature</a></li></ul></div>
+      <div><h5>Project</h5><ul><li><a href="https://github.com/scadavide55/Tacet">GitHub</a></li><li><a href="https://github.com/scadavide55/Tacet/releases">Releases</a></li><li><a href="https://github.com/scadavide55/Tacet/blob/main/README.md">README</a></li><li><a href="https://github.com/scadavide55/Tacet/blob/main/LICENSE">License</a></li></ul></div>
+      <div><h5>Help</h5><ul><li><a href="#faq">FAQ</a></li><li><a href="https://github.com/scadavide55/Tacet/issues">Report a bug</a></li><li><a href="https://github.com/scadavide55/Tacet/issues/new">Request a feature</a></li></ul></div>
     </div>
     <div class="bottom">
-      <span>© 2026 Lumen</span>
+      <span>© 2026 Tacet</span>
       <span>This site has no cookies, no analytics and no trackers. The only request it makes is to GitHub, for the latest release.</span>
     </div>
   </div>
@@ -1111,9 +1116,9 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
     maps: site('maps.apple.com', '#34c759', 'M')
   };
   const items = [
-    { k: 'tab', t: 'Lumen: the quiet browser for Mac', s: 'github.com/scadavide55/Lumen', site: sites.github, badge: 'Switch to tab' },
+    { k: 'tab', t: 'Tacet: the quiet browser for Mac', s: 'github.com/scadavide55/Tacet', site: sites.github, badge: 'Switch to tab' },
     { k: 'tab', t: 'WebKit Blog', s: 'webkit.org/blog', site: sites.webkit, badge: 'Switch to tab' },
-    { k: 'tab', t: 'Lumen (unit) – Wikipedia', s: 'en.wikipedia.org/wiki/Lumen_(unit)', site: sites.wiki, badge: 'Switch to tab' },
+    { k: 'tab', t: 'Tacet – Wikipedia', s: 'en.wikipedia.org/wiki/Tacet', site: sites.wiki, badge: 'Switch to tab' },
     { k: 'bookmark', t: 'Hacker News', s: 'news.ycombinator.com', site: sites.hn, badge: 'Bookmark' },
     { k: 'bookmark', t: 'MDN Web Docs', s: 'developer.mozilla.org', site: sites.mdn, badge: 'Bookmark' },
     { k: 'history', t: 'Swift.org – Welcome to Swift', s: 'swift.org', site: sites.swift, badge: 'History' },
@@ -1123,8 +1128,8 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
     { k: 'cmd', t: 'Split View', s: 'Put this tab beside another', ic: '◫', key: '⌥⌘S' },
     { k: 'cmd', t: 'New Private Window', s: 'Forgets everything when closed', ic: '🕶', key: '⇧⌘N' },
     { k: 'cmd', t: 'Toggle Sidebar', s: 'Show or hide vertical tabs', ic: '▤', key: '⌘S' },
-    { k: 'cmd', t: 'Block Ads and Trackers', s: 'Lumen Shield on or off', ic: '🛡', key: '⇧⌘B' },
-    { k: 'cmd', t: 'Lumen Assistant', s: 'Ask about this page', ic: '✦', key: '⇧⌘A' },
+    { k: 'cmd', t: 'Block Ads and Trackers', s: 'Tacet Shield on or off', ic: '🛡', key: '⇧⌘B' },
+    { k: 'cmd', t: 'Tacet Assistant', s: 'Ask about this page', ic: '✦', key: '⇧⌘A' },
     { k: 'cmd', t: 'Group Tabs by Site', s: 'Tidy tabs from the same site into groups', ic: '▣' },
     { k: 'cmd', t: 'Close Duplicate Tabs', s: '2 duplicates open', ic: '⧉' },
     { k: 'cmd', t: 'Save Group and Close “Rome trip”', s: 'Saved Groups', ic: '▣' },
@@ -1210,15 +1215,15 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
   // Clean link demo: loops between the tracked and the clean link
   const url = $('#url'), state = $('#url-state');
   let clean = false;
-  const tick = () => { clean = !clean; url.classList.toggle('clean', clean); state.textContent = clean ? 'Cleaned by Lumen' : 'Cleaning…'; };
+  const tick = () => { clean = !clean; url.classList.toggle('clean', clean); state.textContent = clean ? 'Cleaned by Tacet' : 'Cleaning…'; };
   new IntersectionObserver((entries, obs) => {
     if (entries[0].isIntersecting) { setTimeout(tick, 900); setInterval(tick, 3200); obs.disconnect(); }
   }, { threshold: 0.6 }).observe(url);
 
   // Assistant: scripted conversations, typed out one after another
   const scenes = [
-    { model: 'claude-opus-5-5', page: '📄 Lumen (unit) – Wikipedia', you: 'Summarise this page', steps: [
-      { ai: '<b>Lumen (lm)</b> is the SI unit of luminous flux: how much light a source gives off, weighted by how sensitive the eye is to each colour. A 1 candela source shining in every direction gives off 4π lumens.' }
+    { model: 'claude-opus-5-5', page: '📄 Tacet – Wikipedia', you: 'Summarise this page', steps: [
+      { ai: '<b>Tacet</b> is Latin for &ldquo;it is silent&rdquo;. In a score it tells a player to stay quiet for a whole movement or section, and it&rsquo;s why John Cage&rsquo;s <i>4′33″</i> has three movements all marked tacet.' }
     ]},
     { model: 'Apple on-device', page: '▶ WWDC: What\'s new in WebKit – YouTube', you: 'What are the three main points of this video?', steps: [
       { tool: 'Reading the transcript (48:12)' },
@@ -1299,7 +1304,7 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
   // Copy the Terminal command
   $('#copy-btn').addEventListener('click', async (e) => {
     const b = e.currentTarget;
-    try { await navigator.clipboard.writeText('xattr -dr com.apple.quarantine /Applications/Lumen.app'); b.textContent = 'Copied'; }
+    try { await navigator.clipboard.writeText('xattr -dr com.apple.quarantine /Applications/Tacet.app'); b.textContent = 'Copied'; }
     catch (err) { b.textContent = 'Select it'; }
     setTimeout(() => { b.textContent = 'Copy'; }, 1800);
   });
@@ -1310,7 +1315,7 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
     const lines = md.split('\n').map((l) => l.trim()).filter((l) => /^[-*] /.test(l)).slice(0, 5);
     return lines.map((l) => '<li>' + esc(l.replace(/^[-*] /, '')).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/`(.+?)`/g, '<code>$1</code>') + '</li>').join('');
   };
-  fetch('https://api.github.com/repos/scadavide55/Lumen/releases/latest', { headers: { Accept: 'application/vnd.github+json' } })
+  fetch('https://api.github.com/repos/scadavide55/Tacet/releases/latest', { headers: { Accept: 'application/vnd.github+json' } })
     .then((r) => r.ok ? r.json() : Promise.reject(r.status))
     .then((rel) => {
       const v = String(rel.tag_name || '').replace(/^v/, '');
@@ -1327,7 +1332,7 @@ footer .bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(
       $$('#dl-top, #dl-main').forEach((a) => a.href = dmg.browser_download_url);
       const bullets = relNotes(rel.body || '');
       if (bullets) {
-        $('#rel-notes').innerHTML = `<h4>${esc(rel.name || 'Lumen ' + v)}</h4><ul>${bullets}</ul><a class="more" href="${esc(rel.html_url)}">Full release notes →</a>`;
+        $('#rel-notes').innerHTML = `<h4>${esc(rel.name || 'Tacet ' + v)}</h4><ul>${bullets}</ul><a class="more" href="${esc(rel.html_url)}">Full release notes →</a>`;
       }
     })
     .catch(() => {});

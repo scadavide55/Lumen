@@ -1,5 +1,5 @@
 #!/bin/sh
-# Builds Lumen's sources together with tools/tests/main.swift and runs the tests.
+# Builds Tacet's sources together with tools/tests/main.swift and runs the tests.
 set -e
 cd "$(dirname "$0")/.."
 OUT=$(mktemp -d)

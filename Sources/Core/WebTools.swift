@@ -118,7 +118,7 @@ enum WebTools {
 
     /// Downloads at most `byteLimit` bytes, refusing private addresses, also after a redirect.
     private static func get(_ url: URL) async throws -> (Data, URLResponse) {
-        guard isPublic(url) else { throw Failure.notAllowed("Lumen doesn't fetch local or private network addresses.") }
+        guard isPublic(url) else { throw Failure.notAllowed("Tacet doesn't fetch local or private network addresses.") }
         guard let host = url.host, await resolvesPublic(host) else {
             throw Failure.notAllowed("This address points to a local or private network, or couldn't be found.")
         }

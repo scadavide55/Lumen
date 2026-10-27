@@ -2,7 +2,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 import WebKit
 
-/// First-launch setup, organised in sections with a sidebar, and a tour of Lumen.
+/// First-launch setup, organised in sections with a sidebar, and a tour of Tacet.
 struct OnboardingView: View {
     enum Step: Int, CaseIterable {
         case welcome, switchOver, importData, google, passwords, theme, background, tabs, search, shield, assistant, tour, shortcuts, done
@@ -28,7 +28,7 @@ struct OnboardingView: View {
             case .moveIn: "Move in"
             case .look: "Look and feel"
             case .privacy: "Search and privacy"
-            case .learn: "Learn Lumen"
+            case .learn: "Learn Tacet"
             case .done: "Ready"
             }
         }
@@ -134,7 +134,7 @@ private struct SetupSidebar: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 10) {
                 Image(nsImage: NSApp.applicationIconImage).resizable().frame(width: 30, height: 30)
-                Text("Lumen Setup").font(.system(size: 14, weight: .semibold))
+                Text("Tacet Setup").font(.system(size: 14, weight: .semibold))
             }
             .padding(.bottom, 18)
             ForEach(OnboardingView.Section.allCases.filter { $0 != .welcome && $0 != .done }, id: \.self) { section in
@@ -322,7 +322,7 @@ private struct WelcomeStep: View {
                 }
                 .scaleEffect(phase >= 1 ? 1 : 0.2)
                 .opacity(phase >= 1 ? 1 : 0)
-                Text("Welcome to Lumen").font(.system(size: 40, weight: .bold, design: .rounded))
+                Text("Welcome to Tacet").font(.system(size: 40, weight: .bold, design: .rounded))
                     .offset(y: phase >= 2 ? 0 : 20).opacity(phase >= 2 ? 1 : 0)
                 Text("A quiet, fast browser that blocks ads and trackers for you. Let's get it set up the way you like. It only takes a minute.")
                     .font(.system(size: 15)).opacity(phase >= 2 ? 0.85 : 0).multilineTextAlignment(.center).frame(maxWidth: 540)
@@ -357,7 +357,7 @@ private struct WelcomeStep: View {
                     }
                     if needsRestart {
                         HStack(spacing: 8) {
-                            Text("Restart Lumen to use the new language.").font(.callout)
+                            Text("Restart Tacet to use the new language.").font(.callout)
                             Button("Restart Now") { AppLanguage.relaunch() }
                         }
                     }
@@ -390,18 +390,18 @@ private struct SwitchStep: View {
     @State private var declined = false
 
     var body: some View {
-        StepPage(symbol: "arrow.left.arrow.right", title: "Make Lumen your default browser?",
-                 subtitle: "Links from Mail, Messages and every other app will open in Lumen. You can change this anytime in System Settings.") {
+        StepPage(symbol: "arrow.left.arrow.right", title: "Make Tacet your default browser?",
+                 subtitle: "Links from Mail, Messages and every other app will open in Tacet. You can change this anytime in System Settings.") {
             VStack(spacing: 14) {
                 if isDefault {
-                    Label("Lumen is your default browser", systemImage: "checkmark.circle.fill")
+                    Label("Tacet is your default browser", systemImage: "checkmark.circle.fill")
                         .font(.system(size: 15, weight: .medium)).foregroundStyle(.green)
                 } else if declined {
                     Text("No problem. Your current browser stays the default.").foregroundStyle(.secondary)
                 } else {
                     HStack(spacing: 12) {
                         Button("Not Now") { declined = true }.controlSize(.large)
-                        Button("Yes, Use Lumen") {
+                        Button("Yes, Use Tacet") {
                             DefaultBrowser.makeDefault { isDefault = DefaultBrowser.isDefault }
                         }
                         .controlSize(.large)
@@ -411,7 +411,7 @@ private struct SwitchStep: View {
                 }
                 VStack(alignment: .leading, spacing: 10) {
                     Label("Your bookmarks, history and sign-ins can come with you in the next step.", systemImage: "square.and.arrow.down")
-                    Label("Everything stays on your Mac. Lumen has no accounts and no analytics.", systemImage: "lock")
+                    Label("Everything stays on your Mac. Tacet has no accounts and no analytics.", systemImage: "lock")
                     Label("You can change any choice later in Settings.", systemImage: "gearshape")
                 }
                 .font(.system(size: 13.5))
@@ -434,7 +434,7 @@ private struct ImportStep: View {
 
     var body: some View {
         StepPage(symbol: "square.and.arrow.down.on.square", title: "Bring everything with you",
-                 subtitle: "Lumen found these browsers on your Mac. Pick the ones to import from.") {
+                 subtitle: "Tacet found these browsers on your Mac. Pick the ones to import from.") {
             VStack(spacing: 12) {
                 if sources.isEmpty {
                     Text("No other browsers found. You can skip this step.").foregroundStyle(.secondary)
@@ -541,7 +541,7 @@ private struct GoogleStep: View {
 
     var body: some View {
         StepPage(symbol: "person.crop.circle.badge.checkmark", title: "Sign in to Google",
-                 subtitle: "Sign in once and you're signed in to Gmail, YouTube, Drive and every Google service in Lumen.") {
+                 subtitle: "Sign in once and you're signed in to Gmail, YouTube, Drive and every Google service in Tacet.") {
             VStack(spacing: 14) {
                 switch signedIn {
                 case .none:
@@ -557,7 +557,7 @@ private struct GoogleStep: View {
                         Label("Sign in with Google", systemImage: "g.circle.fill").font(.system(size: 14, weight: .semibold))
                     }
                     .controlSize(.large)
-                    Text("Optional. Lumen never sees your password: you type it on Google's own page.")
+                    Text("Optional. Tacet never sees your password: you type it on Google's own page.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }
@@ -574,7 +574,7 @@ private struct GoogleStep: View {
     }
 }
 
-/// Google's sign-in page in a sheet, sharing Lumen's cookies. Closes itself once signed in.
+/// Google's sign-in page in a sheet, sharing Tacet's cookies. Closes itself once signed in.
 private struct GoogleSignInSheet: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -627,10 +627,10 @@ private struct PasswordsStep: View {
 
     var body: some View {
         StepPage(symbol: "key.fill", title: "Your passwords",
-                 subtitle: "Lumen saves passwords in your Mac's Keychain and asks for Touch ID before filling them. Already use another password manager? Pick it here.") {
+                 subtitle: "Tacet saves passwords in your Mac's Keychain and asks for Touch ID before filling them. Already use another password manager? Pick it here.") {
             VStack(spacing: 14) {
                 VStack(spacing: 8) {
-                    ManagerRow(name: L("Lumen (Keychain and Touch ID)"), detail: L("Saves and fills passwords for you. Recommended."),
+                    ManagerRow(name: L("Tacet (Keychain and Touch ID)"), detail: L("Saves and fills passwords for you. Recommended."),
                                icon: Image(systemName: "key.fill"), selected: s.passwordManager.isEmpty) { s.passwordManager = "" }
                     ForEach(managers) { m in
                         ManagerRow(name: m.name, detail: detail(m), icon: Image(nsImage: m.icon), selected: s.passwordManager == m.id) {
@@ -654,9 +654,9 @@ private struct PasswordsStep: View {
 
     private func detail(_ m: ExternalPasswordManager) -> String {
         switch m.fill {
-        case .shortcut(let keys) where !keys.isEmpty: String(format: L("Fill any sign-in page with %@. Lumen won't offer to save passwords."), keys)
-        case .shortcut: L("Fill sign-in pages with its Auto-Type shortcut. Lumen won't offer to save passwords.")
-        case .openApp: L("Lumen opens it from sign-in pages so you can copy passwords. Lumen won't offer to save passwords.")
+        case .shortcut(let keys) where !keys.isEmpty: String(format: L("Fill any sign-in page with %@. Tacet won't offer to save passwords."), keys)
+        case .shortcut: L("Fill sign-in pages with its Auto-Type shortcut. Tacet won't offer to save passwords.")
+        case .openApp: L("Tacet opens it from sign-in pages so you can copy passwords. Tacet won't offer to save passwords.")
         }
     }
 
@@ -701,7 +701,7 @@ private struct ThemeStep: View {
     private let presets = ["#5E5CE6", "#0A84FF", "#30B0C7", "#34C759", "#E8A33D", "#FF6B35", "#FF375F", "#BF5AF2"]
 
     var body: some View {
-        StepPage(symbol: "paintpalette", title: "Pick your look", subtitle: "Choose light or dark, and a colour for Lumen's accents.") {
+        StepPage(symbol: "paintpalette", title: "Pick your look", subtitle: "Choose light or dark, and a colour for Tacet's accents.") {
             VStack(spacing: 20) {
                 HStack(spacing: 14) {
                     ChoiceCard(title: "System", detail: "Follows your Mac", selected: s.theme == .system, action: { s.theme = .system }) {
@@ -810,7 +810,7 @@ private struct ShieldStep: View {
     private var level: Level { !s.adBlock ? .off : (s.easyList && s.easyPrivacy ? .strict : .standard) }
 
     var body: some View {
-        StepPage(symbol: "shield.lefthalf.filled", title: "Set up Lumen Shield",
+        StepPage(symbol: "shield.lefthalf.filled", title: "Set up Tacet Shield",
                  subtitle: "Shield stops ads and trackers before they load, using the content blocker built into WebKit. Pages load faster, and you can switch it off for any site from the shield button.") {
             VStack(spacing: 16) {
                 HStack(spacing: 14) {
@@ -840,7 +840,7 @@ private struct AssistantStep: View {
     @State private var key = ""
 
     var body: some View {
-        StepPage(symbol: "sparkles", title: "Lumen Assistant (beta)",
+        StepPage(symbol: "sparkles", title: "Tacet Assistant (beta)",
                  subtitle: "Ask questions about the page you're reading, get summaries and explanations, in a panel beside the page. It uses your own API key, and it stays off unless you turn it on.") {
             VStack(spacing: 16) {
                 HStack(spacing: 14) {
@@ -916,7 +916,7 @@ private struct TourStep: View {
     ]
 
     var body: some View {
-        StepPage(symbol: "sparkles", title: "How Lumen works", subtitle: "A few things worth knowing.") {
+        StepPage(symbol: "sparkles", title: "How Tacet works", subtitle: "A few things worth knowing.") {
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
                 ForEach(items, id: \.0) { symbol, title, text in
                     HStack(alignment: .top, spacing: 12) {
@@ -950,7 +950,7 @@ struct ShortcutList: View {
             ("⌘F", "Find on page"), ("⌘G", "Find next"), ("⇧⌘R", "Reader"), ("⌘+ / ⌘− / ⌘0", "Zoom"),
             ("⌘D", "Bookmark the page"), ("⇧⌘C", "Copy link"),
         ]),
-        ("Lumen", [
+        ("Tacet", [
             ("⌘S", "Show or hide the sidebar"), ("⇧⌘B", "Ad blocker on or off"), ("⌘Y", "History"),
             ("⌥⌘B", "Bookmarks"), ("⌥⌘L", "Downloads"), ("⌘P", "Print"), ("⌘,", "Settings"),
         ]),

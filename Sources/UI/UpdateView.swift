@@ -13,7 +13,7 @@ struct UpdateView: View {
                     Image(nsImage: NSApp.applicationIconImage).resizable().frame(width: 64, height: 64)
                     VStack(alignment: .leading, spacing: 4) {
                         Text("New Update Available").font(.title2.weight(.bold))
-                        Text(String(format: L("%@ is ready. You have Lumen %@."), r.name, UpdateChecker.currentVersion))
+                        Text(String(format: L("%@ is ready. You have Tacet %@."), r.name, UpdateChecker.currentVersion))
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -33,7 +33,7 @@ struct UpdateView: View {
                 case .downloading(let p):
                     ProgressView(value: p) { Text("Downloading…").font(.caption) }
                 case .installing:
-                    ProgressView { Text("Installing… Lumen will restart.").font(.caption) }
+                    ProgressView { Text("Installing… Tacet will restart.").font(.caption) }
                 case .failed(let message):
                     Label(message, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange).font(.callout)
                 case .idle:
@@ -59,7 +59,7 @@ struct UpdateView: View {
         } else {
             VStack(spacing: 10) {
                 Image(systemName: "checkmark.circle.fill").font(.system(size: 40)).foregroundStyle(.green)
-                Text(updates.lastResult ?? L("Lumen is up to date."))
+                Text(updates.lastResult ?? L("Tacet is up to date."))
                 Button("OK") { dismiss() }.keyboardShortcut(.defaultAction)
             }
             .padding(30)

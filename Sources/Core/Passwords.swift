@@ -14,6 +14,7 @@ struct SavedLogin: Identifiable, Hashable {
 @Observable
 final class PasswordStore {
     static let shared = PasswordStore()
+    /// Named before Lumen became Tacet; kept so saved passwords are still found.
     static let marker = "Lumen web password"
 
     private(set) var logins: [SavedLogin] = []
@@ -67,7 +68,7 @@ final class PasswordStore {
         let data = Data(password.utf8)
         let update: [String: Any] = [kSecValueData as String: data]
         var status = SecItemUpdate(baseQuery(host, username) as CFDictionary, update as CFDictionary)
-        // An item written by an earlier build (Lumen is signed ad hoc, so every build is a different app)
+        // An item written by an earlier build (Tacet is signed ad hoc, so every build is a different app)
         // can refuse the update; it is replaced instead.
         if status != errSecSuccess && status != errSecItemNotFound {
             SecItemDelete(baseQuery(host, username) as CFDictionary)
@@ -220,7 +221,7 @@ struct ExternalPasswordManager: Identifiable, Hashable {
         /// The app fills any field system-wide with a shortcut (1Password Universal Autofill, KeePassXC Auto-Type).
         /// An empty string means the shortcut is one the user picked in that app.
         case shortcut(String)
-        /// No system-wide filling: Lumen opens the app so you can copy the password.
+        /// No system-wide filling: Tacet opens the app so you can copy the password.
         case openApp
     }
 

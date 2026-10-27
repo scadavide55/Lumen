@@ -70,7 +70,7 @@ struct AssistantFullView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 6) {
                 Image(systemName: "sparkles").foregroundStyle(.tint)
-                Text("Lumen Assistant").font(.system(size: 14, weight: .semibold)).lineLimit(1)
+                Text("Tacet Assistant").font(.system(size: 14, weight: .semibold)).lineLimit(1)
                 BetaBadge()
                 Spacer()
             }

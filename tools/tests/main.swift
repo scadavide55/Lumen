@@ -1,5 +1,5 @@
-// Lumen's logic tests. Run with: tools/test.sh
-// They use only pure functions and temporary files: nothing touches your Lumen data.
+// Tacet's logic tests. Run with: tools/test.sh
+// They use only pure functions and temporary files: nothing touches your Tacet data.
 import Foundation
 import WebKit
 

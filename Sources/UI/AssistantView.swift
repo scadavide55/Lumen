@@ -65,7 +65,7 @@ struct AssistantPanel: View {
     private var header: some View {
         HStack(spacing: 6) {
             Image(systemName: "sparkles").foregroundStyle(.tint)
-            Text("Lumen Assistant").font(.system(size: 13, weight: .semibold)).lineLimit(1).fixedSize()
+            Text("Tacet Assistant").font(.system(size: 13, weight: .semibold)).lineLimit(1).fixedSize()
             BetaBadge()
             Spacer(minLength: 4)
             IconButton(systemName: "clock.arrow.circlepath", help: "Chat History") { showHistory.toggle() }
@@ -87,7 +87,7 @@ struct AssistantPanel: View {
             Spacer()
             Image(systemName: "key.horizontal").font(.system(size: 28)).foregroundStyle(.secondary)
             Text("Add an API key to start").font(.headline)
-            Text("Lumen Assistant uses your own key from Anthropic, OpenAI, OpenRouter, DeepSeek or any OpenAI-compatible server. The key stays in your Keychain.")
+            Text("Tacet Assistant uses your own key from Anthropic, OpenAI, OpenRouter, DeepSeek or any OpenAI-compatible server. The key stays in your Keychain.")
                 .font(.callout).foregroundStyle(.secondary).multilineTextAlignment(.center)
             SettingsLink { Text("Open Settings") }
             Spacer()
@@ -274,7 +274,7 @@ struct AssistantComposer: View {
                 if chat.canAttachImages {
                     IconButton(systemName: "photo.badge.plus", help: "Attach Image") { pickImages() }
                 }
-                TextField(L("Ask Lumen Assistant…"), text: $chat.draft, axis: .vertical)
+                TextField(L("Ask Tacet Assistant…"), text: $chat.draft, axis: .vertical)
                     .textFieldStyle(.plain)
                     .lineLimit(1...8)
                     .focused($focused)
@@ -500,7 +500,7 @@ struct AssistantButton: View {
 
     var body: some View {
         if s.aiEnabled {
-            IconButton(systemName: "sparkles", help: "Lumen Assistant (⇧⌘A)", tint: b.assistantVisible ? .accentColor : nil) {
+            IconButton(systemName: "sparkles", help: "Tacet Assistant (⇧⌘A)", tint: b.assistantVisible ? .accentColor : nil) {
                 b.assistantVisible.toggle()
             }
         }
@@ -509,7 +509,7 @@ struct AssistantButton: View {
 
 // MARK: - Introduction
 
-/// Shown once to people who used Lumen before the assistant existed.
+/// Shown once to people who used Tacet before the assistant existed.
 struct AssistantIntro: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openSettings) private var openSettings
@@ -522,7 +522,7 @@ struct AssistantIntro: View {
                 .background(Color.accentColor.opacity(0.14), in: RoundedRectangle(cornerRadius: 17, style: .continuous))
             VStack(spacing: 6) {
                 HStack(spacing: 8) {
-                    Text("New: Lumen Assistant").font(.system(size: 22, weight: .bold))
+                    Text("New: Tacet Assistant").font(.system(size: 22, weight: .bold))
                     BetaBadge()
                 }
                 Text("An AI assistant in a panel beside the page, for questions about what you're reading.")
@@ -581,9 +581,9 @@ struct AIPane: View {
         Form {
             Section {
                 Toggle(isOn: $s.aiEnabled) {
-                    HStack(spacing: 6) { Text("Turn on Lumen Assistant"); BetaBadge() }
+                    HStack(spacing: 6) { Text("Turn on Tacet Assistant"); BetaBadge() }
                 }
-                Text("Lumen Assistant answers questions about the page you're reading in a panel on the right (⇧⌘A). It is off unless you turn it on, and nothing is sent until you ask something.")
+                Text("Tacet Assistant answers questions about the page you're reading in a panel on the right (⇧⌘A). It is off unless you turn it on, and nothing is sent until you ask something.")
                     .font(.caption).foregroundStyle(.secondary)
             }
             Section("Provider") {

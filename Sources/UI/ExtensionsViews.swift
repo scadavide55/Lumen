@@ -247,7 +247,7 @@ struct InstallSheet: View {
                 }
             }
             if !e.errors.isEmpty {
-                Label(String(format: L("Some parts may not work in Lumen: %@"), e.errors.map(\.localizedDescription).joined(separator: "; ")),
+                Label(String(format: L("Some parts may not work in Tacet: %@"), e.errors.map(\.localizedDescription).joined(separator: "; ")),
                       systemImage: "exclamationmark.triangle")
                     .font(.caption).foregroundStyle(.orange).fixedSize(horizontal: false, vertical: true)
             }

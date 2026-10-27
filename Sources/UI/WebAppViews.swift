@@ -26,7 +26,7 @@ private struct WebAppBar: View {
                 Spacer().frame(width: 72)
                 NavButtons(tab: tab)
                 Spacer()
-                IconButton(systemName: "safari", help: "Open in Lumen") {
+                IconButton(systemName: "safari", help: "Open in Tacet") {
                     if let u = tab.url { WebApp.openInBrowser(u) }
                 }
             }

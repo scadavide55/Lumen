@@ -6,7 +6,7 @@ struct LumenApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
 
     var body: some Scene {
-        WindowGroup("Lumen", id: "main") {
+        WindowGroup("Tacet", id: "main") {
             ContentView(isPrivate: false)
         }
         // Links opened from other apps go to the app delegate, which puts them in tabs; without this
@@ -16,7 +16,7 @@ struct LumenApp: App {
         .defaultSize(width: 1280, height: 820)
         .commands { LumenCommands() }
 
-        WindowGroup("Lumen", id: "profile", for: UUID.self) { $profile in
+        WindowGroup("Tacet", id: "profile", for: UUID.self) { $profile in
             ContentView(isPrivate: false, profileID: profile)
         }
         .handlesExternalEvents(matching: [])
@@ -42,7 +42,7 @@ struct LumenApp: App {
         .handlesExternalEvents(matching: [])
         .windowResizability(.contentSize)
 
-        Window("About Lumen", id: "about") {
+        Window("About Tacet", id: "about") {
             AboutView()
         }
         .handlesExternalEvents(matching: [])
@@ -71,7 +71,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var keyMonitor: Any?
 
     func applicationWillFinishLaunching(_ notification: Notification) {
-        // Lumen restores its own session, so macOS shouldn't reopen windows on top of it.
+        // Tacet restores its own session, so macOS shouldn't reopen windows on top of it.
         UserDefaults.standard.set(false, forKey: "NSQuitAlwaysKeepsWindows")
         Settings.shared.applyTheme()
         ContentBlocker.shared.start()
@@ -104,7 +104,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if !WindowRegistry.shared.open(urls) { Self.openWindowWhenReady() }
     }
 
-    /// Opening Lumen from a link can leave it without a window, since no window claims the link at launch.
+    /// Opening Tacet from a link can leave it without a window, since no window claims the link at launch.
     /// The new window picks up the link (and the saved session) once the menus exist.
     private static func openWindowWhenReady(attempt: Int = 0) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
@@ -123,6 +123,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         Session.shared.saveNow()
+        AppRename.afterQuit()
         History.shared.flush()
         guard Settings.shared.clearOnQuit else { return .terminateNow }
         DataCleaner.clear(range: .all, history: true, cookies: true, cache: true) {
@@ -219,7 +220,7 @@ struct LumenCommands: Commands {
             Button("Toggle Sidebar") { b?.sidebarVisible.toggle() }.keyboardShortcut("s").disabled(b == nil)
             Button("Command Bar") { b?.togglePalette("") }.keyboardShortcut("k").disabled(b == nil)
             if s.aiEnabled {
-                Button("Lumen Assistant") { b?.assistantVisible.toggle() }.keyboardShortcut("a", modifiers: [.command, .shift]).disabled(b == nil)
+                Button("Tacet Assistant") { b?.assistantVisible.toggle() }.keyboardShortcut("a", modifiers: [.command, .shift]).disabled(b == nil)
             }
             Divider()
             Button("Reader") { b?.current?.toggleReader() }.keyboardShortcut("r", modifiers: [.command, .shift]).disabled(b == nil)
@@ -324,18 +325,18 @@ struct LumenCommands: Commands {
         }
 
         CommandGroup(replacing: .appInfo) {
-            Button("About Lumen") { openWindow(id: "about") }
+            Button("About Tacet") { openWindow(id: "about") }
             Button("Check for Updates…") { UpdateChecker.shared.check(force: true) { openWindow(id: "update") } }
         }
 
         CommandGroup(replacing: .help) {
-            Button("Welcome to Lumen…") {
+            Button("Welcome to Tacet…") {
                 if let b { b.showOnboarding = true } else { openWindow(id: "main") }
             }
             Button("Keyboard Shortcuts") { openWindow(id: "shortcuts") }
             Divider()
-            Button("Lumen Website") { NSWorkspace.shared.open(URL(string: "https://scadavide55.github.io/Lumen/")!) }
-            Button("Report a Bug") { NSWorkspace.shared.open(URL(string: "https://github.com/scadavide55/Lumen/issues")!) }
+            Button("Tacet Website") { NSWorkspace.shared.open(URL(string: "https://scadavide55.github.io/Tacet/")!) }
+            Button("Report a Bug") { NSWorkspace.shared.open(URL(string: "https://github.com/scadavide55/Tacet/issues")!) }
         }
     }
 

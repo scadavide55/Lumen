@@ -212,7 +212,7 @@ struct BookmarkList: View {
     private func exportFile() {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.html]
-        panel.nameFieldStringValue = "Lumen Bookmarks.html"
+        panel.nameFieldStringValue = "Tacet Bookmarks.html"
         guard panel.runModal() == .OK, let url = panel.url else { return }
         try? bookmarks.exportHTML().write(to: url, atomically: true, encoding: .utf8)
     }

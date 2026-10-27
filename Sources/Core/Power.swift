@@ -1,7 +1,7 @@
 import Observation
 import Foundation
 
-/// Low Power Mode and memory pressure, so Lumen does less when the Mac asks it to.
+/// Low Power Mode and memory pressure, so Tacet does less when the Mac asks it to.
 @Observable
 final class Power {
     static let shared = Power()

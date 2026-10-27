@@ -61,7 +61,7 @@ final class HistoryDB {
         }
     }
 
-    /// Clears everything, or what was visited since `date`. Waits until it's done, so nothing is left behind if Lumen quits.
+    /// Clears everything, or what was visited since `date`. Waits until it's done, so nothing is left behind if Tacet quits.
     func clear(since date: Date?) {
         queue.sync {
             if let date { run("DELETE FROM visits WHERE date >= ?", [date.timeIntervalSince1970]) } else { run("DELETE FROM visits", []) }

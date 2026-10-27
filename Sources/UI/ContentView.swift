@@ -56,11 +56,11 @@ struct ContentView: View {
                     // Once per update, for people coming from an earlier version.
                     ContentView.onboardingShown = true
                     settings.aiIntroduced = true
-                    if WhatsNew.pages.isEmpty { settings.welcomedVersion = UpdateChecker.currentVersion } else { browser.showWhatsNew = true }
+                    if WhatsNew.pages(since: settings.welcomedVersion).isEmpty { settings.welcomedVersion = UpdateChecker.currentVersion } else { browser.showWhatsNew = true }
                 } else if settings.onboarded && !settings.aiIntroduced && settings.aiEnabled {
                     settings.aiIntroduced = true
                 } else if settings.onboarded && !settings.aiIntroduced && !ContentView.onboardingShown {
-                    // People who set Lumen up before 1.5.4 hear about the assistant once.
+                    // People who set Tacet up before 1.5.4 hear about the assistant once.
                     ContentView.onboardingShown = true
                     browser.showAssistantIntro = true
                 }

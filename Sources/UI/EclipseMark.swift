@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Lumen's mark, the "Eclissi" of the app icon: a dark disc over a sun, leaving a crescent of light.
+/// Tacet's mark, the "Eclissi" of the app icon: a dark disc over a sun, leaving a crescent of light.
 /// `glow` (0…1) brightens the halo, for a gentle pulse.
 struct EclipseMark: View {
     var size: CGFloat

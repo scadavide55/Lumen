@@ -1,4 +1,4 @@
-// Draws the Lumen app icon ("Eclissi": a crescent of light on cream) and writes an .iconset folder.
+// Draws the Tacet app icon ("Eclissi": a crescent of light on cream) and writes an .iconset folder.
 // The same design as an SVG is docs/assets/logo-prototypes/crescent.svg.
 // Usage: swift tools/make-icon.swift <output.iconset>
 import AppKit
@@ -59,7 +59,7 @@ func render(pixels px: Int) -> Data {
     return rep.representation(using: .png, properties: [:])!
 }
 
-let out = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "Lumen.iconset"
+let out = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "Tacet.iconset"
 try FileManager.default.createDirectory(atPath: out, withIntermediateDirectories: true)
 let files: [(String, Int)] = [
     ("icon_16x16", 16), ("icon_16x16@2x", 32),

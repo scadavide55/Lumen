@@ -2,11 +2,11 @@ import Observation
 import AppKit
 import CryptoKit
 
-/// Checks GitHub releases for a newer Lumen and can install it in place.
+/// Checks GitHub releases for a newer Tacet and can install it in place.
 @Observable
 final class UpdateChecker {
     static let shared = UpdateChecker()
-    static let releasesAPI = URL(string: "https://api.github.com/repos/scadavide55/Lumen/releases?per_page=10")!
+    static let releasesAPI = URL(string: "https://api.github.com/repos/scadavide55/Tacet/releases?per_page=10")!
 
     struct Release: Equatable {
         let version: String
@@ -68,7 +68,7 @@ final class UpdateChecker {
                     self.lastResult = String(format: L("%@ is available."), newest.name)
                 } else {
                     self.available = nil
-                    self.lastResult = L("Lumen is up to date.")
+                    self.lastResult = L("Tacet is up to date.")
                 }
             }
         }.resume()
@@ -106,7 +106,7 @@ final class UpdateChecker {
 
 // MARK: - Installing
 
-/// Downloads a release, checks it is Lumen, swaps it in for the running copy and relaunches.
+/// Downloads a release, checks it is Tacet, swaps it in for the running copy and relaunches.
 @Observable
 final class UpdateInstaller: NSObject, URLSessionDownloadDelegate {
     enum State: Equatable {
@@ -121,7 +121,7 @@ final class UpdateInstaller: NSObject, URLSessionDownloadDelegate {
     @ObservationIgnored private var release: UpdateChecker.Release?
     @ObservationIgnored private lazy var session = URLSession(configuration: .ephemeral, delegate: self, delegateQueue: .main)
 
-    /// Public half of the key that signs Lumen updates (see tools/sign-update.swift).
+    /// Public half of the key that signs Tacet updates (see tools/sign-update.swift).
     /// Updates not signed with the matching private key are refused.
     private static let signingKey = "F+nRdeNu8pDKHPW5IepLoLSrTmiMkV6CatzvXsCLgHA="
 
@@ -138,7 +138,7 @@ final class UpdateInstaller: NSObject, URLSessionDownloadDelegate {
         }
         let target = Bundle.main.bundleURL
         guard FileManager.default.isWritableFile(atPath: target.deletingLastPathComponent().path) else {
-            state = .failed(L("Lumen can't replace itself here. Move Lumen to the Applications folder, or install the update from GitHub."))
+            state = .failed(L("Tacet can't replace itself here. Move Tacet to the Applications folder, or install the update from GitHub."))
             return
         }
         release = r
@@ -181,7 +181,7 @@ final class UpdateInstaller: NSObject, URLSessionDownloadDelegate {
 
     struct Message: Error { let text: String }
 
-    /// The download must carry a signature made with Lumen's update key. A checksum next to the file
+    /// The download must carry a signature made with Tacet's update key. A checksum next to the file
     /// would not do: whoever can change the release can change that too.
     private static func verify(archive: URL, signature: URL?) -> Result<Void, Message> {
         let damaged = Message(text: L("The update couldn't be verified. It may be damaged or changed; try again later."))
@@ -194,7 +194,7 @@ final class UpdateInstaller: NSObject, URLSessionDownloadDelegate {
         return key.isValidSignature(sig, for: data) ? .success(()) : .failure(damaged)
     }
 
-    /// Extracts the new Lumen.app and checks its identity and version.
+    /// Extracts the new Tacet.app and checks its identity and version.
     private static func prepare(archive: URL, ext: String, work: URL) -> Result<URL, Message> {
         let extracted = work.appendingPathComponent("extracted")
         try? FileManager.default.createDirectory(at: extracted, withIntermediateDirectories: true)
@@ -204,8 +204,8 @@ final class UpdateInstaller: NSObject, URLSessionDownloadDelegate {
                 return .failure(Message(text: L("Couldn't open the downloaded disk image.")))
             }
             defer { _ = run("/usr/bin/hdiutil", ["detach", "-force", mount.path]) }
-            guard let app = findApp(in: mount), run("/usr/bin/ditto", [app.path, extracted.appendingPathComponent("Lumen.app").path]) else {
-                return .failure(Message(text: L("The download doesn't contain Lumen.")))
+            guard let app = findApp(in: mount), run("/usr/bin/ditto", [app.path, extracted.appendingPathComponent("Tacet.app").path]) else {
+                return .failure(Message(text: L("The download doesn't contain Tacet.")))
             }
         } else {
             guard run("/usr/bin/ditto", ["-x", "-k", archive.path, extracted.path]) else {
@@ -214,7 +214,7 @@ final class UpdateInstaller: NSObject, URLSessionDownloadDelegate {
         }
         guard let app = findApp(in: extracted), let bundle = Bundle(url: app),
               bundle.bundleIdentifier == Bundle.main.bundleIdentifier else {
-            return .failure(Message(text: L("The download doesn't contain Lumen.")))
+            return .failure(Message(text: L("The download doesn't contain Tacet.")))
         }
         // The app must be intact: every file has to match its code signature.
         guard run("/usr/bin/codesign", ["--verify", "--deep", "--strict", app.path]) else {
@@ -244,8 +244,10 @@ final class UpdateInstaller: NSObject, URLSessionDownloadDelegate {
         return p.terminationStatus == 0
     }
 
-    /// A small script waits for Lumen to quit, swaps the app and opens the new one.
+    /// A small script waits for Tacet to quit, swaps the app and opens the new one.
     private func relaunch(into newApp: URL) {
+        // The script below swaps the app in place; nothing else may move it meanwhile.
+        AppRename.skip = true
         Session.shared.saveNow()
         let current = Bundle.main.bundleURL.path
         let script = """
@@ -268,5 +270,31 @@ final class UpdateInstaller: NSObject, URLSessionDownloadDelegate {
         } catch {
             state = .failed(error.localizedDescription)
         }
+    }
+}
+
+// MARK: - The new name on disk
+
+/// Lumen became Tacet in 1.6.2. Updates install over the old copy, which keeps its old name in Finder, so after
+/// quitting, an Applications copy named "Lumen.app" is renamed "Tacet.app". Nothing inside it changes.
+enum AppRename {
+    static var skip = false
+
+    static func afterQuit() {
+        let app = Bundle.main.bundleURL
+        let folder = app.deletingLastPathComponent()
+        let target = folder.appendingPathComponent("Tacet.app")
+        let fm = FileManager.default
+        guard !skip, !WebApp.isActive, app.lastPathComponent == "Lumen.app", !fm.fileExists(atPath: target.path),
+              fm.isWritableFile(atPath: folder.path) else { return }
+        let lsregister = "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+        let script = """
+        while kill -0 \(ProcessInfo.processInfo.processIdentifier) 2>/dev/null; do sleep 0.2; done
+        [ -e "\(target.path)" ] || mv "\(app.path)" "\(target.path)" && "\(lsregister)" -f "\(target.path)"
+        """
+        let p = Process()
+        p.executableURL = URL(fileURLWithPath: "/bin/sh")
+        p.arguments = ["-c", script]
+        try? p.run()
     }
 }

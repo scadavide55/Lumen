@@ -202,7 +202,7 @@ extension BrowserState {
         }
     }
 
-    /// Groups tabs by site right away, as many as the threshold asks, whether or not Lumen does it automatically.
+    /// Groups tabs by site right away, as many as the threshold asks, whether or not Tacet does it automatically.
     func groupBySiteNow() {
         marked = []
         autoOrganize()

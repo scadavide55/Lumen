@@ -68,7 +68,7 @@ enum AssistantSources {
         return youtube && (url.path == "/watch" || url.path.hasPrefix("/shorts/") || url.path.hasPrefix("/live/"))
     }
 
-    /// The captions of the YouTube video on the page, read the way the YouTube player reads them. Runs in Lumen's
+    /// The captions of the YouTube video on the page, read the way the YouTube player reads them. Runs in Tacet's
     /// own script world, so the page can't change what the assistant gets, and asks only youtube.com.
     static let transcriptScript = #"""
     const want = (args.lang || 'en').toLowerCase();

@@ -1,18 +1,19 @@
 import AppKit
 import WebKit
 
-/// Sites installed as their own apps. Each one is a copy of Lumen with the site's name and icon
-/// in ~/Applications/Lumen Apps; when Lumen starts from such a copy it shows only that site.
+/// Sites installed as their own apps. Each one is a copy of Tacet with the site's name and icon
+/// in ~/Applications/Lumen Apps; when Tacet starts from such a copy it shows only that site.
 enum WebApp {
-    /// The site this copy of Lumen is dedicated to, or nil for the normal browser.
+    /// The site this copy of Tacet is dedicated to, or nil for the normal browser.
     static let url: URL? = (Bundle.main.object(forInfoDictionaryKey: "LumenWebAppURL") as? String).flatMap(URL.init)
     static var isActive: Bool { url != nil }
     static var site: String? { url?.host.map(PasswordStore.site) }
 
+    /// Still "Lumen Apps", Tacet's former name, so apps installed before the rename keep working.
     static let folder: URL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications/Lumen Apps", isDirectory: true)
     static let browserBundleID = "com.lumen.browser"
 
-    /// Opens a link in the main Lumen browser.
+    /// Opens a link in the main Tacet browser.
     static func openInBrowser(_ url: URL) {
         guard let app = NSWorkspace.shared.urlForApplication(withBundleIdentifier: browserBundleID) else {
             NSWorkspace.shared.open(url)

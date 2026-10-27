@@ -1,4 +1,4 @@
-// Signs Lumen updates with Ed25519, so Lumen only installs updates made with your key.
+// Signs Tacet updates with Ed25519, so Tacet only installs updates made with your key.
 //   swift tools/sign-update.swift keygen        creates the key pair once and prints the public key
 //   swift tools/sign-update.swift public        prints the public key again
 //   swift tools/sign-update.swift sign <file>   writes <file>.sig, to upload next to the file

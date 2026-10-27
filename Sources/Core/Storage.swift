@@ -7,6 +7,7 @@ import WebKit
 enum Paths {
     static let support: URL = {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        // Still "Lumen", Tacet's former name, so everything saved before the rename stays where it is.
         var url = base.appendingPathComponent("Lumen", isDirectory: true)
         // Installed web apps keep their own history and settings apart from the browser.
         if WebApp.isActive { url = url.appendingPathComponent("WebApps/" + (Bundle.main.bundleIdentifier ?? "app"), isDirectory: true) }
@@ -285,7 +286,7 @@ final class History {
         db?.clear(since: date)
     }
 
-    /// Waits for history writes still in progress, before Lumen quits.
+    /// Waits for history writes still in progress, before Tacet quits.
     func flush() {
         db?.flush()
         db?.checkpoint()
@@ -371,7 +372,7 @@ struct TabGroup: Identifiable, Codable, Equatable {
     var name: String
     var collapsed = false
     var color = 0
-    /// Set for groups Lumen made by site; nil for groups you made.
+    /// Set for groups Tacet made by site; nil for groups you made.
     var site: String?
 
     static let colors: [Color] = [.blue, .purple, .pink, .orange, .green, .teal, .yellow, .gray]

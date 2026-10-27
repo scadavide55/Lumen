@@ -9,10 +9,10 @@ import WebKit
 final class Extensions {
     static let shared = Extensions()
 
-    /// What Lumen remembers about an added extension.
+    /// What Tacet remembers about an added extension.
     struct Installed: Codable, Identifiable, Equatable {
         enum Source: Codable, Equatable {
-            /// Unpacked into Lumen's Extensions folder.
+            /// Unpacked into Tacet's Extensions folder.
             case folder(String)
             /// A Safari web extension inside an app, by the path of its .appex.
             case appExtension(String)
@@ -71,7 +71,7 @@ final class Extensions {
 
     // MARK: Folders
 
-    /// Copies an unpacked extension, or unpacks a .zip, .crx or .xpi, into Lumen's Extensions folder.
+    /// Copies an unpacked extension, or unpacks a .zip, .crx or .xpi, into Tacet's Extensions folder.
     func importPackage(at url: URL) throws -> URL {
         let target = folder.appendingPathComponent(UUID().uuidString, isDirectory: true)
         let fm = FileManager.default
@@ -192,7 +192,7 @@ final class Extensions {
 
 @available(macOS 15.4, *)
 extension Extensions {
-    /// Lumen's side of the extension runtime: windows, tabs, popups and permission prompts.
+    /// Tacet's side of the extension runtime: windows, tabs, popups and permission prompts.
     final class Runtime: NSObject, WKWebExtensionControllerDelegate {
         let controller: WKWebExtensionController
         var contexts: [UUID: WKWebExtensionContext] = [:]
@@ -384,11 +384,11 @@ extension Extensions {
                 }
                 // Its background script starts now, so its button and popup are ready when clicked.
                 do { try await context.loadBackgroundContent() } catch {
-                    NSLog("Lumen: background of \(item.name) failed: \(error.localizedDescription)")
+                    NSLog("Tacet: background of \(item.name) failed: \(error.localizedDescription)")
                 }
                 revision += 1
             } catch {
-                NSLog("Lumen couldn't load the extension \(item.name): \(error.localizedDescription)")
+                NSLog("Tacet couldn't load the extension \(item.name): \(error.localizedDescription)")
             }
         }
     }

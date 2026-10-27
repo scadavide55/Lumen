@@ -521,7 +521,7 @@ struct MoveToWindowMenu: View {
 
     /// "Window with “Rome – Wikipedia” (4 tabs)", and the profile when it has one.
     static func label(_ w: BrowserState) -> String {
-        let name = w.current?.title ?? "Lumen"
+        let name = w.current?.title ?? "Tacet"
         let title = w.tabs.count == 1 ? String(format: L("Window with “%@” (1 tab)"), name)
             : String(format: L("Window with “%@” (%d tabs)"), name, w.tabs.count)
         return w.profile.map { "\(title) — \($0.name)" } ?? title
@@ -661,7 +661,7 @@ struct SidebarFooter: View {
                 Label("\(blocker.ruleCount.formatted())", systemImage: "shield.lefthalf.filled")
                     .font(.system(size: 10.5, weight: .medium))
                     .foregroundStyle(.secondary)
-                    .help("Lumen Shield is on with \(blocker.ruleCount.formatted()) rules")
+                    .help("Tacet Shield is on with \(blocker.ruleCount.formatted()) rules")
             }
             Spacer()
             if let r = updates.available {

@@ -19,13 +19,13 @@ struct ImportView: View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Import from Another Browser").font(.title2.weight(.semibold))
-                Text("Bring your bookmarks, history and sign-ins into Lumen. Nothing leaves your Mac.")
+                Text("Bring your bookmarks, history and sign-ins into Tacet. Nothing leaves your Mac.")
                     .foregroundStyle(.secondary)
             }
 
             if sources.isEmpty {
                 ContentUnavailableView("No Other Browsers Found", systemImage: "safari",
-                                       description: Text("Lumen looks for Safari, Firefox and Chromium browsers such as Chrome, Opera, Brave, Edge and Arc."))
+                                       description: Text("Tacet looks for Safari, Firefox and Chromium browsers such as Chrome, Opera, Brave, Edge and Arc."))
                     .frame(maxHeight: .infinity)
             } else {
                 List(sources, selection: $selected) { s in
@@ -92,7 +92,7 @@ struct ImportView: View {
     private func cookieNote(_ s: BrowserSource) -> String {
         switch s.kind {
         case .chromium: String(format: L("Keeps you signed in to sites. macOS will ask you to allow access to “%@” in your Keychain: choose Allow."), s.keychainService ?? "")
-        case .safari: L("Keeps you signed in to sites. Needs Full Disk Access for Lumen.")
+        case .safari: L("Keeps you signed in to sites. Needs Full Disk Access for Tacet.")
         case .firefox: L("Keeps you signed in to sites.")
         }
     }
@@ -132,7 +132,7 @@ private struct ResultView: View {
                 Button("Open Full Disk Access Settings") {
                     NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles")!)
                 }
-                Text("Turn on Lumen in the list, quit and reopen Lumen, then import again.").font(.caption).foregroundStyle(.secondary)
+                Text("Turn on Tacet in the list, quit and reopen Tacet, then import again.").font(.caption).foregroundStyle(.secondary)
             }
         }
         .font(.callout)

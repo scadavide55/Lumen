@@ -2,7 +2,7 @@ import AVFoundation
 import AppKit
 import UniformTypeIdentifiers
 
-/// Custom start page backgrounds, copied into Lumen's own folder so they keep working
+/// Custom start page backgrounds, copied into Tacet's own folder so they keep working
 /// if the original file moves.
 enum BackgroundMedia {
     static let maxVideoSeconds = 60.0
@@ -18,7 +18,7 @@ enum BackgroundMedia {
             switch self {
             case .tooLong: String(format: L("Videos can be up to %lld seconds long."), Int(BackgroundMedia.maxVideoSeconds))
             case .tooBig: L("Videos can be up to 300 MB.")
-            case .unreadable: L("Lumen couldn't play this file.")
+            case .unreadable: L("Tacet couldn't play this file.")
             }
         }
     }

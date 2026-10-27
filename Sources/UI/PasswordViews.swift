@@ -146,7 +146,7 @@ struct InsecurePasswordBanner: View {
     }
 }
 
-/// Covers a locked window: a private one after Lumen goes to the background, or any window locked from the File menu.
+/// Covers a locked window: a private one after Tacet goes to the background, or any window locked from the File menu.
 struct PrivateLockView: View {
     @Environment(BrowserState.self) var b
 
@@ -191,7 +191,7 @@ struct PasswordsPane: View {
         Form {
             Section {
                 Picker("Password manager", selection: $s.passwordManager) {
-                    Text("Lumen (Keychain and Touch ID)").tag("")
+                    Text("Tacet (Keychain and Touch ID)").tag("")
                     ForEach(managers) { m in Text(m.name).tag(m.id) }
                 }
                 Toggle("Offer to save passwords", isOn: $s.savePasswords).disabled(!s.passwordManager.isEmpty)
@@ -203,7 +203,7 @@ struct PasswordsPane: View {
                     }
                 }
             } footer: {
-                Text("Passwords are stored in your Mac's Keychain, encrypted by macOS. Lumen asks for Touch ID or your Mac password before filling or showing one.")
+                Text("Passwords are stored in your Mac's Keychain, encrypted by macOS. Tacet asks for Touch ID or your Mac password before filling or showing one.")
             }
 
             Section {
@@ -242,7 +242,7 @@ struct PasswordsPane: View {
             } header: {
                 Text("Apple Passwords and other managers")
             } footer: {
-                Text("To bring passwords from the Passwords app: in Passwords choose File › Export All Passwords, then import the file here. To send Lumen's passwords to Passwords, export them and choose File › Import Passwords there. CSV files aren't encrypted: delete them afterwards.")
+                Text("To bring passwords from the Passwords app: in Passwords choose File › Export All Passwords, then import the file here. To send Tacet's passwords to Passwords, export them and choose File › Import Passwords there. CSV files aren't encrypted: delete them afterwards.")
             }
 
             if !s.neverSaveHosts.isEmpty {
@@ -292,7 +292,7 @@ struct PasswordsPane: View {
             guard ok else { return }
             let panel = NSSavePanel()
             panel.allowedContentTypes = [.commaSeparatedText]
-            panel.nameFieldStringValue = "Lumen Passwords.csv"
+            panel.nameFieldStringValue = "Tacet Passwords.csv"
             guard panel.runModal() == .OK, let url = panel.url else { return }
             try? store.exportCSV().write(to: url, atomically: true, encoding: .utf8)
         }

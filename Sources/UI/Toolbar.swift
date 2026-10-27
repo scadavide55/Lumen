@@ -158,7 +158,7 @@ struct ShieldButton: View {
     var body: some View {
         let on = tab.shieldsUp
         IconButton(systemName: on ? "shield.lefthalf.filled" : "shield.slash",
-                   help: on ? "Lumen Shield is on" : "Lumen Shield is off for this page",
+                   help: on ? "Tacet Shield is on" : "Tacet Shield is off for this page",
                    tint: on ? s.accent : nil) { show.toggle() }
             .popover(isPresented: $show, arrowEdge: .bottom) { ShieldPopover(tab: tab) }
     }
@@ -176,7 +176,7 @@ struct ShieldPopover: View {
                     .font(.system(size: 24))
                     .foregroundStyle(tab.shieldsUp ? s.accent : .secondary)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Lumen Shield").font(.headline)
+                    Text("Tacet Shield").font(.headline)
                     Text(tab.host.map { InputResolver.displayHost(URL(string: "https://" + $0)) } ?? L("No site loaded"))
                         .font(.caption).foregroundStyle(.secondary)
                 }

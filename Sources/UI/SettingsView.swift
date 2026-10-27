@@ -32,7 +32,7 @@ struct GeneralPane: View {
             Section {
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(isDefault ? LocalizedStringKey("Lumen is your default browser") : "Lumen is not your default browser")
+                        Text(isDefault ? LocalizedStringKey("Tacet is your default browser") : "Tacet is not your default browser")
                         Text("Links you open in other apps go to your default browser.").font(.caption).foregroundStyle(.secondary)
                     }
                     Spacer()
@@ -66,14 +66,14 @@ struct GeneralPane: View {
                 }
                 if language != nil {
                     HStack {
-                        Text("Restart Lumen to use the new language.").foregroundStyle(.secondary)
+                        Text("Restart Tacet to use the new language.").foregroundStyle(.secondary)
                         Spacer()
                         Button("Restart Now") { AppLanguage.relaunch() }
                     }
                 }
             }
             Section("Tabs") {
-                Toggle("Restore windows and tabs when Lumen opens", isOn: $s.restoreSession)
+                Toggle("Restore windows and tabs when Tacet opens", isOn: $s.restoreSession)
                 Toggle("Open the command bar on every new tab", isOn: $s.paletteOnNewTab)
                 Picker("Organize tabs", selection: $s.organizeTabs) {
                     Text("Manually").tag(false)
@@ -86,7 +86,7 @@ struct GeneralPane: View {
                         Text("5 tabs").tag(5)
                     }
                     .onChange(of: s.groupThreshold) { _, _ in BrowserState.groupingChanged() }
-                    Text(String(format: L("When %d or more tabs are open from the same site, Lumen groups them, for example into “GitHub”."), s.groupThreshold))
+                    Text(String(format: L("When %d or more tabs are open from the same site, Tacet groups them, for example into “GitHub”."), s.groupThreshold))
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 GroupExceptionsRow()
@@ -182,7 +182,7 @@ struct ProfilesSection: View {
             return
         }
         Dialogs.confirm(NSApp.keyWindow, title: String(format: L("Delete “%@”?"), p.name),
-                        message: L("Its cookies, sign-ins and site data will be removed. Saved passwords stay in Lumen."),
+                        message: L("Its cookies, sign-ins and site data will be removed. Saved passwords stay in Tacet."),
                         ok: L("Delete")) { ok in
             guard ok else { return }
             s.profiles.removeAll { $0.id == p.id }
@@ -198,7 +198,7 @@ struct UpdateRow: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text(String(format: L("Lumen %@"), UpdateChecker.currentVersion))
+                Text(String(format: L("Tacet %@"), UpdateChecker.currentVersion))
                 if let r = updates.available {
                     Text(String(format: L("%@ is available."), r.name)).font(.caption).foregroundStyle(.green)
                 } else if let result = updates.lastResult {
@@ -355,9 +355,9 @@ struct ShieldPane: View {
                     }
                 }
                 Toggle("Confirm before downloading apps, installers and scripts", isOn: $s.confirmDangerousDownloads)
-                Toggle("Lock private windows with Touch ID when Lumen is in the background", isOn: $s.lockPrivateWindows)
+                Toggle("Lock private windows with Touch ID when Tacet is in the background", isOn: $s.lockPrivateWindows)
                 Toggle("Tell sites not to sell or share my data (Global Privacy Control)", isOn: $s.gpc)
-                Toggle("Clear cookies, cache and history when Lumen quits", isOn: $s.clearOnQuit)
+                Toggle("Clear cookies, cache and history when Tacet quits", isOn: $s.clearOnQuit)
                 Button("Clear Browsing Data…") { showClear = true }
             }
             Section("Sites where Shield is off") {
@@ -600,7 +600,7 @@ struct AdvancedPane: View {
                 if s.uaMode == .custom {
                     TextField("User agent", text: $s.customUA, prompt: Text("Mozilla/5.0 …"))
                 }
-                Text("Lumen identifies as Safari \(UserAgent.safariVersion) so sites serve their full experience.")
+                Text("Tacet identifies as Safari \(UserAgent.safariVersion) so sites serve their full experience.")
                     .font(.caption).foregroundStyle(.secondary)
             }
             Section("Developer") {
@@ -623,7 +623,7 @@ struct AdvancedPane: View {
 }
 
 
-/// Sites Lumen never groups by site, with a field to add one.
+/// Sites Tacet never groups by site, with a field to add one.
 struct GroupExceptionsRow: View {
     @Bindable private var s = Settings.shared
     @State private var adding = ""

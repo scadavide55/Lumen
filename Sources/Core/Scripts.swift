@@ -1,6 +1,6 @@
 import WebKit
 
-/// JavaScript that Lumen injects into pages. Helpers run in an isolated content world so
+/// JavaScript that Tacet injects into pages. Helpers run in an isolated content world so
 /// pages cannot see or spoof them; only scripts that must patch page objects run in `.page`.
 enum Scripts {
     static func install(on c: WKUserContentController) {
@@ -139,7 +139,7 @@ enum Scripts {
         return { user, pw };
       };
 
-      // Only tells Lumen when a menu may be showing, so scrolling doesn't send a message every frame.
+      // Only tells Tacet when a menu may be showing, so scrolling doesn't send a message every frame.
       let menuOpen = false;
       document.addEventListener('focusin', (e) => {
         const t = e.target;
@@ -452,7 +452,7 @@ enum Scripts {
           else { hideFloating(); watch(); }
         } else if (observer) { observer.disconnect(); observer = null; }
       };
-      // Lumen calls this when you change the style, so the page follows without reloading.
+      // Tacet calls this when you change the style, so the page follows without reloading.
       window.__lumenSiteStyle = apply;
       if (mine.length) apply(mine.map(r => r.css).join('\n'), mine.some(r => r.floating), mine.some(r => r.dark));
     })();
@@ -597,7 +597,7 @@ enum Scripts {
       box.appendChild(clone(root));
       const meta = (n) => { const m = document.querySelector(`meta[property="${n}"], meta[name="${n}"]`); return m ? m.content : ''; };
       let title = meta('og:title') || document.title;
-      // The page's own heading is the title; "Lumen - Wikipedia" becomes "Lumen" and isn't shown twice.
+      // The page's own heading is the title; "Tacet - Wikipedia" becomes "Tacet" and isn't shown twice.
       const heading = (document.querySelector('h1') || {}).textContent;
       if (heading && heading.trim() && title.includes(heading.trim())) title = heading.trim();
       const h1 = box.querySelector('h1');

@@ -150,7 +150,7 @@ enum BrowserImporter {
 
     // MARK: Import
 
-    /// Reads on a background queue, then merges into Lumen on the main queue.
+    /// Reads on a background queue, then merges into Tacet on the main queue.
     static func run(_ source: BrowserSource, profile: BrowserProfile, options: ImportOptions,
                     done: @escaping (ImportResult) -> Void) {
         DispatchQueue.global(qos: .userInitiated).async {
@@ -172,7 +172,7 @@ enum BrowserImporter {
         }
     }
 
-    /// Reads another browser's data without changing anything in Lumen.
+    /// Reads another browser's data without changing anything in Tacet.
     static func load(_ source: BrowserSource, profile: BrowserProfile, options: ImportOptions)
         -> (ImportResult, [(String, URL)], [HistoryEntry], [HTTPCookie]) {
             var result = ImportResult()
@@ -196,7 +196,7 @@ enum BrowserImporter {
                 }
             } catch ImportError.permission {
                 result.needsFullDiskAccess = true
-                result.warnings.append(String(format: L("macOS blocked access to %@'s data. Give Lumen Full Disk Access, then try again."), source.name))
+                result.warnings.append(String(format: L("macOS blocked access to %@'s data. Give Tacet Full Disk Access, then try again."), source.name))
             } catch {
                 result.warnings.append(error.localizedDescription)
             }
@@ -271,7 +271,7 @@ enum BrowserImporter {
             .first { FileManager.default.fileExists(atPath: $0.path) }
         guard let file else { return [] }
         guard let key = chromiumKey(service) else {
-            result.warnings.append(String(format: L("Sign-ins weren't imported: Lumen couldn't read “%@” from your Keychain."), service))
+            result.warnings.append(String(format: L("Sign-ins weren't imported: Tacet couldn't read “%@” from your Keychain."), service))
             return []
         }
         let db = try open(file)

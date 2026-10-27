@@ -119,7 +119,7 @@ struct Profile: Codable, Identifiable, Hashable {
 enum ProfileCleanup {
     private static let key = "lumen.profilesToRemove"
 
-    /// Erases the profile's data right away. WebKit only gives up the profile's folder once Lumen
+    /// Erases the profile's data right away. WebKit only gives up the profile's folder once Tacet
     /// restarts, so removing the folder itself may wait until then.
     static func remove(_ id: UUID) {
         let store = WKWebsiteDataStore(forIdentifier: id)
@@ -179,7 +179,7 @@ enum MediaPermission {
     }
 }
 
-/// How a site looks in Lumen: ready-made options, elements picked on the page to hide, and your own CSS and JavaScript.
+/// How a site looks in Tacet: ready-made options, elements picked on the page to hide, and your own CSS and JavaScript.
 struct SiteStyle: Codable, Identifiable, Hashable {
     enum Theme: String, Codable, CaseIterable { case site, dark }
     enum Font: String, Codable, CaseIterable { case site, system, serif, mono }
@@ -424,7 +424,7 @@ final class Settings: Observable {
     @Pref("aiEnabled") var aiEnabled = false
     /// Whether the user has been told about the assistant, in the setup or after updating to 1.5.4.
     @Pref("aiIntroduced") var aiIntroduced = false
-    /// The version whose "Welcome to Lumen" screen was shown, or that was set up fresh.
+    /// The version whose "Welcome to Tacet" screen was shown, or that was set up fresh.
     @Pref("welcomedVersion") var welcomedVersion = ""
     @Pref("aiProvider") var aiProvider = AIProvider.anthropic
     /// The model chosen for each provider, keyed by `AIProvider.rawValue`.
@@ -523,7 +523,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         return AppLanguage(rawValue: String(first.prefix(2))) ?? .system
     }
 
-    /// Takes effect the next time Lumen starts.
+    /// Takes effect the next time Tacet starts.
     func apply() {
         if self == .system {
             UserDefaults.standard.removeObject(forKey: "AppleLanguages")
@@ -545,7 +545,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
 // MARK: - User agent
 
 enum UserAgent {
-    /// The installed Safari's version, so sites treat Lumen like current Safari.
+    /// The installed Safari's version, so sites treat Tacet like current Safari.
     static let safariVersion: String = {
         let url = URL(fileURLWithPath: "/Applications/Safari.app/Contents/Info.plist")
         guard let dict = NSDictionary(contentsOf: url),

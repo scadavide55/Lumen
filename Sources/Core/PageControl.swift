@@ -95,7 +95,7 @@ enum PageControl {
     private static let typeScript = prelude + """
     const el = byRef(args.ref);
     if (!el) return 'ERROR: element ' + args.ref + ' is gone. Call find_elements again.';
-    if (secret(el)) return 'ERROR: this is a password or payment card field. Lumen Assistant never fills these in; ask the user to type it.';
+    if (secret(el)) return 'ERROR: this is a password or payment card field. Tacet Assistant never fills these in; ask the user to type it.';
     if (el.disabled || el.readOnly) return 'ERROR: element ' + args.ref + ' cannot be edited.';
     center(el);
     el.focus({ preventScroll: true });

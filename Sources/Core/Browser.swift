@@ -47,7 +47,7 @@ final class BrowserState {
     /// The assistant fills the window, as a chat app.
     var assistantExpanded = false
     var showAssistantIntro = false
-    /// "Welcome to Lumen <version>": what's new, once after an update.
+    /// "Welcome to Tacet <version>": what's new, once after an update.
     var showWhatsNew = false
     @ObservationIgnored private(set) lazy var assistant = AssistantChat(browser: self)
     @ObservationIgnored var palettePrefill = ""
@@ -131,7 +131,7 @@ final class BrowserState {
         // The title bar holds tabs, so macOS must not drag the window from it; WindowDragArea moves it instead.
         window.isMovable = false
         window.titleVisibility = .hidden
-        window.title = current?.title ?? "Lumen"
+        window.title = current?.title ?? "Tacet"
         WindowRegistry.shared.lastFocused = self
         keyObserver = NotificationCenter.default.addObserver(forName: NSWindow.didBecomeKeyNotification, object: window, queue: .main) { [weak self] _ in
             WindowRegistry.shared.lastFocused = self

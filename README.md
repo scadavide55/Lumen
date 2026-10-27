@@ -1,31 +1,35 @@
 <div align="center">
 
-<img src="docs/assets/icon.png" alt="Lumen icon" width="128" height="128">
+<img src="docs/assets/icon.png" alt="Tacet icon" width="128" height="128">
 
-# Tacet ( formerly Lumen ) 
+# Tacet
+
+*formerly Lumen*
 
 **The quiet browser for your Mac.**
 
 A minimal, fast and private macOS browser built on WebKit, with a native ad blocker you can turn off in one click.
 
-[![Release](https://img.shields.io/github/v/release/scadavide55/Lumen?include_prereleases&label=release&style=flat-square&color=6e56cf)](https://github.com/scadavide55/Lumen/releases)
-[![Downloads](https://img.shields.io/github/downloads/scadavide55/Lumen/total?style=flat-square&color=2ea44f)](https://github.com/scadavide55/Lumen/releases)
+[![Release](https://img.shields.io/github/v/release/scadavide55/Tacet?include_prereleases&label=release&style=flat-square&color=6e56cf)](https://github.com/scadavide55/Tacet/releases)
+[![Downloads](https://img.shields.io/github/downloads/scadavide55/Tacet/total?style=flat-square&color=2ea44f)](https://github.com/scadavide55/Tacet/releases)
 [![macOS](https://img.shields.io/badge/macOS-14%2B-000000?style=flat-square&logo=apple&logoColor=white)](#requirements)
 [![Universal](https://img.shields.io/badge/Apple%20silicon%20%2B%20Intel-universal-555555?style=flat-square)](#requirements)
 [![Swift](https://img.shields.io/badge/Swift-SwiftUI-F05138?style=flat-square&logo=swift&logoColor=white)](Sources)
 [![WebKit](https://img.shields.io/badge/engine-WebKit-1f6feb?style=flat-square&logo=safari&logoColor=white)](https://webkit.org)
-[![Website](https://img.shields.io/badge/website-online-0a7cff?style=flat-square)](https://scadavide55.github.io/Lumen/)
+[![Website](https://img.shields.io/badge/website-online-0a7cff?style=flat-square)](https://scadavide55.github.io/Tacet/)
 
-[**Download**](https://github.com/scadavide55/Lumen/releases) · [**Website**](https://scadavide55.github.io/Lumen/) · [**Release notes**](https://github.com/scadavide55/Lumen/releases)
+[**Download**](https://github.com/scadavide55/Tacet/releases) · [**Website**](https://scadavide55.github.io/Tacet/) · [**Release notes**](https://github.com/scadavide55/Tacet/releases)
 
-<img src="docs/assets/screenshot.jpg" alt="The Lumen window with tabs along the top" width="860">
+<img src="docs/assets/screenshot.jpg" alt="The Tacet window with tabs along the top" width="860">
 
-<img src="docs/assets/groups.png" alt="Tab groups along the top of the Lumen window, each in its own colour" width="860">
+<img src="docs/assets/groups.png" alt="Tab groups along the top of the Tacet window, each in its own colour" width="860">
 
 </div>
 
 > [!NOTE]
-> **Lumen 1.6.1** brings web extensions, an offline Reading List, Customize Site, tab organising and a much more capable Lumen Assistant, including Apple's on-device model. Lumen Assistant is still a beta. If something doesn't work, please report it in [Issues](https://github.com/scadavide55/Lumen/issues).
+> **Lumen is now Tacet.** Same browser, new name: there were already other browsers called Lumen, and the name sounded too much like an AI product. Updating keeps all your tabs, passwords and settings.
+>
+> **1.6.1** brought web extensions, an offline Reading List, Customize Site, tab organising and a much more capable Tacet Assistant, including Apple's on-device model. Tacet Assistant is still a beta. If something doesn't work, please report it in [Issues](https://github.com/scadavide55/Tacet/issues).
 
 ## Features
 
@@ -35,7 +39,7 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 - **Apple's on-device model** (macOS 26 with Apple Intelligence): free, offline and private, with no key. It's smaller, so it's best for short tasks
 - Reads your other tabs without switching to them, searches your history and bookmarks, and takes screenshots of the page when the layout matters
 - Full transcripts of YouTube videos, to summarise or ask about a video
-- Select text and right-click for Lumen Assistant › Explain, Translate, Summarise or Ask About It
+- Select text and right-click for Tacet Assistant › Explain, Translate, Summarise or Ask About It
 - **Web access** (on by default): searches the web and reads pages, with the sources listed under each answer
 - Opens pages and searches in new tabs, switches between your tabs and groups them when you ask
 - **Browser use** (off by default): clicks, types, scrolls and drags on the current page for you. It never fills in passwords or card numbers, and asks before sending, buying or deleting anything
@@ -48,7 +52,7 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 - See what an extension can do before adding it; extensions never run in private windows
 - Toolbar buttons with badges and popups, right-click menu items and settings pages
 
-**Lumen Shield**
+**Tacet Shield**
 - Built-in ad and tracker blocking that works offline, toggled with ⇧⌘B
 - Optional EasyList and EasyPrivacy filter lists, converted to WebKit rules and refreshed weekly
 - Turn protection off for a single site from the shield button
@@ -73,18 +77,18 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 - A guided setup on first launch, in English, Italian or French
 
 **Tabs and windows**
-- Tab groups: drag a tab onto another, or let Lumen group tabs from the same site once there are 2, 3 or 5 of them, except sites you exclude
+- Tab groups: drag a tab onto another, or let Tacet group tabs from the same site once there are 2, 3 or 5 of them, except sites you exclude
 - Save a group and close it, then open it again later with all its tabs; open a new tab inside a group
 - Pick several tabs with ⌘-click and ⇧-click to group, move, pin or close them together
 - Move tabs or whole groups to another window or profile
 - Sort tabs by site, title or last opened, and close duplicate tabs in one click
-- Lumen Assistant can group tabs by topic when you ask, such as "Rome trip"
+- Tacet Assistant can group tabs by topic when you ask, such as "Rome trip"
 - Sidebar, separate or compact tab layouts
 - Install any site as an app with its own window and Dock icon
 - Vertical tabs in a resizable sidebar, or tabs along the top
 - Pinned tabs, drag to reorder, split view, reopen closed tabs
 - Background tabs hibernate to save memory, shown in grey, and wake up where you left them
-- Windows and tabs come back when you reopen Lumen
+- Windows and tabs come back when you reopen Tacet
 
 **Getting around**
 - Command bar (⌘L / ⌘K) for addresses, searches, open tabs, bookmarks, history and commands
@@ -130,21 +134,21 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 
 ```sh
 ./build.sh
-open Lumen.app
+open Tacet.app
 ```
 
-`tools/test.sh` runs the logic tests (addresses, link cleaning, password sites, CSV, filter lists, history database, and WebKit compiling Shield's rules). `build.sh` compiles everything in `Sources` for Apple silicon and Intel, assembles a universal `Lumen.app` and signs it ad hoc. `tools/make-dmg.sh` then packages it as a disk image. Translations live in `tools/translations.py`; run it to regenerate the `.lproj` files. To regenerate the icon, run `swift tools/make-icon.swift Resources/Lumen.iconset` followed by `iconutil -c icns Resources/Lumen.iconset -o Resources/Lumen.icns`.
+`tools/test.sh` runs the logic tests (addresses, link cleaning, password sites, CSV, filter lists, history database, and WebKit compiling Shield's rules). `build.sh` compiles everything in `Sources` for Apple silicon and Intel, assembles a universal `Tacet.app` and signs it ad hoc. `tools/make-dmg.sh` then packages it as a disk image. Translations live in `tools/translations.py`; run it to regenerate the `.lproj` files. To regenerate the icon, run `swift tools/make-icon.swift Resources/Tacet.iconset` followed by `iconutil -c icns Resources/Tacet.iconset -o Resources/Tacet.icns`.
 
 ## Installing a downloaded build
 
-Open the `.dmg` and drag Lumen to Applications. Release builds are not notarized yet, so on recent versions of macOS the first launch says Lumen "is damaged and can't be opened". The download is fine: macOS blocks apps from the internet that Apple hasn't notarized. Run this once in Terminal, then open Lumen normally:
+Open the `.dmg` and drag Tacet to Applications. Release builds are not notarized yet, so on recent versions of macOS the first launch says Tacet "is damaged and can't be opened". The download is fine: macOS blocks apps from the internet that Apple hasn't notarized. Run this once in Terminal, then open Tacet normally:
 
 ```bash
-xattr -dr com.apple.quarantine /Applications/Lumen.app
+xattr -dr com.apple.quarantine /Applications/Tacet.app
 ```
 
-After that, Lumen tells you about new versions and can install them for you.
+After that, Tacet tells you about new versions and can install them for you.
 
 ## License
 
-Lumen is free software, released under the [GNU General Public License v3.0](LICENSE).
+Tacet is free software, released under the [GNU General Public License v3.0](LICENSE).

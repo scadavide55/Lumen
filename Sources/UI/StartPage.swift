@@ -25,7 +25,7 @@ struct StartPage: View {
                 if b.isPrivate {
                     VStack(spacing: 6) {
                         Label("Private browsing", systemImage: "eyeglasses").font(.system(size: 20, weight: .semibold))
-                        Text("Lumen forgets the history, cookies and site data of this window when you close it.")
+                        Text("Tacet forgets the history, cookies and site data of this window when you close it.")
                             .font(.system(size: 13)).opacity(0.75)
                     }
                 } else if s.showGreeting {
@@ -38,7 +38,7 @@ struct StartPage: View {
                 Spacer(minLength: 40)
                 HStack(spacing: 6) {
                     Image(systemName: s.adBlock ? "shield.lefthalf.filled" : "shield.slash")
-                    Text(s.adBlock ? LocalizedStringKey("Lumen Shield is blocking ads and trackers · \(blocker.ruleCount.formatted()) rules") : "Lumen Shield is off")
+                    Text(s.adBlock ? LocalizedStringKey("Tacet Shield is blocking ads and trackers · \(blocker.ruleCount.formatted()) rules") : "Tacet Shield is off")
                 }
                 .font(.system(size: 11.5))
                 .opacity(0.65)

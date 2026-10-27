@@ -60,7 +60,8 @@ struct AboutView: View {
                     .rotationEffect(.degrees(appeared ? 0 : -8))
             }
             .frame(height: 140)
-            Text("Lumen").font(.system(size: 34, weight: .bold, design: .rounded))
+            Text("Tacet").font(.system(size: 34, weight: .bold, design: .rounded))
+            Text("formerly Lumen").font(.system(size: 12, weight: .medium)).opacity(0.6)
             Text("The quiet browser for your Mac").font(.system(size: 14)).opacity(0.8)
             Text(String(format: L("Version %@ (%@)"), UpdateChecker.currentVersion, build))
                 .font(.system(size: 12, weight: .medium, design: .monospaced)).opacity(0.7)
@@ -106,9 +107,9 @@ struct AboutView: View {
 
     private var links: some View {
         HStack(spacing: 10) {
-            linkButton("Website", "globe") { NSWorkspace.shared.open(URL(string: "https://scadavide55.github.io/Lumen/")!) }
-            linkButton("GitHub", "chevron.left.forwardslash.chevron.right") { NSWorkspace.shared.open(URL(string: "https://github.com/scadavide55/Lumen")!) }
-            linkButton("Release Notes", "doc.text") { NSWorkspace.shared.open(URL(string: "https://github.com/scadavide55/Lumen/releases")!) }
+            linkButton("Website", "globe") { NSWorkspace.shared.open(URL(string: "https://scadavide55.github.io/Tacet/")!) }
+            linkButton("GitHub", "chevron.left.forwardslash.chevron.right") { NSWorkspace.shared.open(URL(string: "https://github.com/scadavide55/Tacet")!) }
+            linkButton("Release Notes", "doc.text") { NSWorkspace.shared.open(URL(string: "https://github.com/scadavide55/Tacet/releases")!) }
             linkButton("Updates", "arrow.triangle.2.circlepath") { updates.check(force: true) { openWindow(id: "update") } }
         }
         .opacity(appeared ? 1 : 0)
@@ -132,7 +133,7 @@ struct AboutView: View {
     private var footer: some View {
         VStack(spacing: 4) {
             Text("No accounts, no analytics, no tracking.").font(.system(size: 11.5, weight: .medium))
-            Text("© 2026 Lumen · Made with Swift, SwiftUI and WebKit").font(.system(size: 10.5)).opacity(0.65)
+            Text("© 2026 Tacet · Made with Swift, SwiftUI and WebKit").font(.system(size: 10.5)).opacity(0.65)
             Text("Free software under the GNU GPL v3").font(.system(size: 10.5)).opacity(0.65)
         }
         .opacity(appeared ? 1 : 0)

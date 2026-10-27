@@ -175,6 +175,7 @@ final class AIModels {
 
 /// API keys live in the Keychain, never in the preferences file.
 enum AIKeys {
+    /// Named before Lumen became Tacet; kept so the saved key is still found.
     private static let service = "Lumen AI key"
 
     private static func query(_ p: AIProvider) -> [String: Any] {
@@ -225,7 +226,7 @@ enum AssistantPrompt {
     """
 
     private static let base = """
-    You are Lumen Assistant, the AI assistant built into Lumen, a native web browser for macOS. You appear in a panel \
+    You are Tacet Assistant, the AI assistant built into Tacet, a native web browser for macOS. You appear in a panel \
     beside the page the user is browsing, and you help them understand, summarise and work with what they read.
 
     What you receive:
@@ -268,7 +269,7 @@ enum AssistantPrompt {
     messages, an attached page, tool results) and sites' home pages such as https://www.apple.com. Any other address \
     is shown to the user as a button instead, and the result tells you so: never write an address from memory \
     with a path or query in the hope that it exists, search for it first.
-    - search_in_tab: opens a search for the given words in a new tab, with the search engine the user chose in Lumen. \
+    - search_in_tab: opens a search for the given words in a new tab, with the search engine the user chose in Tacet. \
     Use it when the user wants to see the search results themselves, such as "search Google for…".
     - new_tab: opens an empty new tab and switches to it.
     - switch_tab: switches to a tab by its number from list_tabs. Call list_tabs first if you don't know the number.
@@ -433,7 +434,7 @@ enum AssistantPrompt {
              required: ["url"]),
     ]
 
-    /// The web tools Lumen runs itself, for providers without their own.
+    /// The web tools Tacet runs itself, for providers without their own.
     static let webTools: [Tool] = [
         Tool(name: "web_search",
              description: "Searches the web and returns up to 10 results with their titles, addresses and snippets.",
@@ -1193,8 +1194,8 @@ enum AIClient {
             if let key { request.setValue("Bearer " + key, forHTTPHeaderField: "Authorization") }
             if provider == .openRouter {
                 // OpenRouter's optional app attribution.
-                request.setValue("https://scadavide55.github.io/Lumen/", forHTTPHeaderField: "HTTP-Referer")
-                request.setValue("Lumen", forHTTPHeaderField: "X-Title")
+                request.setValue("https://scadavide55.github.io/Tacet/", forHTTPHeaderField: "HTTP-Referer")
+                request.setValue("Tacet", forHTTPHeaderField: "X-Title")
             }
             body["messages"] = [["role": "system", "content": AssistantPrompt.system(web: web && tools, control: control && tools, vision: vision && tools)]] + transcript
             if tools {

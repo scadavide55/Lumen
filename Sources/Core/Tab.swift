@@ -420,7 +420,7 @@ final class Tab: NSObject, Identifiable {
     private static func fileName(_ title: String) -> String {
         let cleaned = title.components(separatedBy: CharacterSet(charactersIn: "/\\:?%*|\"<>")).joined(separator: " ")
             .trimmingCharacters(in: .whitespaces)
-        return cleaned.isEmpty ? "Lumen" : String(cleaned.prefix(80))
+        return cleaned.isEmpty ? "Tacet" : String(cleaned.prefix(80))
     }
 
     var certificateSummary: String? {
@@ -757,7 +757,7 @@ extension Tab: WKNavigationDelegate {
         if let last = lastCrash, Date().timeIntervalSince(last) < 15, let u = url ?? webView.url {
             lastCrash = nil
             let e = NSError(domain: "WebKitErrorDomain", code: 0, userInfo: [
-                NSLocalizedDescriptionKey: L("This page stopped working more than once, so Lumen stopped reloading it."),
+                NSLocalizedDescriptionKey: L("This page stopped working more than once, so Tacet stopped reloading it."),
             ])
             failedURL = u
             internalLoad = true
@@ -842,8 +842,8 @@ extension Tab: WKUIDelegate {
             return
         }
         Dialogs.confirm(webView.window, title: String(format: L("Allow “%@” to use your %@?"), origin.host, kind.label),
-                        message: L(isPrivate ? "Lumen remembers your choice until you close this tab."
-                                             : "Lumen remembers your choice for this site. You can change it in Settings › Sites."),
+                        message: L(isPrivate ? "Tacet remembers your choice until you close this tab."
+                                             : "Tacet remembers your choice for this site. You can change it in Settings › Sites."),
                         ok: L("Allow"), cancel: L("Don't Allow")) { [weak self] allowed in
             guard let self else { decisionHandler(.deny); return }
             if self.isPrivate {
@@ -858,7 +858,7 @@ extension Tab: WKUIDelegate {
 
 // MARK: - Web view subclass
 
-/// Adds Lumen's items to the page context menu.
+/// Adds Tacet's items to the page context menu.
 final class LumenWebView: WKWebView {
     weak var tab: Tab?
 
@@ -912,7 +912,7 @@ extension LumenWebView {
         items.forEach(menu.addItem)
     }
 
-    /// One quiet item for selected text, after Copy: Lumen Assistant › Explain, Translate, Summarise, Ask About It.
+    /// One quiet item for selected text, after Copy: Tacet Assistant › Explain, Translate, Summarise, Ask About It.
     func addAssistantItems(to menu: NSMenu) {
         guard Settings.shared.aiEnabled, let tab, let browser = tab.browser,
               let copy = menu.items.firstIndex(where: { $0.identifier?.rawValue == "WKMenuItemIdentifierCopy" }) else { return }
@@ -927,7 +927,7 @@ extension LumenWebView {
                 }
             })
         }
-        let item = NSMenuItem(title: L("Lumen Assistant"), action: nil, keyEquivalent: "")
+        let item = NSMenuItem(title: L("Tacet Assistant"), action: nil, keyEquivalent: "")
         item.image = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
         item.submenu = sub
         menu.insertItem(item, at: copy + 1)
