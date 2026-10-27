@@ -156,7 +156,10 @@ final class Extensions {
 
     func remove(_ id: UUID) {
         guard let item = installed.first(where: { $0.id == id }) else { return }
-        if #available(macOS 15.4, *) { unload(id) }
+        if #available(macOS 15.4, *) {
+            unload(id)
+            removeData(of: item)
+        }
         installed.removeAll { $0.id == id }
         persist()
         if case .folder(let path) = item.source { discardImported(URL(fileURLWithPath: path)) }
@@ -394,6 +397,16 @@ extension Extensions {
         guard let context = runtime.contexts[id] else { return }
         try? controller.unload(context)
         runtime.contexts[id] = nil
+    }
+
+    /// Deletes what a removed extension stored (its settings, lists and so on), found by its fixed identifier.
+    func removeData(of item: Installed) {
+        let types: Set<WKWebExtension.DataType> = [.local, .session, .synchronized]
+        controller.fetchDataRecords(ofTypes: types) { [controller] records in
+            let mine = records.filter { $0.uniqueIdentifier == item.uniqueIdentifier }
+            guard !mine.isEmpty else { return }
+            controller.removeData(ofTypes: types, from: mine) {}
+        }
     }
 
     /// Everything the extension asked for when it was added: the user approved it then.

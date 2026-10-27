@@ -321,5 +321,10 @@ extension BrowserState {
         guard !isPrivate else { return }
         WindowRegistry.shared.setPendingMove(TabMove(tabs: detach(list, keepHistory: profile == profileID), group: group.map { ($0.name, $0.color) }),
                                              profile: profile)
+        // If no window opened for them, the tabs come back here rather than being lost.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self] in
+            guard let move = WindowRegistry.shared.takePendingMove(profile: profile) else { return }
+            (self.flatMap { $0.isClosed ? nil : $0 } ?? WindowRegistry.shared.browsers.first { !$0.isPrivate })?.adopt(move)
+        }
     }
 }

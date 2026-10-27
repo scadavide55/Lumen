@@ -395,12 +395,27 @@ footer .links a:hover { color: var(--fg); }
       <div class="card reveal">
         <div class="icon"><svg viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/></svg></div>
         <h3>Tab groups</h3>
-        <p>Drag a tab onto another to make a group, or let Lumen tidy tabs from the same site into one.</p>
+        <p>Drag a tab onto another, or let Lumen tidy tabs from the same site into one. Save groups for later, sort tabs and move them to another window.</p>
       </div>
       <div class="card reveal">
         <div class="icon"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 12h6M12 9v6"/></svg></div>
         <h3>Sites as apps</h3>
         <p>Install any site as an app with its own window and Dock icon, kept apart from your browsing.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M10 4h4v3a2 2 0 1 0 0 4v0h3v4a2 2 0 1 1 0 4v1h-4v-1a2 2 0 1 0-4 0v1H5v-5h1a2 2 0 1 0 0-4H5V7h5z"/></svg></div>
+        <h3>Extensions</h3>
+        <p>Add the Safari extensions that come with your apps, or Chrome and Firefox ones from a file. You see what each can do first.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg></div>
+        <h3>Reading List, offline</h3>
+        <p>Save an article in Reader with its images and read it later, on a plane or anywhere without a connection.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 7l3 3"/></svg></div>
+        <h3>Customize Site</h3>
+        <p>Give any site its own theme, font and width, hide floating bars or anything you click on, and add your own CSS.</p>
       </div>
     </div>
   </div>
@@ -463,9 +478,11 @@ footer .links a:hover { color: var(--fg); }
     <div class="reveal">
       <div class="eyebrow">Lumen Assistant · Beta</div>
       <h2>Ask the page you're reading.</h2>
-      <p class="sub">Open a panel beside any page with ⇧⌘A and ask for a summary, the key points or an explanation of what you selected. The page comes along automatically, so you don't have to copy anything. It can look things up on the web, open tabs, and with Browser use turned on, click and type on the page for you.</p>
+      <p class="sub">Open a panel beside any page with ⇧⌘A and ask for a summary, the key points or an explanation of what you selected. The page comes along automatically, so you don't have to copy anything. It can read your other tabs, your history and bookmarks, the transcript of a YouTube video, look things up on the web, and with Browser use turned on, click and type on the page for you.</p>
       <ul class="checks">
         <li><span>Your own key: <b>Anthropic</b>, <b>OpenAI</b>, <b>OpenRouter</b>, <b>DeepSeek</b>, or a model on your Mac with <b>Ollama</b> or <b>LM Studio</b></span></li>
+        <li><span><b>Apple's on-device model</b> on macOS 26: free, offline and private, no key needed</span></li>
+        <li><span>Reads <b>other tabs</b>, searches your <b>history</b> and <b>bookmarks</b>, gets <b>YouTube transcripts</b> and takes screenshots of the page</span></li>
         <li><span><b>Web access</b> searches the web and reads pages, and lists its sources under the answer</span></li>
         <li><span><b>Browser use</b>, off until you turn it on, clicks, types and scrolls for you. It never touches password or card fields, and asks before sending, buying or deleting</span></li>
         <li><span>Chat history on your Mac, a full-window chat, and a panel you can resize</span></li>
@@ -575,7 +592,7 @@ footer .links a:hover { color: var(--fg); }
       </details>
       <details class="reveal">
         <summary>Does Lumen collect any data?</summary>
-        <p>No. There are no analytics and no accounts. Lumen only talks to the sites you visit. If you turn them on, it also downloads filter lists from easylist.to and fetches search suggestions from your search engine. Suggestions are off by default. Lumen Assistant (beta) is off too; if you turn it on, your questions and the page you attach go only to the AI provider you chose, with your own key. When it searches the web for you, the search goes to your provider (Anthropic) or to DuckDuckGo (other providers).</p>
+        <p>No. There are no analytics and no accounts. Lumen only talks to the sites you visit. If you turn them on, it also downloads filter lists from easylist.to and fetches search suggestions from your search engine. Suggestions are off by default. Lumen Assistant (beta) is off too; if you turn it on, your questions and the page you attach go only to the AI provider you chose, with your own key. When it searches the web for you, the search goes to your provider (Anthropic) or to DuckDuckGo (other providers). With Apple's on-device model, nothing leaves your Mac.</p>
       </details>
       <details class="reveal">
         <summary>Why does macOS warn me when I open it?</summary>
@@ -588,6 +605,10 @@ footer .links a:hover { color: var(--fg); }
       <details class="reveal">
         <summary>Can I bring my bookmarks and passwords?</summary>
         <p>Yes. Lumen imports bookmarks, history and sign-ins straight from Safari, Chrome, Firefox, Opera, Brave, Edge and Arc. Passwords come across from a CSV exported by the Passwords app or your old browser, and are kept in your Mac's Keychain behind Touch ID.</p>
+      </details>
+      <details class="reveal">
+        <summary>Does Lumen support extensions?</summary>
+        <p>Yes, on macOS 15.4 or later. Lumen runs web extensions, the same kind Safari, Chrome and Firefox use. Add the Safari extensions that come with apps on your Mac in one click from Settings › Extensions, or add a Chrome (.crx), Firefox (.xpi) or unpacked extension from a file. Most work; a few features only Chrome or Firefox have may not. Extensions never run in private windows.</p>
       </details>
       <details class="reveal">
         <summary>Does it block every YouTube ad?</summary>

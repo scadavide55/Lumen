@@ -25,18 +25,28 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 </div>
 
 > [!NOTE]
-> **Lumen 1.6 is the first stable release.** Lumen Assistant is still a beta. If something doesn't work, please report it in [Issues](https://github.com/scadavide55/Lumen/issues).
+> **Lumen 1.6.1** brings web extensions, an offline Reading List, Customize Site, tab organising and a much more capable Lumen Assistant, including Apple's on-device model. Lumen Assistant is still a beta. If something doesn't work, please report it in [Issues](https://github.com/scadavide55/Lumen/issues).
 
 ## Features
 
 **Lumen Assistant (beta)**
 - An AI assistant in a panel beside the page (⇧⌘A): summaries, answers and explanations about what you're reading
 - Bring your own key: Anthropic, OpenAI, OpenRouter, DeepSeek or any OpenAI-compatible server (Ollama, LM Studio)
+- **Apple's on-device model** (macOS 26 with Apple Intelligence): free, offline and private, with no key. It's smaller, so it's best for short tasks
+- Reads your other tabs without switching to them, searches your history and bookmarks, and takes screenshots of the page when the layout matters
+- Full transcripts of YouTube videos, to summarise or ask about a video
+- Select text and right-click for Lumen Assistant › Explain, Translate, Summarise or Ask About It
 - **Web access** (on by default): searches the web and reads pages, with the sources listed under each answer
-- Opens pages and searches in new tabs, and switches between your tabs when you ask
+- Opens pages and searches in new tabs, switches between your tabs and groups them when you ask
 - **Browser use** (off by default): clicks, types, scrolls and drags on the current page for you. It never fills in passwords or card numbers, and asks before sending, buying or deleting anything
 - Chat history on your Mac (not in private windows), a full-window chat view, and a panel you can resize
 - Off by default; page content is treated as data, never as instructions
+
+**Extensions**
+- Web extensions on macOS 15.4 or later, the same kind Safari, Chrome and Firefox use
+- Add the Safari extensions that come with your apps in one click, or add a folder, .zip, .crx (Chrome) or .xpi (Firefox) file
+- See what an extension can do before adding it; extensions never run in private windows
+- Toolbar buttons with badges and popups, right-click menu items and settings pages
 
 **Lumen Shield**
 - Built-in ad and tracker blocking that works offline, toggled with ⇧⌘B
@@ -81,6 +91,7 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 - Search shortcuts, for example `yt lofi` searches YouTube
 - Choice of search engine: DuckDuckGo, Google, Bing, Brave, Startpage, Ecosia, Kagi or your own
 - Reader mode, find on page, per-site zoom
+- Reading List: save articles in Reader with their images to read later, even offline
 - Bookmarks with HTML import and export, searchable history, downloads
 
 **Make it yours**
@@ -88,7 +99,7 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 - Sidebar on the left or right, floating page with rounded corners, compact tabs
 - Window tint that follows the site's colour
 - Start page with clock, greeting, favourites and backgrounds: gradients, animated gradients, your own photo or a short video
-- Custom CSS per site
+- Customize Site: per-site theme, font and width, hide floating bars, images or anything you click on, and your own CSS or JavaScript
 
 ## Keyboard shortcuts
 
