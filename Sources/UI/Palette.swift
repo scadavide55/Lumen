@@ -17,8 +17,8 @@ struct PaletteItem: Identifiable {
 
 /// The command bar: address entry, search, open tabs, bookmarks, history and commands in one list.
 struct CommandPalette: View {
-    @EnvironmentObject var b: BrowserState
-    @ObservedObject private var s = Settings.shared
+    @Environment(BrowserState.self) var b
+    @Bindable private var s = Settings.shared
     @Environment(\.openWindow) private var openWindow
     @Environment(\.openSettings) private var openSettings
     @State private var query = ""

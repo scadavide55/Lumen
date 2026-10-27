@@ -92,13 +92,14 @@ struct Bookmark: Codable, Identifiable, Hashable {
     var added = Date()
 }
 
-final class Bookmarks: ObservableObject {
+@Observable
+final class Bookmarks {
     static let shared = Bookmarks()
-    @Published private(set) var items: [Bookmark] {
+    private(set) var items: [Bookmark] {
         didSet { urls = Set(items.map(\.url)) }
     }
     /// For `contains`, which the address bar asks on every redraw.
-    private var urls: Set<URL>
+    @ObservationIgnored private var urls: Set<URL>
     private let file = StoredFile<[Bookmark]>("bookmarks.json")
 
     private init() {
@@ -208,14 +209,15 @@ struct HistoryEntry: Codable, Identifiable, Hashable {
     var visits: Int = 1
 }
 
-final class History: ObservableObject {
+@Observable
+final class History {
     static let shared = History()
     /// Newest first, one entry per URL.
-    @Published private(set) var entries: [HistoryEntry] {
+    private(set) var entries: [HistoryEntry] {
         didSet { haystacks = nil }
     }
     /// Lowercased "title url" per entry, built once and reused by every search until the history changes.
-    private var haystacks: [String]?
+    @ObservationIgnored private var haystacks: [String]?
     private let db = HistoryDB(Paths.file("history.sqlite"))
 
     private init() {
@@ -247,6 +249,7 @@ final class History: ObservableObject {
         guard !list.isEmpty else { return 0 }
         var byURL = Dictionary(entries.map { ($0.url, $0) }, uniquingKeysWith: { a, _ in a })
         var added = 0
+        var changed: Set<URL> = []
         for e in list where ["http", "https"].contains(e.url.scheme ?? "") {
             if var old = byURL[e.url] {
                 old.visits += e.visits
@@ -257,9 +260,11 @@ final class History: ObservableObject {
                 byURL[e.url] = e
                 added += 1
             }
+            changed.insert(e.url)
         }
         entries = byURL.values.sorted { $0.date > $1.date }
-        db?.save(entries)
+        // Only the imported rows are written; the rest of the history is already on disk.
+        db?.save(changed.compactMap { byURL[$0] })
         return added
     }
 
@@ -281,14 +286,19 @@ final class History: ObservableObject {
     }
 
     /// Waits for history writes still in progress, before Lumen quits.
-    func flush() { db?.flush() }
+    func flush() {
+        db?.flush()
+        db?.checkpoint()
+    }
 
     /// `search` on a background thread, so typing never waits for a large history.
+    @MainActor
     func searchInBackground(_ query: String, limit: Int = 8) async -> [HistoryEntry] {
         await inBackground { entries, hay in History.search(query, entries: entries, haystacks: hay, limit: limit) }
     }
 
     /// Entries containing every word of `query`, newest first, found on a background thread.
+    @MainActor
     func filterInBackground(_ query: String, limit: Int = 500) async -> [HistoryEntry] {
         await inBackground { entries, hay in
             let words = query.lowercased().split(separator: " ").map(String.init)
@@ -297,6 +307,8 @@ final class History: ObservableObject {
     }
 
     /// Runs `work` off the main thread with the history and its lowercase index, building the index if needed.
+    /// The rest stays on the main thread, where the history changes.
+    @MainActor
     private func inBackground(_ work: @escaping @Sendable ([HistoryEntry], [String]) -> [HistoryEntry]) async -> [HistoryEntry] {
         let entries = entries
         let cached = haystacks

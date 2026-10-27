@@ -126,10 +126,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 // MARK: - Menus
 
 struct LumenCommands: Commands {
-    @FocusedObject private var b: BrowserState?
+    @FocusedValue(\.browser) private var b
     @Environment(\.openWindow) private var openWindow
-    @ObservedObject private var s = Settings.shared
-    @ObservedObject private var bookmarks = Bookmarks.shared
+    @Bindable private var s = Settings.shared
+    private var bookmarks = Bookmarks.shared
 
     var body: some Commands {
         CommandGroup(replacing: .newItem) {

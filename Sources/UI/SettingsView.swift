@@ -20,7 +20,7 @@ struct SettingsView: View {
 // MARK: - General
 
 struct GeneralPane: View {
-    @ObservedObject private var s = Settings.shared
+    @Bindable private var s = Settings.shared
     @State private var isDefault = DefaultBrowser.isDefault
     @State private var language: AppLanguage?
     @Environment(\.openWindow) private var openWindow
@@ -121,7 +121,7 @@ struct GeneralPane: View {
 }
 
 struct ProfilesSection: View {
-    @ObservedObject private var s = Settings.shared
+    @Bindable private var s = Settings.shared
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
@@ -183,7 +183,7 @@ struct ProfilesSection: View {
 }
 
 struct UpdateRow: View {
-    @ObservedObject private var updates = UpdateChecker.shared
+    private var updates = UpdateChecker.shared
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
@@ -227,7 +227,7 @@ enum DefaultBrowser {
 // MARK: - Appearance
 
 struct AppearancePane: View {
-    @ObservedObject private var s = Settings.shared
+    @Bindable private var s = Settings.shared
     private let presets = ["#5E5CE6", "#0A84FF", "#30B0C7", "#34C759", "#E8A33D", "#FF6B35", "#FF375F", "#BF5AF2", "#8E8E93"]
 
     var body: some View {
@@ -292,8 +292,8 @@ struct AppearancePane: View {
 // MARK: - Shield
 
 struct ShieldPane: View {
-    @ObservedObject private var s = Settings.shared
-    @ObservedObject private var blocker = ContentBlocker.shared
+    @Bindable private var s = Settings.shared
+    private var blocker = ContentBlocker.shared
     @State private var newHost = ""
     @State private var showClear = false
 
@@ -421,7 +421,7 @@ struct ClearDataSheet: View {
 // MARK: - Search
 
 struct SearchPane: View {
-    @ObservedObject private var s = Settings.shared
+    @Bindable private var s = Settings.shared
     @State private var keyword = ""
     @State private var name = ""
     @State private var template = ""
@@ -476,7 +476,7 @@ struct SearchPane: View {
 // MARK: - Sites
 
 struct SitesPane: View {
-    @ObservedObject private var s = Settings.shared
+    @Bindable private var s = Settings.shared
     @State private var editing: SiteStyle?
 
     var body: some View {
@@ -595,7 +595,7 @@ struct SiteStyleEditor: View {
 // MARK: - Advanced
 
 struct AdvancedPane: View {
-    @ObservedObject private var s = Settings.shared
+    @Bindable private var s = Settings.shared
 
     var body: some View {
         Form {

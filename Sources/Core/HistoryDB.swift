@@ -72,6 +72,9 @@ final class HistoryDB {
     /// Waits for pending writes.
     func flush() { queue.sync {} }
 
+    /// Folds the write-ahead log back into the database and empties it, so it doesn't keep growing.
+    func checkpoint() { queue.sync { exec("PRAGMA wal_checkpoint(TRUNCATE)") } }
+
     // MARK: SQLite helpers
 
     private func exec(_ sql: String) { sqlite3_exec(db, sql, nil, nil, nil) }

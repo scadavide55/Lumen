@@ -2,11 +2,11 @@ import AVFoundation
 import SwiftUI
 
 struct StartPage: View {
-    @ObservedObject var tab: Tab
-    @EnvironmentObject var b: BrowserState
-    @ObservedObject private var s = Settings.shared
-    @ObservedObject private var bookmarks = Bookmarks.shared
-    @ObservedObject private var blocker = ContentBlocker.shared
+    var tab: Tab
+    @Environment(BrowserState.self) var b
+    @Bindable private var s = Settings.shared
+    private var bookmarks = Bookmarks.shared
+    private var blocker = ContentBlocker.shared
 
     private var light: Bool { s.startBackground == .plain }
 
@@ -139,8 +139,8 @@ struct FavoriteTile: View {
 struct StartBackgroundView: View {
     let style: StartBackground
     let isPrivate: Bool
-    @ObservedObject private var s = Settings.shared
-    @ObservedObject private var power = Power.shared
+    @Bindable private var s = Settings.shared
+    private var power = Power.shared
 
     /// Backgrounds hold still in Low Power Mode.
     private var animated: Bool { s.animateBackground && !power.lowPower }

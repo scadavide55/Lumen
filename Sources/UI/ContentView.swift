@@ -1,25 +1,37 @@
 import SwiftUI
 import WebKit
 
+/// Keeps one BrowserState alive for the window. It publishes nothing: views observe the state itself.
+final class BrowserHolder: ObservableObject {
+    let browser: BrowserState
+    init(_ browser: BrowserState) { self.browser = browser }
+}
+
+extension FocusedValues {
+    @Entry var browser: BrowserState?
+}
+
 struct ContentView: View {
-    @StateObject private var browser: BrowserState
-    @ObservedObject private var settings = Settings.shared
+    /// `@StateObject` builds the window's state once; `@State` would build a throwaway BrowserState
+    /// (restoring the session, registering the window) every time SwiftUI re-creates this view.
+    @StateObject private var holder: BrowserHolder
+    private var browser: BrowserState { holder.browser }
+    private var settings = Settings.shared
     @Environment(\.openWindow) private var openWindow
     static var onboardingShown = false
     static var updateChecked = false
 
     init(isPrivate: Bool, profileID: UUID? = nil) {
-        _browser = StateObject(wrappedValue: BrowserState(isPrivate: isPrivate, profileID: profileID))
+        _holder = StateObject(wrappedValue: BrowserHolder(BrowserState(isPrivate: isPrivate, profileID: profileID)))
     }
 
     var body: some View {
         Group {
             if WebApp.isActive { WebAppLayout() } else { BrowserLayout() }
         }
-            .environmentObject(browser)
-            .environmentObject(settings)
+            .environment(browser)
             .tint(settings.accent)
-            .focusedSceneObject(browser)
+            .focusedSceneValue(\.browser, browser)
             .background(WindowAccessor { browser.attach($0) })
             .frame(minWidth: 640, minHeight: 420)
             .ignoresSafeArea()
@@ -39,8 +51,8 @@ struct ContentView: View {
                     browser.showOnboarding = true
                 }
             }
-            .sheet(isPresented: $browser.showOnboarding) { OnboardingView() }
-            .sheet(isPresented: $browser.showInstallApp) {
+            .sheet(isPresented: Bindable(browser).showOnboarding) { OnboardingView() }
+            .sheet(isPresented: Bindable(browser).showInstallApp) {
                 if let tab = browser.current { InstallAppSheet(tab: tab) }
             }
     }
@@ -49,8 +61,8 @@ struct ContentView: View {
 // MARK: - Layout
 
 struct BrowserLayout: View {
-    @EnvironmentObject var b: BrowserState
-    @EnvironmentObject var s: Settings
+    @Environment(BrowserState.self) var b
+    @Bindable var s = Settings.shared
     /// The sidebar width while its edge is dragged, saved to settings only when the drag ends.
     @State private var dragWidth: Double?
 
@@ -108,7 +120,7 @@ struct MainColumn: View {
     let trafficSpace: Bool
     let leadingFlush: Bool
     let trailingFlush: Bool
-    @EnvironmentObject var s: Settings
+    @Bindable var s = Settings.shared
 
     var body: some View {
         let inset: CGFloat = s.insetContent ? 8 : 0
@@ -124,7 +136,7 @@ struct MainColumn: View {
 }
 
 struct PageArea: View {
-    @EnvironmentObject var b: BrowserState
+    @Environment(BrowserState.self) var b
 
     var body: some View {
         HStack(spacing: 6) {
@@ -135,10 +147,10 @@ struct PageArea: View {
 }
 
 struct TabPane: View {
-    @ObservedObject var tab: Tab
+    var tab: Tab
     let isSplit: Bool
-    @EnvironmentObject var b: BrowserState
-    @EnvironmentObject var s: Settings
+    @Environment(BrowserState.self) var b
+    @Bindable var s = Settings.shared
 
     var body: some View {
         let r: CGFloat = s.insetContent ? s.cornerRadius : 0
@@ -279,8 +291,8 @@ struct WindowDragArea: NSViewRepresentable {
 // MARK: - Chrome
 
 struct ChromeBackground: View {
-    @EnvironmentObject var b: BrowserState
-    @EnvironmentObject var s: Settings
+    @Environment(BrowserState.self) var b
+    @Bindable var s = Settings.shared
 
     var body: some View {
         ZStack {
@@ -303,7 +315,7 @@ struct ChromeBackground: View {
 
 /// Washes the chrome with the page's theme colour.
 struct SiteTint: View {
-    @ObservedObject var tab: Tab
+    var tab: Tab
 
     var body: some View {
         Group {
@@ -316,7 +328,7 @@ struct SiteTint: View {
 struct ResizeHandle: View {
     let side: SidebarSide
     @Binding var width: Double?
-    @EnvironmentObject var s: Settings
+    @Bindable var s = Settings.shared
     @State private var start: Double?
 
     var body: some View {
@@ -348,8 +360,8 @@ struct ResizeHandle: View {
 
 /// With the sidebar hidden, hovering the window edge slides it in over the page.
 struct PeekSidebar: View {
-    @EnvironmentObject var b: BrowserState
-    @EnvironmentObject var s: Settings
+    @Environment(BrowserState.self) var b
+    @Bindable var s = Settings.shared
 
     var body: some View {
         let left = s.sidebarSide == .left
@@ -409,7 +421,7 @@ struct IconButton: View {
 }
 
 struct FaviconView: View {
-    @ObservedObject var tab: Tab
+    var tab: Tab
     var size: CGFloat = 16
 
     var body: some View {
@@ -449,8 +461,8 @@ struct StatusBubble: View {
 }
 
 struct SplitHeader: View {
-    @ObservedObject var tab: Tab
-    @EnvironmentObject var b: BrowserState
+    var tab: Tab
+    @Environment(BrowserState.self) var b
 
     var body: some View {
         HStack(spacing: 2) {
@@ -467,7 +479,7 @@ struct SplitHeader: View {
 
 /// The arrow that appears while you pull a page down to reload it.
 struct PullIndicator: View {
-    @ObservedObject var pull: PullToRefresh
+    var pull: PullToRefresh
 
     var body: some View {
         let p = pull.progress

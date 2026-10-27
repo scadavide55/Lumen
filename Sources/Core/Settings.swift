@@ -188,8 +188,8 @@ struct SiteStyle: Codable, Identifiable, Hashable {
 
 // MARK: - Persisted preference wrapper
 
-/// Stores a Codable value in UserDefaults and publishes changes through the
-/// enclosing `Settings` object.
+/// Stores a Codable value in UserDefaults and reports reads and changes to the
+/// enclosing `Settings` object, so a view only redraws for the preferences it reads.
 @propertyWrapper
 struct Pref<Value: Codable> {
     let key: String
@@ -213,13 +213,15 @@ struct Pref<Value: Codable> {
 
     static subscript(
         _enclosingInstance s: Settings,
-        wrapped _: ReferenceWritableKeyPath<Settings, Value>,
+        wrapped wrappedKeyPath: ReferenceWritableKeyPath<Settings, Value>,
         storage k: ReferenceWritableKeyPath<Settings, Pref<Value>>
     ) -> Value {
-        get { s[keyPath: k].value }
+        get {
+            s.registrar.access(s, keyPath: wrappedKeyPath)
+            return s[keyPath: k].value
+        }
         set {
-            s.objectWillChange.send()
-            s[keyPath: k].value = newValue
+            s.registrar.withMutation(of: s, keyPath: wrappedKeyPath) { s[keyPath: k].value = newValue }
             let key = s[keyPath: k].key
             if let data = try? JSONEncoder().encode(newValue) {
                 UserDefaults.standard.set(data, forKey: "lumen." + key)
@@ -231,8 +233,10 @@ struct Pref<Value: Codable> {
 
 // MARK: - Settings
 
-final class Settings: ObservableObject {
+/// Observable by hand rather than with `@Observable`, which can't be combined with the `@Pref` wrapper.
+final class Settings: Observable {
     static let shared = Settings()
+    fileprivate let registrar = ObservationRegistrar()
 
     // Appearance
     @Pref("theme") var theme = ThemeMode.system

@@ -3,7 +3,7 @@ import UniformTypeIdentifiers
 
 /// Saved accounts under a focused sign-in field.
 struct LoginMenuView: View {
-    @ObservedObject var tab: Tab
+    var tab: Tab
     let menu: Tab.LoginMenu
     @State private var hover: String?
 
@@ -94,7 +94,7 @@ private struct ExternalManagerRow: View {
 
 /// "Save password?" after a sign-in.
 struct SavePasswordBanner: View {
-    @ObservedObject var tab: Tab
+    var tab: Tab
     let pending: Tab.PendingLogin
 
     var body: some View {
@@ -125,7 +125,7 @@ struct SavePasswordBanner: View {
 
 /// Warning shown when a password field appears on an unencrypted page.
 struct InsecurePasswordBanner: View {
-    @ObservedObject var tab: Tab
+    var tab: Tab
 
     var body: some View {
         HStack(spacing: 10) {
@@ -148,7 +148,7 @@ struct InsecurePasswordBanner: View {
 
 /// Covers a locked window: a private one after Lumen goes to the background, or any window locked from the File menu.
 struct PrivateLockView: View {
-    @EnvironmentObject var b: BrowserState
+    @Environment(BrowserState.self) var b
 
     var body: some View {
         ZStack {
@@ -175,8 +175,8 @@ struct PrivateLockView: View {
 // MARK: - Settings
 
 struct PasswordsPane: View {
-    @ObservedObject private var s = Settings.shared
-    @ObservedObject private var store = PasswordStore.shared
+    @Bindable private var s = Settings.shared
+    private var store = PasswordStore.shared
     @State private var query = ""
     @State private var revealed: [String: String] = [:]
     @State private var message: String?

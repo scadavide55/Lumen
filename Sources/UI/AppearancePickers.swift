@@ -3,7 +3,7 @@ import UniformTypeIdentifiers
 
 /// Thumbnails of every start page background, plus your own photo or video.
 struct BackgroundPicker: View {
-    @ObservedObject private var s = Settings.shared
+    @Bindable private var s = Settings.shared
     @State private var error: String?
     @State private var importing = false
 
@@ -104,7 +104,7 @@ struct BackgroundPicker: View {
 
 /// Visual choice between the sidebar, separate top tabs and compact top tabs.
 struct TabLayoutPicker: View {
-    @ObservedObject private var s = Settings.shared
+    @Bindable private var s = Settings.shared
 
     var body: some View {
         HStack(spacing: 14) {

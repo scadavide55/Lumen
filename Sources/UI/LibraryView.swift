@@ -1,9 +1,10 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-final class LibraryRouter: ObservableObject {
+@Observable
+final class LibraryRouter {
     static let shared = LibraryRouter()
-    @Published var section = LibraryView.Section.history
+    var section = LibraryView.Section.history
 }
 
 struct LibraryView: View {
@@ -19,7 +20,7 @@ struct LibraryView: View {
         set { LibraryRouter.shared.section = newValue }
     }
 
-    @ObservedObject private var router = LibraryRouter.shared
+    private var router = LibraryRouter.shared
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
@@ -48,7 +49,7 @@ struct LibraryView: View {
 
 struct HistoryList: View {
     let open: ([URL]) -> Void
-    @ObservedObject private var history = History.shared
+    private var history = History.shared
     @State private var query = ""
     @State private var selection = Set<UUID>()
     /// Search results, found off the main thread; nil while the search field is empty.
@@ -135,7 +136,7 @@ struct HistoryList: View {
 
 struct BookmarkList: View {
     let open: ([URL]) -> Void
-    @ObservedObject private var bookmarks = Bookmarks.shared
+    private var bookmarks = Bookmarks.shared
     @State private var selection = Set<UUID>()
     @State private var renaming: Bookmark?
     @State private var newTitle = ""

@@ -2,8 +2,8 @@ import SwiftUI
 
 /// "New update available": version, what's new, a link to the release and an install button.
 struct UpdateView: View {
-    @ObservedObject private var updates = UpdateChecker.shared
-    @ObservedObject private var installer = UpdateInstaller.shared
+    private var updates = UpdateChecker.shared
+    private var installer = UpdateInstaller.shared
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {

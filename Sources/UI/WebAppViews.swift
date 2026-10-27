@@ -2,8 +2,8 @@ import SwiftUI
 
 /// The window of an installed web app: just the site, with a slim title bar.
 struct WebAppLayout: View {
-    @EnvironmentObject var b: BrowserState
-    @EnvironmentObject var s: Settings
+    @Environment(BrowserState.self) var b
+    @Bindable var s = Settings.shared
 
     var body: some View {
         ZStack {
@@ -18,7 +18,7 @@ struct WebAppLayout: View {
 }
 
 private struct WebAppBar: View {
-    @ObservedObject var tab: Tab
+    var tab: Tab
 
     var body: some View {
         ZStack {
@@ -48,7 +48,7 @@ private struct WebAppBar: View {
 
 /// "Install as App": name, icon and start page of the site, then builds the app.
 struct InstallAppSheet: View {
-    @ObservedObject var tab: Tab
+    var tab: Tab
     @Environment(\.dismiss) private var dismiss
     @State private var candidate: WebApp.Candidate?
     @State private var name = ""

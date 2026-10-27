@@ -1,39 +1,38 @@
-import Combine
 import LocalAuthentication
 import SwiftUI
 import WebKit
 
 /// State for one browser window: its tabs, selection, split view and overlays.
-final class BrowserState: ObservableObject {
+@Observable
+final class BrowserState {
     let isPrivate: Bool
     let dataStore: WKWebsiteDataStore
     /// The profile whose cookies and site data this window uses; nil for the main one.
     let profileID: UUID?
     var profile: Profile? { profileID.flatMap { id in Settings.shared.profiles.first { $0.id == id } } }
 
-    @Published var tabs: [Tab] = []
-    @Published var groups: [TabGroup] = []
-    private var popups: [PopupWindow] = []
-    @Published var selectedID: UUID?
-    @Published var splitID: UUID?
-    @Published var sidebarVisible: Bool {
+    var tabs: [Tab] = [] { didSet { sessionChanged() } }
+    var groups: [TabGroup] = []
+    @ObservationIgnored private var popups: [PopupWindow] = []
+    var selectedID: UUID? { didSet { sessionChanged() } }
+    var splitID: UUID? { didSet { sessionChanged() } }
+    var sidebarVisible: Bool {
         didSet { if !isPrivate { Settings.shared.sidebarVisible = sidebarVisible } }
     }
-    @Published var peekSidebar = false
-    @Published var paletteVisible = false
-    @Published var findVisible = false
-    @Published var showOnboarding = false
-    @Published var locked = false
-    @Published var showInstallApp = false
-    var palettePrefill = ""
-    weak var window: NSWindow?
+    var peekSidebar = false
+    var paletteVisible = false
+    var findVisible = false
+    var showOnboarding = false
+    var locked = false
+    var showInstallApp = false
+    @ObservationIgnored var palettePrefill = ""
+    @ObservationIgnored weak var window: NSWindow?
 
-    @Published private(set) var closedTabs: [(snapshot: TabSnapshot, index: Int)] = []
-    private var lastOpened: (opener: UUID, tab: UUID)?
-    private var timer: Timer?
-    private var cancellables = Set<AnyCancellable>()
-    private var keyObserver: NSObjectProtocol?
-    private var lockObserver: NSObjectProtocol?
+    private(set) var closedTabs: [(snapshot: TabSnapshot, index: Int)] = []
+    @ObservationIgnored private var lastOpened: (opener: UUID, tab: UUID)?
+    @ObservationIgnored private var timer: Timer?
+    @ObservationIgnored private var keyObserver: NSObjectProtocol?
+    @ObservationIgnored private var lockObserver: NSObjectProtocol?
 
     var current: Tab? { tabs.first { $0.id == selectedID } }
     var splitTab: Tab? { splitID.flatMap { id in tabs.first { $0.id == id } } }
@@ -75,12 +74,11 @@ final class BrowserState: ObservableObject {
             self.prepareSpare()
         }
         prepareSpare()
-        if !isPrivate {
-            $tabs.combineLatest($selectedID, $splitID)
-                .debounce(for: .seconds(1), scheduler: RunLoop.main)
-                .sink { _ in Session.shared.scheduleSave() }
-                .store(in: &cancellables)
-        }
+    }
+
+    /// Tabs, selection or split changed: the session is saved once things settle (`scheduleSave` waits).
+    private func sessionChanged() {
+        if !isPrivate { Session.shared.scheduleSave() }
     }
 
     deinit {
@@ -523,7 +521,7 @@ final class BrowserState: ObservableObject {
     // MARK: Window lock
 
     /// True when the user locked the window from the File menu, so the lock waits for them instead of asking right away.
-    @Published private(set) var lockedByUser = false
+    private(set) var lockedByUser = false
 
     /// Covers the window until Touch ID or the Mac password unlocks it.
     func lock() {
@@ -536,7 +534,7 @@ final class BrowserState: ObservableObject {
         window?.makeFirstResponder(nil)
     }
 
-    private var unlocking = false
+    @ObservationIgnored private var unlocking = false
 
     func unlock() {
         guard locked, !unlocking else { return }
@@ -561,8 +559,8 @@ final class BrowserState: ObservableObject {
     // MARK: Spare web view
 
     /// A web view built ahead of time, so the next new tab doesn't wait while one is made and its scripts are set up.
-    private var spare: LumenWebView?
-    private var spareObserver: NSObjectProtocol?
+    @ObservationIgnored private var spare: LumenWebView?
+    @ObservationIgnored private var spareObserver: NSObjectProtocol?
 
     func takeSpareWebView() -> LumenWebView? {
         let wv = spare

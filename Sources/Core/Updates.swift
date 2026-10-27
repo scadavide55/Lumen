@@ -1,8 +1,10 @@
+import Observation
 import AppKit
 import CryptoKit
 
 /// Checks GitHub releases for a newer Lumen and can install it in place.
-final class UpdateChecker: ObservableObject {
+@Observable
+final class UpdateChecker {
     static let shared = UpdateChecker()
     static let releasesAPI = URL(string: "https://api.github.com/repos/scadavide55/Lumen/releases?per_page=10")!
 
@@ -16,9 +18,9 @@ final class UpdateChecker: ObservableObject {
         let signature: URL?
     }
 
-    @Published private(set) var available: Release?
-    @Published private(set) var checking = false
-    @Published private(set) var lastResult: String?
+    private(set) var available: Release?
+    private(set) var checking = false
+    private(set) var lastResult: String?
 
     static var currentVersion: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"
@@ -105,7 +107,8 @@ final class UpdateChecker: ObservableObject {
 // MARK: - Installing
 
 /// Downloads a release, checks it is Lumen, swaps it in for the running copy and relaunches.
-final class UpdateInstaller: NSObject, ObservableObject, URLSessionDownloadDelegate {
+@Observable
+final class UpdateInstaller: NSObject, URLSessionDownloadDelegate {
     enum State: Equatable {
         case idle
         case downloading(Double)
@@ -114,9 +117,9 @@ final class UpdateInstaller: NSObject, ObservableObject, URLSessionDownloadDeleg
     }
 
     static let shared = UpdateInstaller()
-    @Published private(set) var state = State.idle
-    private var release: UpdateChecker.Release?
-    private lazy var session = URLSession(configuration: .ephemeral, delegate: self, delegateQueue: .main)
+    private(set) var state = State.idle
+    @ObservationIgnored private var release: UpdateChecker.Release?
+    @ObservationIgnored private lazy var session = URLSession(configuration: .ephemeral, delegate: self, delegateQueue: .main)
 
     /// Public half of the key that signs Lumen updates (see tools/sign-update.swift).
     /// Updates not signed with the matching private key are refused.

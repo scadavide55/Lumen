@@ -1,24 +1,26 @@
+import Observation
 import AppKit
 import WebKit
 
-final class DownloadItem: NSObject, ObservableObject, Identifiable {
+@Observable
+final class DownloadItem: NSObject, Identifiable {
     enum State: Equatable { case active, finished, failed(String), cancelled }
 
     let id = UUID()
     /// Replaced when a stopped download is resumed.
-    fileprivate(set) var download: WKDownload
+    @ObservationIgnored fileprivate(set) var download: WKDownload
     let source: URL?
     /// What WebKit needs to continue a download that failed or was cancelled.
-    @Published fileprivate(set) var resumeData: Data?
-    @Published var filename = L("Download")
-    @Published var destination: URL?
-    @Published var fraction = 0.0
-    @Published var received: Int64 = 0
-    @Published var total: Int64 = 0
-    @Published var state = State.active
+    fileprivate(set) var resumeData: Data?
+    var filename = L("Download")
+    var destination: URL?
+    var fraction = 0.0
+    var received: Int64 = 0
+    var total: Int64 = 0
+    var state = State.active
     let started = Date()
-    private var observation: NSKeyValueObservation?
-    private var lastUpdate = Date.distantPast
+    @ObservationIgnored private var observation: NSKeyValueObservation?
+    @ObservationIgnored private var lastUpdate = Date.distantPast
 
     init(_ download: WKDownload) {
         self.download = download
@@ -66,10 +68,11 @@ final class DownloadItem: NSObject, ObservableObject, Identifiable {
     }
 }
 
-final class DownloadManager: NSObject, ObservableObject, WKDownloadDelegate {
+@Observable
+final class DownloadManager: NSObject, WKDownloadDelegate {
     static let shared = DownloadManager()
-    @Published private(set) var items: [DownloadItem] = []
-    @Published var unseen = false
+    private(set) var items: [DownloadItem] = []
+    var unseen = false
 
     var active: [DownloadItem] { items.filter { $0.state == .active } }
     var overallFraction: Double {

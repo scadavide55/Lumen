@@ -3,49 +3,50 @@ import WebKit
 
 /// One browser tab. The web view is created lazily and released when the tab
 /// hibernates, keeping its back/forward history in `restoreState`.
-final class Tab: NSObject, ObservableObject, Identifiable {
+@Observable
+final class Tab: NSObject, Identifiable {
     let id = UUID()
-    weak var browser: BrowserState?
+    @ObservationIgnored weak var browser: BrowserState?
 
-    @Published var title: String
-    @Published var url: URL?
-    @Published var isLoading = false
-    @Published var canGoBack = false
-    @Published var canGoForward = false
-    @Published var favicon: NSImage?
-    @Published var isPinned: Bool
-    @Published var groupID: UUID?
-    @Published var isPlayingAudio = false
-    @Published var isMuted = false
-    @Published var hoverURL: String?
-    @Published var isReader = false
-    @Published var isSecure = false
-    @Published var themeColor: NSColor?
-    @Published var zoom = 1.0
-    @Published var failedURL: URL?
-    @Published private(set) var webView: LumenWebView?
-    @Published var loginMenu: LoginMenu?
-    @Published var pendingSave: PendingLogin?
-    @Published var insecureWarning = false
-    var lastActive = Date()
+    var title: String
+    var url: URL?
+    var isLoading = false
+    var canGoBack = false
+    var canGoForward = false
+    var favicon: NSImage?
+    var isPinned: Bool
+    var groupID: UUID?
+    var isPlayingAudio = false
+    var isMuted = false
+    var hoverURL: String?
+    var isReader = false
+    var isSecure = false
+    var themeColor: NSColor?
+    var zoom = 1.0
+    var failedURL: URL?
+    private(set) var webView: LumenWebView?
+    var loginMenu: LoginMenu?
+    var pendingSave: PendingLogin?
+    var insecureWarning = false
+    @ObservationIgnored var lastActive = Date()
 
-    private var restoreState: Data?
-    private var pendingURL: URL?
-    private var observers: [NSKeyValueObservation] = []
-    private var tokens: [NSObjectProtocol] = []
-    private var appliedLists: String?
-    private var upgrade: (host: String, original: URL, at: Date)?
-    private var internalLoad = false
-    private var internalNavigation: WKNavigation?
-    private var readerOrigin: URL?
-    private var faviconHost: String?
+    @ObservationIgnored private var restoreState: Data?
+    @ObservationIgnored private var pendingURL: URL?
+    @ObservationIgnored private var observers: [NSKeyValueObservation] = []
+    @ObservationIgnored private var tokens: [NSObjectProtocol] = []
+    @ObservationIgnored private var appliedLists: String?
+    @ObservationIgnored private var upgrade: (host: String, original: URL, at: Date)?
+    @ObservationIgnored private var internalLoad = false
+    @ObservationIgnored private var internalNavigation: WKNavigation?
+    @ObservationIgnored private var readerOrigin: URL?
+    @ObservationIgnored private var faviconHost: String?
     /// Pull to refresh state, kept apart so that only the indicator redraws while you pull.
     let pull = PullToRefresh()
     /// Loading progress, kept apart so that only the progress line redraws while a page loads.
     let load = LoadProgress()
-    private var mediaPermissions: [String: Bool] = [:]
-    private var rememberedUser: (host: String, name: String, at: Date)?
-    private var lastCrash: Date?
+    @ObservationIgnored private var mediaPermissions: [String: Bool] = [:]
+    @ObservationIgnored private var rememberedUser: (host: String, name: String, at: Date)?
+    @ObservationIgnored private var lastCrash: Date?
 
     /// Saved accounts shown under a focused sign-in field, in page-view coordinates.
     struct LoginMenu: Equatable {
@@ -882,19 +883,21 @@ enum Dialogs {
     }
 }
 
-final class LoadProgress: ObservableObject {
-    @Published var value = 0.0
+@Observable
+final class LoadProgress {
+    var value = 0.0
 }
 
 /// Scrolling up past the top of a page with the trackpad reloads it.
-final class PullToRefresh: ObservableObject {
+@Observable
+final class PullToRefresh {
     /// 0 when idle, 1 when letting go reloads the page.
-    @Published private(set) var progress: CGFloat = 0
-    var atTop = true {
+    private(set) var progress: CGFloat = 0
+    @ObservationIgnored var atTop = true {
         didSet { if !atTop { reset() } }
     }
-    private var pulling = false
-    private var distance: CGFloat = 0
+    @ObservationIgnored private var pulling = false
+    @ObservationIgnored private var distance: CGFloat = 0
     static let threshold: CGFloat = 190
 
     /// Feeds a scroll event in. Returns true when the gesture ended past the threshold.

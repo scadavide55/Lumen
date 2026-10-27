@@ -2,11 +2,11 @@ import SwiftUI
 import WebKit
 
 struct AboutView: View {
-    @ObservedObject private var blocker = ContentBlocker.shared
-    @ObservedObject private var updates = UpdateChecker.shared
-    @ObservedObject private var passwords = PasswordStore.shared
-    @ObservedObject private var history = History.shared
-    @ObservedObject private var bookmarks = Bookmarks.shared
+    private var blocker = ContentBlocker.shared
+    private var updates = UpdateChecker.shared
+    private var passwords = PasswordStore.shared
+    private var history = History.shared
+    private var bookmarks = Bookmarks.shared
     @Environment(\.openWindow) private var openWindow
     @State private var appeared = false
 

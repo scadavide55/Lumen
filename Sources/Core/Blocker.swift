@@ -1,3 +1,4 @@
+import Observation
 import WebKit
 
 extension Notification.Name {
@@ -7,20 +8,21 @@ extension Notification.Name {
 
 /// Owns every compiled WebKit rule list: the built-in list, the third-party cookie
 /// list, and optional EasyList / EasyPrivacy lists downloaded and converted at runtime.
-final class ContentBlocker: ObservableObject {
+@Observable
+final class ContentBlocker {
     static let shared = ContentBlocker()
 
-    @Published private(set) var builtInCount = 0
-    @Published private(set) var filterCount = 0
-    @Published private(set) var updating = false
-    @Published private(set) var status = ""
-    @Published private(set) var lastUpdated: Date?
+    private(set) var builtInCount = 0
+    private(set) var filterCount = 0
+    private(set) var updating = false
+    private(set) var status = ""
+    private(set) var lastUpdated: Date?
 
-    private(set) var isReady = false
-    private var readyCallbacks: [() -> Void] = []
-    private var builtIn: WKContentRuleList?
-    private var cookies: WKContentRuleList?
-    private var filters: [WKContentRuleList] = []
+    @ObservationIgnored private(set) var isReady = false
+    @ObservationIgnored private var readyCallbacks: [() -> Void] = []
+    @ObservationIgnored private var builtIn: WKContentRuleList?
+    @ObservationIgnored private var cookies: WKContentRuleList?
+    @ObservationIgnored private var filters: [WKContentRuleList] = []
     private let store = WKContentRuleListStore.default()!
     private let defaults = UserDefaults.standard
 
@@ -71,7 +73,6 @@ final class ContentBlocker: ObservableObject {
             switch key {
             case "easyList", "easyPrivacy": self.updateFilterLists()
             case "adBlock", "thirdPartyCookies", "allowlist":
-                self.objectWillChange.send()
                 NotificationCenter.default.post(name: .blockerChanged, object: nil)
             default: break
             }

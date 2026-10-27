@@ -2,8 +2,8 @@ import SwiftUI
 
 struct Sidebar: View {
     let showsControls: Bool
-    @EnvironmentObject var b: BrowserState
-    @EnvironmentObject var s: Settings
+    @Environment(BrowserState.self) var b
+    @Bindable var s = Settings.shared
 
     var body: some View {
         VStack(spacing: 8) {
@@ -52,8 +52,8 @@ struct Sidebar: View {
 }
 
 struct SidebarToggle: View {
-    @EnvironmentObject var b: BrowserState
-    @EnvironmentObject var s: Settings
+    @Environment(BrowserState.self) var b
+    @Bindable var s = Settings.shared
 
     var body: some View {
         IconButton(systemName: s.sidebarSide == .left ? "sidebar.left" : "sidebar.right", help: "Toggle sidebar (⌘S)") {
@@ -64,7 +64,7 @@ struct SidebarToggle: View {
 }
 
 struct NavButtons: View {
-    @ObservedObject var tab: Tab
+    var tab: Tab
 
     var body: some View {
         HStack(spacing: 2) {
@@ -113,8 +113,8 @@ struct ProfileBadge: View {
 }
 
 struct NewTabRow: View {
-    @EnvironmentObject var b: BrowserState
-    @EnvironmentObject var s: Settings
+    @Environment(BrowserState.self) var b
+    @Bindable var s = Settings.shared
     @State private var hover = false
 
     var body: some View {
@@ -165,7 +165,7 @@ extension Sidebar {
 
 struct GroupHeader: View {
     let group: TabGroup
-    @EnvironmentObject var b: BrowserState
+    @Environment(BrowserState.self) var b
     @State private var hover = false
     @State private var renaming = false
     @State private var name = ""
@@ -235,7 +235,7 @@ struct GroupHeader: View {
 /// Gets what it shows from the sidebar as plain values instead of watching the whole window,
 /// so opening the command bar or switching tabs only redraws the rows that change.
 struct TabRow: View, Equatable {
-    @ObservedObject var tab: Tab
+    var tab: Tab
     let browser: BrowserState
     var grouped = false
     let selected: Bool
@@ -305,7 +305,7 @@ struct TabRow: View, Equatable {
 }
 
 struct PinnedGrid: View {
-    @EnvironmentObject var b: BrowserState
+    @Environment(BrowserState.self) var b
 
     var body: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 44), spacing: 6)], spacing: 6) {
@@ -316,7 +316,7 @@ struct PinnedGrid: View {
 }
 
 struct PinnedTile: View, Equatable {
-    @ObservedObject var tab: Tab
+    var tab: Tab
     let browser: BrowserState
     let selected: Bool
     @Environment(\.colorScheme) private var scheme
@@ -350,8 +350,8 @@ struct PinnedTile: View, Equatable {
 }
 
 struct TabMenu: View {
-    @ObservedObject var tab: Tab
-    @EnvironmentObject var b: BrowserState
+    var tab: Tab
+    @Environment(BrowserState.self) var b
 
     var body: some View {
         Button(tab.isPinned ? LocalizedStringKey("Unpin Tab") : "Pin Tab") { b.togglePin(tab) }
@@ -397,10 +397,10 @@ struct TabMenu: View {
 
 struct SidebarFooter: View {
     let showsDownloads: Bool
-    @EnvironmentObject var b: BrowserState
-    @ObservedObject private var blocker = ContentBlocker.shared
-    @ObservedObject private var updates = UpdateChecker.shared
-    @ObservedObject private var s = Settings.shared
+    @Environment(BrowserState.self) var b
+    private var blocker = ContentBlocker.shared
+    private var updates = UpdateChecker.shared
+    @Bindable private var s = Settings.shared
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
@@ -443,8 +443,8 @@ struct SidebarFooter: View {
 struct TabStrip: View {
     /// Compact: the strip shares the toolbar row and the selected tab shows the address.
     var compact = false
-    @EnvironmentObject var b: BrowserState
-    @EnvironmentObject var s: Settings
+    @Environment(BrowserState.self) var b
+    @Bindable var s = Settings.shared
 
     var body: some View {
         GeometryReader { geo in
@@ -524,7 +524,7 @@ extension TabStrip {
 struct GroupChip: View {
     let group: TabGroup
     let count: Int
-    @EnvironmentObject var b: BrowserState
+    @Environment(BrowserState.self) var b
     @State private var hover = false
     @State private var renaming = false
     @State private var name = ""
@@ -579,7 +579,7 @@ struct GroupChip: View {
 
 /// Safari's compact layout: navigation, tabs and the address in one row.
 struct CompactBar: View {
-    @EnvironmentObject var b: BrowserState
+    @Environment(BrowserState.self) var b
 
     var body: some View {
         HStack(spacing: 4) {
@@ -601,7 +601,7 @@ struct CompactBar: View {
 
 /// Like `TabRow`, takes plain values so only the chips that change are redrawn.
 struct TabChip: View, Equatable {
-    @ObservedObject var tab: Tab
+    var tab: Tab
     let browser: BrowserState
     let selected: Bool
     let alwaysShowTitles: Bool

@@ -6,8 +6,8 @@ extension Notification.Name {
 }
 
 struct FindBar: View {
-    @ObservedObject var tab: Tab
-    @EnvironmentObject var b: BrowserState
+    var tab: Tab
+    @Environment(BrowserState.self) var b
     @State private var text = ""
     @State private var found = true
     @FocusState private var focused: Bool

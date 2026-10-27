@@ -48,7 +48,7 @@ struct OnboardingView: View {
     }
 
     @Environment(\.dismiss) private var dismiss
-    @ObservedObject private var s = Settings.shared
+    @Bindable private var s = Settings.shared
     @State private var step = Step.welcome
     @State private var forward = true
 
@@ -621,7 +621,7 @@ private struct GoogleWebView: NSViewRepresentable {
 }
 
 private struct PasswordsStep: View {
-    @ObservedObject private var s = Settings.shared
+    @Bindable private var s = Settings.shared
     @State private var managers: [ExternalPasswordManager] = []
     @State private var imported: Int?
 
@@ -697,7 +697,7 @@ private struct ManagerRow: View {
 }
 
 private struct ThemeStep: View {
-    @ObservedObject private var s = Settings.shared
+    @Bindable private var s = Settings.shared
     private let presets = ["#5E5CE6", "#0A84FF", "#30B0C7", "#34C759", "#E8A33D", "#FF6B35", "#FF375F", "#BF5AF2"]
 
     var body: some View {
@@ -738,7 +738,7 @@ private struct BackgroundStep: View {
 }
 
 private struct TabsStep: View {
-    @ObservedObject private var s = Settings.shared
+    @Bindable private var s = Settings.shared
 
     var body: some View {
         StepPage(symbol: "rectangle.3.group", title: "Arrange your tabs",
@@ -767,7 +767,7 @@ private struct TabsStep: View {
 }
 
 private struct SearchStep: View {
-    @ObservedObject private var s = Settings.shared
+    @Bindable private var s = Settings.shared
 
     var body: some View {
         StepPage(symbol: "magnifyingglass", title: "Choose your search engine", subtitle: "What you type in the command bar is searched here. Private options are marked.") {
@@ -804,7 +804,7 @@ private struct SearchStep: View {
 }
 
 private struct ShieldStep: View {
-    @ObservedObject private var s = Settings.shared
+    @Bindable private var s = Settings.shared
 
     private enum Level { case off, standard, strict }
     private var level: Level { !s.adBlock ? .off : (s.easyList && s.easyPrivacy ? .strict : .standard) }
@@ -937,7 +937,7 @@ private struct ShortcutsStep: View {
 
 private struct DoneStep: View {
     let finish: () -> Void
-    @ObservedObject private var s = Settings.shared
+    @Bindable private var s = Settings.shared
     @State private var shown = false
 
     var body: some View {

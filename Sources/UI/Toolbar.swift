@@ -2,8 +2,8 @@ import SwiftUI
 
 struct Toolbar: View {
     let trafficSpace: Bool
-    @EnvironmentObject var b: BrowserState
-    @EnvironmentObject var s: Settings
+    @Environment(BrowserState.self) var b
+    @Bindable var s = Settings.shared
 
     var body: some View {
         HStack(spacing: 4) {
@@ -18,9 +18,9 @@ struct Toolbar: View {
 }
 
 struct ToolbarContent: View {
-    @ObservedObject var tab: Tab
-    @EnvironmentObject var b: BrowserState
-    @EnvironmentObject var s: Settings
+    var tab: Tab
+    @Environment(BrowserState.self) var b
+    @Bindable var s = Settings.shared
 
     var body: some View {
         let horizontal = s.tabLayout != .vertical
@@ -40,10 +40,10 @@ struct ToolbarContent: View {
 // MARK: - Address
 
 struct AddressPill: View {
-    @ObservedObject var tab: Tab
-    @EnvironmentObject var b: BrowserState
-    @EnvironmentObject var s: Settings
-    @ObservedObject private var bookmarks = Bookmarks.shared
+    var tab: Tab
+    @Environment(BrowserState.self) var b
+    @Bindable var s = Settings.shared
+    private var bookmarks = Bookmarks.shared
     @State private var hover = false
     @State private var showInfo = false
 
@@ -128,7 +128,7 @@ struct AddressPill: View {
 
 /// The progress line of a loading page; it watches only the progress, not the whole tab.
 struct LoadingLine: View {
-    @ObservedObject var load: LoadProgress
+    var load: LoadProgress
     var body: some View { ProgressLine(progress: load.value) }
 }
 
@@ -149,8 +149,8 @@ struct ProgressLine: View {
 // MARK: - Shield
 
 struct ShieldButton: View {
-    @ObservedObject var tab: Tab
-    @EnvironmentObject var s: Settings
+    var tab: Tab
+    @Bindable var s = Settings.shared
     @State private var show = false
 
     var body: some View {
@@ -163,9 +163,9 @@ struct ShieldButton: View {
 }
 
 struct ShieldPopover: View {
-    @ObservedObject var tab: Tab
-    @ObservedObject private var s = Settings.shared
-    @ObservedObject private var blocker = ContentBlocker.shared
+    var tab: Tab
+    @Bindable private var s = Settings.shared
+    private var blocker = ContentBlocker.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -208,8 +208,8 @@ struct ShieldPopover: View {
 // MARK: - Site information
 
 struct SiteInfoPopover: View {
-    @ObservedObject var tab: Tab
-    @EnvironmentObject var b: BrowserState
+    var tab: Tab
+    @Environment(BrowserState.self) var b
     @State private var cleared = false
 
     var body: some View {
@@ -269,7 +269,7 @@ struct SiteInfoPopover: View {
 // MARK: - Downloads
 
 struct DownloadsButton: View {
-    @ObservedObject private var dm = DownloadManager.shared
+    private var dm = DownloadManager.shared
     @State private var show = false
 
     var body: some View {
@@ -296,7 +296,7 @@ struct DownloadsButton: View {
 }
 
 struct DownloadsList: View {
-    @ObservedObject private var dm = DownloadManager.shared
+    private var dm = DownloadManager.shared
 
     var body: some View {
         VStack(spacing: 0) {
@@ -321,7 +321,7 @@ struct DownloadsList: View {
 }
 
 struct DownloadRow: View {
-    @ObservedObject var item: DownloadItem
+    var item: DownloadItem
     private var dm: DownloadManager { .shared }
 
     var body: some View {
@@ -364,8 +364,8 @@ struct DownloadRow: View {
 // MARK: - Page menu
 
 struct PageMenu: View {
-    @ObservedObject var tab: Tab
-    @EnvironmentObject var b: BrowserState
+    var tab: Tab
+    @Environment(BrowserState.self) var b
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {

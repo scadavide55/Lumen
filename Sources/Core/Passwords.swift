@@ -1,3 +1,4 @@
+import Observation
 import AppKit
 import LocalAuthentication
 import Security
@@ -10,12 +11,13 @@ struct SavedLogin: Identifiable, Hashable {
 
 /// Website passwords kept in the macOS Keychain as internet passwords. Reading one
 /// requires Touch ID or the Mac's password; listing accounts does not.
-final class PasswordStore: ObservableObject {
+@Observable
+final class PasswordStore {
     static let shared = PasswordStore()
     static let marker = "Lumen web password"
 
-    @Published private(set) var logins: [SavedLogin] = []
-    private var unlockedUntil = Date.distantPast
+    private(set) var logins: [SavedLogin] = []
+    @ObservationIgnored private var unlockedUntil = Date.distantPast
 
     private init() { reload() }
 

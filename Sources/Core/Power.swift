@@ -1,11 +1,13 @@
+import Observation
 import Foundation
 
 /// Low Power Mode and memory pressure, so Lumen does less when the Mac asks it to.
-final class Power: ObservableObject {
+@Observable
+final class Power {
     static let shared = Power()
-    @Published private(set) var lowPower = ProcessInfo.processInfo.isLowPowerModeEnabled
-    private var observer: NSObjectProtocol?
-    private var memory: DispatchSourceMemoryPressure?
+    private(set) var lowPower = ProcessInfo.processInfo.isLowPowerModeEnabled
+    @ObservationIgnored private var observer: NSObjectProtocol?
+    @ObservationIgnored private var memory: DispatchSourceMemoryPressure?
 
     func start() {
         observer = NotificationCenter.default.addObserver(forName: .NSProcessInfoPowerStateDidChange, object: nil, queue: .main) { [weak self] _ in
