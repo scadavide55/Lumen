@@ -108,6 +108,7 @@ T = {
     'Yellow': ('Giallo', 'Jaune'),
     'Yours to customise': ('Personalizzabile', 'Personnalisable'),
     '© 2026 Lumen · Made with Swift, SwiftUI and WebKit': ('© 2026 Lumen · Fatto con Swift, SwiftUI e WebKit', '© 2026 Lumen · Fait avec Swift, SwiftUI et WebKit'),
+    'Free software under the GNU GPL v3': ('Software libero sotto GNU GPL v3', 'Logiciel libre sous GNU GPL v3'),
     "Paste and Go": ("Incolla e vai", "Coller et ouvrir"),
     "Paste and Search": ("Incolla e cerca", "Coller et rechercher"),
     "Copy Link as Markdown": ("Copia link in Markdown", "Copier le lien en Markdown"),
@@ -461,9 +462,9 @@ T = {
     "Optional": ("Facoltativo", "Facultatif"),
     "Optional. Lumen never sees your password: you type it on Google's own page.": ("Facoltativo. Lumen non vede mai la tua password: la scrivi direttamente sulla pagina di Google.", "Facultatif. Lumen ne voit jamais votre mot de passe : vous le saisissez sur la page de Google."),
     "Password": ("Password", "Mot de passe"),
-    "Passwords aren't imported, because Lumen doesn't store passwords. To bring them across, export them from your old browser and import them into the Passwords app.":
-        ("Le password non vengono importate, perché Lumen non salva password. Per portarle con te, esportale dal vecchio browser e importale nell'app Password.",
-         "Les mots de passe ne sont pas importés, car Lumen n'enregistre pas de mots de passe. Pour les transférer, exportez-les de votre ancien navigateur et importez-les dans l'app Mots de passe."),
+    "Passwords aren't imported directly, because other browsers keep them encrypted. Export them from your old browser as a CSV file, then use Import from CSV in Settings › Passwords.":
+        ("Le password non vengono importate direttamente, perché gli altri browser le tengono cifrate. Esportale dal vecchio browser in un file CSV, poi usa Importa da CSV in Impostazioni › Password.",
+         "Les mots de passe ne sont pas importés directement, car les autres navigateurs les gardent chiffrés. Exportez-les depuis votre ancien navigateur en CSV, puis utilisez Importer depuis un CSV dans Réglages › Mots de passe."),
     "Permission denied": ("Permesso negato", "Autorisation refusée"),
     "Pick your look": ("Scegli il tuo stile", "Choisissez votre style"),
     "Pin Tab": ("Fissa scheda", "Épingler l'onglet"),

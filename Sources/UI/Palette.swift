@@ -195,6 +195,8 @@ struct CommandPalette: View {
             return
         }
         historyTask = Task {
+            try? await Task.sleep(for: .milliseconds(120))
+            guard !Task.isCancelled else { return }
             let hits = await History.shared.searchInBackground(trimmed, limit: 6)
             if !Task.isCancelled { historyHits = hits }
         }
@@ -285,7 +287,7 @@ struct CommandPalette: View {
     }
 
     private func command(_ title: String, _ symbol: String, _ detail: String = "", _ action: @escaping () -> Void) -> PaletteItem {
-        PaletteItem(id: "c" + title, icon: .symbol(symbol), title: title, subtitle: detail, badge: "Command", run: { _ in action() })
+        PaletteItem(id: "c" + title, icon: .symbol(symbol), title: L(title), subtitle: L(detail), badge: "Command", run: { _ in action() })
     }
 
     private var commands: [PaletteItem] {
@@ -380,9 +382,9 @@ struct PaletteRow: View, Equatable {
                 .fill(selected ? Color.white.opacity(0.18) : Color.primary.opacity(0.06)))
 
             VStack(alignment: .leading, spacing: 1) {
-                Text(L(item.title)).font(.system(size: 13, weight: .medium)).lineLimit(1)
+                Text(verbatim: item.title).font(.system(size: 13, weight: .medium)).lineLimit(1)
                 if !item.subtitle.isEmpty {
-                    Text(L(item.subtitle)).font(.system(size: 11)).lineLimit(1).truncationMode(.middle)
+                    Text(verbatim: item.subtitle).font(.system(size: 11)).lineLimit(1).truncationMode(.middle)
                         .foregroundStyle(selected ? Color.white.opacity(0.75) : .secondary)
                 }
             }

@@ -130,7 +130,7 @@ struct FavoriteTile: View {
         .buttonStyle(.plain)
         .onHover { h in withAnimation(.easeOut(duration: 0.12)) { hover = h } }
         .contextMenu {
-            Button("Remove from Favorites") { Bookmarks.shared.remove([bookmark.id]) }
+            Button("Remove Bookmark") { Bookmarks.shared.remove([bookmark.id]) }
         }
         .help(bookmark.url.absoluteString)
     }

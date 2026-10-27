@@ -145,7 +145,7 @@ struct LumenCommands: Commands {
                 }
             }
             Divider()
-            Button("Open Location…") { b?.showPalette() }.keyboardShortcut("l").disabled(b == nil)
+            Button("Open Location…") { b?.togglePalette() }.keyboardShortcut("l").disabled(b == nil)
             Button("Reopen Closed Tab") { b?.reopenClosed() }.keyboardShortcut("t", modifiers: [.command, .shift]).disabled(b == nil)
             Divider()
             Button("Close Tab") {
@@ -180,7 +180,7 @@ struct LumenCommands: Commands {
 
         CommandGroup(replacing: .sidebar) {
             Button("Toggle Sidebar") { b?.sidebarVisible.toggle() }.keyboardShortcut("s").disabled(b == nil)
-            Button("Command Bar") { b?.showPalette("") }.keyboardShortcut("k").disabled(b == nil)
+            Button("Command Bar") { b?.togglePalette("") }.keyboardShortcut("k").disabled(b == nil)
             Divider()
             Button("Reader") { b?.current?.toggleReader() }.keyboardShortcut("r", modifiers: [.command, .shift]).disabled(b == nil)
             Button("Split View") {

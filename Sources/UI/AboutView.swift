@@ -18,25 +18,27 @@ struct AboutView: View {
     private var openTabs: Int { WindowRegistry.shared.browsers.reduce(0) { $0 + $1.tabs.count } }
 
     var body: some View {
-        ZStack {
-            FlowGradient().opacity(0.9)
-            Color.black.opacity(0.35)
-            VStack(spacing: 0) {
-                hero
-                    .padding(.top, 34)
-                stats
-                    .padding(.top, 26)
-                links
-                    .padding(.top, 22)
-                Spacer(minLength: 16)
-                footer
-                    .padding(.bottom, 16)
-            }
-            .padding(.horizontal, 28)
-            .foregroundStyle(.white)
+        VStack(spacing: 0) {
+            hero
+                .padding(.top, 34)
+            stats
+                .padding(.top, 26)
+            links
+                .padding(.top, 22)
+            Spacer(minLength: 16)
+            footer
+                .padding(.bottom, 16)
         }
+        .padding(.horizontal, 28)
+        .foregroundStyle(.white)
         .frame(width: 520, height: 560)
-        .ignoresSafeArea()
+        .background {
+            ZStack {
+                FlowGradient().opacity(0.9)
+                Color.black.opacity(0.35)
+            }
+            .ignoresSafeArea()
+        }
         .onAppear {
             withAnimation(.spring(response: 0.7, dampingFraction: 0.7)) { appeared = true }
         }
@@ -136,6 +138,7 @@ struct AboutView: View {
         VStack(spacing: 4) {
             Text("No accounts, no analytics, no tracking.").font(.system(size: 11.5, weight: .medium))
             Text("© 2026 Lumen · Made with Swift, SwiftUI and WebKit").font(.system(size: 10.5)).opacity(0.65)
+            Text("Free software under the GNU GPL v3").font(.system(size: 10.5)).opacity(0.65)
         }
         .opacity(appeared ? 1 : 0)
         .animation(.easeOut(duration: 0.6).delay(0.45), value: appeared)

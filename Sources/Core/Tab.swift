@@ -378,7 +378,7 @@ final class Tab: NSObject, ObservableObject, Identifiable {
             switch key {
             case "gpc", "cookieBanners", "youtubeAds", "forceDark", "siteStyles", "adBlock", "allowlist":
                 Scripts.install(on: wv.configuration.userContentController)
-                if ["forceDark", "siteStyles"].contains(key), self.isSelected, self.url != nil { wv.reload() }
+                if ["forceDark", "siteStyles", "cookieBanners", "youtubeAds", "gpc"].contains(key), self.isSelected, self.url != nil { wv.reload() }
             case "developer":
                 wv.isInspectable = Settings.shared.developer
             case "uaMode", "customUA":

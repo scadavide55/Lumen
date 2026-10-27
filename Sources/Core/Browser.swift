@@ -76,7 +76,7 @@ final class BrowserState: ObservableObject {
         }
         prepareSpare()
         if !isPrivate {
-            $tabs.combineLatest($selectedID)
+            $tabs.combineLatest($selectedID, $splitID)
                 .debounce(for: .seconds(1), scheduler: RunLoop.main)
                 .sink { _ in Session.shared.scheduleSave() }
                 .store(in: &cancellables)
@@ -89,6 +89,8 @@ final class BrowserState: ObservableObject {
         if let lockObserver { NotificationCenter.default.removeObserver(lockObserver) }
         if let spareObserver { NotificationCenter.default.removeObserver(spareObserver) }
         tabs.forEach { $0.close() }
+        // Closing a window changes what the next launch restores.
+        if !isPrivate { DispatchQueue.main.async { Session.shared.scheduleSave() } }
     }
 
     func attach(_ window: NSWindow) {
@@ -116,10 +118,15 @@ final class BrowserState: ObservableObject {
         }
         normalizeOrder()
         if !tabs.isEmpty { select(tabs[max(0, min(snap.selected, tabs.count - 1))]) }
+        if let i = snap.split, tabs.indices.contains(i), tabs[i].id != selectedID {
+            tabs[i].ensureWebView()
+            splitID = tabs[i].id
+        }
     }
 
     func snapshot() -> WindowSnapshot {
-        WindowSnapshot(tabs: tabs.map { $0.snapshot() }, selected: tabs.firstIndex { $0.id == selectedID } ?? 0, groups: groups, profile: profileID)
+        WindowSnapshot(tabs: tabs.map { $0.snapshot() }, selected: tabs.firstIndex { $0.id == selectedID } ?? 0, groups: groups, profile: profileID,
+                       split: splitID.flatMap { id in tabs.firstIndex { $0.id == id } })
     }
 
     // MARK: Opening and selecting
@@ -580,6 +587,11 @@ final class BrowserState: ObservableObject {
         palettePrefill = prefill ?? current?.url?.absoluteString ?? ""
         findVisible = false
         paletteVisible = true
+    }
+
+    /// ⌘L and ⌘K: the same shortcut that opens the command bar closes it.
+    func togglePalette(_ prefill: String? = nil) {
+        if paletteVisible { paletteVisible = false } else { showPalette(prefill) }
     }
 
     func showFind() {

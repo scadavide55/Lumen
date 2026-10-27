@@ -13,6 +13,7 @@ final class HistoryDB {
             sqlite3_close(db)
             return nil
         }
+        sqlite3_busy_timeout(db, 3000)
         exec("PRAGMA journal_mode=WAL")
         exec("PRAGMA synchronous=NORMAL")
         exec("CREATE TABLE IF NOT EXISTS visits (id TEXT PRIMARY KEY, url TEXT NOT NULL UNIQUE, title TEXT NOT NULL, date REAL NOT NULL, visits INTEGER NOT NULL)")

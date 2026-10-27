@@ -70,7 +70,7 @@ struct ImportView: View {
 
             if let result { ResultView(result: result, source: resultSource) }
 
-            Text("Passwords aren't imported, because Lumen doesn't store passwords. To bring them across, export them from your old browser and import them into the Passwords app.")
+            Text("Passwords aren't imported directly, because other browsers keep them encrypted. Export them from your old browser as a CSV file, then use Import from CSV in Settings › Passwords.")
                 .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
 
             HStack {

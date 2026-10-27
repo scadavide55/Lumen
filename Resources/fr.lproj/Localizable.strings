@@ -203,6 +203,7 @@
 "Forward" = "Avant";
 "Forward (⌘])" = "Avant (⌘])";
 "Free memory used by background tabs" = "Libérer la mémoire des onglets en arrière-plan";
+"Free software under the GNU GPL v3" = "Logiciel libre sous GNU GPL v3";
 "General" = "Général";
 "Get Started" = "Commencer";
 "Go Back" = "Revenir en arrière";
@@ -387,7 +388,7 @@
 "Password manager" = "Gestionnaire de mots de passe";
 "Passwords" = "Mots de passe";
 "Passwords are stored in your Mac's Keychain, encrypted by macOS. Lumen asks for Touch ID or your Mac password before filling or showing one." = "Les mots de passe sont stockés dans le trousseau de votre Mac, chiffrés par macOS. Lumen demande Touch ID ou le mot de passe du Mac avant de les remplir ou de les afficher.";
-"Passwords aren't imported, because Lumen doesn't store passwords. To bring them across, export them from your old browser and import them into the Passwords app." = "Les mots de passe ne sont pas importés, car Lumen n'enregistre pas de mots de passe. Pour les transférer, exportez-les de votre ancien navigateur et importez-les dans l'app Mots de passe.";
+"Passwords aren't imported directly, because other browsers keep them encrypted. Export them from your old browser as a CSV file, then use Import from CSV in Settings › Passwords." = "Les mots de passe ne sont pas importés directement, car les autres navigateurs les gardent chiffrés. Exportez-les depuis votre ancien navigateur en CSV, puis utilisez Importer depuis un CSV dans Réglages › Mots de passe.";
 "Paste and Go" = "Coller et ouvrir";
 "Paste and Search" = "Coller et rechercher";
 "Permission denied" = "Autorisation refusée";

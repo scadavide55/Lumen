@@ -133,11 +133,11 @@ enum ProfileCleanup {
 
     /// Removes folders left by profiles deleted last time. It runs once a page has loaded,
     /// because WebKit crashes when asked to remove a profile before it has started.
-    static func finishPending() {
+    static func finishPending(attempt: Int = 0) {
         let ids = pending.compactMap(UUID.init)
         guard !ids.isEmpty else { return }
         guard WindowRegistry.shared.browsers.contains(where: { $0.current?.webView != nil }) else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 10) { finishPending() }
+            if attempt < 12 { DispatchQueue.main.asyncAfter(deadline: .now() + 10) { finishPending(attempt: attempt + 1) } }
             return
         }
         pending = []

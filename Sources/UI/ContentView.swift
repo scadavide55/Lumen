@@ -29,7 +29,7 @@ struct ContentView: View {
                 for _ in 0..<extra { openWindow(id: "main") }
                 if !ContentView.updateChecked && settings.checkUpdates {
                     ContentView.updateChecked = true
-                    UpdateChecker.shared.check(force: true) {
+                    UpdateChecker.shared.check {
                         if UpdateChecker.shared.announceable != nil && settings.onboarded { openWindow(id: "update") }
                     }
                 }

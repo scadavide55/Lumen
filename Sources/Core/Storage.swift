@@ -350,6 +350,8 @@ struct WindowSnapshot: Codable {
     var selected: Int
     var groups: [TabGroup]?
     var profile: UUID?
+    /// Index of the tab shown beside the selected one.
+    var split: Int?
 }
 
 struct TabGroup: Identifiable, Codable, Equatable {
@@ -460,7 +462,7 @@ final class Favicons {
     }()
     /// Hosts with no icon on disk, so lists that redraw don't hit the disk again for them.
     private var missing: Set<String> = []
-    private var inFlight: Set<String> = []
+    private var waiting: [String: [(NSImage) -> Void]] = [:]
     private let folder = Paths.folder("Favicons")
     private let session: URLSession = {
         let c = URLSessionConfiguration.ephemeral
@@ -485,19 +487,20 @@ final class Favicons {
 
     func fetch(_ url: URL, host: String, persist: Bool, done: @escaping (NSImage) -> Void) {
         let key = host.lowercased()
-        guard !inFlight.contains(key) else { return }
-        inFlight.insert(key)
+        // Tabs asking for the same host while it loads all get the icon, not just the first.
+        if waiting[key] != nil { waiting[key]?.append(done); return }
+        waiting[key] = [done]
         session.dataTask(with: url) { [weak self] data, response, _ in
             DispatchQueue.main.async {
                 guard let self else { return }
-                self.inFlight.remove(key)
+                let callbacks = self.waiting.removeValue(forKey: key) ?? []
                 guard let data, data.count < 1_000_000,
                       (response as? HTTPURLResponse)?.statusCode ?? 200 < 400,
                       let img = NSImage(data: data), img.isValid else { return }
                 self.memory.setObject(img, forKey: key as NSString)
                 self.missing.remove(key)
                 if persist { try? data.write(to: self.folder.appendingPathComponent(key + ".icon"), options: .atomic) }
-                done(img)
+                callbacks.forEach { $0(img) }
             }
         }.resume()
     }
