@@ -205,8 +205,9 @@ struct MainColumn: View {
         let inset: CGFloat = s.insetContent ? 8 : 0
         VStack(spacing: 0) {
             if toolbar { Toolbar(trafficSpace: trafficSpace) }
+            // The gap above the page belongs to the bar over it, so it moves the window too.
+            if !toolbar && inset > 0 { WindowDragArea().frame(height: inset) }
             PageArea()
-                .padding(.top, toolbar ? 0 : inset)
                 .padding(.bottom, inset)
                 .padding(.leading, leadingFlush ? 0 : inset)
                 .padding(.trailing, trailingFlush ? 0 : inset)

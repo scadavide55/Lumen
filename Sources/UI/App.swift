@@ -85,6 +85,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidBecomeActive(_ notification: Notification) {
         UpdateChecker.shared.check()
+        PendingImport.retry()
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {

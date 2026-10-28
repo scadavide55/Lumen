@@ -529,6 +529,7 @@ private struct ImportLine: View {
                     }
                     .controlSize(.small)
                 }
+                Text("Turn on Tacet in the list. When you come back to Tacet, the import finishes by itself.").font(.caption).foregroundStyle(.secondary)
             } else {
                 ForEach(result.warnings, id: \.self) { Label($0, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange) }
             }
@@ -629,7 +630,7 @@ private struct PasswordsStep: View {
 
     var body: some View {
         StepPage(symbol: "key.fill", title: "Your passwords",
-                 subtitle: "Tacet saves passwords in your Mac's Keychain and asks for Touch ID before filling them. Already use another password manager? Pick it here.") {
+                 subtitle: "Tacet keeps the passwords you save in it in your Mac's Keychain and asks for Touch ID before filling them. It can't see the ones saved in Safari: bring them over below. Already use another password manager? Pick it here.") {
             VStack(spacing: 14) {
                 VStack(spacing: 8) {
                     ManagerRow(name: L("Tacet (Keychain and Touch ID)"), detail: L("Saves and fills passwords for you. Recommended."),

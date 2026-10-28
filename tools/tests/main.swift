@@ -561,5 +561,21 @@ if let q = refFor(listing, "Search"), let pw = refFor(listing, "type=password"),
     check(false, "page control: refs found", listing)
 }
 
+// MARK: Sign-in fields inside shadow roots (Reddit's login)
+
+_ = js("""
+document.body.innerHTML = '<div id="host"></div>';
+const root = document.getElementById('host').attachShadow({ mode: 'open' });
+root.innerHTML = '<div id="u"></div><div id="p"></div>';
+root.getElementById('u').attachShadow({ mode: 'open' }).innerHTML = '<input name="username" autocomplete="username">';
+root.getElementById('p').attachShadow({ mode: 'open' }).innerHTML = '<input type="password" name="password">';
+""")
+_ = js(Scripts.logins)
+eq(js("window.__lumenFill('me@example.com', 'hunter2')") as? Bool, true, "logins: finds fields in shadow roots")
+eq(js("document.getElementById('host').shadowRoot.getElementById('u').shadowRoot.querySelector('input').value") as? String,
+   "me@example.com", "logins: fills the username in a shadow root")
+eq(js("document.getElementById('host').shadowRoot.getElementById('p').shadowRoot.querySelector('input').value") as? String,
+   "hunter2", "logins: fills the password in a shadow root")
+
 print("\(passed) passed, \(failures) failed")
 exit(failures == 0 ? 0 : 1)

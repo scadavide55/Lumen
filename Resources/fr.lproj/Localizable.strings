@@ -986,12 +986,12 @@
 "Tacet is not your default browser" = "Tacet n'est pas votre navigateur par défaut";
 "Tacet is up to date." = "Tacet est à jour.";
 "Tacet is your default browser" = "Tacet est votre navigateur par défaut";
+"Tacet keeps the passwords you save in it in your Mac's Keychain and asks for Touch ID before filling them. It can't see the ones saved in Safari: bring them over below. Already use another password manager? Pick it here." = "Tacet conserve dans le trousseau de votre Mac les mots de passe que vous y enregistrez et demande Touch ID avant de les remplir. Il ne voit pas ceux enregistrés dans Safari : importez-les ci-dessous. Vous utilisez déjà un autre gestionnaire ? Choisissez-le ici.";
 "Tacet looks for Safari, Firefox and Chromium browsers such as Chrome, Opera, Brave, Edge and Arc." = "Tacet recherche Safari, Firefox et les navigateurs Chromium comme Chrome, Opera, Brave, Edge et Arc.";
 "Tacet now has a signature of its own, so after this update macOS may ask once more to let Tacet use its Keychain items. Choose Always Allow: future updates won't ask again." = "Tacet a maintenant sa propre signature : après cette mise à jour, macOS peut demander une dernière fois d’autoriser Tacet à utiliser ses éléments du trousseau. Choisissez Toujours autoriser : les prochaines mises à jour ne le demanderont plus.";
 "Tacet opens it from sign-in pages so you can copy passwords. Tacet won't offer to save passwords." = "Tacet l'ouvre depuis les pages de connexion pour copier vos mots de passe. Tacet ne proposera pas d'enregistrer les mots de passe.";
 "Tacet remembers your choice for this site. You can change it in Settings › Sites." = "Tacet retient votre choix pour ce site. Vous pouvez le modifier dans Réglages › Sites.";
 "Tacet remembers your choice until you close this tab." = "Tacet se souvient de votre choix jusqu'à la fermeture de cet onglet.";
-"Tacet saves passwords in your Mac's Keychain and asks for Touch ID before filling them. Already use another password manager? Pick it here." = "Tacet enregistre les mots de passe dans le trousseau de votre Mac et demande Touch ID avant de les remplir. Vous utilisez déjà un autre gestionnaire ? Choisissez-le ici.";
 "Tacet's developer read this plugin and checked what it does." = "Le développeur de Tacet a lu ce plugin et vérifié ce qu’il fait.";
 "Take Screenshot of Page" = "Capturer la page";
 "Taking a screenshot of the page" = "Capture d'écran de la page";
@@ -1090,7 +1090,7 @@
 "Turn on" = "Activer";
 "Turn on Apple Intelligence in System Settings to use the Apple model." = "Activez Apple Intelligence dans Réglages Système pour utiliser le modèle Apple.";
 "Turn on Tacet Assistant" = "Activer l'Assistant Tacet";
-"Turn on Tacet in the list, quit and reopen Tacet, then import again." = "Activez Tacet dans la liste, quittez puis rouvrez Tacet, et importez à nouveau.";
+"Turn on Tacet in the list. When you come back to Tacet, the import finishes by itself." = "Activez Tacet dans la liste. Quand vous revenez dans Tacet, l'importation se termine toute seule.";
 "Turn on browser use?" = "Activer le contrôle du navigateur ?";
 "Turn on this site's changes" = "Activer les changements de ce site";
 "Turned off" = "Désactivée";

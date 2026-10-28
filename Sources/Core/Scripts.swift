@@ -139,13 +139,30 @@ enum Scripts {
       const textual = (i) => i instanceof HTMLInputElement && /^(text|email|tel|)$/.test(i.type);
       const userish = (i) => textual(i) && (i.type === 'email' ||
         /user|email|e-mail|login|account|identifier|mail|phone/i.test([i.autocomplete, i.name, i.id, i.placeholder, i.getAttribute('aria-label')].join(' ')));
+      // Sign-in forms built from web components (Reddit's, for one) keep their fields in shadow roots, which
+      // querySelectorAll doesn't enter: walk the open ones too, in page order.
+      const deepAll = (root, sel, out = []) => {
+        for (const el of root.querySelectorAll('*')) {
+          if (el.matches(sel)) out.push(el);
+          if (el.shadowRoot) deepAll(el.shadowRoot, sel, out);
+        }
+        return out;
+      };
+      // The field itself rather than the component around it, which is what events and activeElement report.
+      const inner = (e) => (e.composedPath ? e.composedPath()[0] : e.target);
+      const active = () => {
+        let a = document.activeElement;
+        while (a && a.shadowRoot && a.shadowRoot.activeElement) a = a.shadowRoot.activeElement;
+        return a instanceof HTMLInputElement ? a : null;
+      };
       const fields = (anchor) => {
         const scope = (anchor && anchor.form) || document;
-        const pw = [...scope.querySelectorAll('input[type=password]')].filter(visible)[0] || null;
-        let user = scope.querySelector('input[autocomplete~=username], input[autocomplete~=email]');
-        if (!user || !visible(user)) {
-          const inputs = [...scope.querySelectorAll('input')].filter((i) => visible(i) && textual(i));
-          const before = pw ? inputs.filter((i) => i.compareDocumentPosition(pw) & Node.DOCUMENT_POSITION_FOLLOWING) : inputs.filter(userish);
+        const all = deepAll(scope, 'input').filter(visible);
+        const pw = all.find((i) => i.type === 'password') || null;
+        let user = all.find((i) => /(^|\s)(username|email)(\s|$)/.test(i.autocomplete || '')) || null;
+        if (!user) {
+          const inputs = all.filter(textual);
+          const before = pw ? inputs.filter((i) => all.indexOf(i) < all.indexOf(pw)) : inputs.filter(userish);
           user = before.reverse().find(userish) || before[0] || null;
         }
         return { user, pw };
@@ -154,7 +171,7 @@ enum Scripts {
       // Only tells Tacet when a menu may be showing, so scrolling doesn't send a message every frame.
       let menuOpen = false;
       document.addEventListener('focusin', (e) => {
-        const t = e.target;
+        const t = inner(e);
         if (!(t instanceof HTMLInputElement)) return;
         const f = fields(t);
         const isPw = t.type === 'password';
@@ -163,14 +180,14 @@ enum Scripts {
         const r = t.getBoundingClientRect();
         const scope = t.form || document;
         const isNew = isPw && (/new-password/.test(t.autocomplete || '') ||
-          [...scope.querySelectorAll('input[type=password]')].filter(visible).length > 1 ||
+          deepAll(scope, 'input[type=password]').filter(visible).length > 1 ||
           /sign.?up|register|create|join|iscri|registra|inscri|nuova password|new password|nouveau mot/i.test(
             [scope.action || '', scope.id || '', scope.className || '', t.name, t.id, t.placeholder].join(' ')));
         post({ type: 'loginFocus', x: r.left, y: r.bottom, w: r.width, newPassword: isNew });
         menuOpen = true;
       }, true);
       const hide = () => { if (menuOpen) { menuOpen = false; post({ type: 'loginBlur' }); } };
-      document.addEventListener('mousedown', (e) => { if (!(e.target instanceof HTMLInputElement)) hide(); }, true);
+      document.addEventListener('mousedown', (e) => { if (!(inner(e) instanceof HTMLInputElement)) hide(); }, true);
       window.addEventListener('scroll', hide, { passive: true, capture: true });
 
       let last = '';
@@ -187,21 +204,21 @@ enum Scripts {
       };
       document.addEventListener('submit', (e) => capture(e.target.querySelector('input')), true);
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && e.target instanceof HTMLInputElement) capture(e.target);
+        if (e.key === 'Enter' && inner(e) instanceof HTMLInputElement) capture(inner(e));
       }, true);
       document.addEventListener('click', (e) => {
-        const b = e.target.closest && e.target.closest('button, input[type=submit], [role=button]');
+        const b = e.composedPath().find((el) => el.matches && el.matches('button, input[type=submit], [role=button]'));
         if (!b) return;
         const label = [b.textContent, b.value, b.getAttribute('aria-label')].join(' ');
         if (b.type === 'submit' || /log\s?in|sign\s?in|accedi|entra|connexion|connecter|continu|next|avanti|suivant|submit/i.test(label)) {
-          capture(b.form ? b.form.querySelector('input') : document.activeElement);
+          capture(b.form ? b.form.querySelector('input') : active());
         }
       }, true);
 
       window.__lumenFillNew = (password) => {
-        const anchor = document.activeElement instanceof HTMLInputElement ? document.activeElement : null;
+        const anchor = active();
         const scope = (anchor && anchor.form) || document;
-        const fields = [...scope.querySelectorAll('input[type=password]')].filter(visible)
+        const fields = deepAll(scope, 'input[type=password]').filter(visible)
           .filter((p) => !/current-password/.test(p.autocomplete || ''));
         for (const el of fields) {
           Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, password);
@@ -212,7 +229,7 @@ enum Scripts {
       };
 
       window.__lumenFill = (username, password) => {
-        const anchor = document.activeElement instanceof HTMLInputElement ? document.activeElement : null;
+        const anchor = active();
         const f = fields(anchor);
         const set = (el, v) => {
           Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, v);

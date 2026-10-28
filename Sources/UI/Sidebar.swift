@@ -806,6 +806,10 @@ struct TabStrip: View {
                     }
                 }
                 .padding(.horizontal, compact ? 2 : 8)
+                // The strip's empty part and the gaps between tabs move the window, like a title bar: in the
+                // compact layout this row is most of the window's top.
+                .frame(minWidth: geo.size.width, minHeight: geo.size.height, alignment: .leading)
+                .background(WindowDragArea())
             }
         }
         .frame(height: 34)

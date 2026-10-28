@@ -27,7 +27,7 @@ struct BrowserProfile: Identifiable, Hashable {
     let path: URL
 }
 
-struct ImportOptions {
+struct ImportOptions: Codable {
     var bookmarks = true
     var history = true
     var cookies = true
@@ -196,6 +196,7 @@ enum BrowserImporter {
                 }
                 group.notify(queue: .main) {
                     result.cookies = cookies.count
+                    if result.needsFullDiskAccess { PendingImport.remember(source, profile, options) } else { PendingImport.forget(source, profile) }
                     done(result)
                 }
             }
@@ -209,26 +210,35 @@ enum BrowserImporter {
             var marks: [(String, URL)] = []
             var visits: [HistoryEntry] = []
             var cookies: [HTTPCookie] = []
-            do {
-                switch source.kind {
-                case .chromium:
-                    if options.bookmarks { marks = try chromiumBookmarks(profile.path) }
-                    if options.history { visits = try chromiumHistory(profile.path) }
-                    if options.cookies { cookies = try chromiumCookies(profile.path, service: source.keychainService ?? "", result: &result) }
-                case .firefox:
-                    if options.bookmarks { marks = try firefoxBookmarks(profile.path) }
-                    if options.history { visits = try firefoxHistory(profile.path) }
-                    if options.cookies { cookies = try firefoxCookies(profile.path) }
-                case .safari:
-                    if options.bookmarks { marks = try safariBookmarks(profile.path) }
-                    if options.history { visits = try safariHistory(profile.path) }
-                    if options.cookies { cookies = try safariCookies() }
+            // Each kind on its own, so one that can't be read doesn't keep the others from coming across.
+            func attempt<T>(_ read: () throws -> T) -> T? {
+                do { return try read() } catch ImportError.permission {
+                    if !result.needsFullDiskAccess {
+                        result.needsFullDiskAccess = true
+                        result.warnings.append(String(format: L("macOS blocked access to %@'s data. Give Tacet Full Disk Access, then try again."), source.name))
+                    }
+                } catch {
+                    if !result.warnings.contains(error.localizedDescription) { result.warnings.append(error.localizedDescription) }
                 }
-            } catch ImportError.permission {
-                result.needsFullDiskAccess = true
-                result.warnings.append(String(format: L("macOS blocked access to %@'s data. Give Tacet Full Disk Access, then try again."), source.name))
-            } catch {
-                result.warnings.append(error.localizedDescription)
+                return nil
+            }
+            switch source.kind {
+            case .chromium:
+                if options.bookmarks { marks = attempt { try chromiumBookmarks(profile.path) } ?? [] }
+                if options.history { visits = attempt { try chromiumHistory(profile.path) } ?? [] }
+                if options.cookies {
+                    var notes = ImportResult()
+                    cookies = attempt { try chromiumCookies(profile.path, service: source.keychainService ?? "", result: &notes) } ?? []
+                    result.warnings += notes.warnings
+                }
+            case .firefox:
+                if options.bookmarks { marks = attempt { try firefoxBookmarks(profile.path) } ?? [] }
+                if options.history { visits = attempt { try firefoxHistory(profile.path) } ?? [] }
+                if options.cookies { cookies = attempt { try firefoxCookies(profile.path) } ?? [] }
+            case .safari:
+                if options.bookmarks { marks = attempt { try safariBookmarks(profile.path) } ?? [] }
+                if options.history { visits = attempt { try safariHistory(profile.path) } ?? [] }
+                if options.cookies { cookies = attempt { try safariCookies() } ?? [] }
             }
             return (result, marks, visits, cookies)
     }
@@ -503,6 +513,62 @@ enum BrowserImporter {
         if sameSite == 1 { p[.sameSitePolicy] = HTTPCookieStringPolicy.sameSiteLax }
         if sameSite == 2 { p[.sameSitePolicy] = HTTPCookieStringPolicy.sameSiteStrict }
         return HTTPCookie(properties: p)
+    }
+}
+
+// MARK: - Waiting for Full Disk Access
+
+/// Imports macOS blocked until Tacet has Full Disk Access. Tacet runs them again by itself once the access is there,
+/// when it next becomes the active app or opens, so turning the access on is the last thing to do.
+enum PendingImport {
+    private static let key = "lumen.pendingImport"
+    private static var running = false
+
+    struct Saved: Codable, Equatable {
+        let source: String
+        let profile: String
+        let options: ImportOptions
+        static func == (a: Saved, b: Saved) -> Bool { a.source == b.source && a.profile == b.profile }
+    }
+
+    private static var saved: [Saved] {
+        get { UserDefaults.standard.data(forKey: key).flatMap { try? JSONDecoder().decode([Saved].self, from: $0) } ?? [] }
+        set { UserDefaults.standard.set(try? JSONEncoder().encode(newValue), forKey: key) }
+    }
+
+    static func remember(_ source: BrowserSource, _ profile: BrowserProfile, _ options: ImportOptions) {
+        let item = Saved(source: source.id, profile: profile.path.path, options: options)
+        saved = saved.filter { $0 != item } + [item]
+    }
+
+    static func forget(_ source: BrowserSource, _ profile: BrowserProfile) {
+        let item = Saved(source: source.id, profile: profile.path.path, options: ImportOptions())
+        if saved.contains(item) { saved = saved.filter { $0 != item } }
+    }
+
+    /// Runs the first waiting import whose folder macOS now lets Tacet read, and says what came across.
+    @MainActor
+    static func retry() {
+        guard !running, !saved.isEmpty else { return }
+        let sources = BrowserImporter.detect()
+        for item in saved {
+            guard let source = sources.first(where: { $0.id == item.source }),
+                  let profile = source.profiles.first(where: { $0.path.path == item.profile }) else {
+                saved = saved.filter { $0 != item }
+                continue
+            }
+            guard (try? FileManager.default.contentsOfDirectory(atPath: profile.path.path)) != nil else { continue }
+            running = true
+            BrowserImporter.run(source, profile: profile, options: item.options) { result in
+                running = false
+                guard !result.needsFullDiskAccess else { return }
+                let alert = NSAlert()
+                alert.messageText = String(format: L("Imported from %@: %@."), source.name, result.summary)
+                alert.informativeText = result.warnings.joined(separator: "\n")
+                alert.runModal()
+            }
+            return
+        }
     }
 }
 
