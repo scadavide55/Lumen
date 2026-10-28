@@ -636,9 +636,12 @@ final class AssistantChat {
     }
 
     func stop() {
-        task?.cancel()
+        guard let running = task else { return }
+        running.cancel()
         task = nil
         busy = false
+        // The chat is kept as it is, marked as stopped.
+        if let last = messages.last, last.role == .assistant { noteActivity(L("Stopped")) }
         // A tool call left without its result would make the next request fail.
         if let last = transcript.last, last["role"] as? String == "assistant", Self.hasToolCalls(last) { transcript.removeLast() }
     }
@@ -682,6 +685,8 @@ final class AssistantChat {
             if provider == .apple { pageText = pageText.map(AppleModel.shorten) }
             self.transcript.append(Self.userMessage(text: text, page: pageText, images: shownImages.map(\.jpeg), provider: provider))
             await self.run(provider: provider)
+            // Stopped: stop() has already updated the state, and a newer message may be running now.
+            guard !Task.isCancelled else { self.saveToHistory(); return }
             self.busy = false
             self.task = nil
             self.saveToHistory()
@@ -739,7 +744,7 @@ final class AssistantChat {
         let control = s.aiControl
 
         // The model may call tools several times before it answers; each round is one request.
-        for _ in 0..<8 {
+        for _ in 0..<Self.maxRounds {
             if Task.isCancelled { return }
             let result: AIClient.Result
             do {
@@ -780,7 +785,13 @@ final class AssistantChat {
             transcript.append(contentsOf: AIClient.toolResults(outputs, provider: provider, images: toolImages))
             toolImages = [:]
         }
+        if !Task.isCancelled {
+            fail(String(format: L("Tacet Assistant stopped after %d steps without finishing. Ask it to continue, or split the task."), Self.maxRounds))
+        }
     }
+
+    /// Rounds of tool calls in one answer. Browser use takes one per click, so it needs room, but not forever.
+    static let maxRounds = 20
 
     // MARK: Apple's on-device model
 

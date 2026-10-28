@@ -61,10 +61,20 @@ struct ImportView: View {
                                 Text(cookieNote(source)).font(.caption).foregroundStyle(.secondary)
                             }
                         }
+                        if isArc {
+                            Toggle(isOn: $options.arcSidebar) {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Spaces and pinned tabs")
+                                    Text("Favorites become pinned tabs, each Space and folder a tab group in the front window. They load only when you open them.")
+                                        .font(.caption).foregroundStyle(.secondary)
+                                }
+                            }
+                            Toggle("Also today's unpinned tabs", isOn: $options.arcToday).disabled(!options.arcSidebar)
+                        }
                     }
                     .formStyle(.grouped)
                     .scrollDisabled(true)
-                    .frame(height: source.profiles.count > 1 ? 210 : 170)
+                    .frame(height: (source.profiles.count > 1 ? 210 : 170) + (isArc ? 110 : 0))
                 }
             }
 
@@ -79,7 +89,7 @@ struct ImportView: View {
                 if working { ProgressView().controlSize(.small) }
                 Button("Import") { runImport() }
                     .keyboardShortcut(.defaultAction)
-                    .disabled(working || profile == nil || !(options.bookmarks || options.history || options.cookies))
+                    .disabled(working || profile == nil || !(options.bookmarks || options.history || options.cookies || (isArc && options.arcSidebar)))
             }
         }
         .padding(20)
@@ -88,6 +98,8 @@ struct ImportView: View {
         .tint(Settings.shared.accent)
         .onAppear(perform: detect)
     }
+
+    private var isArc: Bool { source?.bundleID == ArcImport.bundleID }
 
     private func cookieNote(_ s: BrowserSource) -> String {
         switch s.kind {
@@ -120,9 +132,8 @@ private struct ResultView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            if result.warnings.isEmpty || result.bookmarks + result.history + result.cookies > 0 {
-                Label("Imported from \(source): \(result.bookmarks) bookmarks, \(result.history) history items, \(result.cookies) sign-in cookies.",
-                      systemImage: "checkmark.circle.fill")
+            if result.warnings.isEmpty || result.imported > 0 {
+                Label(String(format: L("Imported from %@: %@."), source, result.summary), systemImage: "checkmark.circle.fill")
                     .foregroundStyle(.green)
             }
             ForEach(result.warnings, id: \.self) { w in

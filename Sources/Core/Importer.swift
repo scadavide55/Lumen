@@ -31,14 +31,29 @@ struct ImportOptions {
     var bookmarks = true
     var history = true
     var cookies = true
+    /// Arc only: Spaces, Favorites, pinned tabs and folders, as tabs and groups.
+    var arcSidebar = true
+    /// Arc only: also the unpinned tabs of each Space's Today section.
+    var arcToday = false
 }
 
 struct ImportResult {
     var bookmarks = 0
     var history = 0
     var cookies = 0
+    var tabs = 0
     var warnings: [String] = []
     var needsFullDiskAccess = false
+
+    /// "12 bookmarks, 340 history items, 25 cookies", plus the tabs brought from Arc.
+    var summary: String {
+        var parts = [String(format: L("%lld bookmarks"), bookmarks), String(format: L("%lld history items"), history),
+                     String(format: L("%lld cookies"), cookies)]
+        if tabs > 0 { parts.append(String(format: L("%lld tabs from Spaces and pinned tabs"), tabs)) }
+        return ListFormatter.localizedString(byJoining: parts)
+    }
+
+    var imported: Int { bookmarks + history + cookies + tabs }
 }
 
 // MARK: - Detection
@@ -155,9 +170,24 @@ enum BrowserImporter {
                     done: @escaping (ImportResult) -> Void) {
         DispatchQueue.global(qos: .userInitiated).async {
             var (result, marks, visits, cookies) = load(source, profile: profile, options: options)
+            var arc: ArcImport.Sidebar?
+            if source.bundleID == ArcImport.bundleID, options.arcSidebar {
+                do {
+                    let data = try read(ArcImport.sidebarFile)
+                    arc = try ArcImport.read(data, profile: profile.path.lastPathComponent, includeToday: options.arcToday)
+                } catch ImportError.permission {
+                    result.needsFullDiskAccess = true
+                } catch {
+                    result.warnings.append(String(format: L("Arc's Spaces and pinned tabs couldn't be read: %@"), error.localizedDescription))
+                }
+            }
             DispatchQueue.main.async {
                 result.bookmarks = Bookmarks.shared.importItems(marks)
                 result.history = History.shared.importEntries(visits)
+                if let arc, let window = WindowRegistry.shared.lastFocused.flatMap({ $0.isPrivate ? nil : $0 })
+                    ?? WindowRegistry.shared.browsers.first(where: { !$0.isPrivate }) {
+                    result.tabs = window.adopt(arc)
+                }
                 let store = WKWebsiteDataStore.default().httpCookieStore
                 let group = DispatchGroup()
                 for c in cookies {

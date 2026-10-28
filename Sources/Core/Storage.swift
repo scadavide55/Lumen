@@ -493,10 +493,27 @@ final class Favicons {
         let file = folder.appendingPathComponent(host + ".icon")
         if let data = try? Data(contentsOf: file), let img = NSImage(data: data) {
             memory.setObject(img, forKey: host as NSString)
+            // Marks it as used, so pruning keeps it.
+            try? FileManager.default.setAttributes([.modificationDate: Date()], ofItemAtPath: file.path)
             return img
         }
         missing.insert(host)
         return nil
+    }
+
+    /// A page names its own icon, so it could point it anywhere: at the local network, or at a file on this Mac.
+    /// Only icons inside the page, on a public address, or on the page's own host (a router's page, say) are fetched.
+    static func mayFetch(_ url: URL, forPageHost pageHost: String) async -> Bool {
+        switch url.scheme?.lowercased() {
+        case "data": return true
+        case "http", "https":
+            guard let host = url.host?.lowercased() else { return false }
+            if host == pageHost.lowercased() { return true }
+            // A public name can still lead to a local address, so where it resolves is checked too.
+            guard WebTools.isPublic(url) else { return false }
+            return await WebTools.resolvesPublic(host)
+        default: return false
+        }
     }
 
     func fetch(_ url: URL, host: String, persist: Bool, done: @escaping (NSImage) -> Void) {
@@ -517,6 +534,21 @@ final class Favicons {
                 callbacks.forEach { $0(img) }
             }
         }.resume()
+    }
+
+    /// Icons of sites not seen for six months go, and only the newest 3,000 are kept, so the folder can't grow forever.
+    func prune() {
+        let folder = self.folder
+        DispatchQueue.global(qos: .utility).async {
+            let fm = FileManager.default
+            let files = (try? fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: [.contentModificationDateKey])) ?? []
+            let dated = files.map { ($0, (try? $0.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast) }
+                .sorted { $0.1 > $1.1 }
+            let cutoff = Date().addingTimeInterval(-180 * 86_400)
+            for (n, (file, date)) in dated.enumerated() where n >= 3_000 || date < cutoff {
+                try? fm.removeItem(at: file)
+            }
+        }
     }
 
     func trimMemory() {

@@ -95,6 +95,43 @@ eq(WhatsNew.pages(since: "1.6").count, WhatsNew.all.count, "welcome after 1.6: e
 eq(WhatsNew.pages(since: "").count, WhatsNew.all.count, "welcome never seen: every page")
 check(WhatsNew.pages(since: "1.6.2").isEmpty, "welcome already seen: nothing")
 
+// MARK: Arc's sidebar
+do {
+    let json = """
+    {"sidebar":{"containers":[{"global":{}},{
+      "spaces":["s1",{"id":"s1","title":"Work","containerIDs":["pinned","p1","unpinned","u1"],"profile":{"default":true},"customInfo":{"iconType":{"emoji_v2":"💼"}}},
+                "s2",{"id":"s2","title":"Home","containerIDs":["pinned","p2","unpinned","u2"],"profile":{"custom":{"_0":{"directoryBasename":"Profile 1"}}}}],
+      "items":[
+        "top",{"id":"top","childrenIds":["f1"],"data":{"itemContainer":{"containerType":{"topApps":{"_0":{"default":true}}}}}},
+        "f1",{"id":"f1","parentID":"top","title":null,"data":{"tab":{"savedURL":"https://mail.example.com/","savedTitle":"Mail"}}},
+        "p1",{"id":"p1","childrenIds":["t1","d1","x1"],"data":{"itemContainer":{"containerType":{"spaceItems":{"_0":"s1"}}}}},
+        "t1",{"id":"t1","title":"Docs","data":{"tab":{"savedURL":"https://docs.example.com/","savedTitle":"Old title"}}},
+        "x1",{"id":"x1","data":{"tab":{"savedURL":"file:///etc/passwd","savedTitle":"Local"}}},
+        "d1",{"id":"d1","title":"Clients","childrenIds":["t2","d2"],"data":{"list":{}}},
+        "t2",{"id":"t2","data":{"tab":{"savedURL":"https://a.example.com/","savedTitle":"A"}}},
+        "d2",{"id":"d2","title":"Old","childrenIds":["t3"],"data":{"list":{}}},
+        "t3",{"id":"t3","data":{"tab":{"savedURL":"https://b.example.com/","savedTitle":"B"}}},
+        "u1",{"id":"u1","childrenIds":["t4"],"data":{"itemContainer":{}}},
+        "t4",{"id":"t4","data":{"tab":{"savedURL":"https://news.example.com/","savedTitle":"News"}}},
+        "p2",{"id":"p2","childrenIds":["t5"],"data":{"itemContainer":{}}},
+        "t5",{"id":"t5","data":{"tab":{"savedURL":"https://shop.example.com/","savedTitle":"Shop"}}}
+      ]}]}}
+    """
+    let work = try ArcImport.read(Data(json.utf8), profile: "Default", includeToday: false)
+    eq(work.favorites.map(\.title), ["Mail"], "arc: favorites of the profile")
+    eq(work.groups.map(\.name), ["💼 Work", "💼 Work · Clients", "💼 Work · Clients · Old"], "arc: a group per space and folder")
+    eq(work.groups.first?.tabs.map(\.title), ["Docs"], "arc: renamed tab keeps its title, local files skipped")
+    eq(work.tabCount, 4, "arc: tab count")
+    let today = try ArcImport.read(Data(json.utf8), profile: "Default", includeToday: true)
+    eq(today.groups.last?.tabs.map(\.title), ["News"], "arc: today's tabs when asked")
+    let home = try ArcImport.read(Data(json.utf8), profile: "Profile 1", includeToday: false)
+    eq(home.groups.map(\.name), ["Home"], "arc: other profile's spaces only")
+    eq(home.favorites.count, 0, "arc: favorites belong to their profile")
+    check((try? ArcImport.read(Data("{}".utf8), profile: nil, includeToday: false)) == nil, "arc: unreadable file is an error")
+} catch {
+    check(false, "arc: sample sidebar", "\(error)")
+}
+
 // MARK: AI providers
 
 check(AIProvider.anthropic.guessesImages("claude-opus-5-5"), "vision: claude")

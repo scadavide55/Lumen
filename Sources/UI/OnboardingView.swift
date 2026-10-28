@@ -469,12 +469,15 @@ private struct ImportStep: View {
                         Toggle("Bookmarks", isOn: $options.bookmarks)
                         Toggle("History", isOn: $options.history)
                         Toggle("Sign-ins (cookies)", isOn: $options.cookies)
+                        if sources.contains(where: { chosen.contains($0.id) && $0.bundleID == ArcImport.bundleID }) {
+                            Toggle("Arc Spaces and pinned tabs", isOn: $options.arcSidebar)
+                        }
                     }
                     .toggleStyle(.checkbox)
                     HStack(spacing: 10) {
                         Button("Import") { runImport() }
                             .controlSize(.large)
-                            .disabled(working || chosen.isEmpty || !(options.bookmarks || options.history || options.cookies))
+                            .disabled(working || chosen.isEmpty || !(options.bookmarks || options.history || options.cookies || options.arcSidebar))
                         if working { ProgressView().controlSize(.small) }
                     }
                     ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
@@ -515,9 +518,8 @@ private struct ImportLine: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            if result.warnings.isEmpty || result.bookmarks + result.history + result.cookies > 0 {
-                Label("\(name): \(result.bookmarks) bookmarks, \(result.history) history items, \(result.cookies) cookies",
-                      systemImage: "checkmark.circle.fill").foregroundStyle(.green)
+            if result.warnings.isEmpty || result.imported > 0 {
+                Label(name + ": " + result.summary, systemImage: "checkmark.circle.fill").foregroundStyle(.green)
             }
             if result.needsFullDiskAccess {
                 HStack {

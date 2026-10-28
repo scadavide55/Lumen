@@ -491,8 +491,12 @@ final class Tab: NSObject, Identifiable {
             if faviconHost == host, favicon != nil { return }
             faviconHost = host
             if let cached = Favicons.shared.cached(host) { favicon = cached; return }
-            Favicons.shared.fetch(iconURL, host: host, persist: !isPrivate) { [weak self] img in
-                if self?.host == host { self?.favicon = img }
+            let persist = !isPrivate
+            Task { @MainActor [weak self] in
+                guard await Favicons.mayFetch(iconURL, forPageHost: host) else { return }
+                Favicons.shared.fetch(iconURL, host: host, persist: persist) { [weak self] img in
+                    if self?.host == host { self?.favicon = img }
+                }
             }
         case "hover":
             let link = body["url"] as? String

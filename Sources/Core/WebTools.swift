@@ -172,7 +172,7 @@ enum WebTools {
     }
 
     /// Whether every address the host resolves to is public, so a name can't lead to the local network.
-    private static func resolvesPublic(_ host: String) async -> Bool {
+    static func resolvesPublic(_ host: String) async -> Bool {
         await Task.detached {
             var hints = addrinfo(ai_flags: 0, ai_family: AF_UNSPEC, ai_socktype: SOCK_STREAM, ai_protocol: 0,
                                  ai_addrlen: 0, ai_canonname: nil, ai_addr: nil, ai_next: nil)

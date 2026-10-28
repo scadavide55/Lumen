@@ -91,7 +91,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
             return event
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) { ProfileCleanup.finishPending() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            ProfileCleanup.finishPending()
+            Favicons.shared.prune()
+            if !WebApp.isActive { PublicSuffix.refreshIfStale() }
+        }
         if #available(macOS 15.4, *) { Extensions.shared.start() }
     }
 
