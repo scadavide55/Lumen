@@ -32,8 +32,10 @@
 "A quick answer here, searching the web if needed" = "Une réponse rapide ici, en cherchant sur le web si besoin";
 "A quiet, fast browser that blocks ads and trackers for you. Let's get it set up the way you like. It only takes a minute." = "Un navigateur discret et rapide qui bloque les publicités et les traqueurs pour vous. Configurons-le à votre goût : cela ne prend qu'une minute.";
 "A sleeping tab shows the page as you last saw it while it loads again, then puts you back where you had scrolled to. No white flash, no jump to the top." = "Un onglet en veille affiche la page telle que vous l’avez vue pendant qu’elle se recharge, puis vous ramène où vous en étiez. Pas de flash blanc, pas de retour en haut.";
+"A small round button appears at the bottom right when you've scrolled far down a page, and takes you back to the top." = "Un petit bouton rond apparaît en bas à droite quand vous êtes descendu loin dans une page, et vous ramène en haut.";
 "A stronger Tacet Shield" = "Un Tacet Shield plus fort";
 "AI" = "IA";
+"AMP to Original" = "D’AMP à l’original";
 "API key" = "Clé API";
 "API key (optional)" = "Clé API (facultative)";
 "About Tacet" = "À propos de Tacet";
@@ -75,6 +77,7 @@
 "Also today's unpinned tabs" = "Aussi les onglets non épinglés d'aujourd'hui";
 "Always" = "Toujours";
 "Always show website titles in tabs" = "Toujours afficher les titres des sites dans les onglets";
+"Amazon Without Sponsored" = "Amazon sans sponsorisés";
 "An AI assistant in a panel beside the page, for questions about what you're reading." = "Un assistant IA dans un panneau à côté de la page, pour vos questions sur ce que vous lisez.";
 "Animate gradient backgrounds" = "Animer les fonds dégradés";
 "Answers come from your AI provider and can be wrong." = "Les réponses viennent de votre fournisseur d'IA et peuvent être erronées.";
@@ -111,6 +114,7 @@
 "Back" = "Retour";
 "Back (⌘[)" = "Retour (⌘[)";
 "Back / forward" = "Retour / avant";
+"Back to Top" = "Retour en haut";
 "Background" = "Fond";
 "Beta" = "Bêta";
 "Block" = "Bloquer";
@@ -133,6 +137,7 @@
 "Bring everything with you" = "Emportez tout avec vous";
 "Bring your Arc sidebar" = "Apportez votre barre latérale Arc";
 "Bring your bookmarks, history and sign-ins into Tacet. Nothing leaves your Mac." = "Importez vos signets, votre historique et vos connexions dans Tacet. Rien ne quitte votre Mac.";
+"Browse without the mouse: press F to label every link, then type its letters to open it (⇧F opens it in a new tab). J and K scroll, G goes to the top and ⇧G to the bottom. Keys do nothing while you type in a field. Sites with their own single-key shortcuts, like YouTube and Gmail, keep theirs." = "Naviguez sans souris : appuyez sur F pour étiqueter chaque lien, puis tapez ses lettres pour l’ouvrir (⇧F dans un nouvel onglet). J et K font défiler, G va en haut et ⇧G en bas. Les touches ne font rien pendant que vous tapez dans un champ. Les sites qui ont leurs propres raccourcis à une touche, comme YouTube et Gmail, gardent les leurs.";
 "Browser use" = "Contrôle du navigateur";
 "Browser use: let the assistant click, type and scroll on pages" = "Contrôle du navigateur : autoriser l'assistant à cliquer, écrire et faire défiler les pages";
 "Browsing" = "Navigation";
@@ -148,6 +153,7 @@
 "Cancel" = "Annuler";
 "Cancelled" = "Annulé";
 "Change a site's colours, font and width, hide parts of it, or add your own CSS and JavaScript. On any page, choose Customize This Site from the ⋯ menu or the command bar." = "Changez les couleurs, la police et la largeur d'un site, masquez-en des parties ou ajoutez votre CSS et JavaScript. Sur n'importe quelle page, choisissez Personnaliser ce site dans le menu ⋯ ou la barre de commandes.";
+"Change the speed of any video with ] and [ (in steps of 0.25×), and press \\ to go back to normal. A small label shows the speed." = "Changez la vitesse de n’importe quelle vidéo avec ] et [ (par pas de 0,25×), et appuyez sur \\ pour revenir à la normale. Une petite étiquette affiche la vitesse.";
 "Changes canvas, WebGL and audio readings slightly for each site, so they can't be used to recognise your Mac." = "Modifie légèrement les lectures canvas, WebGL et audio pour chaque site, afin qu’elles ne servent pas à reconnaître votre Mac.";
 "Chat History" = "Historique des discussions";
 "Chats in private windows aren't saved." = "Les discussions des fenêtres privées ne sont pas enregistrées.";
@@ -340,12 +346,14 @@
 "Full Screen Chat" = "Discussion en plein écran";
 "General" = "Général";
 "Get Started" = "Commencer";
+"GitHub Wide" = "GitHub en large";
 "Go Back" = "Revenir en arrière";
 "Go to tab" = "Aller à l'onglet";
 "Good afternoon" = "Bon après-midi";
 "Good evening" = "Bonsoir";
 "Good morning" = "Bonjour";
 "Good night" = "Bonne nuit";
+"Google, Just Results" = "Google, juste les résultats";
 "Graphite" = "Graphite";
 "Green" = "Vert";
 "Grey" = "Gris";
@@ -374,7 +382,10 @@
 "Hide cookie consent banners" = "Masquer les bannières de consentement aux cookies";
 "Hide images and videos" = "Masquer les images et vidéos";
 "Hides Shorts from YouTube's home page, search, subscriptions and sidebar, and opens any Shorts link as a normal video." = "Masque les Shorts de l’accueil de YouTube, de la recherche, des abonnements et de la barre latérale, et ouvre chaque lien Shorts comme une vidéo normale.";
+"Hides Stack Overflow's sidebars, hot questions, ads and sign-up prompts, and widens the question and answers." = "Masque les barres latérales, les questions populaires, les publicités et les invitations à s’inscrire de Stack Overflow, et élargit la question et les réponses.";
+"Hides YouTube's home feed, the recommended videos next to the one you're watching and the suggestions at its end, so you watch what you came for. Search and subscriptions stay." = "Masque l’accueil de YouTube, les vidéos recommandées à côté de celle que vous regardez et les suggestions de fin, pour regarder ce que vous étiez venu voir. La recherche et les abonnements restent.";
 "Hides comment sections on YouTube, news sites, blogs and Reddit, for a quieter read. Turn it off for a moment from Tacet Plugins when you want to read them." = "Masque les commentaires sur YouTube, les sites d’actualité, les blogs et Reddit, pour une lecture plus calme. Désactivez-le un instant depuis Tacet Plugins pour les lire.";
+"Hides sponsored products and ad banners from Amazon's search results and product pages, so you see what matches your search." = "Masque les produits sponsorisés et les bannières publicitaires des résultats et des fiches produit d’Amazon, pour voir ce qui correspond à votre recherche.";
 "History" = "Historique";
 "History and Bookmarks" = "Historique et signets";
 "History and bookmarks (⌘Y)" = "Historique et signets (⌘Y)";
@@ -418,6 +429,7 @@
 "Keeps you signed in to sites." = "Vous garde connecté aux sites.";
 "Keeps you signed in to sites. Needs Full Disk Access for Tacet." = "Vous garde connecté aux sites. Nécessite l'accès complet au disque pour Tacet.";
 "Keeps you signed in to sites. macOS will ask you to allow access to “%@” in your Keychain: choose Allow." = "Vous garde connecté aux sites. macOS vous demandera d'autoriser l'accès à « %@ » dans le trousseau : choisissez Autoriser.";
+"Keyboard Navigation" = "Navigation au clavier";
 "Keyboard Shortcuts" = "Raccourcis clavier";
 "Keyboard shortcuts" = "Raccourcis clavier";
 "Keyword" = "Mot-clé";
@@ -432,10 +444,12 @@
 "Left" = "Gauche";
 "Let the assistant click, type and scroll on the current page" = "Autoriser l'assistant à cliquer, écrire et faire défiler la page actuelle";
 "Let the assistant search the web and read pages" = "Autoriser l'assistant à rechercher sur le web et lire les pages";
+"Lets GitHub use the whole window for code, diffs, issues and pull requests, instead of a narrow column in the middle." = "Permet à GitHub d’utiliser toute la fenêtre pour le code, les diffs, les issues et les pull requests, au lieu d’une colonne étroite au centre.";
 "Library" = "Bibliothèque";
 "Light" = "Clair";
 "Light Appearance" = "Apparence claire";
 "Links from Mail, Messages and every other app will open in Tacet. You can change this anytime in System Settings." = "Les liens de Mail, Messages et de toutes les autres apps s'ouvriront dans Tacet. Vous pouvez changer cela à tout moment dans Réglages Système.";
+"Links that lead to a different site open in a new tab, so the page you were reading stays where it was." = "Les liens qui mènent à un autre site s’ouvrent dans un nouvel onglet, pour que la page que vous lisiez reste où elle était.";
 "Links you open in other apps go to your default browser." = "Les liens ouverts depuis d'autres apps vont dans votre navigateur par défaut.";
 "Lists are downloaded from easylist.to and refreshed weekly." = "Les listes sont téléchargées depuis easylist.to et actualisées chaque semaine.";
 "Loading models…" = "Chargement des modèles…";
@@ -549,7 +563,9 @@
 "Off until you turn it on. Nothing is sent until you ask something" = "Désactivé tant que vous ne l'activez pas. Rien n'est envoyé avant que vous posiez une question";
 "Offer to save passwords" = "Proposer d'enregistrer les mots de passe";
 "Offline" = "Hors ligne";
+"Old Reddit" = "Old Reddit";
 "On" = "Activé";
+"On X (Twitter), hides trends, \"Who to follow\", premium offers and the sidebar's suggestions, leaving your timeline and replies." = "Sur X (Twitter), masque les tendances, « Suggestions d’abonnement », les offres premium et les suggestions de la barre latérale, en laissant votre fil et les réponses.";
 "On articles, a thin bar at the top shows how far you've read, and a small label says how many minutes are left." = "Sur les articles, une fine barre en haut montre où vous en êtes et une petite étiquette indique les minutes restantes.";
 "On sign-up and change-password pages, offer a random password like abcdEf-ghijk2-lmnopq." = "Sur les pages d'inscription et de changement de mot de passe, proposer un mot de passe aléatoire comme abcdEf-ghijk2-lmnopq.";
 "On-device model" = "Modèle sur le Mac";
@@ -585,10 +601,12 @@
 "OpenAI-compatible" = "Compatible OpenAI";
 "Opening %@" = "Ouverture de %@";
 "Opening a new tab" = "Ouverture d'un nouvel onglet";
+"Opens Reddit in its classic layout at old.reddit.com: lighter, faster and with more posts on screen. Galleries, chat and settings still open in the new design." = "Ouvre Reddit dans sa présentation classique sur old.reddit.com : plus léger, plus rapide, avec plus de publications à l’écran. Les galeries, le chat et les réglages s’ouvrent toujours dans le nouveau design.";
 "Optional" = "Facultatif";
 "Optional. Tacet never sees your password: you type it on Google's own page." = "Facultatif. Tacet ne voit jamais votre mot de passe : vous le saisissez sur la page de Google.";
 "Orange" = "Orange";
 "Organize tabs" = "Organiser les onglets";
+"Other Sites in New Tabs" = "Autres sites dans de nouveaux onglets";
 "Page" = "Page";
 "Page width" = "Largeur de la page";
 "Password" = "Mot de passe";
@@ -608,6 +626,7 @@
 "Pick a gradient, let it move, or use your own photo or a short video." = "Choisissez un dégradé, animez-le, ou utilisez votre photo ou une courte vidéo.";
 "Pick several tabs at once" = "Plusieurs onglets à la fois";
 "Pick your look" = "Choisissez votre style";
+"Picture in Picture" = "Image dans l’image";
 "Pin Tab" = "Épingler l'onglet";
 "Pin Tabs" = "Épingler les onglets";
 "Pin or Unpin Tab" = "Épingler ou détacher l'onglet";
@@ -619,6 +638,8 @@
 "Press ⌘L or click the address. Type a site, a search, an open tab, a bookmark or a command." = "Appuyez sur ⌘L ou cliquez sur l'adresse. Tapez un site, une recherche, un onglet ouvert, un signet ou une commande.";
 "Press ⌘L to go anywhere. You can see this tour again from the Help menu, and change anything in Settings." = "Appuyez sur ⌘L pour aller n'importe où. Vous pouvez revoir cette visite depuis le menu Aide et tout modifier dans les Réglages.";
 "Press ⌥⇧C to copy the selected text as Markdown, with its links, headings, lists, bold, italics and code. Without a selection, it copies the page's title and address as a Markdown link." = "Appuyez sur ⌥⇧C pour copier le texte sélectionné en Markdown, avec liens, titres, listes, gras, italique et code. Sans sélection, copie le titre et l’adresse de la page en lien Markdown.";
+"Press ⌥⇧P to float the video you're watching in its own small window, on any site, even ones that hide the button." = "Appuyez sur ⌥⇧P pour faire flotter la vidéo dans sa propre petite fenêtre, sur n’importe quel site, même ceux qui cachent le bouton.";
+"Press ⌥⇧W to see how many words and characters are in the text you selected, or in the whole page, and how long it takes to read." = "Appuyez sur ⌥⇧W pour voir combien de mots et de caractères compte le texte sélectionné, ou toute la page, et le temps de lecture.";
 "Presses “Reject all” on cookie banners that offer it, so sites remember your choice." = "Appuie sur « Tout refuser » sur les bannières de cookies qui le proposent, pour que les sites retiennent votre choix.";
 "Previous (⇧⌘G)" = "Précédent (⇧⌘G)";
 "Previous Tab" = "Onglet précédent";
@@ -677,6 +698,7 @@
 "Remove tracking from links" = "Supprimer le pistage des liens";
 "Remove tracking parameters from links" = "Supprimer les paramètres de pistage des liens";
 "Remove “%@”?" = "Supprimer « %@ » ?";
+"Removes sponsored results and ads from Google Search, so the first links are real results." = "Retire les résultats sponsorisés et les annonces de la recherche Google, pour que les premiers liens soient de vrais résultats.";
 "Removes utm_ and similar parameters" = "Supprime utm_ et les paramètres similaires";
 "Rename Bookmark" = "Renommer le signet";
 "Rename Group…" = "Renommer le groupe…";
@@ -833,6 +855,7 @@
 "Split View" = "Vue partagée";
 "Split View with New Tab" = "Vue partagée avec un nouvel onglet";
 "Split view" = "Vue partagée";
+"Stack Overflow, Clean" = "Stack Overflow épuré";
 "Standard" = "Standard";
 "Start Browsing" = "Commencer à naviguer";
 "Start page" = "Page d'accueil";
@@ -1037,6 +1060,7 @@
 "Version %@ (%@)" = "Version %1$@ (%2$@)";
 "Vertical tabs give long titles room to breathe. Separate and Compact feel like Safari." = "Les onglets verticaux laissent de la place aux titres longs. Séparé et Compact rappellent Safari.";
 "Vertical tabs give long titles room to breathe. Top tabs feel like Safari." = "Les onglets verticaux laissent de la place aux titres longs. Les onglets en haut rappellent Safari.";
+"Video Speed" = "Vitesse vidéo";
 "Videos can be up to %lld seconds long." = "Les vidéos peuvent durer jusqu'à %lld secondes.";
 "Videos can be up to 300 MB." = "Les vidéos peuvent peser jusqu'à 300 Mo.";
 "Videos: MP4, MOV or M4V, up to 60 seconds and 300 MB. They play muted, on a loop." = "Vidéos : MP4, MOV ou M4V, jusqu'à 60 secondes et 300 Mo. Lues sans son, en boucle.";
@@ -1061,6 +1085,7 @@
 "What you type in the command bar is searched here. Private options are marked." = "Ce que vous tapez dans la barre de commandes est recherché ici. Les options privées sont indiquées.";
 "What's new" = "Nouveautés";
 "When %d or more tabs are open from the same site, Tacet groups them, for example into “GitHub”." = "Quand %d onglets ou plus sont ouverts sur le même site, Tacet les regroupe, par exemple dans « GitHub ».";
+"When a link opens a Google AMP copy of an article, goes to the publisher's own page instead, which is complete and isn't served through Google." = "Quand un lien ouvre une copie AMP de Google d’un article, va plutôt sur la page de l’éditeur, complète et non servie par Google.";
 "When three or more tabs are open from the same site, Tacet groups them, for example into “GitHub”." = "Quand trois onglets ou plus sont ouverts sur le même site, Tacet les regroupe, par exemple dans « GitHub ».";
 "When you ask something, your message, the attached page and any images are sent to the provider you chose, under their privacy terms. With a server on your own Mac, such as Ollama, nothing leaves your computer unless the assistant searches the web. Your API key is kept in the macOS Keychain." = "Quand vous posez une question, votre message, la page jointe et les éventuelles images sont envoyés au fournisseur choisi, selon ses conditions de confidentialité. Avec un serveur sur votre Mac, comme Ollama, rien ne quitte votre ordinateur, sauf si l'assistant fait une recherche sur le web. Votre clé API est conservée dans le trousseau macOS.";
 "When you ask, the assistant can use the page in the current tab for you, where you're signed in. It asks before sending, buying or deleting anything, and never fills in passwords or card numbers. A page can try to trick it, so watch what it does and press Stop if needed." = "Quand vous le demandez, l'assistant peut utiliser pour vous la page de l'onglet actuel, où vous êtes connecté. Il demande confirmation avant d'envoyer, d'acheter ou de supprimer quoi que ce soit, et ne saisit jamais de mots de passe ni de numéros de carte. Une page peut tenter de le tromper : surveillez ce qu'il fait et appuyez sur Arrêter si besoin.";
@@ -1070,7 +1095,9 @@
 "Window style" = "Style de fenêtre";
 "Window with “%@” (%d tabs)" = "Fenêtre avec « %1$@ » (%2$d onglets)";
 "Window with “%@” (1 tab)" = "Fenêtre avec « %@ » (1 onglet)";
+"Word Count" = "Nombre de mots";
 "Works, but not verified" = "Fonctionne, mais non vérifié";
+"X Without Distractions" = "X sans distractions";
 "Yellow" = "Jaune";
 "Yes, Use Tacet" = "Oui, utiliser Tacet";
 "You can change any choice later in Settings." = "Vous pourrez modifier chaque choix plus tard dans les Réglages.";
@@ -1079,6 +1106,7 @@
 "You're all set" = "Tout est prêt";
 "You're already signed in to Google." = "Vous êtes déjà connecté à Google.";
 "You're offline" = "Vous êtes hors ligne";
+"YouTube Focus" = "YouTube Focus";
 "YouTube without Shorts" = "YouTube sans Shorts";
 "Your Google sign-in came across with your imported data." = "Votre connexion Google a été importée avec vos données.";
 "Your JavaScript runs when the page loads" = "Votre JavaScript s’exécute au chargement de la page";

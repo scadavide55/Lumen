@@ -1,0 +1,7 @@
+/* Ads above and below the results and in the shopping blocks. */
+#tads, #tadsb, #bottomads, #taw div[data-text-ad], div[data-text-ad],
+.commercial-unit-desktop-top, .commercial-unit-desktop-rhs, .cu-container,
+div[aria-label="Ads"], div[aria-label="Annunci"], div[aria-label="Annonces"], div[aria-label="Anzeigen"],
+[data-pla="1"], .pla-unit, #rhs .pla-unit-container {
+  display: none !important;
+}

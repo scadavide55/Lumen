@@ -2,6 +2,63 @@
   "format": 1,
   "plugins": [
     {
+      "id": "amazon-no-sponsored",
+      "name": "Amazon Without Sponsored",
+      "description": "Hides sponsored products and ad banners from Amazon's search results and product pages, so you see what matches your search.",
+      "version": "1.0",
+      "icon": "cart",
+      "author": "Tacet Plugins",
+      "sites": [
+        "amazon.com",
+        "amazon.it",
+        "amazon.fr",
+        "amazon.de",
+        "amazon.es",
+        "amazon.co.uk",
+        "amazon.ca"
+      ],
+      "css": "style.css",
+      "runAt": "start",
+      "world": "isolated",
+      "files": {
+        "style.css": "52f0960835a3753793d2a4943c7673070b9365dd43a2b4e8f2cd317208eeb6d6"
+      }
+    },
+    {
+      "id": "amp-to-original",
+      "name": "AMP to Original",
+      "description": "When a link opens a Google AMP copy of an article, goes to the publisher's own page instead, which is complete and isn't served through Google.",
+      "version": "1.0",
+      "icon": "arrow.uturn.left.square",
+      "author": "Tacet Plugins",
+      "sites": [
+        "*"
+      ],
+      "js": "main.js",
+      "runAt": "end",
+      "world": "isolated",
+      "files": {
+        "main.js": "bf769ec5e87c4f786e39c9f7471d8813842f03eccd551e17e7eb53ab136fc76f"
+      }
+    },
+    {
+      "id": "back-to-top",
+      "name": "Back to Top",
+      "description": "A small round button appears at the bottom right when you've scrolled far down a page, and takes you back to the top.",
+      "version": "1.0",
+      "icon": "arrow.up.circle",
+      "author": "Tacet Plugins",
+      "sites": [
+        "*"
+      ],
+      "js": "main.js",
+      "runAt": "end",
+      "world": "isolated",
+      "files": {
+        "main.js": "3ad6919ab4216e2b6adb3b60716d5598bd381c48ce7c787f6353f3925d392166"
+      }
+    },
+    {
       "id": "copy-as-markdown",
       "name": "Copy as Markdown",
       "description": "Press ⌥⇧C to copy the selected text as Markdown, with its links, headings, lists, bold, italics and code. Without a selection, it copies the page's title and address as a Markdown link.",
@@ -15,6 +72,63 @@
       "world": "isolated",
       "files": {
         "main.js": "dbda68a16a26b5fbd74a0c09b5a1735ad5f81ae10a54e6fa45eb38dc293eb6e5"
+      }
+    },
+    {
+      "id": "external-links-new-tab",
+      "name": "Other Sites in New Tabs",
+      "description": "Links that lead to a different site open in a new tab, so the page you were reading stays where it was.",
+      "version": "1.0",
+      "icon": "arrow.up.forward.square",
+      "author": "Tacet Plugins",
+      "sites": [
+        "*"
+      ],
+      "js": "main.js",
+      "runAt": "end",
+      "world": "isolated",
+      "files": {
+        "main.js": "ee53cb6eaccecd6db98fe0f4f7e1775cef7a21fe3990a3f616dec1efc144c5d2"
+      }
+    },
+    {
+      "id": "github-wide",
+      "name": "GitHub Wide",
+      "description": "Lets GitHub use the whole window for code, diffs, issues and pull requests, instead of a narrow column in the middle.",
+      "version": "1.0",
+      "icon": "arrow.left.and.right.square",
+      "author": "Tacet Plugins",
+      "sites": [
+        "github.com"
+      ],
+      "css": "style.css",
+      "runAt": "start",
+      "world": "isolated",
+      "files": {
+        "style.css": "33ab02218247d8cbf5934f0d1c18293d5c57e790343349a0287a5469df8eb8a3"
+      }
+    },
+    {
+      "id": "google-just-results",
+      "name": "Google, Just Results",
+      "description": "Removes sponsored results and ads from Google Search, so the first links are real results.",
+      "version": "1.0",
+      "icon": "magnifyingglass.circle",
+      "author": "Tacet Plugins",
+      "sites": [
+        "google.com",
+        "google.it",
+        "google.fr",
+        "google.de",
+        "google.es",
+        "google.co.uk",
+        "google.ch"
+      ],
+      "css": "style.css",
+      "runAt": "start",
+      "world": "isolated",
+      "files": {
+        "style.css": "b1c95d4915f9babb7d7c9764e41f6966fb31af036979dc4b7a7a49e3d8cd3d0c"
       }
     },
     {
@@ -34,6 +148,57 @@
       }
     },
     {
+      "id": "keyboard-navigation",
+      "name": "Keyboard Navigation",
+      "description": "Browse without the mouse: press F to label every link, then type its letters to open it (⇧F opens it in a new tab). J and K scroll, G goes to the top and ⇧G to the bottom. Keys do nothing while you type in a field. Sites with their own single-key shortcuts, like YouTube and Gmail, keep theirs.",
+      "version": "1.0",
+      "icon": "keyboard",
+      "author": "Tacet Plugins",
+      "sites": [
+        "*"
+      ],
+      "js": "main.js",
+      "runAt": "end",
+      "world": "isolated",
+      "files": {
+        "main.js": "616aa762cc60c60e9570d7f5605b994aafbc30b0bbe0b32abdca3b4f3db94c64"
+      }
+    },
+    {
+      "id": "old-reddit",
+      "name": "Old Reddit",
+      "description": "Opens Reddit in its classic layout at old.reddit.com: lighter, faster and with more posts on screen. Galleries, chat and settings still open in the new design.",
+      "version": "1.0",
+      "icon": "clock.arrow.circlepath",
+      "author": "Tacet Plugins",
+      "sites": [
+        "reddit.com"
+      ],
+      "js": "main.js",
+      "runAt": "start",
+      "world": "isolated",
+      "files": {
+        "main.js": "44aae5104e4816d09b5ab9c161bdc8b50ad9885b7659f0a1776229441e8d7552"
+      }
+    },
+    {
+      "id": "picture-in-picture",
+      "name": "Picture in Picture",
+      "description": "Press ⌥⇧P to float the video you're watching in its own small window, on any site, even ones that hide the button.",
+      "version": "1.0",
+      "icon": "pip.enter",
+      "author": "Tacet Plugins",
+      "sites": [
+        "*"
+      ],
+      "js": "main.js",
+      "runAt": "end",
+      "world": "isolated",
+      "files": {
+        "main.js": "a41f4fa01e5de36672763b0d5c8c0e9038163702cf6c5d3e96dc2e4731f59fa1"
+      }
+    },
+    {
       "id": "reading-progress",
       "name": "Reading Progress",
       "description": "On articles, a thin bar at the top shows how far you've read, and a small label says how many minutes are left.",
@@ -47,6 +212,96 @@
       "world": "isolated",
       "files": {
         "main.js": "330f73d6bd0fa6fe3d088644cead01c1d42a370e5c9e408dbd6e4c97bd5dd905"
+      }
+    },
+    {
+      "id": "stack-overflow-clean",
+      "name": "Stack Overflow, Clean",
+      "description": "Hides Stack Overflow's sidebars, hot questions, ads and sign-up prompts, and widens the question and answers.",
+      "version": "1.0",
+      "icon": "list.bullet.rectangle",
+      "author": "Tacet Plugins",
+      "sites": [
+        "stackoverflow.com",
+        "stackexchange.com",
+        "superuser.com",
+        "serverfault.com",
+        "askubuntu.com"
+      ],
+      "css": "style.css",
+      "runAt": "start",
+      "world": "isolated",
+      "files": {
+        "style.css": "4d645f9c98420f5700f76f6c0ebc3ee9f82c0874496eca3bc3767e246e178075"
+      }
+    },
+    {
+      "id": "video-speed",
+      "name": "Video Speed",
+      "description": "Change the speed of any video with ] and [ (in steps of 0.25×), and press \\ to go back to normal. A small label shows the speed.",
+      "version": "1.0",
+      "icon": "gauge.with.dots.needle.67percent",
+      "author": "Tacet Plugins",
+      "sites": [
+        "*"
+      ],
+      "js": "main.js",
+      "runAt": "end",
+      "world": "isolated",
+      "files": {
+        "main.js": "a3b7b76cbc256c5338209a453aa40351b473d255217379b8b14b3c1e325a5129"
+      }
+    },
+    {
+      "id": "word-count",
+      "name": "Word Count",
+      "description": "Press ⌥⇧W to see how many words and characters are in the text you selected, or in the whole page, and how long it takes to read.",
+      "version": "1.0",
+      "icon": "textformat.123",
+      "author": "Tacet Plugins",
+      "sites": [
+        "*"
+      ],
+      "js": "main.js",
+      "runAt": "end",
+      "world": "isolated",
+      "files": {
+        "main.js": "969070ea74415ceaefc47a5d2039cbf27a19c83696a85cde0a8daba2933ed5a7"
+      }
+    },
+    {
+      "id": "x-without-distractions",
+      "name": "X Without Distractions",
+      "description": "On X (Twitter), hides trends, \"Who to follow\", premium offers and the sidebar's suggestions, leaving your timeline and replies.",
+      "version": "1.0",
+      "icon": "text.bubble",
+      "author": "Tacet Plugins",
+      "sites": [
+        "x.com",
+        "twitter.com"
+      ],
+      "css": "style.css",
+      "runAt": "start",
+      "world": "isolated",
+      "files": {
+        "style.css": "f1a4b0cc77541d19acfc2f080724b5347a0e43cf137467644fd3813d4b6aa745"
+      }
+    },
+    {
+      "id": "youtube-focus",
+      "name": "YouTube Focus",
+      "description": "Hides YouTube's home feed, the recommended videos next to the one you're watching and the suggestions at its end, so you watch what you came for. Search and subscriptions stay.",
+      "version": "1.0",
+      "icon": "eye.slash",
+      "author": "Tacet Plugins",
+      "sites": [
+        "youtube.com"
+      ],
+      "css": "style.css",
+      "runAt": "start",
+      "world": "isolated",
+      "files": {
+        "style.css": "94feab10b40d2ee7d4d4ae4110dd5a37614420d2c3269e004d1da3b22cfa15af"
       }
     },
     {

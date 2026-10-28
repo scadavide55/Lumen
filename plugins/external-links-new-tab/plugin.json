@@ -1,0 +1,14 @@
+{
+  "id": "external-links-new-tab",
+  "name": "Other Sites in New Tabs",
+  "description": "Links that lead to a different site open in a new tab, so the page you were reading stays where it was.",
+  "version": "1.0",
+  "icon": "arrow.up.forward.square",
+  "author": "Tacet Plugins",
+  "sites": [
+    "*"
+  ],
+  "js": "main.js",
+  "runAt": "end",
+  "world": "isolated"
+}

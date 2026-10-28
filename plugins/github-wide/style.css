@@ -1,0 +1,7 @@
+/* GitHub's fixed-width containers stretch to the window. */
+.container-xl, .container-lg, .container-md,
+.application-main .container, .repository-content, .Layout--sidebarPosition-end,
+[data-target="react-app.reactRoot"] .container-xl, .js-repo-pjax-container .container-xl,
+.PageLayout-content, .prc-PageLayout-Content, .react-code-view-container {
+  max-width: none !important;
+}

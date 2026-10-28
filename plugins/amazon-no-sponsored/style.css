@@ -1,0 +1,7 @@
+/* Sponsored results, brand banners and ad slots. */
+[data-component-type="sp-sponsored-result"], .AdHolder, .s-result-item:has(.puis-sponsored-label-text),
+div[data-cel-widget^="MAIN-SHOPPING_ADVISER"], div[data-cel-widget*="sp_"], #sp_detail, #sp_detail2,
+[data-component-type="s-ads-metrics"], .s-widget-sponsored-label, [cel_widget_id*="adplacements"],
+#ad-feedback-text, .ad-feedback-text, [id^="sponsoredProducts"], [data-ad-placement] {
+  display: none !important;
+}

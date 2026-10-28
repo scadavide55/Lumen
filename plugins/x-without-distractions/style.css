@@ -1,0 +1,9 @@
+/* The right column's trends, suggestions and offers, and promoted posts. */
+[data-testid="sidebarColumn"] section[aria-labelledby],
+[data-testid="sidebarColumn"] [aria-label*="Trending"],
+[data-testid="sidebarColumn"] aside,
+[data-testid="sidebarColumn"] [data-testid="super-upsell-UpsellCardRenderProperties"],
+a[href="/i/premium_sign_up"], a[href="/i/verified-choose"], a[href="/explore"][role="link"] + div,
+[data-testid="cellInnerDiv"]:has([data-testid="placementTracking"]) {
+  display: none !important;
+}

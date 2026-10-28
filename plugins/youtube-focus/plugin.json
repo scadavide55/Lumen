@@ -1,0 +1,14 @@
+{
+  "id": "youtube-focus",
+  "name": "YouTube Focus",
+  "description": "Hides YouTube's home feed, the recommended videos next to the one you're watching and the suggestions at its end, so you watch what you came for. Search and subscriptions stay.",
+  "version": "1.0",
+  "icon": "eye.slash",
+  "author": "Tacet Plugins",
+  "sites": [
+    "youtube.com"
+  ],
+  "css": "style.css",
+  "runAt": "start",
+  "world": "isolated"
+}

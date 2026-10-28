@@ -1,0 +1,14 @@
+{
+  "id": "keyboard-navigation",
+  "name": "Keyboard Navigation",
+  "description": "Browse without the mouse: press F to label every link, then type its letters to open it (⇧F opens it in a new tab). J and K scroll, G goes to the top and ⇧G to the bottom. Keys do nothing while you type in a field. Sites with their own single-key shortcuts, like YouTube and Gmail, keep theirs.",
+  "version": "1.0",
+  "icon": "keyboard",
+  "author": "Tacet Plugins",
+  "sites": [
+    "*"
+  ],
+  "js": "main.js",
+  "runAt": "end",
+  "world": "isolated"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "video-speed",
+  "name": "Video Speed",
+  "description": "Change the speed of any video with ] and [ (in steps of 0.25×), and press \\ to go back to normal. A small label shows the speed.",
+  "version": "1.0",
+  "icon": "gauge.with.dots.needle.67percent",
+  "author": "Tacet Plugins",
+  "sites": [
+    "*"
+  ],
+  "js": "main.js",
+  "runAt": "end",
+  "world": "isolated"
+}

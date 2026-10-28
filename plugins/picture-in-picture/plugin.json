@@ -1,0 +1,14 @@
+{
+  "id": "picture-in-picture",
+  "name": "Picture in Picture",
+  "description": "Press ⌥⇧P to float the video you're watching in its own small window, on any site, even ones that hide the button.",
+  "version": "1.0",
+  "icon": "pip.enter",
+  "author": "Tacet Plugins",
+  "sites": [
+    "*"
+  ],
+  "js": "main.js",
+  "runAt": "end",
+  "world": "isolated"
+}

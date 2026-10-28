@@ -1,0 +1,5 @@
+#sidebar, #hot-network-questions, .js-consent-banner, #left-sidebar, .s-sidebarwidget,
+.js-dismissable-hero, .everyonelovesstackoverflow, [id^="dfp-"], .js-zone-container, #announcement-banner {
+  display: none !important;
+}
+#mainbar, #content, .container { width: auto !important; max-width: 1100px !important; float: none !important; margin: 0 auto !important; }

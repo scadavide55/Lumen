@@ -1,0 +1,14 @@
+{
+  "id": "github-wide",
+  "name": "GitHub Wide",
+  "description": "Lets GitHub use the whole window for code, diffs, issues and pull requests, instead of a narrow column in the middle.",
+  "version": "1.0",
+  "icon": "arrow.left.and.right.square",
+  "author": "Tacet Plugins",
+  "sites": [
+    "github.com"
+  ],
+  "css": "style.css",
+  "runAt": "start",
+  "world": "isolated"
+}

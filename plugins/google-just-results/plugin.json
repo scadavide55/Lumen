@@ -1,0 +1,20 @@
+{
+  "id": "google-just-results",
+  "name": "Google, Just Results",
+  "description": "Removes sponsored results and ads from Google Search, so the first links are real results.",
+  "version": "1.0",
+  "icon": "magnifyingglass.circle",
+  "author": "Tacet Plugins",
+  "sites": [
+    "google.com",
+    "google.it",
+    "google.fr",
+    "google.de",
+    "google.es",
+    "google.co.uk",
+    "google.ch"
+  ],
+  "css": "style.css",
+  "runAt": "start",
+  "world": "isolated"
+}
