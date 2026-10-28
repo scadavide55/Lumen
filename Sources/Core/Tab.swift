@@ -41,6 +41,8 @@ final class Tab: NSObject, Identifiable {
     var translatedFrom: String?
     var translationError: String?
     var readingAloud = false
+    /// What Tacet Shield blocked on the page shown now, by site, and how many times.
+    var blockedHere: [String: Int] = [:]
 
     /// The picture of the page from when you last left it, for the preview shown when hovering over the tab.
     var previewImage: NSImage? { isSelected ? nil : lastLook.flatMap { NSImage(data: $0.jpeg) } }
@@ -786,6 +788,7 @@ extension Tab: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        if !blockedHere.isEmpty { blockedHere = [:] }
         // A new page isn't translated, and isn't the one being read aloud.
         if translatedFrom != nil { translatedFrom = nil }
         if translationError != nil { translationError = nil }
@@ -1118,4 +1121,20 @@ final class PullToRefresh {
         distance = 0
         if progress != 0 { progress = 0 }
     }
+}
+
+// MARK: - What Tacet Shield blocked
+
+extension Tab {
+    /// WebKit tells its own browser about every request a content rule list blocked; it isn't public API, so the
+    /// name is matched exactly and nothing breaks if a WebKit version stops calling it.
+    @objc(_webView:contentRuleListWithIdentifier:performedAction:forURL:)
+    func contentRuleList(_ webView: WKWebView, identifier: String, performedAction action: NSObject, forURL url: URL) {
+        guard webView === self.webView, action.responds(to: NSSelectorFromString("blockedLoad")),
+              (action.value(forKey: "blockedLoad") as? Bool) == true else { return }
+        let site = url.host.map { PasswordStore.site($0) } ?? url.absoluteString
+        blockedHere[site, default: 0] += 1
+    }
+
+    var blockedCount: Int { blockedHere.values.reduce(0, +) }
 }

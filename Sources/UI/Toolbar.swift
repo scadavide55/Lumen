@@ -181,6 +181,7 @@ struct ShieldPopover: View {
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }
+            if tab.shieldsUp && tab.url != nil { BlockedOnPage(tab: tab) }
             if let host = tab.host {
                 Toggle("Protection on this site", isOn: Binding(
                     get: { !s.isAllowlisted(host) },
@@ -204,6 +205,45 @@ struct ShieldPopover: View {
         .controlSize(.small)
         .padding(16)
         .frame(width: 300)
+    }
+}
+
+/// "12 blocked on this page", and from which sites.
+struct BlockedOnPage: View {
+    var tab: Tab
+    @State private var expanded = false
+
+    var body: some View {
+        let count = tab.blockedCount
+        VStack(alignment: .leading, spacing: 6) {
+            Button { if count > 0 { expanded.toggle() } } label: {
+                HStack(spacing: 6) {
+                    Text("\(count)").font(.system(size: 22, weight: .bold, design: .rounded)).monospacedDigit()
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(count == 1 ? LocalizedStringKey("ad or tracker blocked on this page") : "ads and trackers blocked on this page")
+                            .font(.system(size: 12, weight: .medium))
+                        if count > 0 {
+                            Text(String(format: L("from %d sites"), tab.blockedHere.count)).font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                    Spacer()
+                    if count > 0 { Image(systemName: expanded ? "chevron.up" : "chevron.down").font(.system(size: 10)).foregroundStyle(.secondary) }
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            if expanded {
+                ForEach(tab.blockedHere.sorted { $0.value > $1.value }.prefix(12), id: \.key) { site, n in
+                    HStack {
+                        Text(site).font(.system(size: 11.5)).lineLimit(1)
+                        Spacer()
+                        Text("\(n)").font(.system(size: 11.5)).foregroundStyle(.secondary).monospacedDigit()
+                    }
+                }
+            }
+        }
+        .padding(10)
+        .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Color.primary.opacity(0.05)))
     }
 }
 
