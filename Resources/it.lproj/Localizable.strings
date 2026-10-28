@@ -692,6 +692,7 @@
 "Save and Close Group" = "Salva e chiudi gruppo";
 "Save and Close “%@”" = "Salva e chiudi “%@”";
 "Save for Offline" = "Salva offline";
+"Save or import passwords first, then check them here." = "Prima salva o importa delle password, poi controllale qui.";
 "Save password?" = "Salvare la password?";
 "Save this password?" = "Salvare questa password?";
 "Saved" = "Salvata";

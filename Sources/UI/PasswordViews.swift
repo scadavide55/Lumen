@@ -209,16 +209,17 @@ struct PasswordsPane: View {
             }
 
             Section {
+                // Always there, so it's easy to find; with nothing saved there's nothing to check yet.
+                PasswordCheckRow(issues: issues, checking: checking, empty: store.logins.isEmpty) {
+                    checking = true
+                    store.checkup { result in
+                        checking = false
+                        if let result { issues = result }
+                    }
+                }
                 if store.logins.isEmpty {
                     Text("No saved passwords yet.").foregroundStyle(.secondary)
                 } else {
-                    PasswordCheckRow(issues: issues, checking: checking) {
-                        checking = true
-                        store.checkup { result in
-                            checking = false
-                            if let result { issues = result }
-                        }
-                    }
                     TextField("Search passwords", text: $query)
                     ForEach(filtered) { login in
                         HStack {
@@ -317,6 +318,7 @@ struct PasswordsPane: View {
 struct PasswordCheckRow: View {
     let issues: [SavedLogin.ID: Set<PasswordStore.Issue>]?
     let checking: Bool
+    var empty = false
     let check: () -> Void
 
     static func describe(_ issue: PasswordStore.Issue) -> String {
@@ -345,7 +347,9 @@ struct PasswordCheckRow: View {
             }
             Spacer()
             if checking { ProgressView().controlSize(.small) }
-            Button(issues == nil ? LocalizedStringKey("Check…") : "Check Again") { check() }.disabled(checking)
+            Button(issues == nil ? LocalizedStringKey("Check…") : "Check Again") { check() }
+                .disabled(checking || empty)
+                .help(empty ? L("Save or import passwords first, then check them here.") : "")
         }
     }
 }

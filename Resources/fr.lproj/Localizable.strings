@@ -692,6 +692,7 @@
 "Save and Close Group" = "Enregistrer et fermer le groupe";
 "Save and Close “%@”" = "Enregistrer et fermer « %@ »";
 "Save for Offline" = "Enregistrer hors ligne";
+"Save or import passwords first, then check them here." = "Enregistrez ou importez d’abord des mots de passe, puis vérifiez-les ici.";
 "Save password?" = "Enregistrer le mot de passe ?";
 "Save this password?" = "Enregistrer ce mot de passe ?";
 "Saved" = "Enregistrée";
