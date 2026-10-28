@@ -198,7 +198,7 @@ struct LumenCommands: Commands {
             }
             Divider()
             Button("Open Location…") { b?.togglePalette() }.keyboardShortcut("l").disabled(b == nil)
-            Button("Reopen Closed Tab") { b?.reopenClosed() }.keyboardShortcut("t", modifiers: [.command, .shift]).disabled(b == nil)
+            Button("Reopen Closed Tab") { b?.reopenLastClosed() }.keyboardShortcut("t", modifiers: [.command, .shift]).disabled(b == nil)
             Divider()
             Button("Close Tab") {
                 if let b { b.closeCurrent() } else { NSApp.keyWindow?.performClose(nil) }

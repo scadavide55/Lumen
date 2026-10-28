@@ -364,6 +364,7 @@ struct TabRow: View, Equatable {
             return b.handleDrop(items, on: tab, placement: placement, pinned: false)
         }
         .tabPreview(tab, edge: Settings.shared.sidebarSide == .left ? .trailing : .leading)
+        .overlay(MiddleClick { b.close(tab) })
     }
 }
 
@@ -474,6 +475,9 @@ struct OneTabMenu: View {
         Button("Reload Tab") { tab.reload() }
         if !tab.isHibernated && !tab.isSelected {
             Button("Hibernate Tab") { tab.hibernate() }
+            if tab.isPinned, let home = tab.pinnedHome, home != tab.url {
+                Button("Back to Pinned Address") { tab.load(home) }
+            }
         }
         SortTabsMenu()
         Divider()
@@ -1009,6 +1013,7 @@ struct TabChip: View, Equatable {
             return b.handleDrop(items, on: tab, placement: placement, pinned: tab.isPinned)
         }
         .tabPreview(tab, edge: .bottom)
+        .overlay(MiddleClick { b.close(tab) })
     }
 }
 
@@ -1036,4 +1041,29 @@ struct CloseTabButton: View {
         .padding(-slop)
         .help("Close tab (⌘W)")
     }
+}
+
+/// Closes a tab with a click of the mouse's middle button (the scroll wheel), as in other browsers. It takes only
+/// that click: every other click goes through to the tab underneath.
+struct MiddleClick: NSViewRepresentable {
+    let action: () -> Void
+
+    final class Catcher: NSView {
+        var action: () -> Void = {}
+        override func hitTest(_ point: NSPoint) -> NSView? {
+            guard let e = NSApp.currentEvent, e.type == .otherMouseDown || e.type == .otherMouseUp, e.buttonNumber == 2 else { return nil }
+            return super.hitTest(point)
+        }
+        override func otherMouseUp(with event: NSEvent) {
+            if event.buttonNumber == 2 { action() } else { super.otherMouseUp(with: event) }
+        }
+    }
+
+    func makeNSView(context: Context) -> Catcher {
+        let v = Catcher()
+        v.action = action
+        return v
+    }
+
+    func updateNSView(_ v: Catcher, context: Context) { v.action = action }
 }

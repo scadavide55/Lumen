@@ -62,7 +62,10 @@ final class BrowserState {
     @ObservationIgnored var palettePrefill = ""
     @ObservationIgnored weak var window: NSWindow?
 
-    private(set) var closedTabs: [(snapshot: TabSnapshot, index: Int)] = []
+    /// Closed tabs to reopen, newest last; tabs closed together (other tabs, a group) share a batch and come back together.
+    private(set) var closedTabs: [(snapshot: TabSnapshot, index: Int, batch: Int)] = []
+    @ObservationIgnored private var closingBatch: Int?
+    @ObservationIgnored private var batches = 0
     @ObservationIgnored private var lastOpened: (opener: UUID, tab: UUID)?
     @ObservationIgnored private var timer: Timer?
     @ObservationIgnored private var keyObserver: NSObjectProtocol?
@@ -170,6 +173,7 @@ final class BrowserState {
         groups = snap.groups ?? []
         tabs = snap.tabs.map { s in
             let t = Tab(browser: self, url: s.url, title: s.title, state: s.state, pinned: s.pinned)
+            if s.pinned { t.pinnedHome = s.home ?? s.url }
             t.groupID = s.group.flatMap { g in groups.contains { $0.id == g } ? g : nil }
             if let d = s.lastActive { t.lastActive = d }
             return t
@@ -275,8 +279,9 @@ final class BrowserState {
     func close(_ tab: Tab) {
         guard let i = tabs.firstIndex(where: { $0.id == tab.id }) else { return }
         if tab.url != nil {
-            closedTabs.append((tab.snapshot(), i))
-            if closedTabs.count > 30 { closedTabs.removeFirst() }
+            if closingBatch == nil { batches += 1 }
+            closedTabs.append((tab.snapshot(), i, closingBatch ?? batches))
+            if closedTabs.count > 60 { closedTabs.removeFirst() }
         }
         let wasSelected = tab.id == selectedID
         tabs.remove(at: i)
@@ -300,8 +305,16 @@ final class BrowserState {
         }
     }
 
+    /// Closes several tabs as one batch, which ⇧⌘T brings back whole.
+    func closingTogether(_ body: () -> Void) {
+        batches += 1
+        closingBatch = batches
+        body()
+        closingBatch = nil
+    }
+
     func closeOthers(_ keep: Tab) {
-        for t in tabs where t.id != keep.id && !t.isPinned { close(t) }
+        closingTogether { for t in tabs where t.id != keep.id && !t.isPinned { close(t) } }
     }
 
     /// Closes tabs showing the same address as an earlier tab, keeping the selected and pinned ones.
@@ -315,13 +328,21 @@ final class BrowserState {
 
     func closeBelow(_ tab: Tab) {
         guard let i = tabs.firstIndex(where: { $0.id == tab.id }) else { return }
-        for t in tabs[(i + 1)...] where !t.isPinned { close(t) }
+        closingTogether { for t in tabs[(i + 1)...] where !t.isPinned { close(t) } }
+    }
+
+    /// ⇧⌘T: the last tab closed, or every tab closed with it, in their places.
+    func reopenLastClosed() {
+        guard let batch = closedTabs.last?.batch else { return }
+        // Newest first, undoing the closes in reverse, so every tab lands back in its own place.
+        while closedTabs.last?.batch == batch { reopenClosed() }
     }
 
     func reopenClosed(at position: Int? = nil) {
         guard !closedTabs.isEmpty else { return }
-        let (snap, index) = closedTabs.remove(at: position ?? closedTabs.count - 1)
+        let (snap, index, _) = closedTabs.remove(at: position ?? closedTabs.count - 1)
         let tab = Tab(browser: self, url: snap.url, title: snap.title, state: snap.state, pinned: snap.pinned)
+        if snap.pinned { tab.pinnedHome = snap.home ?? snap.url }
         // Back into its group, if the group is still there.
         if !snap.pinned, let g = snap.group, groups.contains(where: { $0.id == g }) { tab.groupID = g }
         tabs.insert(tab, at: min(index, tabs.count))
@@ -487,7 +508,7 @@ final class BrowserState {
     }
 
     func closeGroup(_ id: UUID) {
-        for t in tabs where t.groupID == id { close(t) }
+        closingTogether { for t in tabs where t.groupID == id { close(t) } }
         groups.removeAll { $0.id == id }
     }
 

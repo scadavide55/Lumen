@@ -1,5 +1,6 @@
 "%@ is available." = "%@ est disponible.";
 "%@ is ready. You have Tacet %@." = "%1$@ est prêt. Vous avez Tacet %2$@.";
+"%@ isn't running. Open the %@ app (and in LM Studio, start its server), then try again." = "%1$@ n'est pas lancé. Ouvrez l'app %2$@ (et dans LM Studio, démarrez son serveur), puis réessayez.";
 "%@ needs Full Disk Access." = "%@ nécessite l'accès complet au disque.";
 "%@ of %@" = "%1$@ sur %2$@";
 "%@ on this site" = "%@ sur ce site";
@@ -14,6 +15,7 @@
 "%d duplicate tabs" = "%d onglets en double";
 "%d hidden" = "%d masqués";
 "%d in data breaches · %d reused · %d weak" = "%1$d dans des fuites · %2$d réutilisés · %3$d faibles";
+"%d settings and %d plugins, from Tacet %@. Your passwords, history and bookmarks don't change. Tacet restarts to finish." = "%1$d réglages et %2$d plugins, de Tacet %3$@. Vos mots de passe, historique et signets ne changent pas. Tacet redémarre pour terminer.";
 "%lld bookmarks" = "%lld signets";
 "%lld cookies" = "%lld cookies";
 "%lld history items" = "%lld éléments d'historique";
@@ -27,6 +29,7 @@
 "3 tabs" = "3 onglets";
 "5 tabs" = "5 onglets";
 "A few things worth knowing." = "Quelques choses à savoir.";
+"A focus timer in a tab of its own: 25 minutes of work and 5 of rest, or your own lengths. The time left shows in the tab's title, so you can see it from the tab list, and a soft sound says when it's done." = "Un minuteur de concentration dans son propre onglet : 25 minutes de travail et 5 de pause, ou vos propres durées. Le temps restant s'affiche dans le titre de l'onglet, visible depuis la liste, et un son doux annonce la fin.";
 "A folder with a manifest.json, or a .zip, .crx (Chrome) or .xpi (Firefox) file. Most extensions work; some features that only Chrome or Firefox have may not." = "Un dossier avec un manifest.json, ou un fichier .zip, .crx (Chrome) ou .xpi (Firefox). La plupart des extensions fonctionnent ; certaines fonctions propres à Chrome ou Firefox peuvent ne pas marcher.";
 "A profile can be deleted once none of its windows are open." = "Un profil peut être supprimé lorsqu'aucune de ses fenêtres n'est ouverte.";
 "A quick answer here, searching the web if needed" = "Une réponse rapide ici, en cherchant sur le web si besoin";
@@ -115,9 +118,11 @@
 "Back" = "Retour";
 "Back (⌘[)" = "Retour (⌘[)";
 "Back / forward" = "Retour / avant";
+"Back to Pinned Address" = "Revenir à l'adresse épinglée";
 "Back to Top" = "Retour en haut";
 "Background" = "Fond";
 "Beta" = "Bêta";
+"Bigger YouTube Captions" = "Sous-titres YouTube plus grands";
 "Block" = "Bloquer";
 "Block Ads and Trackers" = "Bloquer les publicités et les traqueurs";
 "Block Third-Party Cookies" = "Bloquer les cookies tiers";
@@ -172,6 +177,7 @@
 "Choose your search engine" = "Choisissez votre moteur de recherche";
 "Choose…" = "Choisir…";
 "Chrome, Opera and other Chromium browsers keep sign-ins locked in your Keychain: when macOS asks, choose Allow. Passwords aren't imported." = "Chrome, Opera et les autres navigateurs Chromium protègent les connexions dans le trousseau : quand macOS le demande, choisissez Autoriser. Les mots de passe ne sont pas importés.";
+"Clean Links on Copy" = "Liens propres à la copie";
 "Clean tracking from links" = "Nettoyer le pistage des liens";
 "Clear" = "Effacer";
 "Clear Browsing Data" = "Effacer les données de navigation";
@@ -215,6 +221,7 @@
 "Compact tabs" = "Onglets compacts";
 "Compiling %@ rules…" = "Compilation de %@ règles…";
 "Confirm before downloading apps, installers and scripts" = "Demander avant de télécharger des apps, programmes d'installation et scripts";
+"Connected · %d models" = "Connecté · %d modèles";
 "Connection is not secure" = "La connexion n'est pas sécurisée";
 "Connection is secure" = "La connexion est sécurisée";
 "Continue" = "Continuer";
@@ -224,6 +231,7 @@
 "Cookies and site data (signs you out of most sites)" = "Cookies et données de sites (vous déconnecte de la plupart des sites)";
 "Copy" = "Copier";
 "Copy Address" = "Copier l'adresse";
+"Copy Clean Address" = "Copier l'adresse propre";
 "Copy Link" = "Copier le lien";
 "Copy Link Without Tracking" = "Copier le lien sans pistage";
 "Copy Link as Markdown" = "Copier le lien en Markdown";
@@ -307,6 +315,7 @@
 "Explain" = "Expliquer";
 "Explain the text I selected" = "Explique le texte que j'ai sélectionné";
 "Explain this." = "Explique-moi ceci.";
+"Export Settings and Plugins…" = "Exporter les réglages et plugins…";
 "Export as PDF" = "Exporter en PDF";
 "Export as PDF…" = "Exporter en PDF…";
 "Export to CSV…" = "Exporter en CSV…";
@@ -340,6 +349,7 @@
 "Float the page with rounded corners" = "Page flottante aux coins arrondis";
 "Flow (animated)" = "Flux (animé)";
 "Focus Mode" = "Mode concentration";
+"Focus Timer" = "Minuteur de concentration";
 "Folder" = "Dossier";
 "Follows your Mac" = "Suit votre Mac";
 "Font" = "Police";
@@ -354,6 +364,7 @@
 "From %@" = "De %@";
 "Full Screen Chat" = "Discussion en plein écran";
 "General" = "Général";
+"Get %@" = "Obtenir %@";
 "Get Started" = "Commencer";
 "GitHub Wide" = "GitHub en large";
 "Go Back" = "Revenir en arrière";
@@ -407,6 +418,7 @@
 "Images" = "Images";
 "Images too, with models that can read them" = "Les images aussi, avec les modèles qui savent les lire";
 "Import" = "Importer";
+"Import and Restart" = "Importer et redémarrer";
 "Import bookmarks exported from Safari, Chrome or Firefox (HTML)" = "Importer des signets exportés de Safari, Chrome ou Firefox (HTML)";
 "Import from Another Browser" = "Importer depuis un autre navigateur";
 "Import from Another Browser…" = "Importer depuis un autre navigateur…";
@@ -470,6 +482,7 @@
 "Look and feel" = "Apparence";
 "Looking at the page" = "Analyse de la page";
 "Looking at your tabs" = "Consultation de vos onglets";
+"Looking for models…" = "Recherche des modèles…";
 "Looking in the Tacet Guide" = "Je consulte le Guide de Tacet";
 "Looks for a newer Tacet on GitHub" = "Recherche une version plus récente de Tacet sur GitHub";
 "Looks for passwords found in data breaches, used on several sites or easy to guess. Only the first 5 characters of each password's SHA-1 hash are sent to Have I Been Pwned; the password never leaves your Mac." = "Cherche les mots de passe trouvés dans des fuites de données, utilisés sur plusieurs sites ou faciles à deviner. Seuls les 5 premiers caractères du hachage SHA-1 de chaque mot de passe sont envoyés à Have I Been Pwned ; le mot de passe ne quitte jamais votre Mac.";
@@ -479,6 +492,7 @@
 "Make Default" = "Définir par défaut";
 "Make Tacet your default browser?" = "Faire de Tacet votre navigateur par défaut ?";
 "Make any site yours" = "Chaque site à votre goût";
+"Makes YouTube's subtitles larger and easier to read, on a soft dark band, in the player and in full screen." = "Agrandit les sous-titres de YouTube et les rend plus lisibles, sur une bande sombre douce, dans le lecteur et en plein écran.";
 "Manage Extensions…" = "Gérer les extensions…";
 "Manage Passwords…" = "Gérer les mots de passe…";
 "Manually" = "Manuellement";
@@ -502,6 +516,7 @@
 "Move to New Group" = "Déplacer dans un nouveau groupe";
 "Move to Trash" = "Placer dans la corbeille";
 "Move to Window" = "Déplacer dans une fenêtre";
+"Move to another Mac" = "Passer à un autre Mac";
 "Mute Tab" = "Couper le son de l'onglet";
 "Mute or Unmute Tab" = "Activer ou couper le son de l'onglet";
 "Mute tab" = "Couper le son de l'onglet";
@@ -550,6 +565,7 @@
 "No extensions yet. Add one from the apps on your Mac below, or from a file." = "Aucune extension pour l'instant. Ajoutez-en une depuis les apps de votre Mac ci-dessous, ou depuis un fichier.";
 "No image chosen" = "Aucune image choisie";
 "No images" = "Sans images";
+"No key needed: open the app and Tacet finds its models. Pick one in Settings › AI." = "Pas de clé : ouvrez l'app et Tacet trouve ses modèles. Choisissez-en un dans Réglages › IA.";
 "No models loaded" = "Aucun modèle chargé";
 "No other browsers found. You can skip this step." = "Aucun autre navigateur trouvé. Vous pouvez passer cette étape.";
 "No pop-ups" = "Sans fenêtres";
@@ -585,6 +601,7 @@
 "On sign-up and change-password pages, offer a random password like abcdEf-ghijk2-lmnopq." = "Sur les pages d'inscription et de changement de mot de passe, proposer un mot de passe aléatoire comme abcdEf-ghijk2-lmnopq.";
 "On · click to turn off" = "Activé · cliquez pour désactiver";
 "On-device model" = "Modèle sur le Mac";
+"One file with your settings, search shortcuts, site styles, profiles and Tacet Plugins. Passwords, AI keys, history and bookmarks aren't in it: export those from their own settings." = "Un seul fichier avec vos réglages, raccourcis de recherche, styles de sites, profils et Tacet Plugins. Les mots de passe, clés d'IA, historique et signets n'y sont pas : exportez-les depuis leurs propres réglages.";
 "One last Keychain question" = "Une dernière question du trousseau";
 "Only add extensions you trust: they can see and change the pages they have access to." = "N'ajoutez que des extensions de confiance : elles peuvent voir et modifier les pages auxquelles elles ont accès.";
 "Open" = "Ouvrir";
@@ -650,6 +667,7 @@
 "Pin to Toolbar" = "Épingler dans la barre";
 "Pink" = "Rose";
 "Pinned tabs" = "Onglets épinglés";
+"Pinned tabs open links to other sites in new tabs" = "Les onglets épinglés ouvrent les liens vers d'autres sites dans de nouveaux onglets";
 "Pinned tabs sit at the top as icons and are always one click away." = "Les onglets épinglés restent en haut sous forme d'icônes, toujours à un clic.";
 "Plain" = "Uni";
 "Press ⌘D on any page, or import bookmarks from another browser." = "Appuyez sur ⌘D sur n'importe quelle page, ou importez des signets d'un autre navigateur.";
@@ -709,6 +727,7 @@
 "Reload Tab" = "Recharger l'onglet";
 "Reload ignoring cache" = "Recharger sans le cache";
 "Remove" = "Supprimer";
+"Remove Background with %@" = "Supprimer l'arrière-plan avec %@";
 "Remove Bookmark" = "Supprimer le signet";
 "Remove Tracking from Links" = "Supprimer le pistage des liens";
 "Remove from Favorites" = "Retirer des favoris";
@@ -724,6 +743,7 @@
 "Rename…" = "Renommer…";
 "Reopen Closed Tab" = "Rouvrir l'onglet fermé";
 "Reopen closed tab" = "Rouvrir l'onglet fermé";
+"Replace your settings with the ones in this file?" = "Remplacer vos réglages par ceux de ce fichier ?";
 "Report a Bug" = "Signaler un problème";
 "Reset" = "Réinitialiser";
 "Reset Site" = "Réinitialiser le site";
@@ -741,6 +761,8 @@
 "Run scripts on pages" = "Exécuter des scripts sur les pages";
 "Run tasks on a schedule" = "Exécuter des tâches planifiées";
 "Runs in the page on this site every time it loads, with access to everything on it. Only add code you wrote or trust." = "S'exécute dans la page de ce site à chaque chargement, avec accès à tout son contenu. N'ajoutez que du code que vous avez écrit ou en qui vous avez confiance.";
+"Runs models on your Mac with LM Studio: no key, and nothing leaves your Mac unless the assistant searches the web. Download a model in LM Studio, then start its server in the Developer tab." = "Exécute les modèles sur votre Mac avec LM Studio : pas de clé, et rien ne quitte votre Mac sauf si l'assistant cherche sur le web. Téléchargez un modèle dans LM Studio, puis démarrez son serveur dans l'onglet Developer.";
+"Runs models on your Mac with Ollama: no key, and nothing leaves your Mac unless the assistant searches the web. Download a model with ollama pull, such as ollama pull gemma3 or llama3.2-vision for pictures." = "Exécute les modèles sur votre Mac avec Ollama : pas de clé, et rien ne quitte votre Mac sauf si l'assistant cherche sur le web. Téléchargez un modèle avec ollama pull, par exemple ollama pull gemma3, ou llama3.2-vision pour les images.";
 "Safari (recommended)" = "Safari (recommandé)";
 "Safari extensions in your apps" = "Extensions Safari dans vos apps";
 "Safari, Chrome, Firefox, Opera…" = "Safari, Chrome, Firefox, Opera…";
@@ -864,6 +886,7 @@
 "Small additions for Tacet, checked by us, that work on every Mac." = "De petits ajouts pour Tacet, vérifiés par nous, qui fonctionnent sur tous les Mac.";
 "Small additions for Tacet. Every one says who made it and whether we checked it." = "De petits ajouts pour Tacet. Chacun indique qui l’a fait et si nous l’avons vérifié.";
 "Small fixes" = "Petites corrections";
+"Smart Dark Mode" = "Mode sombre intelligent";
 "Software Update" = "Mise à jour logicielle";
 "Solid" = "Opaque";
 "Some parts may not work in Tacet: %@" = "Certaines parties peuvent ne pas fonctionner dans Tacet : %@";
@@ -1001,6 +1024,7 @@
 "This extension" = "Cette extension";
 "This extension couldn't be read: %@" = "Cette extension n'a pas pu être lue : %@";
 "This extension has no settings page." = "Cette extension n'a pas de page de réglages.";
+"This isn't a Tacet settings file." = "Ce n'est pas un fichier de réglages de Tacet.";
 "This isn't a web extension: there is no manifest.json inside it." = "Ce n'est pas une extension web : il n'y a pas de manifest.json dedans.";
 "This model can read images" = "Ce modèle sait lire les images";
 "This page is already in your language." = "Cette page est déjà dans votre langue.";
@@ -1052,6 +1076,7 @@
 "Turn on this site's changes" = "Activer les changements de ce site";
 "Turned off" = "Désactivée";
 "Turning off an extension closes its pages too" = "Désactiver une extension ferme aussi ses pages";
+"Turns light sites dark with matching colours, keeps photos and videos as they are, and leaves sites that are already dark alone. Use the menu to turn it off for a site where you prefer the original." = "Rend sombres les sites clairs avec des couleurs cohérentes, garde les photos et vidéos telles quelles et ne touche pas aux sites déjà sombres. Désactivez-le depuis le menu pour un site que vous préférez d'origine.";
 "Two pages side by side. Right-click a tab and choose Open in Split View." = "Deux pages côte à côte. Cliquez avec le bouton droit sur un onglet et choisissez Ouvrir en vue partagée.";
 "Type a keyword, a space and your search in the command bar. For example: yt lofi beats" = "Tapez un mot-clé, une espace et votre recherche dans la barre de commandes. Par exemple : yt lofi beats";
 "Type a model name" = "Saisissez un nom de modèle";
@@ -1082,6 +1107,7 @@
 "Used on more than one site." = "Utilisé sur plus d’un site.";
 "User agent" = "User agent";
 "Username" = "Nom d'utilisateur";
+"Using %@" = "J’utilise %@";
 "Verified by Tacet" = "Vérifié par Tacet";
 "Version" = "Version";
 "Version %@" = "Version %@";
@@ -1117,6 +1143,7 @@
 "When three or more tabs are open from the same site, Tacet groups them, for example into “GitHub”." = "Quand trois onglets ou plus sont ouverts sur le même site, Tacet les regroupe, par exemple dans « GitHub ».";
 "When you ask something, your message, the attached page and any images are sent to the provider you chose, under their privacy terms. With a server on your own Mac, such as Ollama, nothing leaves your computer unless the assistant searches the web. Your API key is kept in the macOS Keychain." = "Quand vous posez une question, votre message, la page jointe et les éventuelles images sont envoyés au fournisseur choisi, selon ses conditions de confidentialité. Avec un serveur sur votre Mac, comme Ollama, rien ne quitte votre ordinateur, sauf si l'assistant fait une recherche sur le web. Votre clé API est conservée dans le trousseau macOS.";
 "When you ask, the assistant can use the page in the current tab for you, where you're signed in. It asks before sending, buying or deleting anything, and never fills in passwords or card numbers. A page can try to trick it, so watch what it does and press Stop if needed." = "Quand vous le demandez, l'assistant peut utiliser pour vous la page de l'onglet actuel, où vous êtes connecté. Il demande confirmation avant d'envoyer, d'acheter ou de supprimer quoi que ce soit, et ne saisit jamais de mots de passe ni de numéros de carte. Une page peut tenter de le tromper : surveillez ce qu'il fait et appuyez sur Arrêter si besoin.";
+"When you copy a link or an address, tracking parts such as utm_source, fbclid and gclid are removed, so what you paste is short and doesn't follow you. Press ⌥⇧L to copy the page's clean address." = "Quand vous copiez un lien ou une adresse, les parties de pistage comme utm_source, fbclid et gclid sont retirées : ce que vous collez est court et ne vous suit pas. Appuyez sur ⌥⇧L pour copier l'adresse propre de la page.";
 "Who's browsing?" = "Qui navigue ?";
 "Width" = "Largeur";
 "Window locked" = "Fenêtre verrouillée";

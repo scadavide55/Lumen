@@ -76,6 +76,7 @@ struct GeneralPane: View {
                 Toggle("Restore windows and tabs when Tacet opens", isOn: $s.restoreSession)
                 Toggle("Open the command bar on every new tab", isOn: $s.paletteOnNewTab)
                 Toggle("Show a preview with memory use when you hover over a tab", isOn: $s.tabPreviews)
+                Toggle("Pinned tabs open links to other sites in new tabs", isOn: $s.pinnedStayOnSite)
                 Picker("Organize tabs", selection: $s.organizeTabs) {
                     Text("Manually").tag(false)
                     Text("Automatically by site").tag(true)
@@ -120,6 +121,16 @@ struct GeneralPane: View {
                 Toggle("Show greeting", isOn: $s.showGreeting)
                 TextField("Your name", text: $s.userName, prompt: Text("Optional"))
                 Toggle("Show favorites", isOn: $s.showFavorites)
+            }
+            Section {
+                HStack {
+                    Button("Export Settings and Plugins…") { SettingsTransfer.export() }
+                    Button("Import…") { SettingsTransfer.importFile() }
+                }
+            } header: {
+                Text("Move to another Mac")
+            } footer: {
+                Text("One file with your settings, search shortcuts, site styles, profiles and Tacet Plugins. Passwords, AI keys, history and bookmarks aren't in it: export those from their own settings.")
             }
             Section("Downloads") {
                 Toggle("Ask where to save each download", isOn: $s.askDownloadLocation)

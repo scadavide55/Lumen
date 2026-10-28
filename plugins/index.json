@@ -62,6 +62,26 @@
       }
     },
     {
+      "id": "clean-links-on-copy",
+      "author": "Tacet Plugins",
+      "version": "1.0",
+      "world": "isolated",
+      "name": "Clean Links on Copy",
+      "description": "When you copy a link or an address, tracking parts such as utm_source, fbclid and gclid are removed, so what you paste is short and doesn't follow you. Press ⌥⇧L to copy the page's clean address.",
+      "icon": "link.badge.plus",
+      "sites": [
+        "*"
+      ],
+      "js": "main.js",
+      "runAt": "end",
+      "mode": "action",
+      "action": "Copy Clean Address",
+      "shortcut": "⌥⇧L",
+      "files": {
+        "main.js": "4aa217dfaf1249c6e9204d1aef7d108c4f101441255340f38b269813a4dd1ddc"
+      }
+    },
+    {
       "id": "copy-as-markdown",
       "name": "Copy as Markdown",
       "description": "Press ⌥⇧C to copy the selected text as Markdown, with its links, headings, lists, bold, italics and code. Without a selection, it copies the page's title and address as a Markdown link.",
@@ -171,6 +191,28 @@
       "mode": "toggle",
       "files": {
         "main.js": "ee53cb6eaccecd6db98fe0f4f7e1775cef7a21fe3990a3f616dec1efc144c5d2"
+      }
+    },
+    {
+      "id": "focus-timer",
+      "author": "Tacet Plugins",
+      "version": "1.0",
+      "world": "isolated",
+      "name": "Focus Timer",
+      "description": "A focus timer in a tab of its own: 25 minutes of work and 5 of rest, or your own lengths. The time left shows in the tab's title, so you can see it from the tab list, and a soft sound says when it's done.",
+      "icon": "timer",
+      "sites": [],
+      "app": {
+        "start": "index.html",
+        "files": [
+          "index.html"
+        ],
+        "assets": []
+      },
+      "mode": "app",
+      "runAt": "end",
+      "files": {
+        "app/index.html": "4f970d98f8657fe20072c0e4c9af5623c486639e3cd3819630e677d86b9d84c9"
       }
     },
     {
@@ -308,6 +350,24 @@
       }
     },
     {
+      "id": "smart-dark",
+      "author": "Tacet Plugins",
+      "version": "1.0",
+      "world": "isolated",
+      "name": "Smart Dark Mode",
+      "description": "Turns light sites dark with matching colours, keeps photos and videos as they are, and leaves sites that are already dark alone. Use the menu to turn it off for a site where you prefer the original.",
+      "icon": "moon.stars",
+      "sites": [
+        "*"
+      ],
+      "js": "main.js",
+      "runAt": "start",
+      "mode": "toggle",
+      "files": {
+        "main.js": "d4b40b62d492a282bee3f2426ad7eee66ee74342929cbcd92ddeba54b102198b"
+      }
+    },
+    {
       "id": "stack-overflow-clean",
       "name": "Stack Overflow, Clean",
       "description": "Hides Stack Overflow's sidebars, hot questions, ads and sign-up prompts, and widens the question and answers.",
@@ -385,6 +445,24 @@
       "mode": "toggle",
       "files": {
         "style.css": "f1a4b0cc77541d19acfc2f080724b5347a0e43cf137467644fd3813d4b6aa745"
+      }
+    },
+    {
+      "id": "youtube-big-captions",
+      "author": "Tacet Plugins",
+      "version": "1.0",
+      "world": "isolated",
+      "name": "Bigger YouTube Captions",
+      "description": "Makes YouTube's subtitles larger and easier to read, on a soft dark band, in the player and in full screen.",
+      "icon": "captions.bubble",
+      "sites": [
+        "youtube.com"
+      ],
+      "css": "style.css",
+      "runAt": "start",
+      "mode": "toggle",
+      "files": {
+        "style.css": "02f3cdfcd2e4eac8097bfdbe2142c2a23d2a746c6d672e14ff74449c260b8a39"
       }
     },
     {

@@ -384,6 +384,35 @@ func tabsWindow(_ urls: [String]) -> BrowserState {
     w.select(w.tabs[0])
     return w
 }
+do {
+    // Tabs closed together come back together with ⇧⌘T, in their places.
+    let w = tabsWindow(["https://a.example/", "https://b.example/", "https://c.example/", "https://d.example/"])
+    w.closeBelow(w.tabs[1])
+    eq(w.tabs.count, 2, "batch: closing tabs below")
+    w.reopenLastClosed()
+    eq(w.tabs.compactMap { $0.url?.host }, ["a.example", "b.example", "c.example", "d.example"], "batch: all come back in order")
+    w.close(w.tabs[3])
+    w.close(w.tabs[2])
+    w.reopenLastClosed()
+    eq(w.tabs.count, 3, "batch: single closes come back one at a time")
+    // A pinned tab remembers where it was pinned.
+    w.togglePin(w.tabs[0])
+    eq(w.tabs.first?.pinnedHome?.host, "a.example", "pinned: remembers its address")
+    eq(w.tabs.first?.snapshot().home?.host, "a.example", "pinned: home is saved with the session")
+}
+// The settings file reads back what it wrote, and keeps this Mac's own bookkeeping out.
+do {
+    let file = SettingsTransfer.File(settings: ["theme": "\"dark\"", "welcomedVersion": "\"1.6.3\""], plugins: [.init(id: "cutout", enabled: true, pinned: true, offSites: nil)])
+    let encoder = JSONEncoder()
+    encoder.dateEncodingStrategy = .iso8601
+    let back = SettingsTransfer.read(try encoder.encode(file))
+    eq(back?.settings["theme"], "\"dark\"", "settings file: round trip")
+    eq(back?.plugins.first?.pinned, true, "settings file: plugins")
+    check(SettingsTransfer.make().map { !String(decoding: $0, as: UTF8.self).contains("\"welcomedVersion\"") } ?? false, "settings file: leaves out this Mac's bookkeeping")
+} catch {
+    check(false, "settings file", "\(error)")
+}
+
 let settingsBefore = (Settings.shared.groupThreshold, Settings.shared.groupExceptions)
 Settings.shared.groupExceptions = []
 

@@ -121,7 +121,7 @@ extension BrowserState {
 
     func close(_ list: [Tab]) {
         marked = []
-        for t in list { close(t) }
+        closingTogether { for t in list { close(t) } }
     }
 
     func setPinned(_ list: [Tab], _ pinned: Bool) {

@@ -14,7 +14,14 @@ final class Tab: NSObject, Identifiable {
     var canGoBack = false
     var canGoForward = false
     var favicon: NSImage?
-    var isPinned: Bool
+    var isPinned: Bool {
+        didSet {
+            // A pinned tab remembers where it was pinned, to go back there.
+            if isPinned && !oldValue { pinnedHome = url ?? pendingURL } else if !isPinned { pinnedHome = nil }
+        }
+    }
+    /// The address a pinned tab was pinned at; links to other sites leave it alone (see decidePolicyFor).
+    @ObservationIgnored var pinnedHome: URL?
     var groupID: UUID?
     var isPlayingAudio = false
     var isMuted = false
@@ -101,6 +108,7 @@ final class Tab: NSObject, Identifiable {
         pendingURL = url
         restoreState = state
         super.init()
+        if pinned { pinnedHome = url }
         favicon = Favicons.shared.cached(url?.host)
         observeNotifications()
     }
@@ -275,7 +283,8 @@ final class Tab: NSObject, Identifiable {
 
     func snapshot() -> TabSnapshot {
         TabSnapshot(url: url ?? pendingURL, title: title, pinned: isPinned,
-                    state: (webView?.interactionState as? Data) ?? restoreState, group: groupID, lastActive: lastActive)
+                    state: (webView?.interactionState as? Data) ?? restoreState, group: groupID, lastActive: lastActive,
+                    home: pinnedHome)
     }
 
     private func titleChanged(_ raw: String?) {
@@ -714,6 +723,13 @@ extension Tab: WKNavigationDelegate {
            action.modifierFlags.contains(.command) || action.buttonNumber == 2 {
             decisionHandler(.cancel, preferences)
             browser?.openInBackground(url, from: self, select: action.modifierFlags.contains(.shift))
+            return
+        }
+        // A pinned tab stays on its site, as in Arc: a link to another site opens in a new tab next to it.
+        if isPinned, Settings.shared.pinnedStayOnSite, action.navigationType == .linkActivated, action.targetFrame?.isMainFrame == true,
+           let from = (pinnedHome ?? self.url)?.host, let to = url.host, PasswordStore.site(from) != PasswordStore.site(to) {
+            decisionHandler(.cancel, preferences)
+            browser?.newTab(url: url, after: self)
             return
         }
         // In an installed web app, links to other sites open in the browser.

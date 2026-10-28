@@ -356,6 +356,8 @@ struct TabSnapshot: Codable {
     var state: Data?
     var group: UUID?
     var lastActive: Date?
+    /// Where a pinned tab was pinned, to go back to.
+    var home: URL?
 }
 
 struct WindowSnapshot: Codable {
