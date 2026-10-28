@@ -359,15 +359,13 @@ struct WindowDragArea: NSViewRepresentable {
     func updateNSView(_ nsView: NSView, context: Context) {}
 
     final class DragView: NSView {
-        /// Moves the window by hand, since browser windows are not movable by the system.
+        /// Hands the drag to macOS, so dragging to a screen edge or corner tiles the window as it does for other
+        /// apps. Browser windows aren't movable from anywhere else (the page, the tabs), so this is the only way in.
         private func moveWindow(from down: NSEvent) {
             guard let window else { return }
-            let start = NSEvent.mouseLocation
-            let origin = window.frame.origin
-            while let e = window.nextEvent(matching: [.leftMouseDragged, .leftMouseUp]), e.type == .leftMouseDragged {
-                let now = NSEvent.mouseLocation
-                window.setFrameOrigin(NSPoint(x: origin.x + now.x - start.x, y: origin.y + now.y - start.y))
-            }
+            window.isMovable = true
+            window.performDrag(with: down)
+            window.isMovable = false
         }
 
         override func mouseDown(with event: NSEvent) {
