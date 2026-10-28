@@ -1,0 +1,11 @@
+{
+  "id": "reading-progress",
+  "name": "Reading Progress",
+  "description": "On articles, a thin bar at the top shows how far you've read, and a small label says how many minutes are left.",
+  "version": "1.0",
+  "icon": "text.line.first.and.arrowtriangle.forward",
+  "sites": ["*"],
+  "js": "main.js",
+  "runAt": "end",
+  "world": "isolated"
+}

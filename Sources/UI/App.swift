@@ -55,6 +55,11 @@ struct LumenApp: App {
         .handlesExternalEvents(matching: [])
         .windowResizability(.contentSize)
 
+        Window("Tacet Plugins", id: "plugins") {
+            PluginsView()
+        }
+        .handlesExternalEvents(matching: [])
+
         Window("Import", id: "import") {
             ImportView()
         }
@@ -346,6 +351,7 @@ struct LumenCommands: Commands {
             Toggle("Remove Tracking from Links", isOn: $s.stripTracking)
             Divider()
             Button("Downloads") { library(.downloads) }.keyboardShortcut("l", modifiers: [.command, .option])
+            Button("Tacet Plugins") { openWindow(id: "plugins") }.keyboardShortcut("p", modifiers: [.command, .shift])
         }
 
         CommandGroup(replacing: .appInfo) {

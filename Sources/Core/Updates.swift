@@ -124,7 +124,7 @@ final class UpdateInstaller: NSObject, URLSessionDownloadDelegate {
 
     /// Public half of the key that signs Tacet updates (see tools/sign-update.swift).
     /// Updates not signed with the matching private key are refused.
-    private static let signingKey = "F+nRdeNu8pDKHPW5IepLoLSrTmiMkV6CatzvXsCLgHA="
+    static let signingKey = "F+nRdeNu8pDKHPW5IepLoLSrTmiMkV6CatzvXsCLgHA="
 
     private static let trustedHosts = ["github.com", "objects.githubusercontent.com", "release-assets.githubusercontent.com"]
 

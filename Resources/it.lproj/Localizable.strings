@@ -55,6 +55,7 @@
 "Add your API key in Settings › AI." = "Aggiungi la tua chiave API in Impostazioni › AI.";
 "Add your own CSS and JavaScript under Advanced" = "Aggiungi CSS e JavaScript tuoi in Avanzate";
 "Add “%@”?" = "Aggiungere “%@”?";
+"Added" = "Aggiunto";
 "Adds EasyList and EasyPrivacy: tens of thousands of rules, updated weekly." = "Aggiunge EasyList ed EasyPrivacy: decine di migliaia di regole, aggiornate ogni settimana.";
 "Add…" = "Aggiungi…";
 "Advanced" = "Avanzate";
@@ -136,6 +137,7 @@
 "Browser use: let the assistant click, type and scroll on pages" = "Uso del browser: permetti all'assistente di cliccare, scrivere e scorrere nelle pagine";
 "Browsing" = "Navigazione";
 "Built-in list. Works offline, breaks almost nothing." = "Lista integrata. Funziona offline e non rompe quasi nulla.";
+"By %@" = "Di %@";
 "By Last Opened" = "Per ultima apertura";
 "By Site" = "Per sito";
 "By Title" = "Per titolo";
@@ -217,6 +219,7 @@
 "Copy Link" = "Copia link";
 "Copy Link Without Tracking" = "Copia link senza tracciamento";
 "Copy Link as Markdown" = "Copia link in Markdown";
+"Copy as Markdown" = "Copia come Markdown";
 "Copy link" = "Copia link";
 "Copy password" = "Copia password";
 "Copy to your clipboard" = "Copiare negli appunti";
@@ -364,11 +367,14 @@
 "Hidden elements" = "Elementi nascosti";
 "Hidden trackers (AdGuard)" = "Tracker nascosti (AdGuard)";
 "Hide Chats" = "Nascondi chat";
+"Hide Comments" = "Nascondi commenti";
 "Hide Cookie Banners" = "Nascondi banner dei cookie";
 "Hide bars and pop-ups that stay on screen" = "Nascondi barre e pop-up che restano sullo schermo";
 "Hide cookie banners" = "Nascondi banner dei cookie";
 "Hide cookie consent banners" = "Nascondi i banner di consenso ai cookie";
 "Hide images and videos" = "Nascondi immagini e video";
+"Hides Shorts from YouTube's home page, search, subscriptions and sidebar, and opens any Shorts link as a normal video." = "Nasconde gli Shorts dalla home di YouTube, dalla ricerca, dalle iscrizioni e dalla barra laterale, e apre ogni link a uno Short come un video normale.";
+"Hides comment sections on YouTube, news sites, blogs and Reddit, for a quieter read. Turn it off for a moment from Tacet Plugins when you want to read them." = "Nasconde i commenti su YouTube, siti di notizie, blog e Reddit, per una lettura più tranquilla. Disattivalo per un attimo da Tacet Plugins quando vuoi leggerli.";
 "History" = "Cronologia";
 "History and Bookmarks" = "Cronologia e segnalibri";
 "History and bookmarks (⌘Y)" = "Cronologia e segnalibri (⌘Y)";
@@ -403,6 +409,7 @@
 "It doesn't ask for any permissions." = "Non chiede alcun permesso.";
 "It reads your other tabs, finds pages in your history and bookmarks, summarises YouTube videos from their transcript, takes screenshots, and groups tabs by topic." = "Legge le altre schede, trova pagine nella cronologia e nei segnalibri, riassume i video YouTube dalla trascrizione, fa screenshot e raggruppa le schede per argomento.";
 "It will be able to:" = "Potrà:";
+"It works in Tacet, but Tacet's developer hasn't checked what it does. Add it only if you trust who made it." = "Funziona in Tacet, ma lo sviluppatore di Tacet non ha controllato cosa fa. Aggiungilo solo se ti fidi di chi l’ha fatto.";
 "Its cookies, sign-ins and site data will be removed. Saved passwords stay in Tacet." = "I suoi cookie, accessi e dati dei siti verranno rimossi. Le password salvate restano in Tacet.";
 "Its own window and Dock icon" = "Finestra e icona nel Dock tutte sue";
 "Its settings and data are removed too." = "Vengono rimossi anche le sue impostazioni e i suoi dati.";
@@ -441,6 +448,7 @@
 "Looks for a newer Tacet on GitHub" = "Cerca una versione più recente di Tacet su GitHub";
 "Looks for passwords found in data breaches, used on several sites or easy to guess. Only the first 5 characters of each password's SHA-1 hash are sent to Have I Been Pwned; the password never leaves your Mac." = "Cerca password trovate in violazioni di dati, usate su più siti o facili da indovinare. A Have I Been Pwned vengono inviati solo i primi 5 caratteri dell’hash SHA-1 di ogni password: la password non lascia mai il tuo Mac.";
 "Lumen is now Tacet" = "Ora Lumen si chiama Tacet";
+"Made by %@, for %@" = "Di %1$@, per %2$@";
 "Main Profile" = "Profilo principale";
 "Make Default" = "Imposta come predefinito";
 "Make Tacet your default browser?" = "Vuoi impostare Tacet come browser predefinito?";
@@ -474,6 +482,7 @@
 "Name" = "Nome";
 "Narrow, for reading" = "Stretta, per leggere";
 "Needs Apple Intelligence turned on" = "Serve Apple Intelligence attivo";
+"Needs macOS 15.4 or later" = "Richiede macOS 15.4 o successivo";
 "Never" = "Mai";
 "Never Group This Site" = "Non raggruppare mai questo sito";
 "Never for This Site" = "Mai per questo sito";
@@ -541,6 +550,7 @@
 "Offer to save passwords" = "Proponi di salvare le password";
 "Offline" = "Offline";
 "On" = "Attivo";
+"On articles, a thin bar at the top shows how far you've read, and a small label says how many minutes are left." = "Sugli articoli, una barra sottile in alto mostra quanto hai letto e una piccola etichetta dice quanti minuti mancano.";
 "On sign-up and change-password pages, offer a random password like abcdEf-ghijk2-lmnopq." = "Nelle pagine di registrazione e di cambio password, proponi una password casuale come abcdEf-ghijk2-lmnopq.";
 "On-device model" = "Modello sul Mac";
 "One last Keychain question" = "Un’ultima domanda del Portachiavi";
@@ -559,6 +569,7 @@
 "Open Reader with ⇧⌘R, then Save for Offline at the bottom right" = "Apri Lettura con ⇧⌘R, poi Salva offline in basso a destra";
 "Open Saved Group “%@”" = "Apri il gruppo salvato “%@”";
 "Open Settings" = "Apri impostazioni";
+"Open Tacet Plugins" = "Apri Tacet Plugins";
 "Open Video in New Tab" = "Apri video in una nuova scheda";
 "Open Window" = "Apri finestra";
 "Open address" = "Apri indirizzo";
@@ -607,6 +618,7 @@
 "Press ⌘D on any page, or import bookmarks from another browser." = "Premi ⌘D su qualsiasi pagina, o importa i segnalibri da un altro browser.";
 "Press ⌘L or click the address. Type a site, a search, an open tab, a bookmark or a command." = "Premi ⌘L o fai clic sull'indirizzo. Scrivi un sito, una ricerca, una scheda aperta, un segnalibro o un comando.";
 "Press ⌘L to go anywhere. You can see this tour again from the Help menu, and change anything in Settings." = "Premi ⌘L per andare ovunque. Puoi rivedere questa guida dal menu Aiuto e cambiare tutto nelle Impostazioni.";
+"Press ⌥⇧C to copy the selected text as Markdown, with its links, headings, lists, bold, italics and code. Without a selection, it copies the page's title and address as a Markdown link." = "Premi ⌥⇧C per copiare il testo selezionato in Markdown, con link, titoli, elenchi, grassetto, corsivo e codice. Senza selezione copia titolo e indirizzo della pagina come link Markdown.";
 "Presses “Reject all” on cookie banners that offer it, so sites remember your choice." = "Preme “Rifiuta tutto” sui banner dei cookie che lo offrono, così i siti ricordano la tua scelta.";
 "Previous (⇧⌘G)" = "Precedente (⇧⌘G)";
 "Previous Tab" = "Scheda precedente";
@@ -638,6 +650,7 @@
 "Reader (⇧⌘R)" = "Lettura (⇧⌘R)";
 "Reading %@" = "Lettura di %@";
 "Reading List" = "Elenco di lettura";
+"Reading Progress" = "Avanzamento lettura";
 "Reading the page" = "Leggo la pagina";
 "Reading the selection" = "Leggo la selezione";
 "Reading the video's transcript" = "Lettura della trascrizione del video";
@@ -719,6 +732,7 @@
 "Search or enter address" = "Cerca o inserisci un indirizzo";
 "Search or enter address (⌘L)" = "Cerca o inserisci un indirizzo (⌘L)";
 "Search passwords" = "Cerca password";
+"Search plugins" = "Cerca plugin";
 "Search reading list" = "Cerca nell'elenco di lettura";
 "Search shortcuts" = "Scorciatoie di ricerca";
 "Search tabs" = "Cerca nelle schede";
@@ -803,6 +817,8 @@
 "Skip YouTube Ads" = "Salta pubblicità di YouTube";
 "Skip YouTube ads" = "Salta pubblicità di YouTube";
 "Sleeping: uses no memory until you open it" = "In pausa: non usa memoria finché non la apri";
+"Small additions for Tacet, checked by us, that work on every Mac." = "Piccole aggiunte per Tacet, controllate da noi, che funzionano su ogni Mac.";
+"Small additions for Tacet. Every one says who made it and whether we checked it." = "Piccole aggiunte per Tacet. Ognuna dice chi l'ha fatta e se l'abbiamo controllata.";
 "Small fixes" = "Piccole correzioni";
 "Software Update" = "Aggiornamento software";
 "Solid" = "Pieno";
@@ -865,6 +881,9 @@
 "Tacet Assistant stopped after %d steps without finishing. Ask it to continue, or split the task." = "Tacet Assistant si è fermato dopo %d passaggi senza finire. Chiedigli di continuare, o dividi il compito.";
 "Tacet Assistant uses your own key from Anthropic, OpenAI, OpenRouter, DeepSeek or any OpenAI-compatible server. The key stays in your Keychain." = "Tacet Assistant usa la tua chiave di Anthropic, OpenAI, OpenRouter, DeepSeek o di un server compatibile con OpenAI. La chiave resta nel tuo Portachiavi.";
 "Tacet Bookmarks.html" = "Segnalibri Tacet.html";
+"Tacet Plugins" = "Tacet Plugins";
+"Tacet Plugins (⇧⌘P)" = "Tacet Plugins (⇧⌘P)";
+"Tacet Plugins couldn't be reached. Check your connection and try again." = "Tacet Plugins non è raggiungibile. Controlla la connessione e riprova.";
 "Tacet Setup" = "Configurazione di Tacet";
 "Tacet Shield is blocking ads and trackers · %@ rules" = "Tacet Shield blocca pubblicità e tracker · %@ regole";
 "Tacet Shield is off" = "Tacet Shield è disattivato";
@@ -886,6 +905,7 @@
 "Tacet remembers your choice for this site. You can change it in Settings › Sites." = "Tacet ricorda la tua scelta per questo sito. Puoi cambiarla in Impostazioni › Siti.";
 "Tacet remembers your choice until you close this tab." = "Tacet ricorda la tua scelta finché non chiudi questa scheda.";
 "Tacet saves passwords in your Mac's Keychain and asks for Touch ID before filling them. Already use another password manager? Pick it here." = "Tacet salva le password nel Portachiavi del Mac e chiede Touch ID prima di compilarle. Usi già un altro gestore di password? Sceglilo qui.";
+"Tacet's developer read this plugin and checked what it does." = "Lo sviluppatore di Tacet ha letto questo plugin e controllato cosa fa.";
 "Take Screenshot of Page" = "Fai uno screenshot della pagina";
 "Taking a screenshot of the page" = "Screenshot della pagina";
 "Talk to its app on your Mac" = "Comunicare con la sua app sul Mac";
@@ -914,6 +934,7 @@
 "The key is saved in your Keychain. You can change the model in Settings › AI." = "La chiave viene salvata nel Portachiavi. Puoi cambiare il modello in Impostazioni › AI.";
 "The model declined to answer this request." = "Il modello ha rifiutato di rispondere a questa richiesta.";
 "The new icon is an eclipse: a dark disc in front of the sun" = "La nuova icona è un'eclissi: un disco scuro davanti al sole";
+"The plugin list couldn't be verified, so nothing was installed." = "Non è stato possibile verificare l'elenco dei plugin, quindi non è stato installato niente.";
 "The quiet browser for your Mac" = "Il browser silenzioso per il tuo Mac";
 "The selected text is sent with your next message" = "Il testo selezionato viene inviato con il prossimo messaggio";
 "The server address isn't valid. Check it in Settings › AI." = "L'indirizzo del server non è valido. Controllalo in Impostazioni › AI.";
@@ -1010,6 +1031,7 @@
 "Used on more than one site." = "Usata su più di un sito.";
 "User agent" = "User agent";
 "Username" = "Nome utente";
+"Verified by Tacet" = "Verificato da Tacet";
 "Version" = "Versione";
 "Version %@" = "Versione %@";
 "Version %@ (%@)" = "Versione %1$@ (%2$@)";
@@ -1048,6 +1070,7 @@
 "Window style" = "Stile della finestra";
 "Window with “%@” (%d tabs)" = "Finestra con “%1$@” (%2$d schede)";
 "Window with “%@” (1 tab)" = "Finestra con “%@” (1 scheda)";
+"Works, but not verified" = "Funziona, ma non verificato";
 "Yellow" = "Giallo";
 "Yes, Use Tacet" = "Sì, usa Tacet";
 "You can change any choice later in Settings." = "Puoi cambiare ogni scelta più tardi nelle Impostazioni.";
@@ -1056,6 +1079,7 @@
 "You're all set" = "Tutto pronto";
 "You're already signed in to Google." = "Hai già effettuato l'accesso a Google.";
 "You're offline" = "Sei offline";
+"YouTube without Shorts" = "YouTube senza Shorts";
 "Your Google sign-in came across with your imported data." = "L'accesso a Google è arrivato insieme ai dati importati.";
 "Your JavaScript runs when the page loads" = "Il tuo JavaScript viene eseguito al caricamento della pagina";
 "Your bookmarks, history and sign-ins can come with you in the next step." = "Nel prossimo passaggio puoi portare con te segnalibri, cronologia e accessi.";
@@ -1090,6 +1114,7 @@
 "unlock your private window" = "sbloccare la finestra privata";
 "© 2026 Tacet · Made with Swift, SwiftUI and WebKit" = "© 2026 Tacet · Fatto con Swift, SwiftUI e WebKit";
 "“%@” can make changes to your Mac" = "“%@” può apportare modifiche al Mac";
+"“%@” couldn't be read: %@" = "Non è stato possibile leggere “%1$@”: %2$@";
 "“%@” wants to read and change these sites:" = "“%@” vuole leggere e modificare questi siti:";
 "“%@” wants to:" = "“%@” vuole:";
 "“Compare the products in my tabs”" = "“Confronta i prodotti nelle mie schede”";

@@ -1,0 +1,71 @@
+{
+  "format": 1,
+  "plugins": [
+    {
+      "id": "copy-as-markdown",
+      "name": "Copy as Markdown",
+      "description": "Press ⌥⇧C to copy the selected text as Markdown, with its links, headings, lists, bold, italics and code. Without a selection, it copies the page's title and address as a Markdown link.",
+      "version": "1.0",
+      "icon": "doc.on.clipboard",
+      "sites": [
+        "*"
+      ],
+      "js": "main.js",
+      "runAt": "end",
+      "world": "isolated",
+      "files": {
+        "main.js": "dbda68a16a26b5fbd74a0c09b5a1735ad5f81ae10a54e6fa45eb38dc293eb6e5"
+      }
+    },
+    {
+      "id": "hide-comments",
+      "name": "Hide Comments",
+      "description": "Hides comment sections on YouTube, news sites, blogs and Reddit, for a quieter read. Turn it off for a moment from Tacet Plugins when you want to read them.",
+      "version": "1.0",
+      "icon": "bubble.left.and.bubble.right",
+      "sites": [
+        "*"
+      ],
+      "css": "style.css",
+      "runAt": "start",
+      "world": "isolated",
+      "files": {
+        "style.css": "d47a6addc925adb588b203eaa12787e0237c2cb4b0d1c0ae475e5afa797f0da8"
+      }
+    },
+    {
+      "id": "reading-progress",
+      "name": "Reading Progress",
+      "description": "On articles, a thin bar at the top shows how far you've read, and a small label says how many minutes are left.",
+      "version": "1.0",
+      "icon": "text.line.first.and.arrowtriangle.forward",
+      "sites": [
+        "*"
+      ],
+      "js": "main.js",
+      "runAt": "end",
+      "world": "isolated",
+      "files": {
+        "main.js": "330f73d6bd0fa6fe3d088644cead01c1d42a370e5c9e408dbd6e4c97bd5dd905"
+      }
+    },
+    {
+      "id": "youtube-no-shorts",
+      "name": "YouTube without Shorts",
+      "description": "Hides Shorts from YouTube's home page, search, subscriptions and sidebar, and opens any Shorts link as a normal video.",
+      "version": "1.0",
+      "icon": "play.slash",
+      "sites": [
+        "youtube.com"
+      ],
+      "js": "main.js",
+      "css": "style.css",
+      "runAt": "start",
+      "world": "isolated",
+      "files": {
+        "main.js": "1c99510ec3446d2110d9287234d41880534f1ace3759a1e64012cba7400c5852",
+        "style.css": "65e22f4b0019fa61fd17927f7c9381401f2235e3b5b8c03f66b0000c52bf64f3"
+      }
+    }
+  ]
+}

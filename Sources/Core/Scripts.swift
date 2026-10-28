@@ -37,6 +37,8 @@ enum Scripts {
         if s.forceDark {
             c.addUserScript(WKUserScript(source: forceDark, injectionTime: .atDocumentStart, forMainFrameOnly: true, in: .defaultClient))
         }
+        // Tacet Plugins the user added, each on its own sites.
+        PluginStore.shared.addScripts(to: c)
         // Always installed, so a style made while a page is open applies to it right away.
         let active = s.siteStyles.filter { $0.enabled && !$0.host.isEmpty }
         let styles = active.map { ["host": $0.host.lowercased(), "css": $0.effectiveCSS, "floating": $0.hideFloating,

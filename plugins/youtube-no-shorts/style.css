@@ -1,0 +1,16 @@
+/* Shelves, tabs and links that lead to Shorts. */
+ytd-reel-shelf-renderer,
+ytd-rich-shelf-renderer[is-shorts],
+ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-shorts]),
+ytd-guide-entry-renderer:has(a[title="Shorts"]),
+ytd-mini-guide-entry-renderer[aria-label="Shorts"],
+yt-chip-cloud-chip-renderer:has(yt-formatted-string[title="Shorts"]),
+ytd-video-renderer:has(a[href^="/shorts/"]),
+ytd-grid-video-renderer:has(a[href^="/shorts/"]),
+ytd-rich-item-renderer:has(a[href^="/shorts/"]),
+ytd-compact-video-renderer:has(a[href^="/shorts/"]),
+grid-shelf-view-model:has(a[href^="/shorts/"]),
+ytm-shorts-lockup-view-model,
+yt-tab-shape[tab-title="Shorts"] {
+  display: none !important;
+}

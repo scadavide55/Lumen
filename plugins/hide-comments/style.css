@@ -1,0 +1,9 @@
+/* The comment areas of YouTube, Reddit, Disqus and the usual blog and news layouts. */
+ytd-comments#comments,
+ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-comments-section"],
+shreddit-comment-tree, shreddit-comments-page-ad, faceplate-batch shreddit-comment,
+#disqus_thread, .fb-comments, #comments, #comment-section, #comments-section,
+section.comments, div.comments-area, .comment-list, .comments-container,
+[data-testid="comments"], [id^="comments-"], [class*="CommentsSection"] {
+  display: none !important;
+}

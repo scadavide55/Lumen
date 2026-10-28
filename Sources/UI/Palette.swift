@@ -350,6 +350,7 @@ struct CommandPalette: View {
             command("New Window", "macwindow", "⌘N") { openWindow(id: "main") },
             command("New Private Window", "eyeglasses", "⇧⌘N") { openWindow(id: "private") },
             command("Reopen Closed Tab", "arrow.uturn.backward", "⇧⌘T") { b.reopenClosed() },
+            command("Tacet Plugins", "puzzlepiece.extension", "⇧⌘P") { openWindow(id: "plugins") },
             command("Toggle Sidebar", "sidebar.left", "⌘S") { b.sidebarVisible.toggle() },
             command("Split View with New Tab", "rectangle.split.2x1", "Show two pages side by side") { b.splitWithNewTab() },
             command("Show History", "clock", "⌘Y") { LibraryView.requestedSection = .history; openWindow(id: "library") },

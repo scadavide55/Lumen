@@ -108,9 +108,21 @@ struct ExtensionsPane: View {
     @State private var pending: PendingInstall?
     @State private var error: String?
     @State private var importing = false
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         Form {
+            Section {
+                HStack(spacing: 12) {
+                    Image(systemName: "puzzlepiece.extension.fill").font(.system(size: 24)).foregroundStyle(.tint)
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 6) { Text("Tacet Plugins").font(.headline); BetaBadge() }
+                        Text("Small additions for Tacet, checked by us, that work on every Mac.").font(.caption).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button("Open Tacet Plugins") { openWindow(id: "plugins") }.buttonStyle(.borderedProminent)
+                }
+            }
             if !Extensions.isSupported {
                 Section {
                     Label("Extensions need macOS 15.4 or later.", systemImage: "exclamationmark.triangle").foregroundStyle(.orange)

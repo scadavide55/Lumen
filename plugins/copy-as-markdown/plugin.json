@@ -1,0 +1,11 @@
+{
+  "id": "copy-as-markdown",
+  "name": "Copy as Markdown",
+  "description": "Press ⌥⇧C to copy the selected text as Markdown, with its links, headings, lists, bold, italics and code. Without a selection, it copies the page's title and address as a Markdown link.",
+  "version": "1.0",
+  "icon": "doc.on.clipboard",
+  "sites": ["*"],
+  "js": "main.js",
+  "runAt": "end",
+  "world": "isolated"
+}

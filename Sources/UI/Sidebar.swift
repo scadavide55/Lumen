@@ -711,6 +711,7 @@ struct SidebarFooter: View {
 
     var body: some View {
         HStack(spacing: 2) {
+            IconButton(systemName: "puzzlepiece.extension", help: "Tacet Plugins (⇧⌘P)") { openWindow(id: "plugins") }
             IconButton(systemName: "books.vertical", help: "History and bookmarks (⌘Y)") {
                 LibraryView.requestedSection = .history
                 openWindow(id: "library")
