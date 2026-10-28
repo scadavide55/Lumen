@@ -102,6 +102,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             if !WebApp.isActive {
                 PublicSuffix.refreshIfStale()
                 WebApp.refreshInstalled()
+                // Installed plugins update themselves at launch, verified as always.
+                if !PluginStore.shared.installed.isEmpty { Task { await PluginStore.shared.refresh() } }
             }
         }
         if #available(macOS 15.4, *) { Extensions.shared.start() }

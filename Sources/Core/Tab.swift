@@ -509,7 +509,7 @@ final class Tab: NSObject, Identifiable {
         tokens.append(nc.addObserver(forName: .settingChanged, object: nil, queue: .main) { [weak self] note in
             guard let self, let wv = self.webView, let key = note.userInfo?["key"] as? String else { return }
             switch key {
-            case "gpc", "cookieBanners", "rejectCookies", "fingerprinting", "plugins", "youtubeAds", "forceDark", "siteStyles", "adBlock", "allowlist":
+            case "gpc", "cookieBanners", "rejectCookies", "fingerprinting", "plugins", "pluginsQuiet", "youtubeAds", "forceDark", "siteStyles", "adBlock", "allowlist":
                 Scripts.install(on: wv.configuration.userContentController)
                 if key == "siteStyles" {
                     // The page follows style changes as they're made; your JavaScript waits for the next load.

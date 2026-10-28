@@ -401,6 +401,7 @@
 "History items" = "Voci di cronologia";
 "History, cookies and site data from this window are forgotten when you close it." = "Cronologia, cookie e dati dei siti di questa finestra vengono dimenticati quando la chiudi.";
 "How Tacet works" = "Come funziona Tacet";
+"How to Use It" = "Come si usa";
 "How to use it" = "Come si usa";
 "Image" = "Immagine";
 "Images" = "Immagini";
@@ -572,6 +573,7 @@
 "OK" = "OK";
 "Ocean" = "Oceano";
 "Off" = "Disattivato";
+"Off on this site" = "Disattivato su questo sito";
 "Off until you turn it on. Nothing is sent until you ask something" = "Spento finché non lo attivi. Non viene inviato nulla finché non chiedi qualcosa";
 "Off · click to turn on" = "Disattivato · clic per attivare";
 "Offer to save passwords" = "Proponi di salvare le password";
@@ -645,6 +647,7 @@
 "Pin Tab" = "Fissa scheda";
 "Pin Tabs" = "Fissa schede";
 "Pin or Unpin Tab" = "Fissa o sblocca scheda";
+"Pin to Toolbar" = "Fissa nella barra";
 "Pink" = "Rosa";
 "Pinned tabs" = "Schede fissate";
 "Pinned tabs sit at the top as icons and are always one click away." = "Le schede fissate stanno in alto come icone, sempre a un clic di distanza.";
@@ -1030,9 +1033,13 @@
 "Translating on this Mac…" = "Traduzione su questo Mac…";
 "Translucent" = "Traslucido";
 "Try Again" = "Riprova";
+"Turn Off" = "Disattiva";
 "Turn Off Ad Blocker" = "Disattiva blocco pubblicità";
+"Turn Off Everywhere" = "Disattiva ovunque";
+"Turn Off for %@" = "Disattiva su %@";
 "Turn On" = "Attiva";
 "Turn On Ad Blocker" = "Attiva blocco pubblicità";
+"Turn On for %@" = "Attiva su %@";
 "Turn On…" = "Attiva…";
 "Turn it off in Settings › General › Tabs" = "Disattivala in Impostazioni › Generali › Schede";
 "Turn off animations" = "Disattiva le animazioni";
@@ -1057,6 +1064,7 @@
 "Unmute tab" = "Riattiva audio della scheda";
 "Unpin Tab" = "Sblocca scheda";
 "Unpin Tabs" = "Sblocca schede";
+"Unpin from Toolbar" = "Togli dalla barra";
 "Untitled chat" = "Chat senza titolo";
 "Unused tabs sleep to free memory, then wake up right where you left them." = "Le schede inutilizzate dormono per liberare memoria e si risvegliano esattamente dove le avevi lasciate.";
 "Update" = "Aggiorna";

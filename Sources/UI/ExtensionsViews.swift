@@ -4,39 +4,43 @@ import WebKit
 
 // MARK: - Toolbar buttons
 
-/// The buttons of loaded extensions, next to the shield. Up to three show; the rest are in a menu.
+/// The buttons pinned to the toolbar, next to the extensions menu: web extensions (shown unless unpinned) and the
+/// Tacet plugins you pinned. Everything else is one click away in the puzzle menu.
 struct ExtensionButtons: View {
     var tab: Tab
     @Environment(BrowserState.self) var b
     private var ext = Extensions.shared
+    private var store = PluginStore.shared
 
     init(tab: Tab) { self.tab = tab }
 
     var body: some View {
-        if #available(macOS 15.4, *), !b.isPrivate {
-            let _ = ext.revision
-            let loaded = ext.loaded
-            if !loaded.isEmpty {
-                HStack(spacing: 2) {
-                    ForEach(loaded.prefix(3), id: \.item.id) { entry in
-                        ExtensionButton(id: entry.item.id, context: entry.context, tab: tab)
-                    }
-                    if loaded.count > 3 {
-                        Menu {
-                            ForEach(loaded.dropFirst(3), id: \.item.id) { entry in
-                                Button(entry.context.webExtension.displayName ?? entry.item.name) {
-                                    entry.context.performAction(for: tab)
-                                }
-                            }
-                        } label: {
-                            Image(systemName: "puzzlepiece.extension").font(.system(size: 12))
-                        }
-                        .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
-                        .frame(width: 24, height: 24)
-                        .help("More Extensions")
-                    }
+        let _ = ext.revision
+        let plugins = store.installed.values.filter { $0.pinned == true && $0.enabled }
+            .sorted { L($0.plugin.name).localizedCaseInsensitiveCompare(L($1.plugin.name)) == .orderedAscending }
+        HStack(spacing: 2) {
+            if #available(macOS 15.4, *), !b.isPrivate {
+                ForEach(ext.loaded.filter { $0.item.pinned ?? true }, id: \.item.id) { entry in
+                    ExtensionButton(id: entry.item.id, context: entry.context, tab: tab)
                 }
             }
+            ForEach(plugins, id: \.plugin.id) { item in PluginButton(plugin: item.plugin, tab: tab) }
+        }
+    }
+}
+
+/// A pinned Tacet plugin: its click does what it does in the extensions menu.
+struct PluginButton: View {
+    let plugin: PluginStore.Plugin
+    var tab: Tab
+    @State private var showHowTo = false
+
+    var body: some View {
+        IconButton(systemName: plugin.icon ?? "puzzlepiece.extension", help: L(plugin.name)) {
+            if PluginActions.activate(plugin, enabled: true, tab: tab) == .showHowTo { showHowTo = true }
+        }
+        .popover(isPresented: $showHowTo, arrowEdge: .bottom) {
+            PluginHowTo(plugin: plugin, back: { showHowTo = false }, close: { showHowTo = false }).frame(width: 300)
         }
     }
 }

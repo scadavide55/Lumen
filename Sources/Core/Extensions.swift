@@ -22,6 +22,8 @@ final class Extensions {
         var name: String
         var source: Source
         var enabled = true
+        /// Its button shows in the toolbar; nil (lists from before) counts as shown.
+        var pinned: Bool?
         /// Keeps the extension's storage and address the same between launches.
         var uniqueIdentifier = UUID().uuidString
         var added = Date()
@@ -151,6 +153,13 @@ final class Extensions {
         installed[i].enabled = on
         persist()
         if #available(macOS 15.4, *) { on ? load(installed[i]) : unload(id) }
+        revision += 1
+    }
+
+    func setPinned(_ id: UUID, _ pinned: Bool) {
+        guard let i = installed.firstIndex(where: { $0.id == id }) else { return }
+        installed[i].pinned = pinned
+        persist()
         revision += 1
     }
 

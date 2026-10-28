@@ -66,6 +66,16 @@ final class PluginStore {
 
         var startURL: URL? { app.flatMap { URL(string: "\(PluginAppScheme.scheme)://\(id)/\($0.start)") } }
 
+        /// What a click on it does, worked out for plugins whose manifest predates `mode`.
+        var behaviour: String {
+            if app != nil { return "app" }
+            if let mode { return mode }
+            return js == nil ? "toggle" : "info"
+        }
+
+        /// A plugin made of a style only can be turned on and off on open pages without reloading them.
+        var isStyleOnly: Bool { js == nil && css != nil }
+
         var isExtension: Bool { kind == "extension" }
         var isVerified: Bool { verified ?? !isExtension }
         var byLine: String {
@@ -78,6 +88,15 @@ final class PluginStore {
     struct Installed: Codable, Equatable {
         var plugin: Plugin
         var enabled = true
+        /// Shown as a button in the toolbar. Optional, so lists saved before it existed still load.
+        var pinned: Bool?
+        /// Sites where the plugin is turned off while it stays on elsewhere.
+        var offSites: [String]?
+
+        func isOff(on host: String?) -> Bool {
+            guard let host = host?.lowercased(), let offSites else { return false }
+            return offSites.contains { host == $0 || host.hasSuffix("." + $0) }
+        }
     }
 
     private struct Index: Codable {
@@ -132,8 +151,15 @@ final class PluginStore {
             catalog = index.plugins
             error = nil
             lastRefresh = Date()
-            for p in index.plugins where installed[p.id].map({ UpdateChecker.isNewer(p.version, than: $0.plugin.version) }) == true {
-                try? await install(p)
+            for p in index.plugins {
+                guard let item = installed[p.id] else { continue }
+                if UpdateChecker.isNewer(p.version, than: item.plugin.version) {
+                    try? await install(p)
+                } else if p.files == item.plugin.files, p != item.plugin {
+                    // Same files, newer details (its name, what a click does): those are taken as they are.
+                    installed[p.id]?.plugin = p
+                    file.saveNow(installed)
+                }
             }
         } catch {
             self.error = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
@@ -272,15 +298,71 @@ final class PluginStore {
     }
 
     func setEnabled(_ id: String, _ on: Bool) {
-        guard installed[id] != nil else { return }
+        guard let item = installed[id] else { return }
         installed[id]?.enabled = on
-        changed()
+        changed(live: item.plugin.isStyleOnly ? id : nil)
     }
 
-    private func changed() {
+    func setPinned(_ id: String, _ pinned: Bool) {
+        guard installed[id] != nil else { return }
+        installed[id]?.pinned = pinned
         file.saveNow(installed)
-        // Open pages pick the change up the way they pick up settings.
-        NotificationCenter.default.post(name: .settingChanged, object: self, userInfo: ["key": "plugins"])
+    }
+
+    /// Turns a plugin off, or back on, for one site only.
+    func setOff(_ id: String, on host: String, _ off: Bool) {
+        guard let item = installed[id] else { return }
+        let site = PublicSuffix.registrable(host.lowercased())
+        var sites = item.offSites ?? []
+        sites.removeAll { $0 == site }
+        if off { sites.append(site) }
+        installed[id]?.offSites = sites.isEmpty ? nil : sites
+        changed(live: item.plugin.isStyleOnly ? id : nil)
+    }
+
+    /// Saves the list and updates open pages: a style-only plugin changes on the page at once; any other plugin
+    /// needs the page it changes to load again, so the tab you're looking at reloads.
+    private func changed(live id: String? = nil) {
+        file.saveNow(installed)
+        NotificationCenter.default.post(name: .settingChanged, object: self, userInfo: ["key": id == nil ? "plugins" : "pluginsQuiet"])
+        if let id { applyLive(id) }
+    }
+
+    /// Adds or removes a style-only plugin's style on every open page, following its sites and where it's off.
+    private func applyLive(_ id: String) {
+        guard let item = installed[id] else { return }
+        let world = WKContentWorld.world(name: "TacetPlugin-" + id)
+        let source = item.enabled ? styleSource(id, item) : nil
+        for b in WindowRegistry.shared.browsers {
+            for t in b.tabs {
+                guard let wv = t.webView else { continue }
+                let remove = "document.querySelectorAll('style[data-tacet-plugin=\"\(id)\"]').forEach(s => s.remove());"
+                let js = remove + (source.map { "\n" + $0 } ?? "")
+                wv.evaluateJavaScript(js, in: nil, in: world)
+            }
+        }
+    }
+
+    private func styleSource(_ id: String, _ item: Installed) -> String? {
+        let dir = folder.appendingPathComponent(id)
+        guard let name = item.plugin.css, let css = try? String(contentsOf: dir.appendingPathComponent(name), encoding: .utf8),
+              let data = try? JSONSerialization.data(withJSONObject: [css]) else { return nil }
+        return "(() => {\n" + guardJS(item) + """
+        const s = document.createElement('style'); s.dataset.tacetPlugin = '\(id)'; s.textContent = \(String(decoding: data, as: UTF8.self))[0];
+        (document.head || document.documentElement).appendChild(s);
+        })();
+        """
+    }
+
+    /// The start of every plugin script: it stops unless the page is on one of the plugin's sites and the plugin
+    /// isn't turned off there.
+    private func guardJS(_ item: Installed) -> String {
+        let json = { (list: [String]) in
+            (try? JSONSerialization.data(withJSONObject: list.map { $0.lowercased() })).map { String(decoding: $0, as: UTF8.self) } ?? "[]"
+        }
+        return "const __sites = \(json(item.plugin.sites)), __off = \(json(item.offSites ?? [])); const __h = location.hostname.toLowerCase();\n"
+            + "const __on = (d) => __h === d || __h.endsWith('.' + d);\n"
+            + "if ((!__sites.includes('*') && !__sites.some(__on)) || __off.some(__on)) return;\n"
     }
 
     // MARK: Running
@@ -295,9 +377,6 @@ final class PluginStore {
                                p.css.flatMap { try? String(contentsOf: dir.appendingPathComponent($0), encoding: .utf8) })
             }
             guard let src = sources[id] else { continue }
-            let sites = (try? JSONSerialization.data(withJSONObject: p.sites.map { $0.lowercased() })).map { String(decoding: $0, as: UTF8.self) } ?? "[]"
-            let guardJS = "const __sites = \(sites); const __h = location.hostname.toLowerCase();\n"
-                + "if (!__sites.includes('*') && !__sites.some(d => __h === d || __h.endsWith('.' + d))) return;\n"
             var body = ""
             if let css = src.css, let data = try? JSONSerialization.data(withJSONObject: [css]) {
                 body += """
@@ -308,8 +387,9 @@ final class PluginStore {
 
                 """
             }
-            if let js = src.js { body += js }
-            let source = "(() => {\n" + guardJS + body + "\n})();"
+            // One plugin's mistake stays its own: it's reported in the Web Inspector and the others still run.
+            if let js = src.js { body += "try {\n" + js + "\n} catch (e) { console.error('Tacet plugin \(id):', e); }" }
+            let source = "(() => {\n" + guardJS(item) + body + "\n})();"
             let world: WKContentWorld = p.world == "page" ? .page : .world(name: "TacetPlugin-" + id)
             // A plugin that hands pictures to its app can talk to Tacet, from its own world only.
             if p.handoff != nil, p.world != "page" {

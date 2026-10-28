@@ -145,6 +145,23 @@ check(TacetGuide.lookup("who made Tacet engine").contains("scadavide55"), "guide
 check(TacetGuide.lookup("why Lumen renamed").contains("Lumen Assistant"), "guide: the rename")
 check(TacetGuide.lookup("").contains("Sections of the Tacet Guide"), "guide: empty query lists sections")
 
+// MARK: Tacet Plugins
+do {
+    // A list saved by an earlier build, without the newer fields, must still load.
+    let old = #"{"cutout":{"plugin":{"id":"cutout","name":"Cutout","description":"d","version":"1.0","sites":["*"],"js":"main.js","files":{},"app":{"start":"index.html","files":[],"assets":[]}},"enabled":true},"hide-comments":{"plugin":{"id":"hide-comments","name":"Hide Comments","description":"d","version":"1.0","sites":["*"],"css":"style.css","files":{}},"enabled":true}}"#
+    let list = try JSONDecoder().decode([String: PluginStore.Installed].self, from: Data(old.utf8))
+    eq(list["cutout"]?.plugin.behaviour, "app", "plugins: an app opens even without a mode")
+    eq(list["hide-comments"]?.plugin.behaviour, "toggle", "plugins: a style-only plugin toggles")
+    check(list["hide-comments"]?.plugin.isStyleOnly == true, "plugins: style-only changes live")
+    check(list["cutout"]?.pinned == nil && list["cutout"]?.offSites == nil, "plugins: new fields default to nothing")
+    var item = list["hide-comments"]!
+    item.offSites = ["youtube.com"]
+    check(item.isOff(on: "www.youtube.com") && item.isOff(on: "youtube.com"), "plugins: off on a site and its subdomains")
+    check(!item.isOff(on: "notyoutube.com") && !item.isOff(on: nil), "plugins: still on elsewhere")
+} catch {
+    check(false, "plugins: old list loads", "\(error)")
+}
+
 // MARK: AI providers
 
 check(AIProvider.anthropic.guessesImages("claude-opus-5-5"), "vision: claude")

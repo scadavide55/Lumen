@@ -401,6 +401,7 @@
 "History items" = "Éléments d'historique";
 "History, cookies and site data from this window are forgotten when you close it." = "L'historique, les cookies et les données de cette fenêtre sont oubliés à sa fermeture.";
 "How Tacet works" = "Comment fonctionne Tacet";
+"How to Use It" = "Comment l’utiliser";
 "How to use it" = "Comment l’utiliser";
 "Image" = "Image";
 "Images" = "Images";
@@ -572,6 +573,7 @@
 "OK" = "OK";
 "Ocean" = "Océan";
 "Off" = "Désactivé";
+"Off on this site" = "Désactivé sur ce site";
 "Off until you turn it on. Nothing is sent until you ask something" = "Désactivé tant que vous ne l'activez pas. Rien n'est envoyé avant que vous posiez une question";
 "Off · click to turn on" = "Désactivé · cliquez pour activer";
 "Offer to save passwords" = "Proposer d'enregistrer les mots de passe";
@@ -645,6 +647,7 @@
 "Pin Tab" = "Épingler l'onglet";
 "Pin Tabs" = "Épingler les onglets";
 "Pin or Unpin Tab" = "Épingler ou détacher l'onglet";
+"Pin to Toolbar" = "Épingler dans la barre";
 "Pink" = "Rose";
 "Pinned tabs" = "Onglets épinglés";
 "Pinned tabs sit at the top as icons and are always one click away." = "Les onglets épinglés restent en haut sous forme d'icônes, toujours à un clic.";
@@ -1030,9 +1033,13 @@
 "Translating on this Mac…" = "Traduction sur ce Mac…";
 "Translucent" = "Translucide";
 "Try Again" = "Réessayer";
+"Turn Off" = "Désactiver";
 "Turn Off Ad Blocker" = "Désactiver le bloqueur de publicités";
+"Turn Off Everywhere" = "Désactiver partout";
+"Turn Off for %@" = "Désactiver sur %@";
 "Turn On" = "Activer";
 "Turn On Ad Blocker" = "Activer le bloqueur de publicités";
+"Turn On for %@" = "Activer sur %@";
 "Turn On…" = "Activer…";
 "Turn it off in Settings › General › Tabs" = "Désactivez-le dans Réglages › Général › Onglets";
 "Turn off animations" = "Désactiver les animations";
@@ -1057,6 +1064,7 @@
 "Unmute tab" = "Rétablir le son de l'onglet";
 "Unpin Tab" = "Détacher l'onglet";
 "Unpin Tabs" = "Détacher les onglets";
+"Unpin from Toolbar" = "Retirer de la barre";
 "Untitled chat" = "Discussion sans titre";
 "Unused tabs sleep to free memory, then wake up right where you left them." = "Les onglets inutilisés se mettent en veille pour libérer la mémoire, puis reprennent là où vous les aviez laissés.";
 "Update" = "Mettre à jour";

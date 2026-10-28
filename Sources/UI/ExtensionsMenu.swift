@@ -32,12 +32,20 @@ struct ExtensionEntry: Identifiable {
         }
     }
 
-    /// What a click does, shown on the right of the row.
-    var hint: String {
+    var pinned: Bool {
+        switch kind {
+        case .plugin(let p): PluginStore.shared.installed[p.id]?.pinned ?? false
+        case .webExtension(let e): Extensions.shared.installed.first { $0.id == e.id }?.pinned ?? true
+        }
+    }
+
+    /// What a click does, shown under the name.
+    func hint(on host: String?) -> String {
         guard enabled else { return L("Off · click to turn on") }
         switch kind {
         case .plugin(let p):
-            switch p.mode {
+            if PluginStore.shared.installed[p.id]?.isOff(on: host) == true { return L("Off on this site") }
+            switch p.behaviour {
             case "app": return L("Open")
             case "action": return p.action.map(L) ?? L("Run")
             case "toggle": return L("On · click to turn off")
@@ -100,10 +108,12 @@ struct ExtensionsMenu: View {
                     ScrollView {
                         VStack(spacing: 2) {
                             ForEach(Array(entries.enumerated()), id: \.element.id) { i, e in
-                                ExtensionRow(entry: e, selected: i == selection, info: { showInfo(e) })
+                                ExtensionRow(entry: e, host: tab.host, selected: i == selection, info: { showInfo(e) },
+                                             open: { activate(e) }, pin: { togglePin(e) })
                                     .contentShape(Rectangle())
                                     .onTapGesture { selection = i; activate(e) }
                                     .onHover { if $0 { selection = i } }
+                                    .contextMenu { rowMenu(e) }
                             }
                         }
                         .padding(.horizontal, 6).padding(.bottom, 6)
@@ -121,13 +131,43 @@ struct ExtensionsMenu: View {
         .focusable()
         .focusEffectDisabled()
         .focused($focused)
-        .onAppear { focused = true }
+        .onAppear {
+            focused = true
+            // Picks up newer plugins and their details; at most once an hour.
+            Task { await store.refresh() }
+        }
         // Arrows move, Return clicks; Esc closes the popover on its own.
         .onKeyPress(.downArrow) { if !entries.isEmpty { selection = (selection + 1) % entries.count }; return .handled }
         .onKeyPress(.upArrow) { if !entries.isEmpty { selection = (selection - 1 + entries.count) % entries.count }; return .handled }
         .onKeyPress(.return) {
             if detail == nil, entries.indices.contains(selection) { activate(entries[selection]) }
             return .handled
+        }
+    }
+
+    private func togglePin(_ e: ExtensionEntry) {
+        switch e.kind {
+        case .plugin(let p): store.setPinned(p.id, !e.pinned)
+        case .webExtension(let item): ext.setPinned(item.id, !e.pinned)
+        }
+    }
+
+    @ViewBuilder private func rowMenu(_ e: ExtensionEntry) -> some View {
+        Button(e.pinned ? "Unpin from Toolbar" : "Pin to Toolbar") { togglePin(e) }
+        if case .plugin(let p) = e.kind {
+            if let host = tab.host, e.enabled, !p.sites.isEmpty {
+                let off = store.installed[p.id]?.isOff(on: host) == true
+                Button(String(format: L(off ? "Turn On for %@" : "Turn Off for %@"), PublicSuffix.registrable(host))) {
+                    store.setOff(p.id, on: host, !off)
+                }
+            }
+            Button(e.enabled ? "Turn Off Everywhere" : "Turn On") { store.setEnabled(p.id, !e.enabled) }
+            Button("How to Use It") { detail = p }
+            Divider()
+            Button("Remove", role: .destructive) { store.remove(p.id) }
+        } else if case .webExtension(let item) = e.kind {
+            Button(e.enabled ? "Turn Off" : "Turn On") { ext.setEnabled(item.id, !e.enabled) }
+            Button("Manage Extensions…") { openSettings(); close() }
         }
     }
 
@@ -139,19 +179,10 @@ struct ExtensionsMenu: View {
     private func activate(_ e: ExtensionEntry) {
         switch e.kind {
         case .plugin(let p):
-            // A plugin that's off can only be turned back on from here.
-            guard e.enabled else { store.setEnabled(p.id, true); return }
-            switch p.mode {
-            case "app":
-                if let url = p.startURL { tab.browser?.newTab(url: url) }
-                close()
-            case "action":
-                close()
-                Task { await store.runAction(p, in: tab) }
-            case "toggle":
-                store.setEnabled(p.id, false)
-            default:
-                detail = p
+            switch PluginActions.activate(p, enabled: e.enabled, tab: tab) {
+            case .done: close()
+            case .stay: break
+            case .showHowTo: detail = p
             }
         case .webExtension(let item):
             guard e.enabled else { ext.setEnabled(item.id, true); return }
@@ -164,17 +195,33 @@ struct ExtensionsMenu: View {
 
 struct ExtensionRow: View {
     let entry: ExtensionEntry
+    let host: String?
     let selected: Bool
     let info: () -> Void
+    let open: () -> Void
+    let pin: () -> Void
+
+    private var isApp: Bool {
+        if case .plugin(let p) = entry.kind { return p.behaviour == "app" }
+        return false
+    }
 
     var body: some View {
         HStack(spacing: 10) {
             icon.frame(width: 22, height: 22)
             VStack(alignment: .leading, spacing: 1) {
                 Text(entry.name).font(.system(size: 13)).lineLimit(1)
-                Text(entry.hint).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1)
+                Text(entry.hint(on: host)).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1)
             }
             Spacer(minLength: 6)
+            // Apps get a button of their own, so opening them is one obvious click.
+            if isApp && entry.enabled {
+                Button(action: open) { Text("Open").font(.system(size: 11, weight: .semibold)) }
+                    .buttonStyle(.borderedProminent).controlSize(.mini)
+            }
+            Button(action: pin) { Image(systemName: entry.pinned ? "pin.fill" : "pin") }
+                .buttonStyle(.borderless).foregroundStyle(entry.pinned ? Color.accentColor : .secondary)
+                .help(entry.pinned ? L("Unpin from Toolbar") : L("Pin to Toolbar"))
             Circle().fill(entry.enabled ? Color.green : Color.secondary.opacity(0.4)).frame(width: 7, height: 7)
                 .help(entry.enabled ? L("On") : L("Off"))
             Button(action: info) { Image(systemName: "info.circle") }
@@ -235,5 +282,30 @@ struct PluginHowTo: View {
                 .toggleStyle(.switch).controlSize(.small)
         }
         .padding(14)
+    }
+}
+
+/// What clicking a Tacet plugin does, the same from the extensions menu and from its pinned toolbar button.
+enum PluginActions {
+    enum Outcome { case done, stay, showHowTo }
+
+    @MainActor
+    static func activate(_ p: PluginStore.Plugin, enabled: Bool, tab: Tab) -> Outcome {
+        let store = PluginStore.shared
+        // A plugin that's off can only be turned back on.
+        guard enabled else { store.setEnabled(p.id, true); return .stay }
+        switch p.behaviour {
+        case "app":
+            if let url = p.startURL { tab.browser?.newTab(url: url) }
+            return .done
+        case "action":
+            Task { await store.runAction(p, in: tab) }
+            return .done
+        case "toggle":
+            store.setEnabled(p.id, false)
+            return .stay
+        default:
+            return .showHowTo
+        }
     }
 }
