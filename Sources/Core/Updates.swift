@@ -1,6 +1,7 @@
 import Observation
 import AppKit
 import CryptoKit
+import Security
 
 /// Checks GitHub releases for a newer Tacet and can install it in place.
 @Observable
@@ -200,10 +201,10 @@ final class UpdateInstaller: NSObject, URLSessionDownloadDelegate {
         try? FileManager.default.createDirectory(at: extracted, withIntermediateDirectories: true)
         if ext == "dmg" {
             let mount = work.appendingPathComponent("mount")
-            guard run("/usr/bin/hdiutil", ["attach", "-nobrowse", "-readonly", "-mountpoint", mount.path, archive.path]) else {
+            guard attach(archive, at: mount) else {
                 return .failure(Message(text: L("Couldn't open the downloaded disk image.")))
             }
-            defer { _ = run("/usr/bin/hdiutil", ["detach", "-force", mount.path]) }
+            defer { detach(mount) }
             guard let app = findApp(in: mount), run("/usr/bin/ditto", [app.path, extracted.appendingPathComponent("Tacet.app").path]) else {
                 return .failure(Message(text: L("The download doesn't contain Tacet.")))
             }
@@ -220,11 +221,39 @@ final class UpdateInstaller: NSObject, URLSessionDownloadDelegate {
         guard run("/usr/bin/codesign", ["--verify", "--deep", "--strict", app.path]) else {
             return .failure(Message(text: L("The update couldn't be verified. It may be damaged or changed; try again later.")))
         }
+        // Once Tacet is signed with its certificate, an update must be signed with the same one.
+        if let mine = signingCertificate(Bundle.main.bundleURL), signingCertificate(app) != mine {
+            return .failure(Message(text: L("The update isn't signed by Tacet's developer, so it wasn't installed.")))
+        }
         let version = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"
         guard UpdateChecker.isNewer(version, than: UpdateChecker.currentVersion) else {
             return .failure(Message(text: L("The downloaded version isn't newer than this one.")))
         }
         return .success(app)
+    }
+
+    /// The certificate an app is signed with, or nil for an ad hoc signature.
+    static func signingCertificate(_ app: URL) -> Data? {
+        var code: SecStaticCode?
+        guard SecStaticCodeCreateWithPath(app as CFURL, [], &code) == errSecSuccess, let code else { return nil }
+        var info: CFDictionary?
+        guard SecCodeCopySigningInformation(code, SecCSFlags(rawValue: kSecCSSigningInformation), &info) == errSecSuccess,
+              let certs = (info as? [String: Any])?[kSecCodeInfoCertificates as String] as? [SecCertificate],
+              let leaf = certs.first else { return nil }
+        return SecCertificateCopyData(leaf) as Data
+    }
+
+    /// diskutil's image commands replace hdiutil's on newer macOS; hdiutil remains for the versions without them.
+    private static func attach(_ image: URL, at mount: URL) -> Bool {
+        try? FileManager.default.createDirectory(at: mount, withIntermediateDirectories: true)
+        return run("/usr/sbin/diskutil", ["image", "attach", "--readOnly", "--nobrowse", "--mountPoint", mount.path, image.path])
+            || run("/usr/bin/hdiutil", ["attach", "-nobrowse", "-readonly", "-mountpoint", mount.path, image.path])
+    }
+
+    private static func detach(_ mount: URL) {
+        if !run("/usr/sbin/diskutil", ["eject", mount.path]) {
+            run("/usr/bin/hdiutil", ["detach", "-force", mount.path])
+        }
     }
 
     private static func findApp(in folder: URL) -> URL? {

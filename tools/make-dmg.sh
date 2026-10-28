@@ -7,7 +7,10 @@ STAGE=$(mktemp -d)
 cp -R Tacet.app "$STAGE/"
 ln -s /Applications "$STAGE/Applications"
 rm -f "Tacet-$VERSION.dmg"
-hdiutil create -volname "Tacet $VERSION" -srcfolder "$STAGE" -fs HFS+ -format UDZO -ov "Tacet-$VERSION.dmg" >/dev/null
+# diskutil's image commands replace hdiutil's on newer macOS; hdiutil is used where they don't exist.
+if diskutil image create from --format UDZO --volumeName "Tacet $VERSION" "$STAGE" "Tacet-$VERSION.dmg" >/dev/null 2>&1; then :
+else hdiutil create -volname "Tacet $VERSION" -srcfolder "$STAGE" -fs HFS+ -format UDZO -ov "Tacet-$VERSION.dmg" >/dev/null
+fi
 rm -rf "$STAGE"
 # Upload this next to the .dmg: Tacet only installs updates signed with your key (swift tools/sign-update.swift keygen, once).
 swift tools/sign-update.swift sign "Tacet-$VERSION.dmg" >/dev/null

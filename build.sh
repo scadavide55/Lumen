@@ -19,5 +19,9 @@ for ARCH in $ARCHS; do
 done
 lipo -create $SLICES -output "$APP/Contents/MacOS/Tacet"
 rm -rf build
-codesign --force --sign - "$APP"
-echo "Built $APP ($(lipo -archs "$APP/Contents/MacOS/Tacet"))"
+# Signed with the "Tacet Developer" certificate when this Mac has it, so every build is the same app to macOS and the
+# Keychain stops asking again after updates. Anyone else gets an ad hoc signature, which works the same otherwise.
+IDENTITY=$(security find-identity -p codesigning 2>/dev/null | awk '/"Tacet Developer"/ {print $2; exit}')
+codesign --force --sign "${IDENTITY:--}" "$APP"
+SIGNED="ad hoc"; [ -n "$IDENTITY" ] && SIGNED="with Tacet Developer"
+echo "Built $APP ($(lipo -archs "$APP/Contents/MacOS/Tacet"), signed $SIGNED)"
