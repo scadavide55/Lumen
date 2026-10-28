@@ -41,6 +41,17 @@
     setTimeout(() => { t.style.opacity = '0'; }, 1400);
     setTimeout(() => t.remove(), 1800);
   };
+  const markdown = () => {
+    const sel = window.getSelection();
+    if (sel && !sel.isCollapsed && sel.rangeCount) {
+      const box = document.createElement('div');
+      for (let i = 0; i < sel.rangeCount; i++) box.appendChild(sel.getRangeAt(i).cloneContents());
+      return md(box).replace(/\n{3,}/g, '\n\n').trim();
+    }
+    return '[' + document.title.replace(/[\[\]]/g, '') + '](' + location.href + ')';
+  };
+  // From Tacet's extensions menu: Tacet copies what this returns.
+  globalThis.tacetAction = () => { toast('Copied as Markdown'); return { copy: markdown() }; };
   document.addEventListener('keydown', async (e) => {
     if (!(e.altKey && e.shiftKey && !e.metaKey && !e.ctrlKey && e.code === 'KeyC')) return;
     e.preventDefault();

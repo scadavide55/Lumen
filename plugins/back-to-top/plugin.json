@@ -2,7 +2,7 @@
   "id": "back-to-top",
   "name": "Back to Top",
   "description": "A small round button appears at the bottom right when you've scrolled far down a page, and takes you back to the top.",
-  "version": "1.0",
+  "version": "1.1",
   "icon": "arrow.up.circle",
   "author": "Tacet Plugins",
   "sites": [
@@ -10,5 +10,6 @@
   ],
   "js": "main.js",
   "runAt": "end",
-  "world": "isolated"
+  "world": "isolated",
+  "mode": "toggle"
 }

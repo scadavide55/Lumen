@@ -2,7 +2,7 @@
   "id": "old-reddit",
   "name": "Old Reddit",
   "description": "Opens Reddit in its classic layout at old.reddit.com: lighter, faster and with more posts on screen. Galleries, chat and settings still open in the new design.",
-  "version": "1.0",
+  "version": "1.1",
   "icon": "clock.arrow.circlepath",
   "author": "Tacet Plugins",
   "sites": [
@@ -10,5 +10,6 @@
   ],
   "js": "main.js",
   "runAt": "start",
-  "world": "isolated"
+  "world": "isolated",
+  "mode": "toggle"
 }

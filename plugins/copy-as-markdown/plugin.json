@@ -2,10 +2,15 @@
   "id": "copy-as-markdown",
   "name": "Copy as Markdown",
   "description": "Press ⌥⇧C to copy the selected text as Markdown, with its links, headings, lists, bold, italics and code. Without a selection, it copies the page's title and address as a Markdown link.",
-  "version": "1.0",
+  "version": "1.1",
   "icon": "doc.on.clipboard",
-  "sites": ["*"],
+  "sites": [
+    "*"
+  ],
   "js": "main.js",
   "runAt": "end",
-  "world": "isolated"
+  "world": "isolated",
+  "mode": "action",
+  "action": "Copy Page or Selection as Markdown",
+  "shortcut": "⌥⇧C"
 }

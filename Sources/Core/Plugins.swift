@@ -1,3 +1,4 @@
+import AppKit
 import CryptoKit
 import Foundation
 import Observation
@@ -41,6 +42,13 @@ final class PluginStore {
         var handoff: String?
         /// A whole web app that runs inside Tacet at tacet-plugin://<id>/, with its large files downloaded once.
         var app: App?
+        /// What clicking it in the extensions menu does: "app" opens its app, "action" runs `action` on the page,
+        /// "toggle" turns it on or off, "info" shows how to use it.
+        var mode: String?
+        /// The action's name, for "action" plugins; the plugin's script defines globalThis.tacetAction to run it.
+        var action: String?
+        /// Its keyboard shortcut, if it has one, as people press it.
+        var shortcut: String?
 
         struct App: Codable, Equatable {
             let start: String
@@ -216,6 +224,21 @@ final class PluginStore {
         var hasher = SHA256()
         while let chunk = try? handle.read(upToCount: 8 << 20), !chunk.isEmpty { hasher.update(data: chunk) }
         return hasher.finalize().map { String(format: "%02x", $0) }.joined()
+    }
+
+    /// Runs an "action" plugin's action on the page in `tab`, in the plugin's own world. Whatever it returns to copy
+    /// goes on the clipboard from here, since a page can only write the clipboard right after a click on it.
+    @MainActor
+    func runAction(_ p: Plugin, in tab: Tab?) async {
+        guard let wv = tab?.webView, tab?.url != nil else { NSSound.beep(); return }
+        let world = WKContentWorld.world(name: "TacetPlugin-" + p.id)
+        let result = try? await wv.callAsyncJavaScript("return globalThis.tacetAction ? await globalThis.tacetAction() : 'missing';",
+                                                        arguments: [:], in: nil, contentWorld: world)
+        if (result as? String) == "missing" { NSSound.beep() }
+        if let dict = result as? [String: Any], let text = dict["copy"] as? String {
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(text, forType: .string)
+        }
     }
 
     /// The folder an installed app's files are in.

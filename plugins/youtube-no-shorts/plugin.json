@@ -2,11 +2,14 @@
   "id": "youtube-no-shorts",
   "name": "YouTube without Shorts",
   "description": "Hides Shorts from YouTube's home page, search, subscriptions and sidebar, and opens any Shorts link as a normal video.",
-  "version": "1.0",
+  "version": "1.1",
   "icon": "play.slash",
-  "sites": ["youtube.com"],
+  "sites": [
+    "youtube.com"
+  ],
   "js": "main.js",
   "css": "style.css",
   "runAt": "start",
-  "world": "isolated"
+  "world": "isolated",
+  "mode": "toggle"
 }

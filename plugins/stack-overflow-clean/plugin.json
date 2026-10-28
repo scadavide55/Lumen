@@ -2,7 +2,7 @@
   "id": "stack-overflow-clean",
   "name": "Stack Overflow, Clean",
   "description": "Hides Stack Overflow's sidebars, hot questions, ads and sign-up prompts, and widens the question and answers.",
-  "version": "1.0",
+  "version": "1.1",
   "icon": "list.bullet.rectangle",
   "author": "Tacet Plugins",
   "sites": [
@@ -14,5 +14,6 @@
   ],
   "css": "style.css",
   "runAt": "start",
-  "world": "isolated"
+  "world": "isolated",
+  "mode": "toggle"
 }

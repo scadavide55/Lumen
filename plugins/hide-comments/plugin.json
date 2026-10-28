@@ -2,10 +2,13 @@
   "id": "hide-comments",
   "name": "Hide Comments",
   "description": "Hides comment sections on YouTube, news sites, blogs and Reddit, for a quieter read. Turn it off for a moment from Tacet Plugins when you want to read them.",
-  "version": "1.0",
+  "version": "1.1",
   "icon": "bubble.left.and.bubble.right",
-  "sites": ["*"],
+  "sites": [
+    "*"
+  ],
   "css": "style.css",
   "runAt": "start",
-  "world": "isolated"
+  "world": "isolated",
+  "mode": "toggle"
 }

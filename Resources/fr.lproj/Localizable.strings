@@ -52,6 +52,7 @@
 "Add an API key to start" = "Ajoutez une clé API pour commencer";
 "Add from a File or Folder…" = "Ajouter depuis un fichier ou un dossier…";
 "Add items to the right-click menu" = "Ajouter des éléments au menu contextuel";
+"Add plugins made for Tacet, or web extensions from your apps or files." = "Ajoutez des plugins faits pour Tacet, ou des extensions web depuis vos apps ou des fichiers.";
 "Add the Safari extensions that come with your apps in one click, or Chrome, Firefox and other WebExtensions from a file. They never run in private windows." = "Ajoutez en un clic les extensions Safari fournies avec vos apps, ou des extensions Chrome, Firefox et autres depuis un fichier. Elles ne fonctionnent jamais en navigation privée.";
 "Add to New Group" = "Ajouter à un nouveau groupe";
 "Add your API key in Settings › AI." = "Ajoutez votre clé API dans Réglages › IA.";
@@ -137,6 +138,7 @@
 "Bring everything with you" = "Emportez tout avec vous";
 "Bring your Arc sidebar" = "Apportez votre barre latérale Arc";
 "Bring your bookmarks, history and sign-ins into Tacet. Nothing leaves your Mac." = "Importez vos signets, votre historique et vos connexions dans Tacet. Rien ne quitte votre Mac.";
+"Browse Tacet Plugins" = "Parcourir Tacet Plugins";
 "Browse without the mouse: press F to label every link, then type its letters to open it (⇧F opens it in a new tab). J and K scroll, G goes to the top and ⇧G to the bottom. Keys do nothing while you type in a field. Sites with their own single-key shortcuts, like YouTube and Gmail, keep theirs." = "Naviguez sans souris : appuyez sur F pour étiqueter chaque lien, puis tapez ses lettres pour l’ouvrir (⇧F dans un nouvel onglet). J et K font défiler, G va en haut et ⇧G en bas. Les touches ne font rien pendant que vous tapez dans un champ. Les sites qui ont leurs propres raccourcis à une touche, comme YouTube et Gmail, gardent les leurs.";
 "Browser use" = "Contrôle du navigateur";
 "Browser use: let the assistant click, type and scroll on pages" = "Contrôle du navigateur : autoriser l'assistant à cliquer, écrire et faire défiler les pages";
@@ -225,6 +227,7 @@
 "Copy Link" = "Copier le lien";
 "Copy Link Without Tracking" = "Copier le lien sans pistage";
 "Copy Link as Markdown" = "Copier le lien en Markdown";
+"Copy Page or Selection as Markdown" = "Copier la page ou la sélection en Markdown";
 "Copy as Markdown" = "Copier en Markdown";
 "Copy link" = "Copier le lien";
 "Copy password" = "Copier le mot de passe";
@@ -238,6 +241,7 @@
 "Couldn't read %@." = "Impossible de lire %@.";
 "Couldn't sign the app." = "Impossible de signer l'app.";
 "Couldn't unzip the update." = "Impossible de décompresser la mise à jour.";
+"Count Words" = "Compter les mots";
 "Custom" = "Personnalisé";
 "Custom CSS" = "CSS personnalisé";
 "Custom JavaScript" = "JavaScript personnalisé";
@@ -310,6 +314,7 @@
 "Extension" = "Extension";
 "Extension Settings" = "Réglages de l'extension";
 "Extensions" = "Extensions";
+"Extensions and Tacet Plugins" = "Extensions et Tacet Plugins";
 "Extensions don't run in private windows. Pages open before you add one start using it when you reload them." = "Les extensions ne fonctionnent pas dans les fenêtres privées. Les pages ouvertes avant l'ajout d'une extension l'utilisent une fois rechargées.";
 "Extensions need macOS 15.4 or later." = "Les extensions nécessitent macOS 15.4 ou ultérieur.";
 "Fanboy Annoyances (pop-ups, social widgets, newsletters)" = "Fanboy Annoyances (pop-ups, widgets sociaux, newsletters)";
@@ -331,6 +336,7 @@
 "Find your articles in the Library › Reading List" = "Retrouvez vos articles dans Bibliothèque › Liste de lecture";
 "Find…" = "Rechercher…";
 "Float pages with rounded corners" = "Pages flottantes aux coins arrondis";
+"Float the Video" = "Détacher la vidéo";
 "Float the page with rounded corners" = "Page flottante aux coins arrondis";
 "Flow (animated)" = "Flux (animé)";
 "Focus Mode" = "Mode concentration";
@@ -395,6 +401,7 @@
 "History items" = "Éléments d'historique";
 "History, cookies and site data from this window are forgotten when you close it." = "L'historique, les cookies et les données de cette fenêtre sont oubliés à sa fermeture.";
 "How Tacet works" = "Comment fonctionne Tacet";
+"How to use it" = "Comment l’utiliser";
 "Image" = "Image";
 "Images" = "Images";
 "Images too, with models that can read them" = "Les images aussi, avec les modèles qui savent les lire";
@@ -538,6 +545,7 @@
 "No animations" = "Sans animations";
 "No blocking. You can turn it on anytime with ⇧⌘B." = "Aucun blocage. Vous pouvez l'activer à tout moment avec ⇧⌘B.";
 "No browser window is open." = "Aucune fenêtre du navigateur n'est ouverte.";
+"No extensions yet" = "Pas encore d’extension";
 "No extensions yet. Add one from the apps on your Mac below, or from a file." = "Aucune extension pour l'instant. Ajoutez-en une depuis les apps de votre Mac ci-dessous, ou depuis un fichier.";
 "No image chosen" = "Aucune image choisie";
 "No images" = "Sans images";
@@ -565,6 +573,7 @@
 "Ocean" = "Océan";
 "Off" = "Désactivé";
 "Off until you turn it on. Nothing is sent until you ask something" = "Désactivé tant que vous ne l'activez pas. Rien n'est envoyé avant que vous posiez une question";
+"Off · click to turn on" = "Désactivé · cliquez pour activer";
 "Offer to save passwords" = "Proposer d'enregistrer les mots de passe";
 "Offline" = "Hors ligne";
 "Old Reddit" = "Old Reddit";
@@ -572,6 +581,7 @@
 "On X (Twitter), hides trends, \"Who to follow\", premium offers and the sidebar's suggestions, leaving your timeline and replies." = "Sur X (Twitter), masque les tendances, « Suggestions d’abonnement », les offres premium et les suggestions de la barre latérale, en laissant votre fil et les réponses.";
 "On articles, a thin bar at the top shows how far you've read, and a small label says how many minutes are left." = "Sur les articles, une fine barre en haut montre où vous en êtes et une petite étiquette indique les minutes restantes.";
 "On sign-up and change-password pages, offer a random password like abcdEf-ghijk2-lmnopq." = "Sur les pages d'inscription et de changement de mot de passe, proposer un mot de passe aléatoire comme abcdEf-ghijk2-lmnopq.";
+"On · click to turn off" = "Activé · cliquez pour désactiver";
 "On-device model" = "Modèle sur le Mac";
 "One last Keychain question" = "Une dernière question du trousseau";
 "Only add extensions you trust: they can see and change the pages they have access to." = "N'ajoutez que des extensions de confiance : elles peuvent voir et modifier les pages auxquelles elles ont accès.";
@@ -724,6 +734,7 @@
 "Right-click a group: New Tab in Group, Save and Close Group, Move Group to Window" = "Clic droit sur un groupe : Nouvel onglet dans le groupe, Enregistrer et fermer, Déplacer dans une fenêtre";
 "Right-click a page and choose Inspect Element." = "Cliquez avec le bouton droit sur une page et choisissez Inspecter l'élément.";
 "Right-click a picked tab for everything you can do with them" = "Clic droit sur un onglet choisi pour tout ce que vous pouvez faire";
+"Run" = "Exécuter";
 "Run scripts on pages" = "Exécuter des scripts sur les pages";
 "Run tasks on a schedule" = "Exécuter des tâches planifiées";
 "Runs in the page on this site every time it loads, with access to everything on it. Only add code you wrote or trust." = "S'exécute dans la page de ce site à chaque chargement, avec accès à tout son contenu. N'ajoutez que du code que vous avez écrit ou en qui vous avez confiance.";
@@ -795,11 +806,13 @@
 "Shield button" = "Bouton Shield";
 "Shield rules" = "Règles Shield";
 "Shield stops ads and trackers before they load, using the content blocker built into WebKit. Pages load faster, and you can switch it off for any site from the shield button." = "Shield arrête les publicités et les traqueurs avant leur chargement, grâce au bloqueur de contenu intégré à WebKit. Les pages se chargent plus vite, et vous pouvez le désactiver pour n'importe quel site avec le bouton bouclier.";
+"Shortcut: %@" = "Raccourci : %@";
 "Show All History" = "Afficher tout l'historique";
 "Show Bookmarks" = "Afficher les signets";
 "Show Chats" = "Afficher les discussions";
 "Show Downloads" = "Afficher les téléchargements";
 "Show History" = "Afficher l'historique";
+"Show Link Hints" = "Afficher les repères des liens";
 "Show Original" = "Afficher l'original";
 "Show Reading List" = "Afficher la liste de lecture";
 "Show a preview with memory use when you hover over a tab" = "Afficher un aperçu avec la mémoire utilisée au survol d’un onglet";
@@ -913,6 +926,7 @@
 "Tacet Plugins" = "Tacet Plugins";
 "Tacet Plugins (⇧⌘P)" = "Tacet Plugins (⇧⌘P)";
 "Tacet Plugins couldn't be reached. Check your connection and try again." = "Tacet Plugins est injoignable. Vérifiez votre connexion et réessayez.";
+"Tacet Plugins…" = "Tacet Plugins…";
 "Tacet Setup" = "Configuration de Tacet";
 "Tacet Shield is blocking ads and trackers · %@ rules" = "Tacet Shield bloque les publicités et les traqueurs · %@ règles";
 "Tacet Shield is off" = "Tacet Shield est désactivé";
@@ -1102,6 +1116,8 @@
 "Window with “%@” (%d tabs)" = "Fenêtre avec « %1$@ » (%2$d onglets)";
 "Window with “%@” (1 tab)" = "Fenêtre avec « %@ » (1 onglet)";
 "Word Count" = "Nombre de mots";
+"Works on %@" = "Fonctionne sur %@";
+"Works on every site" = "Fonctionne sur tous les sites";
 "Works, but not verified" = "Fonctionne, mais non vérifié";
 "X Without Distractions" = "X sans distractions";
 "Yellow" = "Jaune";

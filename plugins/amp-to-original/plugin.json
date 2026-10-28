@@ -2,7 +2,7 @@
   "id": "amp-to-original",
   "name": "AMP to Original",
   "description": "When a link opens a Google AMP copy of an article, goes to the publisher's own page instead, which is complete and isn't served through Google.",
-  "version": "1.0",
+  "version": "1.1",
   "icon": "arrow.uturn.left.square",
   "author": "Tacet Plugins",
   "sites": [
@@ -10,5 +10,6 @@
   ],
   "js": "main.js",
   "runAt": "end",
-  "world": "isolated"
+  "world": "isolated",
+  "mode": "toggle"
 }

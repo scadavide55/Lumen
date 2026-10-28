@@ -31,6 +31,7 @@ struct ToolbarContent: View {
             if horizontal { Spacer(minLength: 8) }
             if horizontal, let p = b.profile { ProfileBadge(profile: p, compact: true).fixedSize() }
             ExtensionButtons(tab: tab)
+            ExtensionsMenuButton(tab: tab)
             ShieldButton(tab: tab)
             DownloadsButton()
             AssistantButton()

@@ -10,13 +10,17 @@
     setTimeout(() => t.remove(), 1600);
   };
   const typing = (e) => { const el = e.target; return el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)); };
-  document.addEventListener('keydown', (e) => {
-    if (!(e.altKey && e.shiftKey && !e.metaKey && !e.ctrlKey && e.code === 'KeyW')) return;
-    e.preventDefault();
+  const count = () => {
     const sel = String(window.getSelection() || '').trim();
     const text = sel || (document.querySelector('article') || document.body).innerText;
     const words = text.split(/\s+/).filter(Boolean).length;
     const minutes = Math.max(1, Math.round(words / 230));
     toast((sel ? 'Selection: ' : 'Page: ') + words.toLocaleString() + ' words · ' + text.length.toLocaleString() + ' characters · ' + minutes + ' min');
+  };
+  globalThis.tacetAction = count;
+  document.addEventListener('keydown', (e) => {
+    if (!(e.altKey && e.shiftKey && !e.metaKey && !e.ctrlKey && e.code === 'KeyW')) return;
+    e.preventDefault();
+    count();
   }, true);
 })();

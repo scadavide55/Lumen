@@ -27,6 +27,7 @@
     document.documentElement.appendChild(layer);
     hints = { layer, map }; typed = ''; newTab = tab;
   };
+  globalThis.tacetAction = () => { show(false); return null; };
   document.addEventListener('keydown', (e) => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (hints) {

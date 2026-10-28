@@ -711,7 +711,7 @@ struct SidebarFooter: View {
 
     var body: some View {
         HStack(spacing: 2) {
-            IconButton(systemName: "puzzlepiece.extension", help: "Tacet Plugins (⇧⌘P)") { openWindow(id: "plugins") }
+            IconButton(systemName: "storefront", help: "Tacet Plugins (⇧⌘P)") { openWindow(id: "plugins") }
             IconButton(systemName: "books.vertical", help: "History and bookmarks (⌘Y)") {
                 LibraryView.requestedSection = .history
                 openWindow(id: "library")
@@ -920,6 +920,7 @@ struct CompactBar: View {
             if let p = b.profile { ProfileBadge(profile: p, compact: true).fixedSize() }
             if let tab = b.current {
                 ExtensionButtons(tab: tab)
+                ExtensionsMenuButton(tab: tab)
                 ShieldButton(tab: tab)
                 DownloadsButton()
                 AssistantButton()

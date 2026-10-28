@@ -2,7 +2,7 @@
   "id": "x-without-distractions",
   "name": "X Without Distractions",
   "description": "On X (Twitter), hides trends, \"Who to follow\", premium offers and the sidebar's suggestions, leaving your timeline and replies.",
-  "version": "1.0",
+  "version": "1.1",
   "icon": "text.bubble",
   "author": "Tacet Plugins",
   "sites": [
@@ -11,5 +11,6 @@
   ],
   "css": "style.css",
   "runAt": "start",
-  "world": "isolated"
+  "world": "isolated",
+  "mode": "toggle"
 }

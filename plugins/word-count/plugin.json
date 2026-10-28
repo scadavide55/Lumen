@@ -2,7 +2,7 @@
   "id": "word-count",
   "name": "Word Count",
   "description": "Press ⌥⇧W to see how many words and characters are in the text you selected, or in the whole page, and how long it takes to read.",
-  "version": "1.0",
+  "version": "1.1",
   "icon": "textformat.123",
   "author": "Tacet Plugins",
   "sites": [
@@ -10,5 +10,8 @@
   ],
   "js": "main.js",
   "runAt": "end",
-  "world": "isolated"
+  "world": "isolated",
+  "mode": "action",
+  "action": "Count Words",
+  "shortcut": "⌥⇧W"
 }

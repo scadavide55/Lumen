@@ -2,7 +2,7 @@
   "id": "google-just-results",
   "name": "Google, Just Results",
   "description": "Removes sponsored results and ads from Google Search, so the first links are real results.",
-  "version": "1.0",
+  "version": "1.1",
   "icon": "magnifyingglass.circle",
   "author": "Tacet Plugins",
   "sites": [
@@ -16,5 +16,6 @@
   ],
   "css": "style.css",
   "runAt": "start",
-  "world": "isolated"
+  "world": "isolated",
+  "mode": "toggle"
 }

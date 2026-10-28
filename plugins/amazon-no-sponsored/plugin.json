@@ -2,7 +2,7 @@
   "id": "amazon-no-sponsored",
   "name": "Amazon Without Sponsored",
   "description": "Hides sponsored products and ad banners from Amazon's search results and product pages, so you see what matches your search.",
-  "version": "1.0",
+  "version": "1.1",
   "icon": "cart",
   "author": "Tacet Plugins",
   "sites": [
@@ -16,5 +16,6 @@
   ],
   "css": "style.css",
   "runAt": "start",
-  "world": "isolated"
+  "world": "isolated",
+  "mode": "toggle"
 }
