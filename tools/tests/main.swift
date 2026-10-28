@@ -132,6 +132,11 @@ do {
     check(false, "arc: sample sidebar", "\(error)")
 }
 
+// MARK: Password check
+check(PasswordStore.isWeak("password"), "weak: common short password")
+check(PasswordStore.isWeak("aaaaaaaaaaaaaaa"), "weak: one repeated character")
+check(!PasswordStore.isWeak("abcdEf-ghijk2-lmnopq"), "weak: a suggested password is strong")
+
 // MARK: AI providers
 
 check(AIProvider.anthropic.guessesImages("claude-opus-5-5"), "vision: claude")

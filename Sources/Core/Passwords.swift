@@ -2,6 +2,7 @@ import Observation
 import AppKit
 import LocalAuthentication
 import Security
+import CryptoKit
 
 struct SavedLogin: Identifiable, Hashable {
     var id: String { host + "\u{1}" + username }
@@ -141,6 +142,68 @@ final class PasswordStore {
 
     func password(for login: SavedLogin, reason: String, done: @escaping (String?) -> Void) {
         authenticate(reason: reason) { ok in done(ok ? self.readPassword(login) : nil) }
+    }
+
+    // MARK: Password check
+
+    enum Issue: String, Comparable {
+        case breached, reused, weak
+        static func < (a: Issue, b: Issue) -> Bool { [Issue.breached, .reused, .weak].firstIndex(of: a)! < [Issue.breached, .reused, .weak].firstIndex(of: b)! }
+    }
+
+    /// Looks at every saved password after one Touch ID: found in a data breach (via Have I Been Pwned, which only
+    /// ever sees the first 5 characters of the password's SHA-1 hash), used on more than one site, or easy to guess.
+    /// Nothing is stored; the result is shown and forgotten.
+    func checkup(done: @escaping ([SavedLogin.ID: Set<Issue>]?) -> Void) {
+        authenticate(reason: L("check your saved passwords")) { ok in
+            guard ok else { done(nil); return }
+            let all = self.logins.compactMap { login in self.readPassword(login).map { (login, $0) } }
+            Task.detached(priority: .userInitiated) {
+                var issues: [SavedLogin.ID: Set<Issue>] = [:]
+                var sites: [String: Set<String>] = [:]
+                for (login, pw) in all { sites[pw, default: []].insert(Self.site(login.host)) }
+                for (login, pw) in all {
+                    if (sites[pw]?.count ?? 0) > 1 { issues[login.id, default: []].insert(.reused) }
+                    if Self.isWeak(pw) { issues[login.id, default: []].insert(.weak) }
+                }
+                let breached = await Self.breached(Set(all.map(\.1)))
+                for (login, pw) in all where breached.contains(pw) { issues[login.id, default: []].insert(.breached) }
+                let result = issues
+                await MainActor.run { done(result) }
+            }
+        }
+    }
+
+    static func isWeak(_ pw: String) -> Bool {
+        let kinds = [pw.contains(where: \.isLowercase), pw.contains(where: \.isUppercase),
+                     pw.contains(where: \.isNumber), pw.contains { !$0.isLetter && !$0.isNumber }].filter { $0 }.count
+        return pw.count < 8 || (pw.count < 12 && kinds < 3) || Set(pw).count < 4
+    }
+
+    /// The passwords that appear in Have I Been Pwned's list of breached passwords (k-anonymity: only a 5-character
+    /// hash prefix is sent, and the answer is padded so its size doesn't reveal anything either).
+    static func breached(_ passwords: Set<String>) async -> Set<String> {
+        var byPrefix: [String: [(suffix: String, password: String)]] = [:]
+        for pw in passwords {
+            let hash = Insecure.SHA1.hash(data: Data(pw.utf8)).map { String(format: "%02X", $0) }.joined()
+            byPrefix[String(hash.prefix(5)), default: []].append((String(hash.dropFirst(5)), pw))
+        }
+        let session = URLSession(configuration: .ephemeral)
+        var found = Set<String>()
+        for (prefix, entries) in byPrefix {
+            guard let url = URL(string: "https://api.pwnedpasswords.com/range/" + prefix) else { continue }
+            var request = URLRequest(url: url)
+            request.setValue("true", forHTTPHeaderField: "Add-Padding")
+            request.timeoutInterval = 15
+            guard let (data, response) = try? await session.data(for: request), (response as? HTTPURLResponse)?.statusCode == 200 else { continue }
+            var counts: [String: Int] = [:]
+            for line in String(decoding: data, as: UTF8.self).split(whereSeparator: \.isNewline) {
+                let parts = line.split(separator: ":")
+                if parts.count == 2 { counts[String(parts[0])] = Int(parts[1].trimmingCharacters(in: .whitespaces)) ?? 0 }
+            }
+            for e in entries where (counts[e.suffix] ?? 0) > 0 { found.insert(e.password) }
+        }
+        return found
     }
 
     // MARK: CSV

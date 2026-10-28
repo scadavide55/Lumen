@@ -181,6 +181,8 @@ struct PasswordsPane: View {
     @State private var revealed: [String: String] = [:]
     @State private var message: String?
     @State private var managers = ExternalPasswordManager.detect()
+    @State private var issues: [SavedLogin.ID: Set<PasswordStore.Issue>]?
+    @State private var checking = false
 
     private var filtered: [SavedLogin] {
         let q = query.lowercased()
@@ -210,12 +212,24 @@ struct PasswordsPane: View {
                 if store.logins.isEmpty {
                     Text("No saved passwords yet.").foregroundStyle(.secondary)
                 } else {
+                    PasswordCheckRow(issues: issues, checking: checking) {
+                        checking = true
+                        store.checkup { result in
+                            checking = false
+                            if let result { issues = result }
+                        }
+                    }
                     TextField("Search passwords", text: $query)
                     ForEach(filtered) { login in
                         HStack {
                             VStack(alignment: .leading, spacing: 1) {
                                 Text(login.host)
                                 Text(login.username.isEmpty ? L("(no username)") : login.username).font(.caption).foregroundStyle(.secondary)
+                            }
+                            if let found = issues?[login.id], let worst = found.min() {
+                                Image(systemName: worst == .breached ? "exclamationmark.octagon.fill" : "exclamationmark.triangle.fill")
+                                    .foregroundStyle(worst == .breached ? .red : .orange)
+                                    .help(found.sorted().map(PasswordCheckRow.describe).joined(separator: "\n"))
                             }
                             Spacer()
                             if let pw = revealed[login.id] {
@@ -295,6 +309,43 @@ struct PasswordsPane: View {
             panel.nameFieldStringValue = "Tacet Passwords.csv"
             guard panel.runModal() == .OK, let url = panel.url else { return }
             try? store.exportCSV().write(to: url, atomically: true, encoding: .utf8)
+        }
+    }
+}
+
+/// "Check passwords" and, once checked, how many are breached, reused or weak.
+struct PasswordCheckRow: View {
+    let issues: [SavedLogin.ID: Set<PasswordStore.Issue>]?
+    let checking: Bool
+    let check: () -> Void
+
+    static func describe(_ issue: PasswordStore.Issue) -> String {
+        switch issue {
+        case .breached: L("Found in a data breach: change it on this site.")
+        case .reused: L("Used on more than one site.")
+        case .weak: L("Easy to guess.")
+        }
+    }
+
+    var body: some View {
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 2) {
+                if let issues {
+                    let count = { (i: PasswordStore.Issue) in issues.values.filter { $0.contains(i) }.count }
+                    if issues.isEmpty {
+                        Label("No problems found", systemImage: "checkmark.shield.fill").foregroundStyle(.green)
+                    } else {
+                        Text(String(format: L("%d in data breaches · %d reused · %d weak"), count(.breached), count(.reused), count(.weak)))
+                    }
+                } else {
+                    Text("Password check")
+                }
+                Text("Looks for passwords found in data breaches, used on several sites or easy to guess. Only the first 5 characters of each password's SHA-1 hash are sent to Have I Been Pwned; the password never leaves your Mac.")
+                    .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer()
+            if checking { ProgressView().controlSize(.small) }
+            Button(issues == nil ? LocalizedStringKey("Check…") : "Check Again") { check() }.disabled(checking)
         }
     }
 }

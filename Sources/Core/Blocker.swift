@@ -131,7 +131,6 @@ final class ContentBlocker {
     // MARK: Filter lists
 
     func updateIfStale() {
-        let s = Settings.shared
         guard Self.anyListEnabled else { return }
         let age = lastUpdated.map { Date().timeIntervalSince($0) } ?? .infinity
         if filters.isEmpty || age > 7 * 86_400 { updateFilterLists() }
