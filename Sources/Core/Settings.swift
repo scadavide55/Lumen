@@ -383,6 +383,8 @@ final class Settings: Observable {
     @Pref("easyPrivacy") var easyPrivacy = false
     @Pref("youtubeAds") var youtubeAds = true
     @Pref("cookieBanners") var hideCookieBanners = true
+    /// Answers the banner with "Reject all" where the site offers it, so it doesn't come back and nothing optional is allowed.
+    @Pref("rejectCookies") var rejectCookies = true
     @Pref("thirdPartyCookies") var blockThirdPartyCookies = true
     @Pref("stripTracking") var stripTracking = true
     @Pref("httpsUpgrade") var httpsUpgrade = true

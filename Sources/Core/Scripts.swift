@@ -18,6 +18,10 @@ enum Scripts {
         if s.adBlock && s.hideCookieBanners {
             c.addUserScript(WKUserScript(source: cookieBanners.replacingOccurrences(of: "__ALLOW__", with: allow),
                                          injectionTime: .atDocumentStart, forMainFrameOnly: true, in: .defaultClient))
+            if s.rejectCookies {
+                c.addUserScript(WKUserScript(source: rejectCookies.replacingOccurrences(of: "__ALLOW__", with: allow),
+                                             injectionTime: .atDocumentEnd, forMainFrameOnly: true, in: .defaultClient))
+            }
         }
         if s.adBlock && s.youtubeAds {
             // Not main-frame only: videos embedded on other sites (Reddit, blogs) play in a YouTube frame.
@@ -291,6 +295,69 @@ enum Scripts {
       window.addEventListener('load', unlock);
       setTimeout(unlock, 1500);
       setTimeout(unlock, 4000);
+    })();
+    """#
+
+    // MARK: Rejecting cookies
+
+    /// Presses the "reject" button of the consent tools sites use most, once per page. Only buttons inside a
+    /// known consent banner are ever pressed, so nothing else on the page can be clicked by mistake.
+    static let rejectCookies = #"""
+    (() => {
+      const allow = __ALLOW__;
+      const h = location.hostname;
+      if (allow.some(d => h === d || h.endsWith('.' + d))) return;
+      const buttons = [
+        '#onetrust-reject-all-handler', '.ot-pc-refuse-all-handler',
+        '#CybotCookiebotDialogBodyButtonDecline', '#CybotCookiebotDialogBodyLevelButtonLevelOptinDeclineAll',
+        '#didomi-notice-disagree-button', '.didomi-continue-without-agreeing',
+        '.iubenda-cs-reject-btn', '.cky-btn-reject', '#cookie_action_close_header_reject', '.cmplz-deny',
+        '.osano-cm-denyAll', '.cm-btn-decline', '#axeptio_btn_dismiss', '#truste-consent-required',
+        '[data-tid="banner-decline"]', '#cookiescript_reject', '.moove-gdpr-infobar-reject-btn',
+        '#tarteaucitronAllDenied2', '.cmpboxbtnno', '.fc-cta-do-not-consent', '#hs-eu-decline-button',
+        '[data-testid="uc-deny-all-button"]',
+      ];
+      const banners = [
+        '#onetrust-banner-sdk', '#CybotCookiebotDialog', '#didomi-host', '.qc-cmp2-container', '.fc-consent-root',
+        '#cmpbox', '#iubenda-cs-banner', '.cky-consent-container', '#cookie-law-info-bar', '.cmplz-cookiebanner',
+        '.osano-cm-dialog', '.klaro', '#axeptio_overlay', '#cookiescript_injected', '#moove_gdpr_cookie_info_bar',
+        '#tarteaucitronRoot', '#hs-eu-cookie-confirmation', '#usercentrics-root', '#BorlabsCookieBox', '.cc-window',
+      ].join(',');
+      // Words for "reject" on a banner's own buttons, for banners whose button has no known name.
+      const reject = /^\s*(reject|decline|deny|refuse|disagree|only necessary|necessary only|essential only|rifiuta|nega|solo necessari|refuser|tout refuser|continuer sans accepter|ablehnen|alle ablehnen|nur notwendige|rechazar|recusar|weigeren)\b/i;
+      let done = false;
+      const press = (el) => { el.click(); done = true; };
+      const roots = () => {
+        const out = [document];
+        const uc = document.querySelector('#usercentrics-root');
+        if (uc && uc.shadowRoot) out.push(uc.shadowRoot);
+        return out;
+      };
+      const tryReject = () => {
+        if (done) return;
+        for (const root of roots()) {
+          for (const sel of buttons) {
+            const b = root.querySelector(sel);
+            if (b) { press(b); return; }
+          }
+        }
+        for (const banner of document.querySelectorAll(banners)) {
+          const b = [...banner.querySelectorAll('button, a[role="button"], [role="button"]')]
+            .find(x => reject.test((x.innerText || x.textContent || '').trim()));
+          if (b) { press(b); return; }
+        }
+      };
+      tryReject();
+      if (done) return;
+      // Most banners arrive a moment after the page; watch for 15 seconds, then stop.
+      let queued = false;
+      const watcher = new MutationObserver(() => {
+        if (queued) return;
+        queued = true;
+        setTimeout(() => { queued = false; tryReject(); if (done) watcher.disconnect(); }, 300);
+      });
+      watcher.observe(document.documentElement, { childList: true, subtree: true });
+      setTimeout(() => watcher.disconnect(), 15000);
     })();
     """#
 

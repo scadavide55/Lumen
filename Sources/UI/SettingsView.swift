@@ -317,6 +317,14 @@ struct ShieldPane: View {
                     }
                 }
                 Toggle("Hide cookie consent banners", isOn: $s.hideCookieBanners).disabled(!s.adBlock)
+                Toggle(isOn: $s.rejectCookies) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Reject optional cookies for me")
+                        Text("Presses “Reject all” on cookie banners that offer it, so sites remember your choice.")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                .disabled(!s.adBlock || !s.hideCookieBanners)
                 Toggle("Skip YouTube ads", isOn: $s.youtubeAds).disabled(!s.adBlock)
             }
             Section {
