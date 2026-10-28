@@ -23,7 +23,7 @@ enum AppleModel {
     /// The tools that fit its context: reading pages, tabs, videos and history, opening pages, the web if it's on,
     /// and using the page if Browser use is on.
     static func tools(web: Bool, control: Bool = false) -> [AssistantPrompt.Tool] {
-        let names = ["tacet_guide", "get_page_content", "get_selection", "list_tabs", "read_tab", "get_video_transcript", "search_history", "open_page"]
+        let names = ["tacet_guide", "use_plugin", "get_page_content", "get_selection", "list_tabs", "read_tab", "get_video_transcript", "search_history", "open_page"]
         return AssistantPrompt.tools.filter { names.contains($0.name) } + (web ? AssistantPrompt.webTools : [])
             + (control ? AssistantPrompt.controlTools : [])
     }

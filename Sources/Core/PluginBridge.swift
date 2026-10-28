@@ -28,6 +28,26 @@ final class PluginBridge: NSObject, WKScriptMessageHandler {
         }
     }
 
+    /// The installed, turned-on plugin whose app takes pictures (Cutout), if there is one.
+    static var imageHandoffPlugin: PluginStore.Plugin? {
+        PluginStore.shared.installed.values.first { $0.enabled && $0.plugin.handoff != nil && $0.plugin.app != nil }?.plugin
+    }
+
+    /// Sends a picture to a plugin's app from Tacet itself: the right-click menu and Tacet Assistant use this.
+    @MainActor
+    static func send(imageAt url: URL, to plugin: PluginStore.Plugin, from tab: Tab) async -> Bool {
+        // A picture inside the page's own code (data:) is read from the address itself.
+        var body: [String: Any] = ["url": url.absoluteString]
+        let raw = url.absoluteString
+        if url.scheme == "data", let comma = raw.firstIndex(of: ","), raw[..<comma].hasSuffix(";base64") {
+            body = ["data": String(raw[raw.index(after: comma)...]), "type": String(raw.dropFirst(5).prefix { $0 != ";" })]
+        }
+        guard let page = plugin.handoff.flatMap(URL.init), let (data, type) = await image(from: body, referer: tab.url) else { return false }
+        let name = url.deletingPathExtension().lastPathComponent
+        open(page, with: data, type: type, name: name.isEmpty ? "image" : name, from: tab)
+        return true
+    }
+
     /// The image the plugin sent, read in the page (base64), or downloaded here from a public address.
     private static func image(from body: [String: Any], referer: URL?) async -> (Data, String)? {
         if let b64 = body["data"] as? String, let data = Data(base64Encoded: b64), data.count <= maxBytes {

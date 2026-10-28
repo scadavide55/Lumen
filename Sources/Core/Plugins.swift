@@ -376,7 +376,8 @@ final class PluginStore {
                 sources[id] = (p.js.flatMap { try? String(contentsOf: dir.appendingPathComponent($0), encoding: .utf8) },
                                p.css.flatMap { try? String(contentsOf: dir.appendingPathComponent($0), encoding: .utf8) })
             }
-            guard let src = sources[id] else { continue }
+            // An app with nothing to add to pages (Focus Timer, say) has no script.
+            guard let src = sources[id], src.js != nil || src.css != nil else { continue }
             var body = ""
             if let css = src.css, let data = try? JSONSerialization.data(withJSONObject: [css]) {
                 body += """

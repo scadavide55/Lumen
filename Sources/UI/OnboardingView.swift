@@ -859,11 +859,14 @@ private struct AssistantStep: View {
                         }
                         .labelsHidden()
                         .frame(width: 170)
-                        SecureField(s.aiProvider.needsKey ? "API key" : "API key (optional)", text: $key)
-                            .frame(width: 260)
-                            .onChange(of: key) { _, k in AIKeys.set(k, for: s.aiProvider) }
+                        if !s.aiProvider.isLocal && s.aiProvider != .apple {
+                            SecureField(s.aiProvider.needsKey ? "API key" : "API key (optional)", text: $key)
+                                .frame(width: 260)
+                                .onChange(of: key) { _, k in AIKeys.set(k, for: s.aiProvider) }
+                        }
                     }
-                    Text(s.aiProvider == .custom ? "Set the server address and model in Settings › AI." : "The key is saved in your Keychain. You can change the model in Settings › AI.")
+                    Text(s.aiProvider.isLocal ? "No key needed: open the app and Tacet finds its models. Pick one in Settings › AI."
+                         : s.aiProvider == .custom ? "Set the server address and model in Settings › AI." : "The key is saved in your Keychain. You can change the model in Settings › AI.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }

@@ -1,0 +1,15 @@
+{
+  "id": "youtube-big-captions",
+  "author": "Tacet Plugins",
+  "version": "1.0",
+  "world": "isolated",
+  "name": "Bigger YouTube Captions",
+  "description": "Makes YouTube's subtitles larger and easier to read, on a soft dark band, in the player and in full screen.",
+  "icon": "captions.bubble",
+  "sites": [
+    "youtube.com"
+  ],
+  "css": "style.css",
+  "runAt": "start",
+  "mode": "toggle"
+}

@@ -1,0 +1,11 @@
+/* Larger subtitles with a softer, more readable background. */
+.ytp-caption-segment {
+  font-size: 2.6vmin !important;
+  line-height: 1.35 !important;
+  background: rgba(8, 8, 12, 0.72) !important;
+  padding: 0.12em 0.4em !important;
+  border-radius: 0.25em;
+  font-weight: 500 !important;
+}
+.ytp-fullscreen .ytp-caption-segment { font-size: 3.4vmin !important; }
+.caption-window { width: auto !important; }

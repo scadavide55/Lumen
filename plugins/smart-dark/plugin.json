@@ -1,0 +1,15 @@
+{
+  "id": "smart-dark",
+  "author": "Tacet Plugins",
+  "version": "1.0",
+  "world": "isolated",
+  "name": "Smart Dark Mode",
+  "description": "Turns light sites dark with matching colours, keeps photos and videos as they are, and leaves sites that are already dark alone. Use the menu to turn it off for a site where you prefer the original.",
+  "icon": "moon.stars",
+  "sites": [
+    "*"
+  ],
+  "js": "main.js",
+  "runAt": "start",
+  "mode": "toggle"
+}

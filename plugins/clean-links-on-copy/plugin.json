@@ -1,0 +1,17 @@
+{
+  "id": "clean-links-on-copy",
+  "author": "Tacet Plugins",
+  "version": "1.0",
+  "world": "isolated",
+  "name": "Clean Links on Copy",
+  "description": "When you copy a link or an address, tracking parts such as utm_source, fbclid and gclid are removed, so what you paste is short and doesn't follow you. Press ⌥⇧L to copy the page's clean address.",
+  "icon": "link.badge.plus",
+  "sites": [
+    "*"
+  ],
+  "js": "main.js",
+  "runAt": "end",
+  "mode": "action",
+  "action": "Copy Clean Address",
+  "shortcut": "⌥⇧L"
+}

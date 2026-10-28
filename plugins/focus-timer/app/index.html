@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Focus Timer</title>
+<style>
+:root { color-scheme: light dark; --bg:#f6f5f2; --fg:#15162a; --muted:#5b5e78; --line:rgba(20,22,40,.1); --accent:#ff5a2a; }
+@media (prefers-color-scheme: dark) { :root { --bg:#0d0e14; --fg:#f3f2ef; --muted:#9a9cb2; --line:rgba(255,255,255,.1); } }
+* { box-sizing: border-box; }
+body { margin:0; min-height:100vh; display:grid; place-items:center; background:var(--bg); color:var(--fg); font:16px -apple-system,sans-serif; }
+main { text-align:center; padding:24px; }
+.phase { font-size:15px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+.ring { position:relative; width:280px; height:280px; margin:0 auto 26px; }
+.ring svg { transform:rotate(-90deg); }
+.ring .time { position:absolute; inset:0; display:grid; place-items:center; font:600 64px ui-rounded,-apple-system,sans-serif; font-variant-numeric:tabular-nums; }
+button { font:600 15px -apple-system,sans-serif; border:0; border-radius:12px; padding:11px 22px; cursor:pointer; margin:0 4px; }
+.primary { background:var(--fg); color:var(--bg); }
+.ghost { background:transparent; color:var(--fg); border:1px solid var(--line); }
+.lengths { margin-top:22px; color:var(--muted); font-size:14px; }
+.lengths input { width:56px; font:14px -apple-system,sans-serif; padding:4px 6px; border-radius:7px; border:1px solid var(--line); background:transparent; color:var(--fg); text-align:center; }
+.count { margin-top:12px; color:var(--muted); font-size:13px; }
+</style></head>
+<body><main>
+  <div class="phase" id="phase">Focus</div>
+  <div class="ring">
+    <svg width="280" height="280"><circle cx="140" cy="140" r="126" fill="none" stroke="var(--line)" stroke-width="10"/>
+      <circle id="arc" cx="140" cy="140" r="126" fill="none" stroke="var(--accent)" stroke-width="10" stroke-linecap="round"/></svg>
+    <div class="time" id="time">25:00</div>
+  </div>
+  <button class="primary" id="start">Start</button>
+  <button class="ghost" id="reset">Reset</button>
+  <button class="ghost" id="skip">Skip</button>
+  <div class="lengths">Focus <input id="focusMin" type="number" min="1" max="180" value="25"> min · Break <input id="breakMin" type="number" min="1" max="60" value="5"> min</div>
+  <div class="count" id="count"></div>
+</main>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const store = { get: (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } },
+                  set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
+  let s = store.get('timer', { phase: 'focus', endsAt: null, left: null, done: 0 });
+  $('focusMin').value = store.get('focusMin', 25);
+  $('breakMin').value = store.get('breakMin', 5);
+  const length = (phase) => (phase === 'focus' ? +$('focusMin').value : +$('breakMin').value) * 60000;
+  const circumference = 2 * Math.PI * 126;
+  $('arc').style.strokeDasharray = circumference;
+  const chime = () => {
+    try {
+      const ctx = new AudioContext();
+      [0, 0.25, 0.5].forEach((t, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.frequency.value = [660, 880, 990][i];
+        g.gain.setValueAtTime(0.0001, ctx.currentTime + t);
+        g.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + t + 0.6);
+        o.connect(g).connect(ctx.destination); o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.7);
+      });
+    } catch (e) {}
+  };
+  const fmt = (ms) => { const t = Math.max(0, Math.ceil(ms / 1000)); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
+  const render = () => {
+    const left = s.endsAt ? s.endsAt - Date.now() : (s.left ?? length(s.phase));
+    if (s.endsAt && left <= 0) {
+      chime();
+      if (s.phase === 'focus') s.done++;
+      s = { phase: s.phase === 'focus' ? 'break' : 'focus', endsAt: null, left: null, done: s.done };
+      store.set('timer', s);
+      return render();
+    }
+    $('time').textContent = fmt(left);
+    $('phase').textContent = s.phase === 'focus' ? 'Focus' : 'Break';
+    $('arc').style.stroke = s.phase === 'focus' ? 'var(--accent)' : '#34c759';
+    $('arc').style.strokeDashoffset = circumference * (1 - left / length(s.phase));
+    $('start').textContent = s.endsAt ? 'Pause' : (s.left ? 'Resume' : 'Start');
+    $('count').textContent = s.done ? s.done + (s.done === 1 ? ' focus session done today' : ' focus sessions done today') : '';
+    // The tab list shows the title: the time left, while it runs.
+    document.title = s.endsAt ? '⏱ ' + fmt(left) + (s.phase === 'focus' ? ' · Focus' : ' · Break') : 'Focus Timer';
+  };
+  $('start').onclick = () => {
+    if (s.endsAt) { s.left = s.endsAt - Date.now(); s.endsAt = null; }
+    else { s.endsAt = Date.now() + (s.left ?? length(s.phase)); s.left = null; }
+    store.set('timer', s); render();
+  };
+  $('reset').onclick = () => { s = { phase: 'focus', endsAt: null, left: null, done: s.done }; store.set('timer', s); render(); };
+  $('skip').onclick = () => { s = { phase: s.phase === 'focus' ? 'break' : 'focus', endsAt: null, left: null, done: s.done }; store.set('timer', s); render(); };
+  for (const id of ['focusMin', 'breakMin']) $(id).onchange = () => { store.set(id, +$(id).value); if (!s.endsAt) s.left = null; render(); };
+  render();
+  setInterval(render, 500);
+})();
+</script>
+</body></html>

@@ -593,6 +593,9 @@ struct AIPane: View {
                 if s.aiProvider == .apple {
                     AppleModelNotice()
                 }
+                if s.aiProvider.isLocal {
+                    LocalServerSettings(provider: s.aiProvider)
+                }
                 if s.aiProvider == .custom {
                     LabeledContent("Server address") {
                         TextField("", text: $s.aiBaseURL, prompt: Text(AIProvider.custom.defaultBaseURL))
@@ -602,7 +605,7 @@ struct AIPane: View {
                     Text("Any server that speaks the OpenAI Chat Completions API, such as Ollama or LM Studio.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
-                if s.aiProvider != .apple {
+                if s.aiProvider != .apple && !s.aiProvider.isLocal {
                 LabeledContent(s.aiProvider.needsKey ? "API key" : "API key (optional)") {
                     HStack {
                         SecureField("", text: $key, prompt: Text("Paste your key here"))
@@ -611,6 +614,8 @@ struct AIPane: View {
                         Button(saved ? "Saved" : "Save", action: saveKey).disabled(saved)
                     }
                 }
+                }
+                if s.aiProvider != .apple {
                 LabeledContent("Default model") {
                     ModelPicker(provider: s.aiProvider, selection: modelBinding)
                 }
@@ -719,5 +724,40 @@ struct ModelPicker: View {
                 .help("Refresh List")
                 .disabled(models.loading.contains(provider))
         }
+    }
+}
+
+/// Ollama and LM Studio: no key, an address that's usually right, and what to do when the server isn't on.
+struct LocalServerSettings: View {
+    let provider: AIProvider
+    @Bindable private var s = Settings.shared
+    private var models = AIModels.shared
+
+    init(provider: AIProvider) { self.provider = provider }
+
+    var body: some View {
+        LabeledContent("Server address") {
+            TextField("", text: Binding(get: { s.aiLocalURLs[provider.rawValue] ?? "" },
+                                        set: { s.aiLocalURLs[provider.rawValue] = $0 }),
+                      prompt: Text(provider.defaultBaseURL))
+                .textFieldStyle(.roundedBorder).frame(minWidth: 260)
+                .onSubmit { AIModels.shared.refresh(provider, force: true) }
+        }
+        HStack {
+            if models.loading.contains(provider) {
+                ProgressView().controlSize(.small)
+                Text("Looking for models…").font(.caption).foregroundStyle(.secondary)
+            } else if models.errors[provider] == nil, !models.models(for: provider).isEmpty {
+                Label(String(format: L("Connected · %d models"), models.models(for: provider).count), systemImage: "checkmark.circle.fill")
+                    .font(.caption).foregroundStyle(.green)
+            }
+            Spacer()
+            Button("Check Again") { AIModels.shared.refresh(provider, force: true) }.controlSize(.small)
+            if let url = provider.appURL { Link(String(format: L("Get %@"), provider.name), destination: url).font(.caption) }
+        }
+        Text(provider == .ollama
+             ? "Runs models on your Mac with Ollama: no key, and nothing leaves your Mac unless the assistant searches the web. Download a model with ollama pull, such as ollama pull gemma3 or llama3.2-vision for pictures."
+             : "Runs models on your Mac with LM Studio: no key, and nothing leaves your Mac unless the assistant searches the web. Download a model in LM Studio, then start its server in the Developer tab.")
+            .font(.caption).foregroundStyle(.secondary)
     }
 }

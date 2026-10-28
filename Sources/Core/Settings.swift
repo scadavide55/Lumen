@@ -441,6 +441,8 @@ final class Settings: Observable {
     /// The model chosen for each provider, keyed by `AIProvider.rawValue`.
     @Pref("aiModels") var aiModels: [String: String] = [:]
     @Pref("aiBaseURL") var aiBaseURL = AIProvider.custom.defaultBaseURL
+    /// Addresses of Ollama and LM Studio when they aren't at their usual place, by provider.
+    @Pref("aiLocalURLs") var aiLocalURLs: [String: String] = [:]
     /// Image support the user set by hand, keyed by `AIProvider.visionKey`; other models are detected.
     @Pref("aiVision") var aiVision: [String: Bool] = [:]
     /// Lets the assistant search the web and read pages by itself.

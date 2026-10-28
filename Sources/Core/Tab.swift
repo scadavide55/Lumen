@@ -945,6 +945,7 @@ final class LumenWebView: WKWebView {
             if let id = item.identifier?.rawValue, let title = renames[id] { item.title = title }
         }
         addAssistantItems(to: menu)
+        addCutoutItem(to: menu, at: convert(event.locationInWindow, from: nil))
         addExtensionItems(to: menu)
         guard let tab, let browser = tab.browser, let link = tab.hoverURL, let url = URL(string: link) else { return }
         let anchor = menu.items.firstIndex { $0.identifier?.rawValue == "WKMenuItemIdentifierOpenLinkInNewWindow" }
@@ -975,6 +976,26 @@ extension LumenWebView {
         guard !items.isEmpty else { return }
         menu.addItem(.separator())
         items.forEach(menu.addItem)
+    }
+
+    /// "Remove Background with Cutout" after Copy Image, when Cutout is installed.
+    func addCutoutItem(to menu: NSMenu, at point: NSPoint) {
+        guard let plugin = PluginBridge.imageHandoffPlugin, let tab,
+              let copy = menu.items.firstIndex(where: { $0.identifier?.rawValue == "WKMenuItemIdentifierCopyImage" }) else { return }
+        // Where the click was, in the page's own coordinates.
+        let y = isFlipped ? point.y : bounds.height - point.y
+        let scale = pageZoom * magnification
+        let x = point.x / scale, top = y / scale
+        let item = ActionMenuItem(String(format: L("Remove Background with %@"), L(plugin.name))) { [weak self] in
+            let js = "(() => { const el = document.elementFromPoint(\(x), \(top)); const img = el && (el.closest('img') || el.querySelector?.('img'));"
+                + " return img ? (img.currentSrc || img.src) : null; })()"
+            self?.evaluateJavaScript(js, in: nil, in: .defaultClient) { result in
+                guard case .success(let value) = result, let src = value as? String, let url = URL(string: src) else { NSSound.beep(); return }
+                Task { @MainActor in if !(await PluginBridge.send(imageAt: url, to: plugin, from: tab)) { NSSound.beep() } }
+            }
+        }
+        item.image = NSImage(systemSymbolName: plugin.icon ?? "scissors", accessibilityDescription: nil)
+        menu.insertItem(item, at: copy + 1)
     }
 
     /// One quiet item for selected text, after Copy: Tacet Assistant › Explain, Translate, Summarise, Ask About It.

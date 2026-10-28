@@ -7,7 +7,7 @@ import WebKit
 
 /// Where the assistant's answers come from. The user brings their own key.
 enum AIProvider: String, Codable, CaseIterable, Identifiable {
-    case anthropic, openAI, openRouter, deepSeek, custom, apple
+    case anthropic, openAI, openRouter, deepSeek, ollama, lmStudio, custom, apple
     var id: String { rawValue }
 
     var name: String {
@@ -16,6 +16,8 @@ enum AIProvider: String, Codable, CaseIterable, Identifiable {
         case .openAI: "OpenAI"
         case .openRouter: "OpenRouter"
         case .deepSeek: "DeepSeek"
+        case .ollama: "Ollama"
+        case .lmStudio: "LM Studio"
         case .custom: L("OpenAI-compatible")
         case .apple: L("Apple (on this Mac)")
         }
@@ -27,7 +29,7 @@ enum AIProvider: String, Codable, CaseIterable, Identifiable {
         case .openAI: "gpt-5"
         case .openRouter: "openrouter/auto"
         case .deepSeek: "deepseek-chat"
-        case .custom: ""
+        case .ollama, .lmStudio, .custom: ""
         case .apple: AppleModel.modelID
         }
     }
@@ -38,13 +40,38 @@ enum AIProvider: String, Codable, CaseIterable, Identifiable {
         case .openAI: "https://api.openai.com/v1"
         case .openRouter: "https://openrouter.ai/api/v1"
         case .deepSeek: "https://api.deepseek.com"
+        case .ollama: "http://localhost:11434/v1"
+        case .lmStudio: "http://localhost:1234/v1"
         case .custom: "http://localhost:11434/v1"
         case .apple: ""
         }
     }
 
-    /// Ollama and other local servers usually don't need a key, and Apple's model runs on the Mac.
-    var needsKey: Bool { self != .custom && self != .apple }
+    /// Models running on this Mac (or the local network), with no account and no key.
+    var isLocal: Bool { self == .ollama || self == .lmStudio }
+
+    /// The address requests go to: the one set in Settings for local servers, else the provider's own.
+    var baseURL: String {
+        switch self {
+        case .custom: return Settings.shared.aiBaseURL
+        case .ollama, .lmStudio:
+            let set = Settings.shared.aiLocalURLs[rawValue]?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            return set.isEmpty ? defaultBaseURL : set
+        default: return defaultBaseURL
+        }
+    }
+
+    /// Ollama, LM Studio and other local servers don't need a key, and Apple's model runs on the Mac.
+    var needsKey: Bool { self != .custom && self != .apple && !isLocal }
+
+    /// Where to get the app that runs the models, for local providers.
+    var appURL: URL? {
+        switch self {
+        case .ollama: URL(string: "https://ollama.com/download")
+        case .lmStudio: URL(string: "https://lmstudio.ai")
+        default: nil
+        }
+    }
 
     /// Whether `model` can read images: the user's choice if they made one, else what the provider's
     /// model list says, else a guess from the model's name.
@@ -69,8 +96,9 @@ enum AIProvider: String, Codable, CaseIterable, Identifiable {
         case .openRouter:
             // Ids look like "vendor/model"; the router itself picks a model that fits the request.
             return m == "openrouter/auto" || ["claude", "gpt-4o", "gpt-4.1", "gpt-5", "gemini", "vision", "-vl", "pixtral", "grok-4", "llama-4"].contains { m.contains($0) }
-        case .custom:
-            return ["vision", "-vl", "vl-", "llava", "gpt-4o", "gemma3", "pixtral", "minicpm-v", "claude"].contains { m.contains($0) }
+        case .custom, .ollama, .lmStudio:
+            return ["vision", "-vl", "vl-", "llava", "gpt-4o", "gemma3", "gemma-3", "pixtral", "minicpm-v", "claude", "qwen2.5vl", "qwen2.5-vl",
+                    "llama3.2-vision", "moondream", "granite3.2-vision", "mistral-small3"].contains { m.contains($0) }
         case .apple:
             return false
         }
@@ -108,7 +136,7 @@ final class AIModels {
         let key = AIKeys.get(p)
         if p.needsKey && key == nil { errors[p] = nil; lists[p] = nil; return }
         loading.insert(p)
-        let base = p == .custom ? Settings.shared.aiBaseURL : p.defaultBaseURL
+        let base = p.baseURL
         Task { @MainActor in
             do {
                 let models = try await Self.fetch(p, base: base, key: key)
@@ -122,14 +150,25 @@ final class AIModels {
                     s.aiModels = m
                 }
             } catch {
-                self.errors[p] = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+                self.errors[p] = Self.explain(error, provider: p)
             }
             self.loading.remove(p)
         }
     }
 
+    /// A local server that isn't running is the usual reason a list doesn't load, so that's said plainly.
+    static func explain(_ error: Error, provider p: AIProvider) -> String {
+        let code = (error as NSError).code
+        if p.isLocal, [NSURLErrorCannotConnectToHost, NSURLErrorNetworkConnectionLost, NSURLErrorTimedOut, NSURLErrorCannotFindHost].contains(code) {
+            return String(format: L("%@ isn't running. Open the %@ app (and in LM Studio, start its server), then try again."), p.name, p.name)
+        }
+        return (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+    }
+
     private static func fetch(_ p: AIProvider, base: String, key: String?) async throws -> [Model] {
         let root = base.trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        if p == .ollama { return try await fetchOllama(root) }
+        if p == .lmStudio, let rich = try? await fetchLMStudio(root) { return rich }
         var out: [Model] = []
         var after: String?
         repeat {
@@ -159,6 +198,51 @@ final class AIModels {
         } while after != nil
         // Anthropic lists newest first; the others are easier to scan sorted.
         return p == .anthropic ? out : out.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+    }
+
+    /// Ollama's own list says which models read images, and leaves out embedding models.
+    private static func fetchOllama(_ root: String) async throws -> [Model] {
+        let host = root.hasSuffix("/v1") ? String(root.dropLast(3)) : root
+        guard let url = URL(string: host + "/api/tags") else { throw AIClient.Failure.badURL }
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 8
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard (response as? HTTPURLResponse)?.statusCode == 200,
+              let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { throw AIClient.Failure.http(0, "") }
+        var out: [Model] = []
+        for m in json["models"] as? [[String: Any]] ?? [] {
+            guard let id = (m["model"] as? String) ?? (m["name"] as? String) else { continue }
+            // What it can do comes from /api/show; older Ollama versions don't say, and the name decides.
+            var caps: [String]?
+            if let show = URL(string: host + "/api/show") {
+                var r = URLRequest(url: show)
+                r.httpMethod = "POST"
+                r.timeoutInterval = 5
+                r.httpBody = try? JSONSerialization.data(withJSONObject: ["model": id])
+                if let (d, _) = try? await URLSession.shared.data(for: r),
+                   let info = try? JSONSerialization.jsonObject(with: d) as? [String: Any] { caps = info["capabilities"] as? [String] }
+            }
+            if let caps, !caps.contains("completion") { continue }
+            out.append(Model(id: id, name: id, vision: caps.map { $0.contains("vision") }))
+        }
+        return out.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+    }
+
+    /// LM Studio's own list says which models read images ("vlm") and leaves out embedding models.
+    private static func fetchLMStudio(_ root: String) async throws -> [Model] {
+        let host = root.hasSuffix("/v1") ? String(root.dropLast(3)) : root
+        guard let url = URL(string: host + "/api/v0/models") else { throw AIClient.Failure.badURL }
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 8
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard (response as? HTTPURLResponse)?.statusCode == 200,
+              let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let list = json["data"] as? [[String: Any]] else { throw AIClient.Failure.http(0, "") }
+        return list.compactMap { m -> Model? in
+            guard let id = m["id"] as? String, (m["type"] as? String) != "embeddings" else { return nil }
+            return Model(id: id, name: id, vision: (m["type"] as? String).map { $0 == "vlm" })
+        }
+        .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
 
     /// OpenAI's list also has embedding, speech and image models, which can't chat.
@@ -215,7 +299,23 @@ enum AIKeys {
 enum AssistantPrompt {
     static func system(web: Bool, control: Bool, vision: Bool = false) -> String {
         base + (vision ? screenshotPart : "") + "\n" + switches(web: web, control: control) + (web ? webPart : noWebPart)
-            + (control ? controlPart : noControlPart) + rules
+            + (control ? controlPart : noControlPart) + pluginsPart + rules
+    }
+
+    /// The Tacet Plugins the user has, so the assistant knows what use_plugin can do right now.
+    static var pluginsPart: String {
+        let list = PluginStore.shared.installed.values.filter(\.enabled).map(\.plugin).sorted { $0.id < $1.id }
+        guard !list.isEmpty else { return "\nThe user has no Tacet Plugins installed, so use_plugin can't do anything yet.\n" }
+        return "\nThe user's Tacet Plugins, for use_plugin:\n" + list.map { p in
+            let what: String
+            switch p.behaviour {
+            case "app": what = p.handoff != nil ? "opens its app; give it image_url (or none for the page's main picture) to send a picture" : "opens its app"
+            case "action": what = "runs: " + (p.action ?? "its action") + " on the current page"
+            case "toggle": what = "works by itself on its sites while it's on"
+            default: what = "works with its keys: " + (p.shortcut ?? "see its description")
+            }
+            return "- \(p.id) (\(p.name)): \(what)"
+        }.joined(separator: "\n") + "\n"
     }
 
     /// Only for models that read images.
@@ -245,6 +345,13 @@ enum AssistantPrompt {
 
     Your tools are grouped by what they do below. Use a tool only when it helps with the request, and say in a few words what you're \
     about to do before you use one.
+
+    Using Tacet Plugins:
+    - use_plugin: uses one of the user's Tacet Plugins by its id: opens an app plugin (Cutout, Focus Timer), sends a \
+    picture to Cutout to remove its background (pass image_url, or leave it out for the biggest picture on the page), \
+    or runs an action plugin on the current page (Copy as Markdown, Count Words, Copy Clean Address…). Use it when \
+    the user asks for what a plugin does, such as "remove the background of this image" or "copy this page as \
+    Markdown". If they don't have the plugin, tell them it's in Tacet Plugins (⇧⌘P).
 
     Knowing Tacet:
     - tacet_guide: searches the Tacet Guide, Tacet's own manual, by a few words, and returns the matching sections: \
@@ -392,6 +499,11 @@ enum AssistantPrompt {
     }
 
     static let tools: [Tool] = [
+        Tool(name: "use_plugin",
+             description: "Uses one of the user's Tacet Plugins by its id: opens an app plugin, sends a picture to Cutout, or runs an action plugin on the current page. The installed plugins are listed in the instructions.",
+             properties: ["plugin": ["type": "string", "description": "The plugin's id, such as \"cutout\" or \"copy-as-markdown\"."],
+                          "image_url": ["type": "string", "description": "For Cutout: the address of the picture. Leave it out to use the biggest picture on the current page."]],
+             required: ["plugin"]),
         Tool(name: "tacet_guide",
              description: "Searches the Tacet Guide, Tacet's own manual, and returns the sections that match: features, menus, keyboard shortcuts, settings, versions and what's new, the rename from Lumen, who made Tacet and how. Use it for every question about Tacet itself. Leave the query empty to list all sections.",
              properties: ["query": ["type": "string", "description": "A few English words for what the user asks, such as \"plugins shortcut\" or \"who made Tacet\" (the guide is in English, whatever language the user writes in)."]],
@@ -786,7 +898,7 @@ final class AssistantChat {
         }
         let model = self.model
         guard !model.isEmpty else { fail(L("Choose a model in Settings › AI.")); return }
-        let base = provider == .custom ? s.aiBaseURL : provider.defaultBaseURL
+        let base = provider.baseURL
         var useTools = true
         let web = quick || s.aiWeb
         let control = !quick && s.aiControl
@@ -807,7 +919,7 @@ final class AssistantChat {
                 return
             } catch {
                 if Task.isCancelled { return }
-                fail((error as? LocalizedError)?.errorDescription ?? error.localizedDescription)
+                fail(AIModels.explain(error, provider: provider))
                 return
             }
             transcript.append(result.assistantMessage)
@@ -840,6 +952,52 @@ final class AssistantChat {
 
     /// Rounds of tool calls in one answer. Browser use takes one per click, so it needs room, but not forever.
     static let maxRounds = 20
+
+    // MARK: Tacet Plugins
+
+    @MainActor
+    private func usePlugin(_ args: [String: Any]) async -> (String, Bool) {
+        let wanted = ((args["plugin"] as? String) ?? "").lowercased().trimmingCharacters(in: .whitespaces)
+        let installed = PluginStore.shared.installed.values
+        guard let item = installed.first(where: { $0.plugin.id == wanted || $0.plugin.name.lowercased() == wanted }) else {
+            let names = installed.map { "\($0.plugin.id) (\($0.plugin.name))" }.sorted().joined(separator: ", ")
+            return ("The plugin \"\(wanted)\" isn't installed. Installed: \(names.isEmpty ? "none" : names). Others are in Tacet Plugins (⇧⌘P).", true)
+        }
+        let p = item.plugin
+        guard item.enabled else { return ("\(p.name) is turned off. The user can turn it on from the puzzle button in the toolbar.", true) }
+        guard let browser else { return ("The browser window is closed.", true) }
+        noteActivity(String(format: L("Using %@"), L(p.name)))
+        switch p.behaviour {
+        case "app":
+            if p.handoff != nil, let tab = browser.current, tab.url != nil {
+                var src = (args["image_url"] as? String)?.trimmingCharacters(in: .whitespaces)
+                if src?.isEmpty != false, let wv = tab.webView {
+                    // The biggest picture showing on the page.
+                    let js = "(() => { const imgs = [...document.images].filter(i => i.naturalWidth >= 120 && i.getBoundingClientRect().width > 60);"
+                        + " imgs.sort((a, b) => b.clientWidth * b.clientHeight - a.clientWidth * a.clientHeight);"
+                        + " return imgs[0] ? (imgs[0].currentSrc || imgs[0].src) : null; })()"
+                    src = (try? await wv.evaluateJavaScript(js, in: nil, contentWorld: .defaultClient)) as? String
+                }
+                if let src, let url = URL(string: src) {
+                    let ok = await PluginBridge.send(imageAt: url, to: p, from: tab)
+                    return (ok ? "Opened \(p.name) in a new tab with the picture \(src) in it; the user picks an engine there and it runs on their Mac."
+                               : "The picture at \(src) couldn't be read (it may not be on a public address).", !ok)
+                }
+            }
+            guard let url = p.startURL else { return ("\(p.name) has nothing to open.", true) }
+            browser.newTab(url: url)
+            return ("Opened \(p.name) in a new tab.", false)
+        case "action":
+            let before = NSPasteboard.general.changeCount
+            await PluginStore.shared.runAction(p, in: browser.current)
+            let copied = NSPasteboard.general.changeCount != before
+            return ("Ran \(p.action ?? p.name) on the current page" + (copied ? "; the result is on the clipboard." : "."), false)
+        case "toggle":
+            return ("\(p.name) is on and works by itself on its sites; there's nothing to run. It can be turned off from the puzzle button.", false)
+        default:
+            return ("\(p.name) works with its keys: \(p.shortcut ?? "see its description"). \(p.description)", false)
+        }
+    }
 
     // MARK: Apple's on-device model
 
@@ -941,6 +1099,8 @@ final class AssistantChat {
             noteActivity(String(format: L("Searching your history for “%@”"), query))
             let days = Self.number(args["days"])
             return (await AssistantSources.searchHistory(query, days: days > 0 ? days : nil), false)
+        case "use_plugin":
+            return await usePlugin(args)
         case "tacet_guide":
             let query = (args["query"] as? String) ?? ""
             noteActivity(L("Looking in the Tacet Guide"))
