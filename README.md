@@ -30,13 +30,14 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 > [!NOTE]
 > **Lumen is now Tacet.** Same browser, new name: there were already other browsers called Lumen, and the name sounded too much like an AI product. Updating keeps all your tabs, passwords and settings.
 >
-> **1.6.3** brings your Arc sidebar across, a stronger Tacet Shield, tab previews, translation on your Mac and a password check. **1.6.2** has a new icon and a few fixes. **1.6.1** brought web extensions, an offline Reading List, Customize Site, tab organising and a much more capable Tacet Assistant, including Apple's on-device model. Tacet Assistant is still a beta. If something doesn't work, please report it in [Issues](https://github.com/scadavide55/Tacet/issues).
+> **1.6.4** brings Tacet Plugins (beta), a verified store with Cutout, Focus Timer, Smart Dark Mode and more, an extensions menu, a Tacet Assistant that knows all of Tacet and runs on Ollama or LM Studio, and better tabs. **1.6.3** brought your Arc sidebar across, a stronger Tacet Shield, tab previews, translation on your Mac and a password check. **1.6.2** has a new icon and a few fixes. **1.6.1** brought web extensions, an offline Reading List, Customize Site, tab organising and a much more capable Tacet Assistant, including Apple's on-device model. Tacet Assistant is still a beta. If something doesn't work, please report it in [Issues](https://github.com/scadavide55/Tacet/issues).
 
 ## Features
 
 **Tacet Assistant (beta)**
 - An AI assistant in a panel beside the page (⇧⌘A): summaries, answers and explanations about what you're reading
-- Bring your own key: Anthropic, OpenAI, OpenRouter, DeepSeek or any OpenAI-compatible server (Ollama, LM Studio)
+- Bring your own key: Anthropic, OpenAI, OpenRouter, DeepSeek, or run models on your Mac with Ollama or LM Studio (no key; Tacet finds their models), or any OpenAI-compatible server
+- Knows everything about Tacet (every feature, menu and shortcut) and uses your Tacet Plugins when you ask, such as "remove the background of this picture"
 - **Apple's on-device model** (macOS 26 with Apple Intelligence): free, offline and private, with no key. It's smaller, so it's best for short tasks
 - Reads your other tabs without switching to them, searches your history and bookmarks, and takes screenshots of the page when the layout matters
 - Full transcripts of YouTube videos, to summarise or ask about a video
@@ -47,6 +48,13 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 - **Browser use** (off by default): clicks, types, scrolls and drags on the current page for you. It never fills in passwords or card numbers, and asks before sending, buying or deleting anything
 - Chat history on your Mac (not in private windows), a full-window chat view, and a panel you can resize
 - Off by default; page content is treated as data, never as instructions
+
+**Tacet Plugins (beta)**
+- A store of plugins made for Tacet and checked by its developer (⇧⌘P), that work on every Mac: each says who made it and whether it's verified
+- Cutout removes picture backgrounds on your Mac, offline: hover a picture and click ✂ Cutout, or right-click it
+- YouTube without Shorts, YouTube Focus, Copy as Markdown, Smart Dark Mode, Focus Timer, Keyboard Navigation, Video Speed, Picture in Picture, Clean Links on Copy, Google Just Results, Old Reddit and more
+- The puzzle button lists every plugin and extension: a click opens, runs, turns on or off, or explains it; pin any to the toolbar, or turn one off for a single site
+- Signed and checked file by file; plugins run in their own space that pages can't reach, and update by themselves
 
 **Extensions**
 - Web extensions on macOS 15.4 or later, the same kind Safari, Chrome and Firefox use
@@ -96,6 +104,8 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 - Pinned tabs, drag to reorder, split view, reopen closed tabs
 - Background tabs hibernate to save memory, shown in grey, and wake up showing the page as you left it, scrolled to the same place
 - Hover over a tab for a preview with its page, site and memory use; search tabs with ⌥⌘F
+- Pinned tabs keep their site, as in Arc; ⇧⌘T brings back tabs closed together; middle-click closes a tab
+- With profiles, Tacet asks who's browsing when it opens; move settings and plugins to another Mac in one file
 - Windows and tabs come back when you reopen Tacet
 
 **Getting around**

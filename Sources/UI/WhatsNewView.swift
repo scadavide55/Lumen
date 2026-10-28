@@ -15,7 +15,7 @@ enum WhatsNew {
         let demo: Demo
     }
 
-    enum Demo { case arc, shield, preview, wake, translate, passwords, keychain, rename, groups, picking, assistant, apple, reading, customize, extensions, fixes }
+    enum Demo { case store, cutout, extMenu, localAI, pinned, arc, shield, preview, wake, translate, passwords, keychain, rename, groups, picking, assistant, apple, reading, customize, extensions, fixes }
 
     /// What's new for someone who last saw the welcome of `seen` (empty when they never did).
     static func pages(since seen: String) -> [Page] {
@@ -23,6 +23,29 @@ enum WhatsNew {
     }
 
     static let all: [Page] = [
+        Page(version: "1.6.4", symbol: "storefront", title: "Tacet Plugins",
+             text: "A store of small plugins made for Tacet and checked by us, that work on every Mac: YouTube without Shorts, Copy as Markdown, Smart Dark Mode, Focus Timer and many more. Each says who made it and whether it's verified.",
+             how: ["Window › Tacet Plugins (⇧⌘P), or the store button in the sidebar", "Add installs it; plugins update by themselves"],
+             demo: .store),
+        Page(version: "1.6.4", symbol: "scissors", title: "Cutout: remove backgrounds",
+             text: "Remove the background of any picture, on this Mac, with no upload. Its AI engines download once when you add it, then it works offline.",
+             how: ["Rest the pointer on a picture and click ✂ Cutout, or press ⌥⇧X", "Or right-click a picture › Remove Background with Cutout"],
+             demo: .cutout),
+        Page(version: "1.6.4", symbol: "puzzlepiece.extension", title: "Every extension in one place",
+             text: "The puzzle button lists your plugins and extensions. A click opens, runs, turns on or off, or explains each one, so there are no shortcuts to remember.",
+             how: ["Pin one to the toolbar with its pin", "Right-click a plugin to turn it off for one site"],
+             demo: .extMenu),
+        Page(version: "1.6.4", symbol: "sparkles", title: "A smarter Tacet Assistant",
+             text: "It knows everything about Tacet, from where a setting is to every shortcut, and it uses your plugins when you ask. Ollama and LM Studio now run it on your Mac with no key.",
+             how: ["“How do I open Tacet Plugins?”", "“Remove the background of this picture”", "Settings › AI › Ollama or LM Studio"],
+             demo: .localAI),
+        Page(version: "1.6.4", symbol: "pin", title: "Tabs that behave",
+             text: "Pinned tabs keep their site, as in Arc: links to other sites open in a new tab. ⇧⌘T brings back every tab you closed together, and a middle-click closes a tab.",
+             how: ["Right-click a pinned tab › Back to Pinned Address", "With profiles, Tacet asks who's browsing when it opens"],
+             demo: .pinned),
+        Page(version: "1.6.4", symbol: "checkmark.seal", title: "And more",
+             text: "Move your settings and plugins to another Mac in one file. Windows snap to the screen's edges, full screen has no empty gap, and the password check is always in Settings.",
+             how: ["Settings › General › Move to another Mac"], demo: .fixes),
         Page(version: "1.6.3", symbol: "square.and.arrow.down.on.square", title: "Bring your Arc sidebar",
              text: "Arc stops working on December 22. Tacet reads your Spaces, Favorites, pinned tabs and folders straight from Arc: Favorites become pinned tabs, and each Space and folder a tab group that loads only when you open it.",
              how: ["File › Import from Another Browser…, then choose Arc", "Keep “Spaces and pinned tabs” on"],
@@ -162,6 +185,11 @@ private struct DemoView: View {
             // A 4-second loop, eased so each step settles before the next.
             let t = context.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 4) / 4
             switch demo {
+            case .store: StoreDemo(t: t)
+            case .cutout: CutoutDemo(t: t)
+            case .extMenu: ExtMenuDemo(t: t)
+            case .localAI: LocalAIDemo(t: t)
+            case .pinned: PinnedDemo(t: t)
             case .arc: ArcDemo(t: t)
             case .shield: ShieldDemo(t: t)
             case .preview: PreviewDemo(t: t)
@@ -200,6 +228,121 @@ private struct Chip: View {
         }
         .frame(width: width, height: 26)
         .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(Color.primary.opacity(0.08)))
+    }
+}
+
+/// Plugin cards appear one by one, each getting its green check.
+private struct StoreDemo: View {
+    let t: Double
+    var body: some View {
+        HStack(spacing: 12) {
+            ForEach(0..<3) { i in
+                let shown = step(t, 0.1 + Double(i) * 0.15, 0.25 + Double(i) * 0.15)
+                VStack(alignment: .leading, spacing: 6) {
+                    Image(systemName: ["play.slash", "doc.on.clipboard", "scissors"][i]).font(.system(size: 16)).foregroundStyle(.tint)
+                        .frame(width: 30, height: 30).background(RoundedRectangle(cornerRadius: 7).fill(Color.accentColor.opacity(0.15)))
+                    RoundedRectangle(cornerRadius: 2).fill(Color.primary.opacity(0.4)).frame(width: 70, height: 6)
+                    HStack(spacing: 3) {
+                        Image(systemName: "checkmark.seal.fill").font(.system(size: 9)).foregroundStyle(.green)
+                        RoundedRectangle(cornerRadius: 2).fill(Color.green.opacity(0.5)).frame(width: 46, height: 5)
+                    }
+                    .opacity(step(t, 0.55, 0.7))
+                }
+                .padding(10)
+                .background(RoundedRectangle(cornerRadius: 10).fill(Color.primary.opacity(0.06)))
+                .opacity(shown).offset(y: 12 * (1 - shown))
+            }
+        }
+    }
+}
+
+/// A picture's background fades to a checkerboard, leaving the subject.
+private struct CutoutDemo: View {
+    let t: Double
+    var body: some View {
+        let cut = step(t, 0.35, 0.6)
+        ZStack {
+            // Transparency, shown as a checkerboard.
+            Canvas { ctx, size in
+                let s: CGFloat = 12
+                for x in stride(from: 0, to: size.width, by: s) {
+                    for y in stride(from: 0, to: size.height, by: s) where (Int(x / s) + Int(y / s)) % 2 == 0 {
+                        ctx.fill(Path(CGRect(x: x, y: y, width: s, height: s)), with: .color(.primary.opacity(0.08)))
+                    }
+                }
+            }
+            LinearGradient(colors: [.teal, .blue], startPoint: .top, endPoint: .bottom).opacity(1 - cut)
+            Image(systemName: "figure.stand").font(.system(size: 92)).foregroundStyle(.orange)
+        }
+        .frame(width: 200, height: 140)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(alignment: .topTrailing) {
+            Text(verbatim: "✂ Cutout").font(.system(size: 11, weight: .semibold)).foregroundStyle(.white)
+                .padding(.horizontal, 8).padding(.vertical, 4).background(Capsule().fill(Color.black.opacity(0.8)))
+                .padding(8).opacity(1 - step(t, 0.3, 0.4))
+        }
+    }
+}
+
+/// The puzzle menu opens under its button with a few rows.
+private struct ExtMenuDemo: View {
+    let t: Double
+    var body: some View {
+        let open = step(t, 0.15, 0.3)
+        VStack(alignment: .trailing, spacing: 6) {
+            HStack(spacing: 10) {
+                Image(systemName: "puzzlepiece.extension").font(.system(size: 16)).foregroundStyle(open > 0.5 ? Color.accentColor : .secondary)
+                Image(systemName: "shield.lefthalf.filled").font(.system(size: 16)).foregroundStyle(.tint)
+            }
+            VStack(alignment: .leading, spacing: 7) {
+                ForEach(0..<3) { i in
+                    HStack(spacing: 8) {
+                        Image(systemName: ["scissors", "doc.on.clipboard", "bubble.left.and.bubble.right"][i]).font(.system(size: 11)).foregroundStyle(.tint).frame(width: 18)
+                        RoundedRectangle(cornerRadius: 2).fill(Color.primary.opacity(0.35)).frame(width: 110, height: 6)
+                        Circle().fill(i == 2 && step(t, 0.6, 0.65) > 0.5 ? Color.secondary.opacity(0.4) : Color.green).frame(width: 7, height: 7)
+                    }
+                    .padding(5)
+                    .background(RoundedRectangle(cornerRadius: 6).fill(Color.accentColor.opacity(i == 2 && t > 0.5 ? 0.15 : 0)))
+                }
+            }
+            .padding(10)
+            .background(RoundedRectangle(cornerRadius: 10).fill(.regularMaterial))
+            .opacity(open).scaleEffect(0.95 + 0.05 * open, anchor: .topTrailing)
+        }
+    }
+}
+
+/// A Mac running the model, with a chat bubble answering.
+private struct LocalAIDemo: View {
+    let t: Double
+    var body: some View {
+        HStack(spacing: 26) {
+            Image(systemName: "laptopcomputer").font(.system(size: 60, weight: .light))
+                .overlay { Image(systemName: "cpu").font(.system(size: 18)).foregroundStyle(.tint).opacity(0.5 + 0.5 * abs(sin(t * .pi * 2))) }
+            VStack(alignment: .leading, spacing: 6) {
+                Capsule().fill(Color.accentColor.opacity(0.25)).frame(width: 150, height: 20).opacity(step(t, 0.05, 0.15))
+                ForEach(0..<3) { i in
+                    RoundedRectangle(cornerRadius: 2).fill(Color.primary.opacity(0.35)).frame(width: [170, 140, 100][i], height: 6)
+                        .opacity(step(t, 0.3 + Double(i) * 0.1, 0.4 + Double(i) * 0.1))
+                }
+            }
+        }
+    }
+}
+
+/// A pinned tab stays put while the link it opened appears as a new tab.
+private struct PinnedDemo: View {
+    let t: Double
+    var body: some View {
+        let open = step(t, 0.35, 0.55)
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                Image(systemName: "pin.fill").font(.system(size: 12)).foregroundStyle(.tint)
+                    .frame(width: 34, height: 30).background(RoundedRectangle(cornerRadius: 8).fill(Color.primary.opacity(0.08)))
+                Chip(color: .blue, width: 120)
+            }
+            Chip(color: .orange, width: 162).opacity(open).offset(x: 20 * (1 - open))
+        }
     }
 }
 

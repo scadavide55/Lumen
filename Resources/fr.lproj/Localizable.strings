@@ -36,6 +36,8 @@
 "A quiet, fast browser that blocks ads and trackers for you. Let's get it set up the way you like. It only takes a minute." = "Un navigateur discret et rapide qui bloque les publicités et les traqueurs pour vous. Configurons-le à votre goût : cela ne prend qu'une minute.";
 "A sleeping tab shows the page as you last saw it while it loads again, then puts you back where you had scrolled to. No white flash, no jump to the top." = "Un onglet en veille affiche la page telle que vous l’avez vue pendant qu’elle se recharge, puis vous ramène où vous en étiez. Pas de flash blanc, pas de retour en haut.";
 "A small round button appears at the bottom right when you've scrolled far down a page, and takes you back to the top." = "Un petit bouton rond apparaît en bas à droite quand vous êtes descendu loin dans une page, et vous ramène en haut.";
+"A smarter Tacet Assistant" = "Un Tacet Assistant plus malin";
+"A store of small plugins made for Tacet and checked by us, that work on every Mac: YouTube without Shorts, Copy as Markdown, Smart Dark Mode, Focus Timer and many more. Each says who made it and whether it's verified." = "Une boutique de petits plugins faits pour Tacet et vérifiés par nous, qui fonctionnent sur tous les Mac : YouTube sans Shorts, Copier en Markdown, Mode sombre intelligent, Minuteur de concentration et bien d'autres. Chacun indique qui l'a fait et s'il est vérifié.";
 "A stronger Tacet Shield" = "Un Tacet Shield plus fort";
 "AI" = "IA";
 "AMP to Original" = "D’AMP à l’original";
@@ -54,6 +56,7 @@
 "Add Site Style…" = "Ajouter un style de site…";
 "Add an API key to start" = "Ajoutez une clé API pour commencer";
 "Add from a File or Folder…" = "Ajouter depuis un fichier ou un dossier…";
+"Add installs it; plugins update by themselves" = "Ajouter l’installe ; les plugins se mettent à jour seuls";
 "Add items to the right-click menu" = "Ajouter des éléments au menu contextuel";
 "Add plugins made for Tacet, or web extensions from your apps or files." = "Ajoutez des plugins faits pour Tacet, ou des extensions web depuis vos apps ou des fichiers.";
 "Add the Safari extensions that come with your apps in one click, or Chrome, Firefox and other WebExtensions from a file. They never run in private windows." = "Ajoutez en un clic les extensions Safari fournies avec vos apps, ou des extensions Chrome, Firefox et autres depuis un fichier. Elles ne fonctionnent jamais en navigation privée.";
@@ -83,6 +86,7 @@
 "Always show website titles in tabs" = "Toujours afficher les titres des sites dans les onglets";
 "Amazon Without Sponsored" = "Amazon sans sponsorisés";
 "An AI assistant in a panel beside the page, for questions about what you're reading." = "Un assistant IA dans un panneau à côté de la page, pour vos questions sur ce que vous lisez.";
+"And more" = "Et plus encore";
 "Animate gradient backgrounds" = "Animer les fonds dégradés";
 "Answers come from your AI provider and can be wrong." = "Les réponses viennent de votre fournisseur d'IA et peuvent être erronées.";
 "Any server that speaks the OpenAI Chat Completions API, such as Ollama or LM Studio." = "Tout serveur compatible avec l'API Chat Completions d'OpenAI, comme Ollama ou LM Studio.";
@@ -260,6 +264,7 @@
 "Customize a Site…" = "Personnaliser un site…";
 "Customized sites" = "Sites personnalisés";
 "Cutout" = "Cutout";
+"Cutout: remove backgrounds" = "Cutout : retirer les arrière-plans";
 "Dark" = "Sombre";
 "Dark Appearance" = "Apparence sombre";
 "Data" = "Données";
@@ -302,6 +307,7 @@
 "Enable JavaScript" = "Activer JavaScript";
 "Enable Web Inspector" = "Activer l'inspecteur web";
 "Engine" = "Moteur";
+"Every extension in one place" = "Toutes les extensions au même endroit";
 "Every shortcut in one place" = "Tous les raccourcis au même endroit";
 "Every window comes back when Tacet opens, closed windows stay closed, and links from other apps open as tabs instead of empty windows." = "Toutes les fenêtres reviennent à l’ouverture, les fenêtres fermées restent fermées, et les liens d’autres apps s’ouvrent en onglets au lieu de fenêtres vides.";
 "Everything has a shortcut. You'll find them all in the menus too." = "Tout a un raccourci. Vous les trouverez aussi dans les menus.";
@@ -441,6 +447,7 @@
 "Installed" = "Installées";
 "Installing… Tacet will restart." = "Installation… Tacet va redémarrer.";
 "It doesn't ask for any permissions." = "Elle ne demande aucune autorisation.";
+"It knows everything about Tacet, from where a setting is to every shortcut, and it uses your plugins when you ask. Ollama and LM Studio now run it on your Mac with no key." = "Il sait tout de Tacet, de l'emplacement d'un réglage à chaque raccourci, et utilise vos plugins quand vous le demandez. Ollama et LM Studio le font maintenant tourner sur votre Mac sans clé.";
 "It reads your other tabs, finds pages in your history and bookmarks, summarises YouTube videos from their transcript, takes screenshots, and groups tabs by topic." = "Il lit vos autres onglets, retrouve des pages dans l’historique et les signets, résume les vidéos YouTube depuis leur transcription, prend des captures et groupe les onglets par sujet.";
 "It will be able to:" = "Elle pourra :";
 "It works in Tacet, but Tacet's developer hasn't checked what it does. Add it only if you trust who made it." = "Il fonctionne dans Tacet, mais le développeur de Tacet n’a pas vérifié ce qu’il fait. Ajoutez-le seulement si vous faites confiance à son auteur.";
@@ -517,6 +524,7 @@
 "Move to Trash" = "Placer dans la corbeille";
 "Move to Window" = "Déplacer dans une fenêtre";
 "Move to another Mac" = "Passer à un autre Mac";
+"Move your settings and plugins to another Mac in one file. Windows snap to the screen's edges, full screen has no empty gap, and the password check is always in Settings." = "Transférez réglages et plugins vers un autre Mac en un seul fichier. Les fenêtres s'accrochent aux bords de l'écran, le plein écran n'a plus d'espace vide, et la vérification des mots de passe est toujours dans les Réglages.";
 "Mute Tab" = "Couper le son de l'onglet";
 "Mute or Unmute Tab" = "Activer ou couper le son de l'onglet";
 "Mute tab" = "Couper le son de l'onglet";
@@ -638,6 +646,7 @@
 "Opens Reddit in its classic layout at old.reddit.com: lighter, faster and with more posts on screen. Galleries, chat and settings still open in the new design." = "Ouvre Reddit dans sa présentation classique sur old.reddit.com : plus léger, plus rapide, avec plus de publications à l’écran. Les galeries, le chat et les réglages s’ouvrent toujours dans le nouveau design.";
 "Optional" = "Facultatif";
 "Optional. Tacet never sees your password: you type it on Google's own page." = "Facultatif. Tacet ne voit jamais votre mot de passe : vous le saisissez sur la page de Google.";
+"Or right-click a picture › Remove Background with Cutout" = "Ou clic droit sur une image › Supprimer l'arrière-plan avec Cutout";
 "Orange" = "Orange";
 "Organize tabs" = "Organiser les onglets";
 "Other Sites in New Tabs" = "Autres sites dans de nouveaux onglets";
@@ -663,10 +672,12 @@
 "Picture in Picture" = "Image dans l’image";
 "Pin Tab" = "Épingler l'onglet";
 "Pin Tabs" = "Épingler les onglets";
+"Pin one to the toolbar with its pin" = "Épinglez-en un dans la barre avec son épingle";
 "Pin or Unpin Tab" = "Épingler ou détacher l'onglet";
 "Pin to Toolbar" = "Épingler dans la barre";
 "Pink" = "Rose";
 "Pinned tabs" = "Onglets épinglés";
+"Pinned tabs keep their site, as in Arc: links to other sites open in a new tab. ⇧⌘T brings back every tab you closed together, and a middle-click closes a tab." = "Les onglets épinglés gardent leur site, comme dans Arc : les liens vers d'autres sites s'ouvrent dans un nouvel onglet. ⇧⌘T rouvre tous les onglets fermés ensemble, et un clic molette ferme un onglet.";
 "Pinned tabs open links to other sites in new tabs" = "Les onglets épinglés ouvrent les liens vers d'autres sites dans de nouveaux onglets";
 "Pinned tabs sit at the top as icons and are always one click away." = "Les onglets épinglés restent en haut sous forme d'icônes, toujours à un clic.";
 "Plain" = "Uni";
@@ -732,6 +743,7 @@
 "Remove Tracking from Links" = "Supprimer le pistage des liens";
 "Remove from Favorites" = "Retirer des favoris";
 "Remove from Group" = "Retirer du groupe";
+"Remove the background of any picture, on this Mac, with no upload. Its AI engines download once when you add it, then it works offline." = "Retirez l'arrière-plan de n'importe quelle image, sur ce Mac, sans rien envoyer. Ses moteurs d'IA se téléchargent une fois à l'ajout, puis tout fonctionne hors ligne.";
 "Remove the background of any picture, on this Mac: rest the pointer on a picture and click ✂ Cutout (or press ⌥⇧X), or open Cutout and drop your own photos. Four AI engines, transparent PNG at full resolution, nothing uploaded. The engines are downloaded once when you add it (413 MB), then it works offline." = "Supprimez l'arrière-plan de n'importe quelle image, sur ce Mac : laissez le pointeur sur une image et cliquez sur ✂ Cutout (ou appuyez sur ⌥⇧X), ou ouvrez Cutout et déposez vos photos. Quatre moteurs d'IA, PNG transparent en pleine résolution, rien n'est envoyé. Les moteurs sont téléchargés une fois à l'ajout (413 Mo), puis tout fonctionne hors ligne.";
 "Remove tracking from links" = "Supprimer le pistage des liens";
 "Remove tracking parameters from links" = "Supprimer les paramètres de pistage des liens";
@@ -748,6 +760,7 @@
 "Reset" = "Réinitialiser";
 "Reset Site" = "Réinitialiser le site";
 "Reset zoom" = "Réinitialiser le zoom";
+"Rest the pointer on a picture and click ✂ Cutout, or press ⌥⇧X" = "Laissez le pointeur sur une image et cliquez sur ✂ Cutout, ou appuyez sur ⌥⇧X";
 "Rest the pointer on a tab to see the page, its site and how much memory it uses. Tabs that are sleeping say so, and use none." = "Laissez le pointeur sur un onglet pour voir la page, son site et la mémoire qu’il utilise. Les onglets en veille l’indiquent, et n’en utilisent pas.";
 "Restart Now" = "Redémarrer";
 "Restart Tacet to use the new language." = "Redémarrez Tacet pour utiliser la nouvelle langue.";
@@ -757,6 +770,8 @@
 "Right-click a group: New Tab in Group, Save and Close Group, Move Group to Window" = "Clic droit sur un groupe : Nouvel onglet dans le groupe, Enregistrer et fermer, Déplacer dans une fenêtre";
 "Right-click a page and choose Inspect Element." = "Cliquez avec le bouton droit sur une page et choisissez Inspecter l'élément.";
 "Right-click a picked tab for everything you can do with them" = "Clic droit sur un onglet choisi pour tout ce que vous pouvez faire";
+"Right-click a pinned tab › Back to Pinned Address" = "Clic droit sur un onglet épinglé › Revenir à l'adresse épinglée";
+"Right-click a plugin to turn it off for one site" = "Clic droit sur un plugin pour le désactiver sur un seul site";
 "Run" = "Exécuter";
 "Run scripts on pages" = "Exécuter des scripts sur les pages";
 "Run tasks on a schedule" = "Exécuter des tâches planifiées";
@@ -821,7 +836,9 @@
 "Set up Tacet Shield" = "Configurer Tacet Shield";
 "Settings" = "Réglages";
 "Settings (⌘,)" = "Réglages (⌘,)";
+"Settings › AI › Ollama or LM Studio" = "Réglages › IA › Ollama ou LM Studio";
 "Settings › Extensions" = "Réglages › Extensions";
+"Settings › General › Move to another Mac" = "Réglages › Général › Passer à un autre Mac";
 "Settings › General › Tabs: when to group, and sites never to group" = "Réglages › Général › Onglets : quand grouper, et les sites à ne jamais grouper";
 "Settings › Passwords › Check…" = "Réglages › Mots de passe › Vérifier…";
 "Settings › Shield: AdGuard, Fanboy Annoyances and hidden trackers" = "Réglages › Shield : AdGuard, Fanboy Annoyances et traqueurs cachés";
@@ -936,6 +953,7 @@
 "Tabs and windows" = "Onglets et fenêtres";
 "Tabs from the same site gather into a group once there are 2, 3 or 5 of them, as you choose. Groups can be saved, closed and opened again later, whole." = "Les onglets du même site se regroupent dès qu’il y en a 2, 3 ou 5, comme vous voulez. Les groupes peuvent être enregistrés, fermés et rouverts plus tard, en entier.";
 "Tabs on top" = "Onglets en haut";
+"Tabs that behave" = "Des onglets bien élevés";
 "Tabs that show the same address as another tab" = "Onglets qui affichent la même adresse qu'un autre onglet";
 "Tabs that tidy themselves" = "Des onglets qui se rangent seuls";
 "Tabs wake up as you left them" = "Les onglets se réveillent comme vous les avez laissés";
@@ -1004,6 +1022,7 @@
 "The model declined to answer this request." = "Le modèle a refusé de répondre à cette demande.";
 "The new icon is an eclipse: a dark disc in front of the sun" = "La nouvelle icône est une éclipse : un disque sombre devant le soleil";
 "The plugin list couldn't be verified, so nothing was installed." = "La liste des plugins n'a pas pu être vérifiée, donc rien n'a été installé.";
+"The puzzle button lists your plugins and extensions. A click opens, runs, turns on or off, or explains each one, so there are no shortcuts to remember." = "Le bouton en forme de pièce de puzzle liste vos plugins et extensions. Un clic ouvre, exécute, active ou désactive, ou explique chacun : plus de raccourcis à retenir.";
 "The quiet browser for your Mac" = "Le navigateur discret pour votre Mac";
 "The selected text is sent with your next message" = "Le texte sélectionné est envoyé avec votre prochain message";
 "The server address isn't valid. Check it in Settings › AI." = "L'adresse du serveur n'est pas valide. Vérifiez-la dans Réglages › IA.";
@@ -1150,6 +1169,8 @@
 "Window style" = "Style de fenêtre";
 "Window with “%@” (%d tabs)" = "Fenêtre avec « %1$@ » (%2$d onglets)";
 "Window with “%@” (1 tab)" = "Fenêtre avec « %@ » (1 onglet)";
+"Window › Tacet Plugins (⇧⌘P), or the store button in the sidebar" = "Fenêtre › Tacet Plugins (⇧⌘P), ou le bouton de la boutique dans la barre latérale";
+"With profiles, Tacet asks who's browsing when it opens" = "Avec des profils, Tacet demande qui navigue à son ouverture";
 "Word Count" = "Nombre de mots";
 "Works on %@" = "Fonctionne sur %@";
 "Works on every site" = "Fonctionne sur tous les sites";
@@ -1204,6 +1225,8 @@
 "“%@” wants to:" = "« %@ » veut :";
 "“Compare the products in my tabs”" = "« Compare les produits de mes onglets »";
 "“Find that SwiftUI article I read yesterday”" = "« Retrouve l’article SwiftUI lu hier »";
+"“How do I open Tacet Plugins?”" = "« Comment ouvrir Tacet Plugins ? »";
+"“Remove the background of this picture”" = "« Retire l’arrière-plan de cette image »";
 "“Summarise this video”" = "« Résume cette vidéo »";
 "⇧⌘N opens a window that forgets everything when you close it." = "⇧⌘N ouvre une fenêtre qui oublie tout à sa fermeture.";
 "⋯ menu › Customize This Site…" = "Menu ⋯ › Personnaliser ce site…";

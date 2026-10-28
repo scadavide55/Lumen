@@ -36,6 +36,8 @@
 "A quiet, fast browser that blocks ads and trackers for you. Let's get it set up the way you like. It only takes a minute." = "Un browser silenzioso e veloce che blocca pubblicità e tracker per te. Configuriamolo come piace a te: ci vuole solo un minuto.";
 "A sleeping tab shows the page as you last saw it while it loads again, then puts you back where you had scrolled to. No white flash, no jump to the top." = "Una scheda in pausa mostra la pagina com'era l'ultima volta mentre si ricarica, poi ti riporta dove eri arrivato. Niente lampo bianco, niente salto in cima.";
 "A small round button appears at the bottom right when you've scrolled far down a page, and takes you back to the top." = "Quando hai scorso molto una pagina, in basso a destra compare un piccolo pulsante rotondo che ti riporta in cima.";
+"A smarter Tacet Assistant" = "Tacet Assistant più intelligente";
+"A store of small plugins made for Tacet and checked by us, that work on every Mac: YouTube without Shorts, Copy as Markdown, Smart Dark Mode, Focus Timer and many more. Each says who made it and whether it's verified." = "Uno store di piccoli plugin fatti per Tacet e controllati da noi, che funzionano su ogni Mac: YouTube senza Shorts, Copia come Markdown, Dark mode intelligente, Timer di concentrazione e molti altri. Ognuno dice chi l'ha fatto e se è verificato.";
 "A stronger Tacet Shield" = "Tacet Shield più forte";
 "AI" = "AI";
 "AMP to Original" = "Da AMP all’originale";
@@ -54,6 +56,7 @@
 "Add Site Style…" = "Aggiungi stile del sito…";
 "Add an API key to start" = "Aggiungi una chiave API per iniziare";
 "Add from a File or Folder…" = "Aggiungi da un file o una cartella…";
+"Add installs it; plugins update by themselves" = "Aggiungi lo installa; i plugin si aggiornano da soli";
 "Add items to the right-click menu" = "Aggiungere voci al menu del tasto destro";
 "Add plugins made for Tacet, or web extensions from your apps or files." = "Aggiungi plugin fatti per Tacet, o estensioni web dalle tue app o da file.";
 "Add the Safari extensions that come with your apps in one click, or Chrome, Firefox and other WebExtensions from a file. They never run in private windows." = "Aggiungi con un clic le estensioni Safari che arrivano con le tue app, o estensioni Chrome, Firefox e altre da un file. Non funzionano mai nelle finestre private.";
@@ -83,6 +86,7 @@
 "Always show website titles in tabs" = "Mostra sempre i titoli dei siti nelle schede";
 "Amazon Without Sponsored" = "Amazon senza sponsorizzati";
 "An AI assistant in a panel beside the page, for questions about what you're reading." = "Un assistente AI in un pannello accanto alla pagina, per le domande su quello che stai leggendo.";
+"And more" = "E altro ancora";
 "Animate gradient backgrounds" = "Anima gli sfondi sfumati";
 "Answers come from your AI provider and can be wrong." = "Le risposte arrivano dal tuo fornitore di AI e possono essere sbagliate.";
 "Any server that speaks the OpenAI Chat Completions API, such as Ollama or LM Studio." = "Qualsiasi server compatibile con l'API Chat Completions di OpenAI, come Ollama o LM Studio.";
@@ -260,6 +264,7 @@
 "Customize a Site…" = "Personalizza un sito…";
 "Customized sites" = "Siti personalizzati";
 "Cutout" = "Cutout";
+"Cutout: remove backgrounds" = "Cutout: togli gli sfondi";
 "Dark" = "Scuro";
 "Dark Appearance" = "Aspetto scuro";
 "Data" = "Dati";
@@ -302,6 +307,7 @@
 "Enable JavaScript" = "Abilita JavaScript";
 "Enable Web Inspector" = "Abilita Web Inspector";
 "Engine" = "Motore";
+"Every extension in one place" = "Tutte le estensioni in un posto";
 "Every shortcut in one place" = "Tutte le scorciatoie in un posto";
 "Every window comes back when Tacet opens, closed windows stay closed, and links from other apps open as tabs instead of empty windows." = "Tutte le finestre tornano quando apri Tacet, quelle chiuse restano chiuse, e i link da altre app si aprono come schede invece che in finestre vuote.";
 "Everything has a shortcut. You'll find them all in the menus too." = "Tutto ha una scorciatoia. Le trovi anche nei menu.";
@@ -441,6 +447,7 @@
 "Installed" = "Installate";
 "Installing… Tacet will restart." = "Installazione… Tacet si riavvierà.";
 "It doesn't ask for any permissions." = "Non chiede alcun permesso.";
+"It knows everything about Tacet, from where a setting is to every shortcut, and it uses your plugins when you ask. Ollama and LM Studio now run it on your Mac with no key." = "Sa tutto di Tacet, da dove si trova un'impostazione a ogni scorciatoia, e usa i tuoi plugin quando glielo chiedi. Ollama e LM Studio ora lo fanno girare sul tuo Mac senza chiave.";
 "It reads your other tabs, finds pages in your history and bookmarks, summarises YouTube videos from their transcript, takes screenshots, and groups tabs by topic." = "Legge le altre schede, trova pagine nella cronologia e nei segnalibri, riassume i video YouTube dalla trascrizione, fa screenshot e raggruppa le schede per argomento.";
 "It will be able to:" = "Potrà:";
 "It works in Tacet, but Tacet's developer hasn't checked what it does. Add it only if you trust who made it." = "Funziona in Tacet, ma lo sviluppatore di Tacet non ha controllato cosa fa. Aggiungilo solo se ti fidi di chi l’ha fatto.";
@@ -517,6 +524,7 @@
 "Move to Trash" = "Sposta nel Cestino";
 "Move to Window" = "Sposta in finestra";
 "Move to another Mac" = "Passa a un altro Mac";
+"Move your settings and plugins to another Mac in one file. Windows snap to the screen's edges, full screen has no empty gap, and the password check is always in Settings." = "Porta impostazioni e plugin su un altro Mac con un solo file. Le finestre si agganciano ai bordi dello schermo, lo schermo intero non ha più spazi vuoti, e il controllo delle password è sempre nelle Impostazioni.";
 "Mute Tab" = "Silenzia scheda";
 "Mute or Unmute Tab" = "Attiva o disattiva audio della scheda";
 "Mute tab" = "Silenzia scheda";
@@ -638,6 +646,7 @@
 "Opens Reddit in its classic layout at old.reddit.com: lighter, faster and with more posts on screen. Galleries, chat and settings still open in the new design." = "Apre Reddit nel suo aspetto classico su old.reddit.com: più leggero, più veloce e con più post sullo schermo. Gallerie, chat e impostazioni si aprono ancora nel nuovo design.";
 "Optional" = "Facoltativo";
 "Optional. Tacet never sees your password: you type it on Google's own page." = "Facoltativo. Tacet non vede mai la tua password: la scrivi direttamente sulla pagina di Google.";
+"Or right-click a picture › Remove Background with Cutout" = "Oppure clic destro su un'immagine › Rimuovi lo sfondo con Cutout";
 "Orange" = "Arancione";
 "Organize tabs" = "Organizza schede";
 "Other Sites in New Tabs" = "Altri siti in nuove schede";
@@ -663,10 +672,12 @@
 "Picture in Picture" = "Picture in Picture";
 "Pin Tab" = "Fissa scheda";
 "Pin Tabs" = "Fissa schede";
+"Pin one to the toolbar with its pin" = "Fissane uno nella barra con la sua puntina";
 "Pin or Unpin Tab" = "Fissa o sblocca scheda";
 "Pin to Toolbar" = "Fissa nella barra";
 "Pink" = "Rosa";
 "Pinned tabs" = "Schede fissate";
+"Pinned tabs keep their site, as in Arc: links to other sites open in a new tab. ⇧⌘T brings back every tab you closed together, and a middle-click closes a tab." = "Le schede fissate restano sul loro sito, come in Arc: i link ad altri siti si aprono in una nuova scheda. ⇧⌘T riporta tutte le schede chiuse insieme, e un clic con la rotella chiude una scheda.";
 "Pinned tabs open links to other sites in new tabs" = "Le schede fissate aprono i link ad altri siti in nuove schede";
 "Pinned tabs sit at the top as icons and are always one click away." = "Le schede fissate stanno in alto come icone, sempre a un clic di distanza.";
 "Plain" = "Semplice";
@@ -732,6 +743,7 @@
 "Remove Tracking from Links" = "Rimuovi il tracciamento dai link";
 "Remove from Favorites" = "Rimuovi dai preferiti";
 "Remove from Group" = "Rimuovi dal gruppo";
+"Remove the background of any picture, on this Mac, with no upload. Its AI engines download once when you add it, then it works offline." = "Togli lo sfondo da qualsiasi immagine, su questo Mac, senza caricare niente online. I suoi motori di AI si scaricano una volta quando lo aggiungi, poi funziona offline.";
 "Remove the background of any picture, on this Mac: rest the pointer on a picture and click ✂ Cutout (or press ⌥⇧X), or open Cutout and drop your own photos. Four AI engines, transparent PNG at full resolution, nothing uploaded. The engines are downloaded once when you add it (413 MB), then it works offline." = "Rimuovi lo sfondo da qualsiasi immagine, su questo Mac: tieni il puntatore su un'immagine e fai clic su ✂ Cutout (o premi ⌥⇧X), oppure apri Cutout e trascina le tue foto. Quattro motori di AI, PNG trasparente alla risoluzione originale, niente caricato online. I motori si scaricano una volta quando lo aggiungi (413 MB), poi funziona offline.";
 "Remove tracking from links" = "Rimuovi il tracciamento dai link";
 "Remove tracking parameters from links" = "Rimuovi i parametri di tracciamento dai link";
@@ -748,6 +760,7 @@
 "Reset" = "Ripristina";
 "Reset Site" = "Ripristina sito";
 "Reset zoom" = "Ripristina zoom";
+"Rest the pointer on a picture and click ✂ Cutout, or press ⌥⇧X" = "Tieni il puntatore su un'immagine e fai clic su ✂ Cutout, o premi ⌥⇧X";
 "Rest the pointer on a tab to see the page, its site and how much memory it uses. Tabs that are sleeping say so, and use none." = "Tieni il puntatore su una scheda per vedere la pagina, il sito e quanta memoria usa. Le schede in pausa lo dicono, e non ne usano.";
 "Restart Now" = "Riavvia ora";
 "Restart Tacet to use the new language." = "Riavvia Tacet per usare la nuova lingua.";
@@ -757,6 +770,8 @@
 "Right-click a group: New Tab in Group, Save and Close Group, Move Group to Window" = "Tasto destro su un gruppo: Nuova scheda nel gruppo, Salva e chiudi gruppo, Sposta gruppo in finestra";
 "Right-click a page and choose Inspect Element." = "Fai clic destro su una pagina e scegli Ispeziona elemento.";
 "Right-click a picked tab for everything you can do with them" = "Tasto destro su una scheda selezionata per tutto quello che puoi fare";
+"Right-click a pinned tab › Back to Pinned Address" = "Clic destro su una scheda fissata › Torna all'indirizzo fissato";
+"Right-click a plugin to turn it off for one site" = "Clic destro su un plugin per disattivarlo su un solo sito";
 "Run" = "Esegui";
 "Run scripts on pages" = "Eseguire script nelle pagine";
 "Run tasks on a schedule" = "Eseguire attività programmate";
@@ -821,7 +836,9 @@
 "Set up Tacet Shield" = "Configura Tacet Shield";
 "Settings" = "Impostazioni";
 "Settings (⌘,)" = "Impostazioni (⌘,)";
+"Settings › AI › Ollama or LM Studio" = "Impostazioni › AI › Ollama o LM Studio";
 "Settings › Extensions" = "Impostazioni › Estensioni";
+"Settings › General › Move to another Mac" = "Impostazioni › Generali › Passa a un altro Mac";
 "Settings › General › Tabs: when to group, and sites never to group" = "Impostazioni › Generali › Schede: quando raggruppare e quali siti mai";
 "Settings › Passwords › Check…" = "Impostazioni › Password › Controlla…";
 "Settings › Shield: AdGuard, Fanboy Annoyances and hidden trackers" = "Impostazioni › Shield: AdGuard, Fanboy Annoyances e tracker nascosti";
@@ -936,6 +953,7 @@
 "Tabs and windows" = "Schede e finestre";
 "Tabs from the same site gather into a group once there are 2, 3 or 5 of them, as you choose. Groups can be saved, closed and opened again later, whole." = "Le schede dello stesso sito si raccolgono in un gruppo quando sono 2, 3 o 5, come preferisci. I gruppi si possono salvare, chiudere e riaprire più tardi, interi.";
 "Tabs on top" = "Schede in alto";
+"Tabs that behave" = "Schede che si comportano bene";
 "Tabs that show the same address as another tab" = "Schede con lo stesso indirizzo di un'altra scheda";
 "Tabs that tidy themselves" = "Schede che si mettono in ordine";
 "Tabs wake up as you left them" = "Le schede si risvegliano come le avevi lasciate";
@@ -1004,6 +1022,7 @@
 "The model declined to answer this request." = "Il modello ha rifiutato di rispondere a questa richiesta.";
 "The new icon is an eclipse: a dark disc in front of the sun" = "La nuova icona è un'eclissi: un disco scuro davanti al sole";
 "The plugin list couldn't be verified, so nothing was installed." = "Non è stato possibile verificare l'elenco dei plugin, quindi non è stato installato niente.";
+"The puzzle button lists your plugins and extensions. A click opens, runs, turns on or off, or explains each one, so there are no shortcuts to remember." = "Il pulsante col pezzo di puzzle elenca plugin ed estensioni. Un clic apre, esegue, attiva o disattiva, o spiega ognuno, così non devi ricordare scorciatoie.";
 "The quiet browser for your Mac" = "Il browser silenzioso per il tuo Mac";
 "The selected text is sent with your next message" = "Il testo selezionato viene inviato con il prossimo messaggio";
 "The server address isn't valid. Check it in Settings › AI." = "L'indirizzo del server non è valido. Controllalo in Impostazioni › AI.";
@@ -1150,6 +1169,8 @@
 "Window style" = "Stile della finestra";
 "Window with “%@” (%d tabs)" = "Finestra con “%1$@” (%2$d schede)";
 "Window with “%@” (1 tab)" = "Finestra con “%@” (1 scheda)";
+"Window › Tacet Plugins (⇧⌘P), or the store button in the sidebar" = "Finestra › Tacet Plugins (⇧⌘P), o il pulsante dello store nella barra laterale";
+"With profiles, Tacet asks who's browsing when it opens" = "Con i profili, Tacet chiede chi sta navigando quando si apre";
 "Word Count" = "Conta parole";
 "Works on %@" = "Funziona su %@";
 "Works on every site" = "Funziona su tutti i siti";
@@ -1204,6 +1225,8 @@
 "“%@” wants to:" = "“%@” vuole:";
 "“Compare the products in my tabs”" = "“Confronta i prodotti nelle mie schede”";
 "“Find that SwiftUI article I read yesterday”" = "“Trova l’articolo su SwiftUI che ho letto ieri”";
+"“How do I open Tacet Plugins?”" = "“Come apro Tacet Plugins?”";
+"“Remove the background of this picture”" = "“Togli lo sfondo a questa immagine”";
 "“Summarise this video”" = "“Riassumi questo video”";
 "⇧⌘N opens a window that forgets everything when you close it." = "⇧⌘N apre una finestra che dimentica tutto quando la chiudi.";
 "⋯ menu › Customize This Site…" = "Menu ⋯ › Personalizza questo sito…";
