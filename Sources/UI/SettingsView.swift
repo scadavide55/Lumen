@@ -479,19 +479,21 @@ struct SearchPane: View {
             }
             Section {
                 ForEach(s.shortcuts) { sc in
-                    HStack {
-                        Text(sc.keyword).font(.system(.body, design: .monospaced)).frame(width: 60, alignment: .leading)
-                        Text(sc.name)
-                        Spacer()
-                        Text(sc.template).font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle).frame(maxWidth: 220)
+                    HStack(spacing: 10) {
+                        Text(sc.keyword).font(.system(.body, design: .monospaced)).lineLimit(1).frame(width: 70, alignment: .leading)
+                        Text(sc.name).lineLimit(1).frame(width: 110, alignment: .leading)
+                        Text(sc.template).font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         Button { s.shortcuts.removeAll { $0.id == sc.id } } label: { Image(systemName: "minus.circle.fill") }
                             .buttonStyle(.plain).foregroundStyle(.secondary)
                     }
                 }
-                HStack {
-                    TextField("Keyword", text: $keyword).frame(width: 80)
-                    TextField("Name", text: $name).frame(width: 110)
-                    TextField("URL with %s", text: $template)
+                // The same columns as the rows above. In a grouped form a field's title becomes a label beside it,
+                // so the hints go inside the fields as prompts instead.
+                HStack(spacing: 10) {
+                    TextField("Keyword", text: $keyword, prompt: Text("Keyword")).labelsHidden().frame(width: 70)
+                    TextField("Name", text: $name, prompt: Text("Name")).labelsHidden().frame(width: 110)
+                    TextField("URL with %s", text: $template, prompt: Text("URL with %s")).labelsHidden()
                     Button("Add") {
                         s.shortcuts.append(SearchShortcut(keyword: keyword.trimmingCharacters(in: .whitespaces),
                                                           name: name.isEmpty ? keyword : name, template: template))
