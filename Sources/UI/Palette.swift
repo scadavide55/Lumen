@@ -410,6 +410,12 @@ struct CommandPalette: View {
             ], at: 1)
         }
         list += groupCommands
+        // Apps from Tacet Plugins, such as Cutout.
+        for item in PluginStore.shared.installed.values where item.enabled {
+            if let start = item.plugin.startURL {
+                list.append(command(String(format: L("Open %@"), L(item.plugin.name)), item.plugin.icon ?? "puzzlepiece.extension", L("Tacet Plugins")) { b.newTab(url: start) })
+            }
+        }
         return list
     }
 

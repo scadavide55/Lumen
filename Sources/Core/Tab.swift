@@ -130,6 +130,8 @@ final class Tab: NSObject, Identifiable {
         c.mediaTypesRequiringUserActionForPlayback = Settings.shared.blockAutoplay ? .audio : []
         c.defaultWebpagePreferences.allowsContentJavaScript = Settings.shared.javaScript
         Scripts.install(on: c.userContentController)
+        // Apps that come with Tacet Plugins (Cutout, say) run from this Mac at tacet-plugin://.
+        c.setURLSchemeHandler(PluginAppScheme.shared, forURLScheme: PluginAppScheme.scheme)
         // Extensions run in normal windows and profiles, never in private windows.
         if #available(macOS 15.4, *), store.isPersistent {
             c.webExtensionController = Extensions.shared.controller
@@ -703,7 +705,7 @@ extension Tab: WKNavigationDelegate {
             return
         }
         // Extension pages (settings, popups opened in a tab) use their own scheme.
-        if !["http", "https", "file", "about", "data", "blob", "javascript", "webkit-extension"].contains(scheme) {
+        if !["http", "https", "file", "about", "data", "blob", "javascript", "webkit-extension", PluginAppScheme.scheme].contains(scheme) {
             decisionHandler(.cancel, preferences)
             if action.navigationType == .linkActivated || action.targetFrame?.isMainFrame == true { openExternal(url) }
             return

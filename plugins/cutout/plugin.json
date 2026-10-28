@@ -1,0 +1,68 @@
+{
+  "id": "cutout",
+  "name": "Cutout",
+  "author": "Cutout",
+  "developer": "scadavide55",
+  "website": "https://scadavide55.github.io/cutout",
+  "description": "Remove the background of any picture, on this Mac: rest the pointer on a picture and click ✂ Cutout (or press ⌥⇧X), or open Cutout and drop your own photos. Four AI engines, transparent PNG at full resolution, nothing uploaded. The engines are downloaded once when you add it (413 MB), then it works offline.",
+  "version": "1.0",
+  "icon": "scissors",
+  "sites": [
+    "*"
+  ],
+  "js": "main.js",
+  "runAt": "end",
+  "world": "isolated",
+  "handoff": "tacet-plugin://cutout/index.html",
+  "app": {
+    "start": "index.html",
+    "files": [
+      "index.html",
+      "THIRD_PARTY.md"
+    ],
+    "assets": [
+      {
+        "path": "models/modnet-quantized.onnx",
+        "url": "https://huggingface.co/Xenova/modnet/resolve/main/onnx/model_quantized.onnx",
+        "sha256": "92e49898c3e05a6d7a944fc67a8cb87c4aad754ffb6ebd949528c7d1105fee3a",
+        "size": 6632188
+      },
+      {
+        "path": "models/modnet.onnx",
+        "url": "https://huggingface.co/Xenova/modnet/resolve/main/onnx/model.onnx",
+        "sha256": "07c308cf0fc7e6e8b2065a12ed7fc07e1de8febb7dc7839d7b7f15dd66584df9",
+        "size": 25888640
+      },
+      {
+        "path": "models/ben2-int8-v3.onnx",
+        "url": "https://huggingface.co/Davide531/ben2-int8/resolve/main/ben2-int8-v3.onnx",
+        "sha256": "d77893a384369d60b9a43a09a4900e25d78ea79e344438479d64b28d34beaf3e",
+        "size": 130416302
+      },
+      {
+        "path": "models/BEN2_Base.onnx",
+        "url": "https://huggingface.co/PramaLLC/BEN2/resolve/main/BEN2_Base.onnx",
+        "sha256": "22cea62108ff53b7ccc20f7a008bf30494228d84b1687f29ecbe76936a998101",
+        "size": 222932053
+      },
+      {
+        "path": "ort/ort.webgpu.min.js",
+        "url": "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.24.3/dist/ort.webgpu.min.js",
+        "sha256": "ed951b6ed6fb2d6e5c13d57fe906d98590c220ba6d127bc0ea2c1ac2ff0d43d8",
+        "size": 67168
+      },
+      {
+        "path": "ort/ort-wasm-simd-threaded.asyncify.mjs",
+        "url": "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.24.3/dist/ort-wasm-simd-threaded.asyncify.mjs",
+        "sha256": "dee69056fbfedf946ba0d9026e191c1361c5455895355e03f4346bf9308e58eb",
+        "size": 48533
+      },
+      {
+        "path": "ort/ort-wasm-simd-threaded.asyncify.wasm",
+        "url": "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.24.3/dist/ort-wasm-simd-threaded.asyncify.wasm",
+        "sha256": "f33595b9f7ea51aa6f646dd5a2bde6fbb1c7bcde0b9d2b5f240011a09c1830d0",
+        "size": 27190919
+      }
+    ]
+  }
+}

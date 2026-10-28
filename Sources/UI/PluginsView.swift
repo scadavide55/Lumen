@@ -74,6 +74,13 @@ struct PluginsView: View {
         .padding(20)
     }
 
+    /// Opens a plugin's app in a new tab of the front window.
+    static func open(_ url: URL) {
+        guard let b = WindowRegistry.shared.lastFocused.flatMap({ $0.isPrivate ? nil : $0 }) ?? WindowRegistry.shared.browsers.first else { return }
+        b.newTab(url: url)
+        b.window?.makeKeyAndOrderFront(nil)
+    }
+
     /// An extension from another browser's store was downloaded: show what it can do before adding it.
     private func prepareExtension() {
         guard let (plugin, folder) = store.pendingExtension, #available(macOS 15.4, *) else { return }
@@ -116,6 +123,17 @@ struct PluginCard: View {
                     Text(L(plugin.name)).font(.system(size: 14, weight: .semibold)).lineLimit(1)
                     Text(plugin.byLine).font(.caption).foregroundStyle(.secondary).lineLimit(1)
                     VerifiedBadge(verified: plugin.isVerified)
+                    if plugin.developer != nil || plugin.website != nil {
+                        HStack(spacing: 6) {
+                            if let dev = plugin.developer {
+                                Text(String(format: L("Developer: %@"), dev)).font(.caption).foregroundStyle(.secondary)
+                            }
+                            if let site = plugin.website, let url = URL(string: site) {
+                                Link(site.replacingOccurrences(of: "https://", with: ""), destination: url).font(.caption)
+                            }
+                        }
+                        .lineLimit(1)
+                    }
                 }
                 Spacer(minLength: 0)
             }
@@ -128,14 +146,28 @@ struct PluginCard: View {
                 }
                 Spacer()
                 if store.working.contains(plugin.id) {
-                    ProgressView().controlSize(.small)
+                    if let p = store.progress[plugin.id], let size = plugin.app?.downloadSize {
+                        Text(String(format: L("Downloading %@ of %@"),
+                                    ByteCountFormatter.string(fromByteCount: Int64(Double(size) * p), countStyle: .file),
+                                    ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)))
+                            .font(.caption).foregroundStyle(.secondary).monospacedDigit()
+                        ProgressView(value: p).frame(width: 90)
+                    } else {
+                        ProgressView().controlSize(.small)
+                    }
                 } else if let installed, !plugin.isExtension {
+                    if let start = plugin.startURL, installed.enabled {
+                        Button("Open") { PluginsView.open(start) }.controlSize(.small)
+                    }
                     Toggle("On", isOn: Binding(get: { installed.enabled }, set: { store.setEnabled(plugin.id, $0) }))
                         .toggleStyle(.switch).controlSize(.small).labelsHidden()
                     Button("Remove") { store.remove(plugin.id) }.controlSize(.small)
                 } else if extensionAdded {
                     Label("Added", systemImage: "checkmark").font(.callout).foregroundStyle(.secondary)
                 } else {
+                    if let size = plugin.app?.downloadSize {
+                        Text(ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)).font(.caption).foregroundStyle(.secondary)
+                    }
                     Button(plugin.isExtension ? LocalizedStringKey("Add…") : "Add") { add() }
                         .buttonStyle(.borderedProminent).controlSize(.small)
                         .disabled(plugin.isExtension && !Extensions.isSupported)

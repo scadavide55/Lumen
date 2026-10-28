@@ -1,0 +1,1792 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cutout — remove image backgrounds, free and private</title>
+<meta name="description" content="Remove image backgrounds in your browser. No account, no upload, no cost.">
+<meta name="theme-color" content="#0d0e14">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Cutout">
+<meta property="og:title" content="Cutout — remove image backgrounds, free and private">
+<meta property="og:description" content="Remove image backgrounds in your browser. No account, no upload, no watermark. The AI runs on your own device.">
+<meta property="og:url" content="https://scadavide55.github.io/cutout/">
+<meta property="og:image" content="https://scadavide55.github.io/cutout/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Cutout — remove image backgrounds, free and private">
+<meta name="twitter:description" content="No account, no upload, no watermark. The AI runs on your own device.">
+<meta name="twitter:image" content="https://scadavide55.github.io/cutout/og.png">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect x='3' y='3' width='12' height='12' rx='3.5' fill='%239a87ff'/><rect x='9' y='9' width='12' height='12' rx='3.5' fill='none' stroke='%239a87ff' stroke-width='1.8'/></svg>">
+<style>
+  /* System fonts, inline icons, no filters or decorative animation. */
+  :root{
+    color-scheme:dark light;
+    --bg:#0d0e14; --panel:#151722; --panel-2:#1b1e2c; --panel-3:#262b3f;
+    --line:#2a2f45; --line-2:#474f70; --text:#eef0f9; --dim:#b0b6cd; --dim-2:#8f96b2;
+    --accent:#9a87ff; --accent-hi:#b0a1ff; --accent-ink:#0f0a2b;
+    --good:#7ee3c4; --warn:#f2c97d; --bad:#ff9fae; --r:20px;
+    --brand:#b3a5ff; --brand-2:#ff9ec7;
+    --chk-a:#252a3c; --chk-b:#1e2232; --swchk-a:#69708f; --swchk-b:#434a66;
+    --sel-bg:#211f3d; --over-bg:#1d1b38;
+    --done-bg:#12302b; --done-line:#2a6556; --warn-bg:#30281a; --warn-line:#675331;
+    --danger-bg:#35202a; --danger-line:#6a3b4b; --scrim:rgba(6,6,14,.74);
+    --shadow:0 20px 70px rgba(0,0,0,.35); --glow:rgba(154,135,255,.16);
+  }
+  @media(prefers-color-scheme:light){
+    :root{
+      --bg:#f6f5fc; --panel:#fff; --panel-2:#f2f0fb; --panel-3:#e6e2f6;
+      --line:#e0dcf0; --line-2:#b4aed3; --text:#1c1936; --dim:#525071; --dim-2:#645f86;
+      --accent:#6a4df0; --accent-hi:#5a3cdc; --accent-ink:#ffffff;
+      --good:#0b7a63; --warn:#7d5314; --bad:#b0304a;
+      --brand:#5b3fe0; --brand-2:#d6336c;
+      --chk-a:#e6e3f4; --chk-b:#f4f2fb; --swchk-a:#cbc7e2; --swchk-b:#f4f2fb;
+      --sel-bg:#efebff; --over-bg:#ece7ff;
+      --done-bg:#e3f6f0; --done-line:#aedccd; --warn-bg:#fbf3e3; --warn-line:#e6cf9c;
+      --danger-bg:#fff0f3; --danger-line:#f0c4cd; --scrim:rgba(20,16,50,.5);
+      --shadow:0 20px 70px rgba(60,40,140,.14); --glow:rgba(106,77,240,.12);
+    }
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  [hidden]{display:none!important}
+  html{scroll-behavior:smooth}
+  body{min-height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--text);
+    font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  a{color:inherit;text-underline-offset:3px}
+  svg{display:block;width:100%;height:100%}
+  button,input{font:inherit}
+  :focus-visible{outline:2px solid var(--good);outline-offset:4px}
+  .spacer{flex:1}
+  header{width:100%;max-width:1180px;margin:auto;display:flex;align-items:center;gap:28px;padding:26px 36px}
+  .brand{display:flex;align-items:center;gap:11px;text-decoration:none}
+  .mark{width:34px;height:34px;flex:none;color:var(--good)}
+  .brand b{font-size:23px;font-weight:730;letter-spacing:-1px}
+  .brand .version{font-size:10px;font-weight:640;letter-spacing:.09em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent);border-radius:6px;padding:2px 6px;margin-left:-2px;translate:0 -7px}
+  .header-link{font-size:13px;color:var(--dim);text-decoration:none}
+  .header-link:hover{color:var(--text)}
+  .chip{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;font-size:12px;color:var(--dim)}
+  .dot,.device-status .d{width:6px;height:6px;border-radius:50%;background:var(--dim-2);flex:none}
+  .dot,.device-status .d.good{background:var(--good)} .device-status .d.warn{background:var(--warn)}
+  main{flex:1;width:100%;max-width:1180px;margin:0 auto;padding:42px 36px 64px}
+  .hero{max-width:800px;margin:0 auto 35px;text-align:center}
+  .eyebrow{font-size:11px;font-weight:650;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:16px}
+  .hero h1{font-size:clamp(38px,5.6vw,68px);line-height:1.05;letter-spacing:-.055em;font-weight:740}
+  .hero h1 span{color:var(--good)}
+  .hero p{max-width:490px;margin:19px auto 0;font-size:16px;color:var(--dim);line-height:1.7}
+  .studio{max-width:820px;margin:auto;border:1px solid var(--line);border-radius:26px;background:var(--panel);padding:10px}
+  #drop{position:relative;border:1px dashed var(--line-2);border-radius:18px;background:var(--panel-2);
+    padding:35px 20px 28px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s}
+  #drop:hover,#drop.over{border-color:var(--good);background:var(--over-bg)}
+  .dz-art{width:106px;height:71px;margin:0 auto 22px;position:relative}
+  .art-photo{position:absolute;left:3px;top:3px;width:58px;height:63px;border:1px solid var(--line-2);border-radius:11px;
+    background:var(--panel);transform:rotate(-10deg);padding:14px;color:var(--dim-2)}
+  .art-cutout{position:absolute;right:2px;top:0;width:62px;height:68px;border:1px solid var(--line-2);border-radius:11px;
+    background:repeating-conic-gradient(var(--chk-a) 0% 25%,var(--chk-b) 0% 50%) 0 0/12px 12px;
+    transform:rotate(8deg);padding:12px;color:var(--good)}
+  #drop .dz-title{font-size:19px;font-weight:650;letter-spacing:-.03em;margin-bottom:5px}
+  #drop .dz-sub{font-size:13px;color:var(--dim)}
+  .choose{display:inline-flex;align-items:center;justify-content:center;gap:10px;margin:20px 0 13px;padding:12px 24px;
+    min-height:46px;border-radius:10px;background:var(--accent);color:var(--accent-ink);font-weight:650;font-size:14px}
+  .choose svg{width:17px;height:17px}
+  #drop kbd{border:1px solid var(--line-2);border-radius:4px;padding:1px 5px;font:11px inherit}
+  #drop .dz-note{font-size:11px;color:var(--dim-2);margin-top:19px}
+  #drop input{display:none}
+  .studio-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 13px 3px;font-size:11px;color:var(--dim)}
+  .studio-foot>span{display:inline-flex;align-items:center;gap:7px}
+  .studio-foot svg{width:14px;height:14px}
+  .device-status{display:flex;justify-content:center;gap:6px;align-items:center;font-size:11px;color:var(--dim-2);margin-top:16px}
+  #capHint{max-width:680px;text-align:center;margin:7px auto 0;font-size:11px;color:var(--dim)}
+  .how{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;max-width:820px;margin:42px auto 0}
+  .how article{position:relative;padding-left:32px}
+  .how .step-no{position:absolute;top:0;left:0;font:11px/25px ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--dim-2)}
+  .how h2{font-size:13px;font-weight:650;letter-spacing:-.01em}
+  .how p{font-size:12px;color:var(--dim);margin-top:4px}
+  .workspace{margin-top:40px}
+  .workspace-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  .workspace-head h2{font-size:21px;letter-spacing:-.04em;font-weight:650}
+  .workspace-head p{font-size:12px;color:var(--dim);margin-top:3px}
+  body.has-images .hero{margin:0 auto 24px}
+  body.has-images .hero .eyebrow,body.has-images .hero p,body.has-images .how{display:none}
+  body.has-images .hero h1{font-size:32px}
+  body.has-images #drop{padding:17px 20px}
+  body.has-images .dz-art,body.has-images .dz-note,body.has-images .dz-title{display:none}
+  body.has-images .choose{margin:0 0 8px;padding:9px 20px;min-height:40px}
+  .alert{display:flex;align-items:center;gap:11px;font-size:13px;background:var(--danger-bg);border:1px solid var(--danger-line);
+    color:var(--bad);border-radius:12px;padding:13px 16px;margin-bottom:22px}
+  .alert.warn{background:var(--warn-bg);border-color:var(--warn-line);color:var(--warn)}
+  .alert .ai{font-weight:750;font-size:16px;flex:none}
+  .alert .btn{background:transparent;color:inherit;border-color:currentColor;font-size:12px;padding:7px 10px}
+  #queue{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr));align-items:start}
+  #queue.single{max-width:700px;margin:auto}
+  #queue.single .stage{aspect-ratio:16/10}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;min-width:0}
+  .stage{position:relative;aspect-ratio:4/3;overflow:hidden;display:flex;align-items:center;justify-content:center;
+    background:repeating-conic-gradient(var(--chk-a) 0% 25%,var(--chk-b) 0% 50%) 0 0/20px 20px}
+  .stage img{position:absolute;inset:0;margin:auto;width:100%;height:100%;object-fit:contain}
+  .stage .orig{opacity:1}
+  .stage.ready .orig{opacity:0}
+  .stage.compare .orig{opacity:1;z-index:2}
+  .stage .placeholder{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:11px;
+    padding:24px;text-align:center;background:var(--scrim);color:#f4f3ff;font-size:13px}
+  .stage .spinner{width:23px;height:23px;border:2px solid #5d5a80;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .stage-tools{position:absolute;top:12px;right:12px;display:flex;gap:6px;z-index:3}
+  .card-body{padding:19px;display:flex;flex-direction:column;gap:12px;flex:1}
+  .card-head{display:flex;align-items:center;gap:10px}
+  .name{font-size:14px;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pill{font-size:10px;font-weight:650;padding:4px 8px;border-radius:6px;background:var(--panel-3);color:var(--dim);flex:none}
+  .pill.fast{background:var(--done-bg);color:var(--good)}
+  .pill.pro{background:var(--sel-bg);color:var(--good)}
+  .meta{font-size:11px;color:var(--dim-2);display:flex;gap:13px;flex-wrap:wrap;overflow-wrap:anywhere}
+  .meta .err{color:var(--bad)}
+  .progress{height:3px;background:var(--panel-3);border-radius:2px;overflow:hidden}
+  .progress i{display:block;height:100%;width:0;background:var(--good);transition:width .2s}
+  .progress.hide{display:none}
+  .row-label{font-size:11px;color:var(--dim);width:100%;margin-bottom:3px}
+  .bgs{display:flex;gap:9px;flex-wrap:wrap;align-items:center;border-top:1px solid var(--line);padding-top:12px}
+  .sw{width:29px;height:29px;border-radius:50%;border:1px solid var(--line-2);cursor:pointer;position:relative;padding:0;flex:none;background:var(--panel-2)}
+  .sw.sel{box-shadow:0 0 0 2px var(--panel),0 0 0 3.5px var(--good)}
+  .sw.t{background:repeating-conic-gradient(var(--swchk-a) 0% 25%,var(--swchk-b) 0% 50%) 0 0/10px 10px}
+  .sw[data-c="custom"]{overflow:hidden}
+  .sw[data-c="custom"] input{position:absolute;inset:0;width:100%;height:100%;border:0;padding:0;cursor:pointer;opacity:0}
+  .sw.img{display:grid;place-items:center;overflow:hidden;background-size:cover;background-position:center;color:var(--dim)}
+  .sw.img svg{width:14px;height:14px}
+  .acts{display:flex;gap:7px;margin-top:auto;padding-top:5px}
+  button.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:12px;font-weight:600;white-space:nowrap;
+    color:var(--text);background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:10px 13px;min-height:40px;cursor:pointer;
+    transition:background .15s,border-color .15s}
+  button.btn svg{width:15px;height:15px;flex:none}
+  button.btn:hover:not(:disabled){background:var(--panel-3);border-color:var(--line-2)}
+  button.btn:disabled{opacity:.45;cursor:default}
+  button.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  button.btn.pri:hover:not(:disabled){background:var(--accent-hi);border-color:var(--accent-hi)}
+  button.btn.done{background:var(--done-bg);border-color:var(--done-line);color:var(--good)}
+  button.btn.wide{flex:1;min-width:0}
+  button.btn.ghost{background:transparent}
+  button.mini{width:38px;height:38px;border-radius:10px;cursor:pointer;background:var(--panel);border:1px solid var(--line-2);
+    color:var(--text);display:grid;place-items:center}
+  button.mini svg{width:18px;height:18px}
+  button.mini:hover{background:var(--panel-3)}
+  button.mini.on{background:var(--accent);color:var(--accent-ink)}
+  #batch{display:flex;align-items:center;gap:9px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:13px;
+    padding:12px 15px;position:sticky;bottom:12px;z-index:5;margin-top:22px;box-shadow:0 4px 18px rgba(0,0,0,.1)}
+  #batch .txt{font-size:12px;color:var(--dim);display:flex;align-items:center;gap:8px}
+  #batch .txt b{color:var(--text)}
+  #overlay{position:fixed;inset:0;background:var(--scrim);display:none;align-items:center;justify-content:center;padding:20px;z-index:60}
+  #overlay.on{display:flex}
+  body.modal-open{overflow:hidden}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:24px;max-width:550px;width:100%;padding:30px;
+    box-shadow:var(--shadow);max-height:calc(100dvh - 40px);overflow:auto}
+  .modal .eyebrow{margin-bottom:9px}
+  .modal h2{font-size:27px;font-weight:680;letter-spacing:-.04em;line-height:1.2;margin-bottom:10px}
+  .modal .lead{font-size:13px;color:var(--dim);margin-bottom:23px}
+  .opts{display:flex;flex-direction:column;gap:10px}
+  .opt{display:flex;gap:13px;align-items:flex-start;text-align:left;width:100%;background:var(--panel-2);border:1px solid var(--line);
+    border-radius:14px;padding:17px;cursor:pointer;font:inherit;color:inherit}
+  .opt:hover{border-color:var(--line-2)}
+  .opt[aria-checked="true"]{border-color:var(--good);background:var(--sel-bg)}
+  .opt .ico{width:34px;height:34px;border-radius:10px;flex:none;display:grid;place-items:center;font-size:13px;font-weight:700;background:var(--panel-3);color:var(--dim)}
+  .opt[aria-checked="true"] .ico{background:var(--accent);color:var(--accent-ink)}
+  .opt .t{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:650;margin-bottom:5px}
+  .opt .tag{font-size:9px;letter-spacing:.04em;padding:2px 6px;border-radius:4px;background:var(--panel-3);color:var(--dim)}
+  .opt .tag.rec{background:var(--done-bg);color:var(--good)}
+  .opt .d{display:block;font-size:12px;line-height:1.65;color:var(--dim)}
+  .opt .cost{display:flex;gap:10px;margin-top:9px;flex-wrap:wrap;font-size:10px;color:var(--dim-2)}
+  .opt .nofit{display:block;margin-top:8px;font-size:11px;line-height:1.5;color:var(--bad)}
+  .opt:disabled{opacity:.55;cursor:not-allowed}
+  .opt:disabled:hover{border-color:var(--line)}
+  .modal .foot{display:flex;gap:9px;margin-top:23px;align-items:center}
+  .modal .hint{font-size:11px;color:var(--dim-2);max-width:150px}
+  .guide{margin:15px 0 0;font-size:12px;color:var(--dim);text-align:center}
+  .guide a{color:var(--dim);text-underline-offset:3px}
+  .guide a:hover{color:var(--text)}
+  .warnbox{margin-top:14px;font-size:12px;color:var(--warn);background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:10px;padding:12px;line-height:1.6}
+  .warnbox.danger{color:var(--bad);background:var(--danger-bg);border-color:var(--danger-line)}
+  footer{width:100%;max-width:1108px;margin:auto;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:15px;
+    padding:21px 0 25px;font-size:11px;color:var(--dim-2)}
+  footer b{color:var(--dim);font-weight:550}
+  @media(max-width:650px){
+    header{padding:21px 20px;gap:16px} .brand b{font-size:21px} .header-link{display:none}
+    main{padding:27px 20px 38px} .hero{margin-bottom:26px} .hero h1{font-size:43px}
+    .hero p{font-size:14px;max-width:330px} .eyebrow{font-size:10px;margin-bottom:13px}
+    .studio{border-radius:22px;padding:7px} #drop{padding:28px 15px 23px}
+    .studio-foot{font-size:10px;padding:11px 7px 4px;gap:6px}
+    .how{gap:15px;margin-top:30px} .how article{padding-left:0} .how .step-no{position:static;display:block;margin-bottom:4px}
+    .how h2{font-size:12px} .how p{font-size:11px} .workspace{margin-top:28px}
+    .card-body{padding:16px} #queue.single .stage{aspect-ratio:4/3}
+    #batch{position:static;padding:12px;gap:8px} #batch .txt{width:100%} #batch .spacer{display:none}
+    #batch button{flex:1} .modal{padding:22px;border-radius:20px} .modal h2{font-size:24px}
+    .modal .foot{flex-wrap:wrap} .modal .hint{width:100%;max-width:none} .modal .hint:empty{display:none}
+    footer{width:calc(100% - 40px);flex-direction:column;gap:5px;padding:19px 0}
+  }
+  @media(max-width:360px){header,main{padding-left:14px;padding-right:14px}.hero h1{font-size:36px}.chip{font-size:10px}.studio-foot{flex-wrap:wrap;justify-content:center}}
+  @media(pointer:coarse){.sw{width:34px;height:34px}.bgs{gap:10px}}
+  /* Lightweight visual polish: no fonts, image downloads or blur effects. */
+  .hero .eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:7px 13px;letter-spacing:.1em}
+  .hero .eyebrow::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--good)}
+  .studio{box-shadow:var(--shadow)}
+  .choose{box-shadow:0 2px 0 rgba(0,0,0,.1);transition:background .15s,transform .15s}
+  #drop:hover .choose{background:var(--accent-hi);transform:translateY(-1px)}
+  .how article{padding-top:4px}
+  .card-head .pill{border:1px solid var(--line)}
+  .pill.medium,.pill.high,.pill.ultra{color:var(--good);background:var(--done-bg);border-color:var(--done-line)}
+  .acts{flex-wrap:wrap}
+  .acts .refine{flex-basis:100%;font-size:11px;color:var(--dim);min-height:34px;padding:6px;border-style:dashed}
+  .modal{max-width:560px}
+  .opt{padding:13px 15px;gap:12px}
+  .opt .ico{width:36px;height:36px;margin-top:2px}
+  .opt .cost{margin-top:6px;gap:8px}
+  .opt .cost span{background:var(--panel-3);padding:2px 7px;border-radius:5px}
+  .opt .t{margin-bottom:3px}
+  .opt:disabled .d,.opt:disabled .cost{display:none}
+  .opt:disabled .nofit{margin-top:4px;font-size:10px}
+  .opt[aria-checked="true"]::after{content:'✓';margin-left:auto;color:var(--good);font-size:18px}
+  .modal .lead{margin-bottom:16px}
+  .modal .foot{position:sticky;bottom:-30px;background:var(--panel);padding:12px 0 0;margin-top:12px}
+  .modal .guide{margin-top:12px;font-size:11px}
+  @media(max-width:650px){
+    .modal .foot{bottom:-22px;padding-bottom:2px}
+    .opt .tag{font-size:8px}
+    .opt .d{font-size:11px}
+    .modal .eyebrow{font-size:9px}
+    .acts .btn{min-height:44px}
+    .acts .refine{min-height:40px}
+  }
+
+  /* ---- UX polish v2: violet palette, clearer states, calmer motion ---- */
+  :focus-visible{outline:2px solid var(--brand);outline-offset:3px;border-radius:6px}
+  body{background:radial-gradient(900px 480px at 50% -80px,var(--glow),transparent 70%) no-repeat,var(--bg)}
+  .skip{position:absolute;left:12px;top:-60px;z-index:100;background:var(--accent);color:var(--accent-ink);padding:10px 16px;border-radius:10px;font-weight:650;text-decoration:none;transition:top .15s}
+  .skip:focus{top:12px}
+  .mark{color:var(--brand)}
+  .brand .version{background:var(--panel-3);color:var(--brand);border:1px solid var(--line-2)}
+  .chip{background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:6px 12px}
+  .header-link{padding:6px 2px;border-bottom:1px solid transparent}
+  .header-link:hover{border-color:var(--brand)}
+  .hero h1 span{background:linear-gradient(95deg,var(--brand),var(--brand-2));-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+  .hero .eyebrow::before{background:var(--brand-2)}
+  .studio{border-radius:28px;padding:12px}
+  #drop{border-width:2px;border-style:dashed;border-radius:20px;padding:44px 20px 34px;transition:border-color .2s,background .2s,box-shadow .2s}
+  #drop:hover,#drop:focus-visible,#drop.over{border-color:var(--brand);background:var(--over-bg)}
+  #drop.over{box-shadow:inset 0 0 0 4px var(--glow)}
+  #drop.over .dz-title{color:var(--brand)}
+  .art-photo,.art-cutout{transition:transform .25s ease}
+  #drop:hover .art-photo,#drop.over .art-photo{transform:rotate(-14deg) translateX(-5px)}
+  #drop:hover .art-cutout,#drop.over .art-cutout{transform:rotate(12deg) translateX(5px)}
+  .art-cutout{color:var(--brand)}
+  #drop .dz-title{font-size:22px}
+  .choose{background:linear-gradient(95deg,var(--accent),var(--accent-hi));padding:14px 28px;min-height:50px;border-radius:12px;font-size:15px;box-shadow:0 6px 20px var(--glow)}
+  #drop:hover .choose{transform:translateY(-1px);box-shadow:0 10px 26px var(--glow)}
+  #drop:active .choose{transform:none}
+  .studio-foot{padding:14px 12px 4px}
+  .studio-foot>span:first-child{color:var(--good)}
+  .dot,.device-status .d.good{background:var(--good)}
+  .how article{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 16px 16px 16px}
+  .how .step-no{position:static;display:inline-grid;place-items:center;width:26px;height:26px;border-radius:8px;background:var(--panel-3);color:var(--brand);margin-bottom:10px;font-weight:650;line-height:1}
+  .how h2{font-size:14px}.how p{font-size:12.5px}
+  .card{transition:border-color .2s,box-shadow .2s,transform .2s}
+  .card:hover{border-color:var(--line-2);box-shadow:var(--shadow);transform:translateY(-2px)}
+  .stage .placeholder{backdrop-filter:none;font-weight:550}
+  .progress{height:4px}
+  .progress i{background:linear-gradient(90deg,var(--accent),var(--brand-2))}
+  .pill.fast,.pill.pro,.pill.medium,.pill.high,.pill.ultra{color:var(--brand);background:var(--sel-bg);border-color:var(--line-2)}
+  .sw{transition:transform .15s}.sw:hover{transform:scale(1.1)}
+  .sw.sel{box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--brand)}
+  button.btn{border-radius:11px;transition:background .15s,border-color .15s,transform .1s}
+  button.btn:active:not(:disabled){transform:scale(.97)}
+  button.btn.pri{background:linear-gradient(95deg,var(--accent),var(--accent-hi));border-color:transparent}
+  button.btn.pri:hover:not(:disabled){background:var(--accent-hi);border-color:transparent}
+  button.btn.done{background:var(--done-bg);border-color:var(--done-line);color:var(--good)}
+  button.mini{background:var(--scrim);color:#fff;border-color:rgba(255,255,255,.28)}
+  button.mini:hover{background:var(--accent);color:var(--accent-ink)}
+  #batch{border-color:var(--line-2);border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.28)}
+  .opt{border-width:1.5px;border-radius:16px;transition:border-color .15s,background .15s,transform .1s}
+  .opt:hover:not(:disabled){border-color:var(--brand);background:var(--panel-3)}
+  .opt:active:not(:disabled){transform:scale(.99)}
+  .opt[aria-checked="true"]{border-color:var(--brand);background:var(--sel-bg);box-shadow:0 0 0 3px var(--glow)}
+  .opt[aria-checked="true"] .ico{background:var(--accent)}
+  .opt[aria-checked="true"]::after{color:var(--brand)}
+  .opt .tag.rec{background:var(--done-bg);color:var(--good)}
+  .modal{border-radius:26px}
+  .alert .btn{border-radius:9px}
+  footer{max-width:1108px;padding:24px 0 30px;line-height:1.7}
+  footer a:hover{color:var(--text)}
+  @media(max-width:650px){
+    #drop{padding:34px 15px 26px}
+    .how{grid-template-columns:1fr}
+    .how article{display:grid;grid-template-columns:34px 1fr;column-gap:10px;padding:14px}
+    .how .step-no{grid-row:span 2;margin:0}
+    .card:hover{transform:none}
+  }
+  @media(hover:none){.card:hover,.sw:hover{transform:none}}
+
+  /* ---- Phone and touch polish ---- */
+  html{-webkit-text-size-adjust:100%}
+  button,.opt,#drop,.sw{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+  .card{animation:rise .35s ease both}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}}
+  #drop:active{background:var(--over-bg);border-color:var(--brand)}
+  @media(pointer:coarse){
+    .dz-hint{display:none}
+    #drop .dz-title{margin-bottom:4px}
+    button.mini{width:44px;height:44px}
+    .stage-tools{top:10px;right:10px;gap:8px}
+    button.btn{min-height:44px}
+    .header-link{padding:12px 4px}
+  }
+  @media(max-width:650px){
+    header{padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 12px max(16px,env(safe-area-inset-left))}
+    .mark{width:30px;height:30px} .brand b{font-size:20px}
+    .chip{font-size:11px;padding:5px 10px;margin-left:auto}
+    main{padding:18px max(16px,env(safe-area-inset-right)) 32px max(16px,env(safe-area-inset-left))}
+    .hero{margin-bottom:20px}
+    .hero h1{font-size:clamp(30px,9.2vw,38px);letter-spacing:-.045em;line-height:1.08}
+    .hero p{font-size:14.5px;margin-top:14px;line-height:1.6}
+    .hero .eyebrow{font-size:10px;padding:6px 11px;margin-bottom:14px}
+    .studio{padding:8px;border-radius:24px}
+    #drop{padding:26px 14px 20px;border-radius:18px}
+    .dz-art{transform:scale(.85);margin-bottom:12px}
+    #drop .dz-title{font-size:20px}
+    .choose{width:100%;margin:16px 0 4px;min-height:54px;font-size:16px}
+    #drop .dz-note{margin-top:12px;font-size:11px}
+    body.has-images .hero h1{font-size:26px}
+    body.has-images #drop{padding:12px}
+    body.has-images .choose{margin:0;min-height:48px}
+    .studio-foot{flex-direction:column;align-items:center;gap:4px;padding:12px 6px 4px;text-align:center}
+    .how article{border-radius:14px}
+    .workspace-head{flex-wrap:wrap}
+    .workspace-head h2{font-size:19px}
+    #queue{gap:14px}
+    .card-body{padding:14px;gap:10px}
+    .name{font-size:15px}
+    .meta{font-size:12px}
+    .bgs{gap:8px;padding-top:12px}
+    .acts{gap:8px}
+    .acts .btn.wide{flex:1 1 calc(50% - 4px)}
+    #batch{position:sticky;bottom:max(10px,env(safe-area-inset-bottom));padding:10px;border-radius:16px;gap:8px;background:var(--panel)}
+    #batch .txt{width:100%;font-size:12px}
+    #batch button{flex:1;min-height:48px}
+    #overlay{align-items:flex-end;padding:0}
+    .modal{max-width:none;border-radius:24px 24px 0 0;border-bottom:0;padding:20px 16px max(16px,env(safe-area-inset-bottom));max-height:92dvh;animation:sheet .28s ease both}
+    .modal::before{content:'';display:block;width:40px;height:4px;border-radius:2px;background:var(--line-2);margin:-8px auto 14px}
+    @keyframes sheet{from{transform:translateY(40px);opacity:0}}
+    .modal h2{font-size:22px}
+    .modal .lead{font-size:13px}
+    .opt{padding:14px;min-height:64px}
+    .opt .d{font-size:12px}
+    .modal .foot{bottom:-16px;padding:12px 0 4px;gap:8px;border-top:1px solid var(--line)}
+    .modal .foot .btn{flex:1;min-height:48px}
+    footer{text-align:center;padding:20px 0 max(24px,env(safe-area-inset-bottom));font-size:11.5px}
+  }
+  @media(max-width:360px){
+    .chip{display:none}
+    .hero h1{font-size:28px}
+  }
+  @media(max-height:480px) and (orientation:landscape){
+    .modal{max-height:96dvh}
+    .hero{margin-bottom:14px} .dz-art{display:none}
+  }
+  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#drop">Skip to upload</a>
+
+<header>
+  <a class="brand" href="#" aria-label="Cutout home">
+    <span class="mark">
+      <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <rect x="2" y="2" width="19" height="19" rx="5" stroke="currentColor" stroke-width="2" stroke-dasharray="3 3"/>
+        <rect x="11" y="11" width="19" height="19" rx="5" fill="currentColor"/>
+        <path d="m17 21 3 3 5-6" stroke="var(--bg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span>
+    <b>Cutout</b>
+    <span class="version">Beta</span>
+  </a>
+  <span class="spacer"></span>
+  <a class="header-link" href="#how">How it works</a>
+  <span class="chip"><span class="dot"></span>Private by design</span>
+</header>
+
+<main>
+  <div id="alert" class="alert" style="display:none" role="status">
+    <span class="ai" aria-hidden="true">!</span>
+    <span id="alertText"></span>
+    <span class="spacer"></span>
+    <button class="btn" id="alertRetry">Check again</button>
+  </div>
+
+  <section class="hero" aria-labelledby="headline">
+    <div class="eyebrow">Free background remover</div>
+    <h1 id="headline">Remove image backgrounds.<br><span>Right in your browser.</span></h1>
+    <p>No account, no upload, no watermark.<br>Your photos never leave your device.</p>
+  </section>
+
+  <div class="studio">
+    <div id="drop" tabindex="0" role="button" aria-label="Choose images to remove backgrounds from" aria-disabled="false">
+      <div class="dz-art" aria-hidden="true">
+        <div class="art-photo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="18" rx="3"/><circle cx="8" cy="9" r="2"/><path d="m3 19 6-6 4 4 4-5 4 5"/>
+          </svg>
+        </div>
+        <div class="art-cutout">
+          <svg viewBox="0 0 32 36" fill="currentColor"><circle cx="16" cy="10" r="7"/><path d="M3 33c0-10 5-15 13-15s13 5 13 15z"/></svg>
+        </div>
+      </div>
+      <div class="dz-title">Drop your photos here</div>
+      <div class="dz-sub">One image or up to 20 at a time.</div>
+      <span class="choose">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m-4 4 4-4 4 4M4 16v4h16v-4"/></svg>
+        <span id="chooseLabel">Choose images</span>
+      </span>
+      <div class="dz-sub dz-hint">or drop here · paste with <kbd id="pasteKey">⌘ V</kbd></div>
+      <div class="dz-note">JPG, PNG, WebP &amp; more · up to 20 images · 30 MB each</div>
+    </div>
+    <input id="file" type="file" accept="image/*" multiple hidden>
+    <div class="studio-foot">
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></svg>Nothing is uploaded</span>
+      <span>No account. No watermark.</span>
+    </div>
+  </div>
+  <div class="device-status" role="status">
+    <span class="d" id="capDot"></span><span id="capText">Checking browser support…</span>
+  </div>
+  <p id="capHint" hidden></p>
+
+  <section class="how" id="how" aria-label="How it works">
+    <article><span class="step-no">01</span><h2>Add your images</h2><p>Drop, choose or paste them. Up to 20 at once.</p></article>
+    <article><span class="step-no">02</span><h2>Pick an engine</h2><p>Low is fastest. High and Ultra handle hair and fine edges.</p></article>
+    <article><span class="step-no">03</span><h2>Download</h2><p>Save a transparent PNG, or add a new background first.</p></article>
+  </section>
+
+  <section class="workspace" id="workspace" hidden aria-labelledby="resultsTitle">
+    <div class="workspace-head">
+      <div><h2 id="resultsTitle">Your images</h2><p>Exported at the original resolution.</p></div>
+      <span class="spacer"></span>
+      <button class="btn" id="retryFailed" hidden>Retry failed</button>
+    </div>
+    <div id="queue"></div>
+
+  <div id="batch" style="display:none">
+    <span class="txt"><span class="dot" style="width:6px;height:6px;border-radius:50%;background:var(--good);display:inline-block"></span><span id="batchText"></span></span>
+    <span class="spacer"></span>
+    <button class="btn pri" id="batchZip">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M8 7.5V5.6A2.1 2.1 0 0 1 10.1 3.5h3.8A2.1 2.1 0 0 1 16 5.6v1.9"/><path d="M12 11v5"/><path d="m9.6 13.6 2.4 2.4 2.4-2.4"/></svg>
+      <span>Download .zip</span>
+    </button>
+    <button class="btn" id="batchClear">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 7h15"/><path d="M10 11v6M14 11v6"/><path d="M6.5 7l1 12.5h9L17.5 7"/><path d="M9.5 7V4.5h5V7"/></svg>
+      Clear all
+    </button>
+  </div>
+  </section>
+</main>
+
+<footer>
+  <b>Nothing uploaded. Nothing to sign up for.</b>
+  <span>AI loads only when you start. Your images stay yours. This is a public beta — expect rough edges; the code is <a href="https://github.com/scadavide55/cutout" target="_blank" rel="noopener">Apache-2.0 licensed</a>.<br><a href="https://github.com/scadavide55/cutout/blob/main/PRIVACY.md" target="_blank" rel="noopener">Privacy</a> · <a href="https://github.com/scadavide55/cutout/blob/main/TERMS.md" target="_blank" rel="noopener">Terms</a><br>Made with ❤️ by scadavide55</span>
+</footer>
+
+<div id="overlay" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="modal">
+    <div class="eyebrow">Engine</div>
+    <h2 id="mTitle">Choose your cutout</h2>
+    <div class="lead" id="mLead">Everything runs on this device. Bigger engines give cleaner edges but download more.</div>
+
+    <div class="opts" role="radiogroup" aria-label="Cutout engine">
+      <button class="opt" id="optLow" role="radio" aria-checked="true">
+        <span class="ico">Lo</span>
+        <span>
+          <span class="t">Low <span class="tag rec">QUICKEST</span></span>
+          <span class="d">For portraits and simple backgrounds. Small download, soft on fine hair.</span>
+          <span class="cost"><span>25.9 MB GPU · 6.6 MB CPU</span><span>GPU first</span></span>
+        </span>
+      </button>
+      <button class="opt" id="optMedium" role="radio" aria-checked="false">
+        <span class="ico">M</span>
+        <span>
+          <span class="t">Medium <span class="tag rec">BALANCED</span></span>
+          <span class="d">People, products and pets. Close to High quality with a smaller download.</span>
+          <span class="cost"><span>130 MB</span><span>GPU first</span></span>
+        </span>
+      </button>
+      <button class="opt" id="optHigh" role="radio" aria-checked="false">
+        <span class="ico">H</span>
+        <span>
+          <span class="t">High <span class="tag">FINE DETAIL</span></span>
+          <span class="d">Full precision for hair, fur and tricky edges. Needs a capable GPU.</span>
+          <span class="cost"><span>223 MB</span><span>GPU required</span></span>
+        </span>
+      </button>
+      <button class="opt" id="optUltra" role="radio" aria-checked="false">
+        <span class="ico">U</span>
+        <span>
+          <span class="t">Ultra <span class="tag">TWO PASSES</span></span>
+          <span class="d">High, refined with a second pass. A modest edge improvement, at twice the processing time.</span>
+          <span class="cost"><span>223 MB · shared with High</span><span>high-end GPU</span></span>
+        </span>
+      </button>
+    </div>
+
+    <p class="guide">Still can't decide? <a href="https://github.com/scadavide55/cutout/blob/main/MODEL%20GUIDE.md" target="_blank" rel="noopener">Read the model guide</a>.</p>
+
+    <div class="warnbox" id="mWarn" style="display:none"></div>
+
+    <div class="foot">
+      <span class="hint" id="mHint"></span>
+      <span class="spacer"></span>
+      <button class="btn" id="mCancel">Cancel</button>
+      <button class="btn pri" id="mGo" data-label="Cut out">Cut out</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ------------------------------------------------------------------ *
+ *  Models. Preprocessing is taken from each model's own source, not
+ *  guessed:
+ *   MODNet   Xenova/modnet  preprocessor_config.json
+ *            shortest edge 512 (divisible by 32), mean .5 std .5,
+ *            output already 0..1
+ *   BEN2 compact  quantised from PramaLLC/BEN2 by this project
+ *            weight-only int8 (160 Conv weights), otherwise identical:
+ *            1024x1024 square, /255 with no mean/std, min-max output.
+ *            130 MB instead of 223 MB, and it fits in memory where the
+ *            full model dies with std::bad_alloc.
+ *   BEN2     PramaLLC/BEN2  onnx_run.py
+ *            Resize((1024,1024)), plain /255 with NO mean/std,
+ *            output min-max normalised, then bilinear to original size
+ *
+ *  Rejected on licence grounds, not on quality: RMBG-1.4 and RMBG-2.0
+ *  (commercial use needs a paid agreement with BRIA) and ISNet (its
+ *  DIS5K dataset terms forbid commercial use). BiRefNet is MIT but out
+ *  of memory in this runtime at 1024x1024, in both precisions.
+ *
+ *  bytes is checked against the device's GPU allocation limit before a
+ *  download starts: BEN2 at 223 MB exceeds the 256 MB limit on some
+ *  phones and takes the whole tab down with it.
+ * ------------------------------------------------------------------ */
+const MODELS = {
+  low: {
+    label: 'Low', name: 'MODNet',
+    url: 'tacet-plugin://cutout/models/modnet-quantized.onnx',
+    bytes: 6632188, licence: 'Apache-2.0',
+    size: 512, square: false, normalise: 'mean05', output: 'sigmoid',
+    gpu: true,
+    gpuUrl: 'tacet-plugin://cutout/models/modnet.onnx',
+    gpuBytes: 25888640 // float convolutions run on WebGPU; integer quantized convolutions do not
+  },
+  medium: {
+    label: 'Medium', name: 'BEN2 compact',
+    url: 'tacet-plugin://cutout/models/ben2-int8-v3.onnx',
+    bytes: 130416302, licence: 'MIT',
+    size: 1024, square: true, normalise: 'unit', output: 'minmax',
+    gpu: true, desktopCPUOnly: true // GPU on compatible phones too; never retry their unsafe CPU path
+  },
+  high: {
+    label: 'High', name: 'BEN2',
+    url: 'tacet-plugin://cutout/models/BEN2_Base.onnx',
+    bytes: 222932053, licence: 'MIT',
+    size: 1024, square: true, normalise: 'unit', output: 'minmax',
+    gpu: true, gpuOnly: true      // too big for the CPU path: it runs out of memory
+  },
+  ultra: {
+    label: 'Ultra', name: 'BEN2 · two-pass',
+    session: 'high',               // the same weights as High, so one download serves both
+    url: 'tacet-plugin://cutout/models/BEN2_Base.onnx',
+    bytes: 222932053, licence: 'MIT',
+    size: 1024, square: true, normalise: 'unit', output: 'minmax',
+    gpu: true, gpuOnly: true, flipPass: true, highEnd: true
+  }
+};
+
+const MAX_FILES = 20;
+const MAX_BYTES = 30 * 1024 * 1024;
+const MAX_PIXELS = 24000000; // avoid multi-hundred-MB full-resolution canvas allocations
+const MAX_DIMENSION = 8192; // compatible canvas dimensions, including mobile browsers
+
+// Keep the landing page independent of the AI CDN. Load it on first use only.
+const ORT_BASE = 'tacet-plugin://cutout/ort/';
+let runtimePromise;
+function loadRuntime(){
+  if (runtimePromise) return runtimePromise;
+  const script = document.createElement('script');
+  script.src = ORT_BASE + 'ort.webgpu.min.js';
+  runtimePromise = new Promise((resolve, reject) => {
+    const timer = setTimeout(() => fail(), 30000);
+    const fail = () => {
+      clearTimeout(timer);
+      script.remove();
+      runtimePromise = null;
+      reject(new Error('AI could not load. Check your connection and try again.'));
+    };
+    script.onerror = fail;
+    script.onload = () => {
+      clearTimeout(timer);
+      if (!window.ort){ fail(); return; }
+      ort.env.wasm.wasmPaths = ORT_BASE;
+      ort.env.logLevel = 'error';
+      if (!window.crossOriginIsolated) ort.env.wasm.numThreads = 1;
+      resolve();
+    };
+    document.head.appendChild(script);
+  });
+  return runtimePromise;
+}
+
+const $ = s => document.querySelector(s);
+
+let sessions = {};            // mode -> ort session (or a promise for one)
+let queue = [];               // result cards, in order
+let seq = 0;
+let chosen = 'low', lastEngine = 'low';
+let caps = { webgpu:false, maxBinding:0, cores:navigator.hardwareConcurrency||4, mem:navigator.deviceMemory||0,
+  mobile: !!(navigator.userAgentData && navigator.userAgentData.mobile) || /Android|iPhone|iPad/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1), good:false };
+const gpuBytes = m => m.gpuBytes || m.bytes;
+const gpuFits = m => !!(m.gpu && caps.webgpu && (!caps.maxBinding || gpuBytes(m) <= caps.maxBinding * 0.85) &&
+  !(caps.mem > 0 && caps.mem <= 4 && gpuBytes(m) > 100 * 1024 * 1024));
+const usesGPU = m => gpuFits(m);
+const canUseCPU = m => !m.gpuOnly && !(m.desktopCPUOnly && caps.mobile);
+const modelVariant = (m, gpu) => gpu && m.gpuUrl ? { ...m, url:m.gpuUrl, bytes:m.gpuBytes } : m;
+const sessionBackends = {};
+
+/* ------------------------------- icons ---------------------------- */
+const svg = d => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" ' +
+                 'stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>';
+const ICON = {
+  download: svg('<path d="M12 3.5v11"/><path d="m7.6 10.1 4.4 4.4 4.4-4.4"/><path d="M4.5 20.5h15"/>'),
+  copy:     svg('<rect x="9" y="9" width="11.5" height="11.5" rx="2.2"/><path d="M5.5 15V6.2A2.2 2.2 0 0 1 7.7 4h8.8"/>'),
+  compare:  svg('<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.8"/>'),
+  image:    svg('<rect x="3" y="4.5" width="18" height="15" rx="2.4"/><circle cx="8.4" cy="9.6" r="1.5"/><path d="m4.2 17.4 4.6-4.6 3.6 3.6 3-3 4.4 4.4"/>'),
+  check:    svg('<path d="m5 13 4.5 4.5L19 7"/>')
+};
+
+/* --------------------- capability detection ----------------------- */
+// WebGPU is the big win but is not everywhere, so detect and fall back
+// rather than break. Nothing here downloads anything.
+async function detectCaps(){
+  // Browser-reported concurrency/memory are hints, NOT physical hardware specs.
+  // An exposed WebGPU API alone does not guarantee a usable adapter.
+  try {
+    const adapter = navigator.gpu ? await Promise.race([navigator.gpu.requestAdapter(), new Promise(r => setTimeout(() => r(null), 4000))]) : null;
+    caps.webgpu = !!adapter;
+    // The largest single buffer this GPU will accept. A model weighing more
+    // than this cannot be loaded at all, and on phones trying anyway has
+    // been observed to kill the tab rather than fail cleanly.
+    caps.maxBinding = adapter ? adapter.limits.maxStorageBufferBindingSize : 0;
+  }
+  catch (e){ caps.webgpu = false; caps.maxBinding = 0; }
+  caps.good = caps.webgpu || (caps.cores >= 8 && (!caps.mem || caps.mem >= 4));
+  const insecure = !window.isSecureContext;
+  $('#capText').textContent = caps.webgpu ? 'GPU detected · engines checked for your device'
+    : insecure ? 'CPU mode · HTTP connection' : 'CPU mode · runs locally';
+  $('#capDot').className = 'd ' + (caps.webgpu ? 'good' : '');
+  $('#capText').title = 'Every engine tries compatible WebGPU first. CPU is a last-resort fallback only where it is safe.';
+  const hint = $('#capHint');
+  hint.hidden = !insecure;
+  if (insecure){
+    hint.textContent = 'GPU acceleration needs HTTPS. On this Mac, use ';
+    const link = document.createElement('a');
+    link.href = 'http://localhost:' + (location.port || '80') + location.pathname;
+    link.textContent = 'localhost instead';
+    hint.append(link, '. On a phone, an HTTPS host is needed.');
+  }
+}
+
+/* ------------------------------ helpers --------------------------- */
+const fmtBytes = b => b >= 1000000
+  ? (b / 1000000).toFixed(b >= 10000000 ? 0 : 1) + ' MB'
+  : (b / 1000).toFixed(0) + ' KB';
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function makeCanvas(w, h){
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  return c;
+}
+
+async function toBitmap(file){
+  if (window.createImageBitmap){
+    try { return await createImageBitmap(file); } catch (e){}
+  }
+  return await new Promise((res, rej) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => { URL.revokeObjectURL(url); res(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('Could not read that image')); };
+    img.src = url;
+  });
+}
+
+const srcSize = b => ({ w: b.width || b.naturalWidth, h: b.height || b.naturalHeight });
+
+function rasterise(bmp, tw, th){
+  const ctx = makeCanvas(tw, th).getContext('2d', { willReadFrequently:true });
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(bmp, 0, 0, tw, th);
+  return ctx.getImageData(0, 0, tw, th);
+}
+
+function targetSize(w, h, model){
+  if (model.square) return { w: model.size, h: model.size };
+  // MODNet: shortest edge to model.size, dimensions kept divisible by 32.
+  const s = Math.min(model.size / Math.min(w, h), 1024 / Math.max(w, h));
+  const r = v => Math.max(32, Math.round(v * s / 32) * 32);
+  return { w: r(w), h: r(h) };
+}
+
+function toTensor(imageData, model){
+  const { data, width, height } = imageData;
+  const n = width * height;
+  const f = new Float32Array(3 * n);
+  const mode = model.normalise;
+  // BiRefNet's preprocessor_config.json: rescale 1/255, then ImageNet mean/std.
+  const M = [0.485, 0.456, 0.406], S = [0.229, 0.224, 0.225];
+  for (let i = 0; i < n; i++){
+    const r = data[i*4] / 255, g = data[i*4+1] / 255, b = data[i*4+2] / 255;
+    if (mode === 'mean05'){            // CHW, ±1
+      f[i]       = (r - 0.5) / 0.5;
+      f[n + i]   = (g - 0.5) / 0.5;
+      f[2*n + i] = (b - 0.5) / 0.5;
+    } else if (mode === 'imagenet'){   // CHW, ImageNet normalised
+      f[i]       = (r - M[0]) / S[0];
+      f[n + i]   = (g - M[1]) / S[1];
+      f[2*n + i] = (b - M[2]) / S[2];
+    } else {                           // CHW, 0..1
+      f[i] = r; f[n + i] = g; f[2*n + i] = b;
+    }
+  }
+  return new ort.Tensor('float32', f, [1, 3, height, width]);
+}
+
+function flipTensor(t){
+  const [, c, h, w] = t.dims, src = t.data, dst = new Float32Array(src.length);
+  for (let k = 0; k < c * h; k++){
+    const row = k * w;
+    for (let x = 0; x < w; x++) dst[row + x] = src[row + w - 1 - x];
+  }
+  return new ort.Tensor('float32', dst, t.dims);
+}
+
+function matteFrom(out, model){
+  const t = out.data, n = t.length, m = new Float32Array(n);
+  let lo = Infinity, hi = -Infinity;
+  for (let i = 0; i < n; i++){ if (t[i] < lo) lo = t[i]; if (t[i] > hi) hi = t[i]; }
+
+  if (model.output === 'sigmoid'){
+    // Logits -> sigmoid. If values already sit in 0..1 the model sigmoided
+    // them itself, so rescaling again would wash the matte out.
+    const already = lo >= -0.001 && hi <= 1.001;
+    for (let i = 0; i < n; i++) m[i] = already ? t[i] : 1 / (1 + Math.exp(-t[i]));
+  } else {
+    // BEN2's own postprocess does a min-max normalise over the whole map.
+    const d = (hi - lo) || 1;
+    for (let i = 0; i < n; i++) m[i] = (t[i] - lo) / d;
+  }
+  return m;
+}
+
+// Fill the frame with an image without distorting it: scale to cover, centre.
+function drawCover(ctx, bmp, W, H){
+  const sw = bmp.width || bmp.naturalWidth;
+  const sh = bmp.height || bmp.naturalHeight;
+  const s = Math.max(W / sw, H / sh);
+  const dw = sw * s, dh = sh * s;
+  ctx.drawImage(bmp, (W - dw) / 2, (H - dh) / 2, dw, dh);
+}
+
+// Matte at model resolution -> full-resolution alpha, then optional backdrop.
+function compose(bmp, matte, mw, mh, W, H, bg){
+  const sctx = makeCanvas(mw, mh).getContext('2d', { willReadFrequently:true });
+  const mid = sctx.createImageData(mw, mh);
+  for (let i = 0; i < mw * mh; i++){
+    const v = matte[i] <= 0 ? 0 : matte[i] >= 1 ? 255 : Math.round(matte[i] * 255);
+    mid.data[i*4] = v; mid.data[i*4+1] = v; mid.data[i*4+2] = v; mid.data[i*4+3] = 255;
+  }
+  sctx.putImageData(mid, 0, 0);
+
+  // Canvas scaling is GPU accelerated, which beats doing this by hand.
+  const bctx = makeCanvas(W, H).getContext('2d', { willReadFrequently:true });
+  bctx.imageSmoothingEnabled = true;
+  bctx.imageSmoothingQuality = 'high';
+  bctx.drawImage(sctx.canvas, 0, 0, W, H);
+  const alpha = bctx.getImageData(0, 0, W, H).data;
+
+  const cut = makeCanvas(W, H);
+  const cctx = cut.getContext('2d', { willReadFrequently:true });
+  cctx.drawImage(bmp, 0, 0, W, H);
+  const img = cctx.getImageData(0, 0, W, H);
+  const d = img.data;
+  for (let i = 0; i < W * H; i++) d[i*4+3] = Math.round(d[i*4+3] * alpha[i*4] / 255);
+  cctx.putImageData(img, 0, 0);
+
+  if (!bg) return cut;
+
+  // Flatten onto the backdrop. The canvas composites the soft edges; painting
+  // first and masking after would cut the new background away again.
+  const out = makeCanvas(W, H);
+  const octx = out.getContext('2d');
+  if (bg.type === 'image') drawCover(octx, bg.bmp, W, H);
+  else { octx.fillStyle = bg.css; octx.fillRect(0, 0, W, H); }
+  octx.drawImage(cut, 0, 0);
+  return out;
+}
+
+const canvasBlob = (canvas, type, q) => new Promise(res => canvas.toBlob(res, type, q));
+
+/* --------------------------- model load --------------------------- */
+// Fetched by hand so a 223 MB download can report real progress.
+async function fetchWithProgress(url, onProgress){
+  const ctl = new AbortController();
+  let timer;
+  const resetTimer = () => { clearTimeout(timer); timer = setTimeout(() => ctl.abort(), 45000); };
+  resetTimer();
+  try {
+    const res = await fetch(url, { signal:ctl.signal });
+    if (!res.ok) throw new Error('Model download failed (' + res.status + ')');
+    const total = +(res.headers.get('content-length') || 0);
+    if (!res.body || !total) return new Uint8Array(await res.arrayBuffer());
+    if (total > 512 * 1024 * 1024) throw new Error('Unexpected model size. Please try again.');
+    // Write directly into one buffer, rather than retaining chunks plus a copy.
+    const out = new Uint8Array(total);
+    const reader = res.body.getReader();
+    let got = 0;
+    for (;;){
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (got + value.length > total) throw new Error('Model download size did not match. Please retry.');
+      out.set(value, got); got += value.length;
+      resetTimer(); onProgress(got / total);
+    }
+    if (got !== total) throw new Error('Model download was interrupted. Please retry.');
+    return out;
+  } catch (err){
+    if (ctl.signal.aborted) throw new Error('Model download stalled. Check your connection and retry.');
+    throw err;
+  } finally { clearTimeout(timer); }
+}
+
+const sessionKey = mode => MODELS[mode].session || mode;
+function getSession(mode, onProgress, onPrepare, forceCPU = false){
+  const m = MODELS[mode];
+  mode = m.session || mode;
+  if (sessions[mode]) return sessions[mode];
+
+  const p = (async () => {
+    await loadRuntime();
+    for (const key of Object.keys(sessions)){
+      if (key === mode) continue;
+      const old = sessions[key];
+      delete sessions[key]; delete sessionBackends[key];
+      try { const session = await old; await session.release(); } catch (e){}
+    }
+    const gpu = !forceCPU && usesGPU(m);
+    if (!gpu && !canUseCPU(m))
+      throw new Error(m.label + ' needs a compatible GPU on this device. Try Low instead.');
+    let buf;
+    let variant = modelVariant(m, gpu);
+    const create = async provider => {
+      if (!buf){
+        buf = await fetchWithProgress(variant.url, f => onProgress && onProgress(f, variant.bytes));
+      }
+      if (onPrepare) onPrepare(provider);
+      const session = await ort.InferenceSession.create(buf, {
+        executionProviders:[provider], graphOptimizationLevel:'all'
+      });
+      sessionBackends[mode] = provider;
+      return session;
+    };
+    if (gpu){
+      try { return await create('webgpu'); }
+      catch (err){
+        if (!canUseCPU(m))
+          throw new Error(m.label + ' could not start on this GPU. CPU fallback is unsafe here; try Low. ' + String(err.message || err).slice(0,180));
+        if (variant.url !== m.url){ buf = null; variant = m; }
+        return await create('wasm');
+      }
+    }
+    return await create('wasm');
+  })();
+
+  sessions[mode] = p;
+  p.catch(() => { delete sessions[mode]; delete sessionBackends[mode]; });
+  return p;
+}
+
+/* --------------------- surviving a tab death ---------------------- *
+ * A renderer killed for memory is not an exception: no try/catch sees
+ * it, the page simply stops existing. So a heavy model is marked before
+ * it loads and unmarked the moment a result lands. A mark still present
+ * on the next visit means the previous attempt was cut off, and the page
+ * can at least say so instead of pretending nothing happened.
+ * Nothing is stored but two words and a byte count — never an image.  */
+const RUN_KEY = 'cutout.running';
+function markRunning(m){
+  try { sessionStorage.setItem(RUN_KEY, JSON.stringify({ label:m.label, bytes:m.bytes })); } catch (e){}
+}
+function clearRunning(){
+  try { sessionStorage.removeItem(RUN_KEY); } catch (e){}
+}
+function cutOffLastTime(){
+  try { return JSON.parse(sessionStorage.getItem(RUN_KEY) || 'null'); } catch (e){ return null; }
+}
+// A normal close or reload fires pagehide; a crash does not.
+addEventListener('pagehide', clearRunning);
+
+function reportCutOff(){
+  const prev = cutOffLastTime();
+  clearRunning();
+  if (!prev) return;
+  setAlert('warn', '<b>The last attempt stopped unexpectedly.</b> ' + prev.label +
+    ' never finished loading and the page was lost, which usually means the ' +
+    fmtBytes(prev.bytes) + ' model did not fit on this device. Nothing was uploaded ' +
+    'and nothing was saved, so those images are gone — add them again and choose Low or Medium.');
+}
+
+/* --------------------------- processing --------------------------- */
+async function runOne(item, mode){
+  const m = MODELS[mode];
+  const t = targetSize(item.w, item.h, m);
+  const tensor = toTensor(rasterise(item.bmp, t.w, t.h), m);
+
+  let sess = await getSession(mode);
+  const infer = async input => {
+    try { return await sess.run({ [sess.inputNames[0]]:input }); }
+    catch (err){
+      const key = sessionKey(mode);
+      if (sessionBackends[key] !== 'webgpu' || !canUseCPU(m)) throw err;
+      // Shader/device failures can occur on the first run, not just at creation.
+      delete sessions[key]; delete sessionBackends[key];
+      try { await sess.release(); } catch (e){}
+      setStage(item, 'working', 'GPU could not finish this engine. Starting CPU fallback…');
+      sess = await getSession(mode, null, null, true);
+      return await sess.run({ [sess.inputNames[0]]:input });
+    }
+  };
+
+  const results = await infer(tensor);
+  const out = results[sess.outputNames[0]];
+  const dims = out.dims;
+  const mh = dims[dims.length - 2];
+  const mw = dims[dims.length - 1];
+
+  let matte = matteFrom(out, m);
+  if (m.flipPass){
+    // Second look at the mirrored picture; the two mattes are averaged, which
+    // settles edges where the model changed its mind between the two views.
+    const f2 = flipTensor(tensor);
+    const r2 = await infer(f2);
+    const m2 = matteFrom(r2[sess.outputNames[0]], m);
+    const n = Math.min(matte.length, m2.length);
+    for (let y = 0; y < mh; y++){
+      for (let x = 0; x < mw; x++){
+        const i = y * mw + x;
+        if (i < n) matte[i] = (matte[i] + m2[y * mw + (mw - 1 - x)]) / 2;
+      }
+    }
+  }
+  if (matte.length !== mw * mh && matte.length >= mw * mh){
+    matte = matte.subarray(matte.length - mw * mh);
+  }
+
+  // Cache the matte so changing the background never re-runs the model.
+  item.backend = sessionBackends[sessionKey(mode)];
+  item.matte = matte; item.mw = mw; item.mh = mh;
+  item.canvas = compose(item.bmp, matte, mw, mh, item.w, item.h, item.bg);
+}
+
+async function processAll(mode){
+  if (document.body.classList.contains('busy')) return;
+  document.body.classList.add('busy');
+  drop.setAttribute('aria-disabled', 'true');
+  $('#chooseLabel').textContent = 'Processing your images…';
+  $('#batchClear').disabled = true;
+  $('#retryFailed').disabled = true;
+  queue.forEach(item => item.el.querySelectorAll('.acts button').forEach(b => b.disabled = true));
+  await capsReady;
+  if (!sessions[sessionKey(mode)]) markRunning(MODELS[mode]);
+  for (const item of queue){
+    if (item.done) continue;
+    setStage(item, 'loading', 'Reading image…');
+
+    try {
+      if (!item.bmp){
+        item.bmp = await toBitmap(item.file);
+        const s = srcSize(item.bmp);
+        const pixelLimit = caps.mobile || (caps.mem > 0 && caps.mem <= 4) ? 12000000 : MAX_PIXELS;
+        const batchLimit = caps.mobile ? 24000000 : 48000000;
+        const batchPixels = queue.reduce((n, other) => n + (other === item ? 0 : other.w * other.h), 0);
+        if (s.w > MAX_DIMENSION || s.h > MAX_DIMENSION || s.w * s.h > pixelLimit || batchPixels + s.w * s.h > batchLimit){
+          if (item.bmp.close) item.bmp.close();
+          item.bmp = null;
+          throw new Error('This image or batch is too large for safe processing. Use a smaller image (under ' +
+            Math.floor(pixelLimit / 1000000) + ' megapixels and ' + MAX_DIMENSION + ' px per side), or clear the batch and add fewer photos.');
+        }
+        item.w = s.w; item.h = s.h;
+        setMeta(item, '');
+      }
+
+      if (!window.ort) setStage(item, 'working', 'Starting the AI engine…');
+      await loadRuntime();
+      if (!sessions[sessionKey(mode)]){
+        const m = MODELS[mode];
+        setStage(item, 'working', 'Downloading the ' + m.name + ' model…');
+        await getSession(mode, (f, bytes) => {
+          setProgress(item, f);
+          setStage(item, 'working', m.name + ' · ' + Math.round(f * 100) + '% of ' + fmtBytes(bytes));
+        }, provider => {
+          setProgress(item, null);
+          setStage(item, 'working', provider === 'webgpu' ? 'Preparing the GPU engine…' : 'Preparing CPU fallback…');
+        });
+        setProgress(item, null);
+      }
+
+      setStage(item, 'working', 'Cutting out…');
+      await sleep(16);                    // let that state paint
+      const t0 = performance.now();
+      await runOne(item, mode);
+      const secs = (performance.now() - t0) / 1000;
+      if (item.backend === 'wasm'){
+        setAlert('warn', '<b>Using CPU fallback.</b> GPU execution was not available for this engine. Your images still stay on this device.');
+      } else { setAlert(null); }
+
+      item.done = true;
+      item.mode = mode;
+      item.secs = secs;
+      await showResult(item);
+      delete item.previousResult;
+      clearRunning();                    // we got a result, so nothing was cut off
+    } catch (err){
+      console.error(err);
+      const keptPrevious = !!item.previousResult;
+      if (keptPrevious){
+        Object.assign(item, item.previousResult);
+        delete item.previousResult;
+        await showResult(item);
+      } else {
+        setStage(item, 'error', 'Could not process this image');
+        setMeta(item, '');
+      }
+      const message = document.createElement('span');
+      message.className = 'err';
+      // A bare "Failed" helps nobody. Show what actually went wrong.
+      message.textContent = (keptPrevious ? 'Previous cutout kept. ' : '') +
+        String((err && (err.message || err)) || 'Failed').slice(0, 300);
+      item.el.querySelector('.meta').appendChild(message);
+      setProgress(item, null);
+    }
+  }
+  document.body.classList.remove('busy');
+  drop.setAttribute('aria-disabled', 'false');
+  $('#chooseLabel').textContent = 'Add more images';
+  $('#batchClear').disabled = false;
+  $('#retryFailed').disabled = false;
+  queue.forEach(item => item.el.querySelectorAll('.acts button').forEach(b => b.disabled = false));
+  clearRunning();
+  updateBatch();
+}
+
+/* --------------------------- card rendering ----------------------- */
+function setStage(item, kind, text){
+  const stage = item.el.querySelector('.stage');
+  stage.classList.toggle('working', kind === 'working');
+  const pill = item.el.querySelector('.pill');
+  pill.textContent = kind === 'error' ? 'Needs retry' : kind === 'working' ? 'Working' : 'Preparing';
+  if (kind === 'done'){ stage.classList.remove('working'); return; }
+
+  let ph = stage.querySelector('.placeholder');
+  if (!ph){
+    ph = document.createElement('div');
+    ph.className = 'placeholder';
+    stage.appendChild(ph);
+  }
+  ph.innerHTML = (kind === 'working' ? '<span class="spinner"></span>' : '') +
+                 '<span>' + text + '</span>';
+  item.placeholder = ph;
+}
+
+function setProgress(item, pct){
+  const bar = item.el.querySelector('.progress');
+  if (pct == null){ bar.classList.add('hide'); return; }
+  bar.classList.remove('hide');
+  bar.querySelector('i').style.width = Math.max(0, Math.min(100, pct * 100)) + '%';
+}
+
+function setMeta(item, extra){
+  const meta = item.el.querySelector('.meta');
+  meta.innerHTML = '<span>' + (item.w && item.h ? item.w + ' × ' + item.h : fmtBytes(item.file.size)) + '</span>' + (extra || '');
+}
+
+async function refreshPreview(item){
+  const canvas = item.canvas;
+  const blob = await canvasBlob(canvas, 'image/png');
+  if (!blob || item.canvas !== canvas || !item.el.isConnected) return;
+  if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+  item.previewUrl = URL.createObjectURL(blob);
+  item.resEl.src = item.previewUrl;
+}
+
+async function showResult(item){
+  const stage = item.el.querySelector('.stage');
+  stage.classList.remove('working');
+  if (item.placeholder){ item.placeholder.remove(); item.placeholder = null; }
+
+  await refreshPreview(item);
+  item.resEl.hidden = false;
+  stage.classList.add('ready');
+
+  const tools = item.el.querySelector('.stage-tools');
+  tools.style.display = 'flex';
+
+  const pill = item.el.querySelector('.pill');
+  pill.className = 'pill ' + item.mode;
+  pill.textContent = MODELS[item.mode].label;
+
+  setMeta(item, '<span>' + (item.backend === 'webgpu' ? 'GPU' : 'CPU fallback') + '</span><span>' + item.secs.toFixed(2) + ' s</span>');
+  item.el.querySelector('.bgs').style.display = 'flex';
+  item.el.querySelector('.acts').style.display = 'flex';
+  syncSwatches(item);
+}
+
+function syncSwatches(item){
+  item.el.querySelectorAll('.sw').forEach(b =>
+    b.classList.toggle('sel', b.dataset.c === item.bgKey));
+}
+
+function rerender(item){
+  if (!item.bmp || !item.matte) return;
+  // Cheap: reuses the cached matte, so no model run.
+  item.canvas = compose(item.bmp, item.matte, item.mw, item.mh, item.w, item.h, item.bg);
+  refreshPreview(item);
+  syncSwatches(item);
+}
+
+const safeBase = item =>
+  (item.file.name.replace(/\.[^.]+$/, '').replace(/[^\w\-. ]+/g, '_') || 'image');
+
+const safeName = (item, type) =>
+  safeBase(item) + (type === 'image/png' ? '-cutout.png' : '-cutout.jpg');
+
+async function save(item, type){
+  let blob;
+  if (type === 'image/jpeg'){
+    // JPEG has no alpha: flatten onto the chosen background, or white.
+    const bg = item.bg || { type:'colour', css:'#ffffff' };
+    blob = await canvasBlob(compose(item.bmp, item.matte, item.mw, item.mh, item.w, item.h, bg),
+                            'image/jpeg', 0.92);
+  } else {
+    blob = await canvasBlob(item.canvas, 'image/png');
+  }
+  if (!blob) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = safeName(item, type);
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+
+async function copy(item, btn){
+  const label = btn.querySelector('span');
+  const original = label.textContent;
+  const flash = (text, cls) => {
+    label.textContent = text;
+    btn.classList.add(cls);
+    setTimeout(() => { label.textContent = original; btn.classList.remove(cls); }, 1500);
+  };
+  try {
+    if (!navigator.clipboard || !window.ClipboardItem) throw new Error('unsupported');
+    const blob = await canvasBlob(item.canvas, 'image/png');
+    await navigator.clipboard.write([ new ClipboardItem({ 'image/png': blob }) ]);
+    flash('Copied', 'done');
+  } catch (e){
+    flash('Blocked', 'done');
+  }
+}
+
+function buildCard(file){
+  const item = {
+    id: ++seq, file, url: URL.createObjectURL(file),
+    w:0, h:0, bmp:null, canvas:null, matte:null,
+    bg:null, bgKey:'t', done:false
+  };
+
+  const el = document.createElement('article');
+  el.className = 'card';
+  el.innerHTML =
+    '<div class="stage">' +
+      '<img class="orig" alt="">' +
+      '<img class="result" alt="Cutout result" hidden>' +
+      '<div class="stage-tools" style="display:none">' +
+        '<button class="mini" data-act="compare" title="Hold to see the original">' + ICON.compare + '</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="card-body">' +
+      '<div class="card-head"><span class="name"></span><span class="pill">Queued</span></div>' +
+      '<div class="meta"></div>' +
+      '<div class="progress hide"><i></i></div>' +
+      '<div class="bgs" style="display:none">' +
+        '<span class="row-label">Background</span>' +
+      '</div>' +
+      '<div class="acts" style="display:none"></div>' +
+    '</div>';
+
+  el.querySelector('.name').textContent = file.name;
+  item.el = el;
+  item.resEl = el.querySelector('.result');
+  item.origEl = el.querySelector('.orig');
+  item.origEl.src = item.url;
+
+  // ---- hold-to-compare on the preview
+  const cmp = el.querySelector('[data-act="compare"]');
+  const stage = el.querySelector('.stage');
+  const on = e => { e.preventDefault(); stage.classList.add('compare'); cmp.classList.add('on'); };
+  const off = () => { stage.classList.remove('compare'); cmp.classList.remove('on'); };
+  cmp.setAttribute('aria-label', 'Hold to see the original');
+  cmp.addEventListener('pointerdown', on);
+  ['pointerup','pointerleave','pointercancel','blur'].forEach(ev => cmp.addEventListener(ev, off));
+  cmp.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') on(e); });
+  cmp.addEventListener('keyup', e => { if (e.key === ' ' || e.key === 'Enter') off(); });
+
+  // ---- background choices
+  const bgs = el.querySelector('.bgs');
+  const setBg = (bg, key) => {
+    if (item.bg && item.bg.type === 'image' && item.bg !== bg && item.bg.bmp.close) item.bg.bmp.close();
+    item.bg = bg; item.bgKey = key;
+    if (item.canvas) rerender(item); else syncSwatches(item);
+  };
+
+  [['t', null], ['w', '#ffffff'], ['k', '#000000'],
+   ['b', '#1f6feb'], ['g', '#3ecf8e'], ['r', '#f0616d']].forEach(([key, val]) => {
+    const b = document.createElement('button');
+    b.className = 'sw' + (key === 't' ? ' t' : '');
+    b.dataset.c = key;
+    b.title = val ? 'Background ' + val : 'Transparent background';
+    if (val) b.style.background = val;
+    b.onclick = () => setBg(val ? { type:'colour', css:val } : null, key);
+    bgs.appendChild(b);
+  });
+
+  const cst = document.createElement('button');
+  cst.className = 'sw'; cst.dataset.c = 'custom'; cst.title = 'Pick any colour';
+  // A rainbow disc reads as "any colour" — an empty box just looks broken.
+  cst.style.background = 'conic-gradient(from 210deg, #ff5f6d, #ffc371, #f7ff71, #4ade80, #38bdf8, #818cf8, #e879f9, #ff5f6d)';
+  cst.innerHTML = '<input type="color" value="#9a87ff">';
+  cst.querySelector('input').oninput = e => {
+    cst.style.background = e.target.value;
+    setBg({ type:'colour', css:e.target.value }, 'custom');
+  };
+  cst.onclick = e => { if (e.target.tagName !== 'INPUT') cst.querySelector('input').click(); };
+  bgs.appendChild(cst);
+
+  // ---- your own photo as the backdrop
+  const bsw = document.createElement('button');
+  bsw.className = 'sw img'; bsw.dataset.c = 'image';
+  bsw.title = 'Use your own image as the background';
+  bsw.innerHTML = ICON.image;
+  const binput = document.createElement('input');
+  binput.type = 'file'; binput.accept = 'image/*'; binput.style.display = 'none';
+  cst.querySelector('input').setAttribute('aria-label', 'Choose background colour');
+  binput.onchange = async e => {
+    const f = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    try {
+      if (f.size > MAX_BYTES) throw new Error('Choose a background image under 30 MB.');
+      const bmp = await toBitmap(f);
+      const { w, h } = srcSize(bmp);
+      const limit = caps.mobile || (caps.mem > 0 && caps.mem <= 4) ? 12000000 : MAX_PIXELS;
+      if (w > MAX_DIMENSION || h > MAX_DIMENSION || w * h > limit){
+        if (bmp.close) bmp.close();
+        throw new Error('That background image is too large. Choose a smaller one.');
+      }
+      if (item.bgUrl) URL.revokeObjectURL(item.bgUrl);
+      item.bgUrl = URL.createObjectURL(f);
+      bsw.style.backgroundImage = 'url(' + item.bgUrl + ')';
+      bsw.innerHTML = '';
+      setBg({ type:'image', bmp }, 'image');
+    } catch (err){ setAlert('warn', 'Could not use that background. ' + String(err.message || 'Choose another image.')); }
+  };
+  bsw.onclick = () => binput.click();
+  el.appendChild(binput);
+  bgs.appendChild(bsw);
+
+  // ---- exports
+  const acts = el.querySelector('.acts');
+
+  const mk = (cls, icon, label, title, fn) => {
+    const b = document.createElement('button');
+    b.className = 'btn ' + cls;
+    b.title = title;
+    b.innerHTML = icon + '<span>' + label + '</span>';
+    b.onclick = () => fn(b);
+    return b;
+  };
+
+  acts.append(
+    mk('pri wide', ICON.download, 'PNG', 'Download the cut-out with transparency', () => save(item, 'image/png')),
+    mk('wide', ICON.download, 'JPG', 'Download flattened on the chosen background', () => save(item, 'image/jpeg')),
+    mk('', ICON.copy, 'Copy', 'Copy the image to the clipboard', b => copy(item, b))
+  );
+  const refine = mk('ghost refine', '', 'Change engine', 'Try another engine without uploading again',
+    () => openModal(1, [], [item]));
+  acts.append(refine);
+
+  setMeta(item, '');
+  return item;
+}
+
+/* ---------------------------- ZIP writer -------------------------- */
+// PNGs are already compressed, so the archive stores them as-is. A 60-line
+// store-only writer beats a ~100 KB zip library for headers around bytes
+// we already have.
+const CRC_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++){
+    let c = n;
+    for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+
+function crc32(buf){
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < buf.length; i++) c = CRC_TABLE[(c ^ buf[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+// ZIP stores timestamps in the old MS-DOS packed format.
+const dosStamp = d => ({
+  time: ((d.getHours() & 31) << 11) | ((d.getMinutes() & 63) << 5) | ((d.getSeconds() / 2) & 31),
+  date: (((d.getFullYear() - 1980) & 127) << 9) | (((d.getMonth() + 1) & 15) << 5) | (d.getDate() & 31)
+});
+
+function makeZip(files){
+  const enc = new TextEncoder();
+  const stamp = dosStamp(new Date());
+  const body = [], central = [];
+  let offset = 0;
+
+  for (const f of files){
+    const name = enc.encode(f.name);
+    const crc = crc32(f.data);
+    const size = f.data.length;
+
+    const lh = new Uint8Array(30 + name.length);
+    const lv = new DataView(lh.buffer);
+    lv.setUint32(0, 0x04034b50, true);   // local file header
+    lv.setUint16(4, 20, true);
+    lv.setUint16(6, 0x0800, true);       // UTF-8 filenames
+    lv.setUint16(8, 0, true);            // 0 = stored
+    lv.setUint16(10, stamp.time, true);
+    lv.setUint16(12, stamp.date, true);
+    lv.setUint32(14, crc, true);
+    lv.setUint32(18, size, true);
+    lv.setUint32(22, size, true);
+    lv.setUint16(26, name.length, true);
+    lh.set(name, 30);
+    body.push(lh, f.data);
+
+    const ch = new Uint8Array(46 + name.length);
+    const cv = new DataView(ch.buffer);
+    cv.setUint32(0, 0x02014b50, true);   // central directory header
+    cv.setUint16(4, 20, true);
+    cv.setUint16(6, 20, true);
+    cv.setUint16(8, 0x0800, true);
+    cv.setUint16(12, stamp.time, true);
+    cv.setUint16(14, stamp.date, true);
+    cv.setUint32(16, crc, true);
+    cv.setUint32(20, size, true);
+    cv.setUint32(24, size, true);
+    cv.setUint16(28, name.length, true);
+    cv.setUint32(42, offset, true);      // where this file starts
+    ch.set(name, 46);
+    central.push(ch);
+
+    offset += lh.length + size;
+  }
+
+  const cdSize = central.reduce((n, c) => n + c.length, 0);
+  const end = new Uint8Array(22);
+  const ev = new DataView(end.buffer);
+  ev.setUint32(0, 0x06054b50, true);     // end of central directory
+  ev.setUint16(8, files.length, true);
+  ev.setUint16(10, files.length, true);
+  ev.setUint32(12, cdSize, true);
+  ev.setUint32(16, offset, true);
+
+  return new Blob([...body, ...central, end], { type: 'application/zip' });
+}
+
+async function downloadZip(){
+  const done = queue.filter(i => i.done);
+  if (!done.length) return;
+
+  const btn = $('#batchZip');
+  const label = btn.querySelector('span');
+  const original = label.textContent;
+  btn.disabled = true;
+  label.textContent = 'Zipping…';
+
+  try {
+    const used = new Set();
+    const files = [];
+    for (const item of done){
+      const blob = await canvasBlob(item.canvas, 'image/png');
+      const data = new Uint8Array(await blob.arrayBuffer());
+      let name = safeName(item, 'image/png');
+      if (used.has(name)){                       // same file added twice
+        const base = name.replace(/\.png$/, '');
+        let n = 2;
+        while (used.has(base + '-' + n + '.png')) n++;
+        name = base + '-' + n + '.png';
+      }
+      used.add(name);
+      files.push({ name, data });
+    }
+
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(makeZip(files));
+    a.download = 'cutout-images.zip';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+
+    label.textContent = 'Saved';
+    setTimeout(() => { label.textContent = original; btn.disabled = false; }, 1500);
+  } catch (err){
+    console.error(err);
+    label.textContent = 'Failed';
+    setTimeout(() => { label.textContent = original; btn.disabled = false; }, 2000);
+  }
+}
+
+/* ----------------------------- batch bar -------------------------- */
+function updateBatch(){
+  const bar = $('#batch');
+  const hasImages = queue.length > 0;
+  document.body.classList.toggle('has-images', hasImages);
+  $('#workspace').hidden = !hasImages;
+  $('#how').hidden = hasImages;
+  $('#queue').classList.toggle('single', queue.length === 1);
+  $('#chooseLabel').textContent = document.body.classList.contains('busy')
+    ? 'Processing your images…' : hasImages ? 'Add more images' : 'Choose images';
+  $('#retryFailed').hidden = !queue.some(i => i.el.querySelector('.pill').textContent === 'Needs retry');
+  if (!hasImages){ bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+
+  const done = queue.filter(i => i.done).length;
+  $('#batchText').innerHTML = done
+    ? '<b>' + done + '</b> ' + (done === 1 ? 'image ready' : 'images ready')
+    : '<b>' + queue.length + '</b> ' + (queue.length === 1 ? 'image' : 'images') + ' waiting';
+  $('#batchZip').disabled = done === 0;
+}
+
+function releaseItem(item){
+  item.el.remove();
+  URL.revokeObjectURL(item.url);
+  if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+  if (item.bgUrl) URL.revokeObjectURL(item.bgUrl);
+  if (item.bmp && item.bmp.close) item.bmp.close();
+  if (item.bg && item.bg.type === 'image' && item.bg.bmp.close) item.bg.bmp.close();
+  item.bmp = item.canvas = item.matte = item.bg = null;
+}
+
+function clearAll(){
+  if (document.body.classList.contains('busy')) return;
+  queue.forEach(releaseItem);
+  queue = [];
+  updateBatch();
+  setAlert(null);
+}
+
+$('#batchZip').onclick = downloadZip;
+$('#batchClear').onclick = clearAll;
+
+/* ------------------------------- intake --------------------------- */
+function addFiles(files){
+  if (document.body.classList.contains('busy') || $('#overlay').classList.contains('on')) return;
+  const list = Array.from(files).filter(f => f.type.startsWith('image/') && f.size <= MAX_BYTES);
+  if (!list.length){ setAlert('warn', 'Choose an image under 30 MB.'); return; }
+  if (queue.length >= MAX_FILES){ setAlert('warn', 'This batch is full. Clear it before adding more images.'); return; }
+
+  const added = [];
+  for (const f of list){
+    if (queue.length >= MAX_FILES) break;
+    const item = buildCard(f);
+    $('#queue').appendChild(item.el);
+    queue.push(item);
+    added.push(item);
+  }
+  if (added.length){ updateBatch(); openModal(added.length, added); }
+}
+
+/* ------------------------------- dialog --------------------------- */
+const ENGINE_BTNS = [['low','optLow'], ['medium','optMedium'], ['high','optHigh'], ['ultra','optUltra']];
+
+// A model weighing more than the GPU's per-allocation limit cannot be loaded
+// at all. This is arithmetic, not a guess about speed, and it is worth
+// honouring: on phones the attempt has been measured taking the whole tab
+// down instead of failing with an error the visitor could recover from.
+function engineFits(m){
+  if (usesGPU(m) || canUseCPU(m)) return { ok:true };
+  if (!caps.webgpu)
+    return { ok:false, why:'too heavy for the memory of this device; try Low' };
+  if (caps.mem > 0 && caps.mem <= 4 && gpuBytes(m) > 100 * 1024 * 1024)
+    return { ok:false, why:'insufficient reported memory for this engine; GPU availability alone does not guarantee enough working memory' };
+  if (caps.maxBinding && gpuBytes(m) > caps.maxBinding * 0.85)
+    return { ok:false, why:'not enough GPU buffer headroom (model ' + fmtBytes(gpuBytes(m)) +
+      '; allocation limit ' + fmtBytes(caps.maxBinding) + ')' };
+  return { ok:false, why:'needs a compatible GPU; try Low instead' };
+}
+
+let modalAdded = [], modalRerun = [];
+async function openModal(count, added = [], rerun = []){
+  if (document.body.classList.contains('busy')) return;
+  modalAdded = added; modalRerun = rerun;
+  await capsReady;
+  ultraOk = false;
+  $('#mGo').dataset.label = rerun.length ? 'Update cutout' : 'Cut out';
+  $('#mGo').textContent = $('#mGo').dataset.label;
+  $('#mTitle').textContent = rerun.length ? 'Refine your cutout' : 'Choose your cutout';
+  chosen = rerun.length ? rerun[0].mode || 'low' : lastEngine;
+  $('#mLead').textContent = (count === 1 ? 'This image stays' : 'These ' + count + ' images stay') +
+    ' on this device. Pick the right engine for the job.';
+
+  const blocked = {};
+  ENGINE_BTNS.forEach(([key, id]) => {
+    const fit = engineFits(MODELS[key]);
+    $('#' + id).disabled = !fit.ok;
+    if (!fit.ok) blocked[key] = fit.why;
+  });
+  if (blocked[chosen]) chosen = 'low';
+  paintOpts(blocked);
+
+  const warn = $('#mWarn');
+  const names = Object.keys(blocked).map(k => MODELS[k].label);
+
+  if (names.length){
+    warn.style.display = 'block';
+    warn.className = 'warnbox';
+    warn.innerHTML = '<b>Low is the quickest choice here.</b> ' +
+      (blocked.medium ? 'Medium froze a 4 GB phone during testing, so it is off here. Low runs on the GPU of your phone.' :
+        !usesGPU(MODELS.medium) ? 'Medium will use CPU fallback; expect a longer wait.' :
+        'GPU is tried first. Unavailable engines are dimmed with the reason shown.');
+  } else if (!caps.webgpu && !caps.good){
+    warn.style.display = 'block';
+    warn.className = 'warnbox';
+    warn.innerHTML = '<b>Low is recommended in this browser.</b> GPU acceleration is unavailable, ' +
+      'so Medium falls back to the processor and takes far longer.';
+  } else if (!caps.webgpu){
+    warn.style.display = 'block';
+    warn.className = 'warnbox';
+    warn.innerHTML = '<b>No GPU here, so Medium uses the processor.</b> ' +
+      'It works, but expect tens of seconds per image rather than seconds.';
+  } else {
+    warn.style.display = 'none';
+  }
+
+  const heavy = MODELS[chosen].bytes > 50 * 1024 * 1024;
+  $('#mHint').textContent = count > 4
+    ? (MODELS[chosen].label + ' on ' + count + ' images will take a while.')
+    : (heavy && count > 1 ? 'The model downloads once and is reused for the whole batch.' : '');
+  $('#overlay').classList.add('on');
+  document.body.classList.add('modal-open');
+  document.querySelectorAll('header,main,footer').forEach(el => el.inert = true);
+  $('#mGo').focus();
+}
+
+let lastBlocked = {};
+function paintOpts(blocked){
+  if (ultraOk && chosen !== 'ultra'){ ultraOk = false; $('#mGo').textContent = $('#mGo').dataset.label || 'Cut out'; $('#mWarn').style.display = 'none'; }
+  if (blocked !== undefined) lastBlocked = blocked;
+  ENGINE_BTNS.forEach(([key, id]) => {
+    const el = $('#' + id);
+    el.setAttribute('aria-checked', chosen === key ? 'true' : 'false');
+    let why = el.querySelector('.nofit');
+    const reason = lastBlocked[key];
+    if (reason && !why){
+      why = document.createElement('span');
+      why.className = 'nofit';
+      el.querySelector('.cost').after(why);
+    }
+    if (why) why.textContent = reason ? 'Not available here: ' + reason + '.' : '';
+    if (why && !reason) why.remove();
+  });
+}
+
+const closeModal = () => {
+  $('#overlay').classList.remove('on');
+  document.body.classList.remove('modal-open');
+  document.querySelectorAll('header,main,footer').forEach(el => el.inert = false);
+  drop.focus({ preventScroll:true });
+};
+$('#retryFailed').onclick = () => openModal(queue.filter(i => !i.done).length);
+
+$('#optLow').onclick = () => { chosen = 'low'; paintOpts(); };
+$('#optMedium').onclick = function(){ if (!this.disabled){ chosen = 'medium'; paintOpts(); } };
+$('#optHigh').onclick = function(){ if (!this.disabled){ chosen = 'high'; paintOpts(); } };
+$('#optUltra').onclick = function(){ if (!this.disabled){ chosen = 'ultra'; paintOpts(); } };
+let ultraOk = false;
+$('#mGo').onclick = () => {
+  if (MODELS[chosen].highEnd && !ultraOk){
+    // Ultra asks twice: it is the one engine that can bog down a modest machine.
+    const warn = $('#mWarn');
+    warn.style.display = 'block'; warn.className = 'warnbox danger';
+    warn.innerHTML = '<b>Ultra needs a high-end device.</b> It runs the 223 MB model twice per image and ' +
+      'wants a fast GPU and plenty of memory. On a modest computer it can be very slow or close the tab. ' +
+      'Press the button again to go ahead, or pick High.';
+    $('#mGo').textContent = 'I understand, use Ultra';
+    ultraOk = true;
+    return;
+  }
+  ultraOk = false; $('#mGo').textContent = $('#mGo').dataset.label || $('#mGo').textContent;
+  lastEngine = chosen;
+  modalRerun.forEach(item => {
+    item.previousResult = { canvas:item.canvas, matte:item.matte, mw:item.mw, mh:item.mh,
+      mode:item.mode, secs:item.secs, done:item.done, backend:item.backend };
+    item.done = false;
+  });
+  modalRerun = [];
+  closeModal(); processAll(chosen);
+};
+$('#mCancel').onclick = () => {
+  closeModal();
+  // Cancel only this upload, never earlier failures or a result being refined.
+  modalAdded.forEach(releaseItem);
+  queue = queue.filter(it => !modalAdded.includes(it));
+  modalAdded = []; modalRerun = [];
+  ultraOk = false; $('#mGo').textContent = 'Cut out';
+  updateBatch();
+};
+
+document.addEventListener('keydown', e => {
+  if (!$('#overlay').classList.contains('on')) return;
+  if (e.key === 'Escape'){ e.preventDefault(); $('#mCancel').click(); }
+  if (e.key === 'Tab'){
+    const controls = Array.from($('#overlay').querySelectorAll('button,input,a[href]'))
+      .filter(el => !el.disabled && el.offsetParent !== null);
+    const first = controls[0], last = controls[controls.length - 1];
+    if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  }
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+    e.preventDefault();
+    // Step through the engines this device can actually run.
+    const avail = ENGINE_BTNS.map(([k]) => k).filter(k => !lastBlocked[k]);
+    if (!avail.length) return;
+    const step = e.key === 'ArrowDown' ? 1 : -1;
+    chosen = avail[(avail.indexOf(chosen) + step + avail.length) % avail.length];
+    paintOpts();
+  }
+});
+
+/* ------------------------------- events --------------------------- */
+const drop = $('#drop');
+drop.onclick = () => { if (!document.body.classList.contains('busy')) $('#file').click(); };
+drop.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); drop.click(); }
+});
+$('#file').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
+
+['dragenter','dragover'].forEach(ev =>
+  drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(ev =>
+  drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => {
+  if (e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files);
+});
+
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => {
+  e.preventDefault();
+  if (!queue.length && e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files);
+});
+
+// Paste straight from the clipboard.
+document.addEventListener('paste', e => {
+  const items = e.clipboardData && e.clipboardData.items;
+  if (!items) return;
+  const files = [];
+  for (const it of items){
+    if (it.kind === 'file' && it.type.startsWith('image/')){
+      const f = it.getAsFile();
+      if (f) files.push(f);
+    }
+  }
+  if (files.length){ e.preventDefault(); addFiles(files); }
+});
+
+/* ------------------------ service reachability -------------------- */
+// Models are downloaded from HuggingFace on first use, so if that host is
+// unreachable the app looks broken for no visible reason. This probes a
+// ~300 byte file on the *same host and CORS setup* as the models, so we know
+// before a 6.6 MB download fails.
+const PING_URL = 'tacet-plugin://cutout/ping.json';
+
+function setAlert(kind, html){
+  const el = $('#alert');
+  if (!kind){ el.style.display = 'none'; return; }
+  el.className = 'alert' + (kind === 'warn' ? ' warn' : '');
+  el.style.display = 'flex';
+  $('#alertText').innerHTML = html;
+}
+
+async function checkServices(){
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 8000);
+  try {
+    const res = await fetch(PING_URL + '?ping=' + Date.now(), { signal: ctl.signal, cache: 'no-store' });
+    if (res.ok){ setAlert(null); return true; }
+    if (res.status === 429){
+      setAlert('bad', '<b>Model servers are busy.</b> HuggingFace is limiting downloads from ' +
+        'this connection, so a model may fail to load. Wait a minute, then check again.');
+      return false;
+    }
+    setAlert('bad', '<b>Model servers are having trouble</b> (error ' + res.status + '). ' +
+      'Cutting out will not work until they recover.');
+    return false;
+  } catch (e){
+    setAlert('bad', '<b>Cannot reach the model servers.</b> Their models cannot download, so ' +
+      'cutting out will not work right now. The page itself is fine.');
+    return false;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+$('#alertRetry').onclick = () => checkServices();
+
+/* ------------------------------ startup --------------------------- */
+const capsReady = detectCaps();
+$('#pasteKey').textContent = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘ V' : 'Ctrl V';
+
+// Deliberately no model preload: nothing is downloaded until the visitor
+// actually asks for a cut-out. The probe is ~300 bytes and only reports
+// whether the servers are reachable. The cut-off check runs after it, so a
+// server outage keeps the louder message.
+checkServices().then(ok => { if (ok) reportCutOff(); });
+
+})();
+</script>
+<script>
+/* Cutout inside Tacet: everything is on this Mac, so nothing is downloaded and nothing is uploaded. */
+(() => {
+  const set = (sel, html) => { const el = document.querySelector(sel); if (el) el.innerHTML = html; };
+  set('.hero h1', 'Remove image backgrounds.<br><span>Fully offline.</span>');
+  set('.hero p', 'Every engine is already on this Mac, inside Tacet.<br>Nothing is uploaded and nothing is downloaded.');
+  set('.chip', '<span class="dot"></span>Works offline');
+  document.title = 'Cutout';
+})();
+</script>
+</body>
+</html>

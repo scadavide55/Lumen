@@ -247,6 +247,7 @@
 "Customize This Site…" = "Personnaliser ce site…";
 "Customize a Site…" = "Personnaliser un site…";
 "Customized sites" = "Sites personnalisés";
+"Cutout" = "Cutout";
 "Dark" = "Sombre";
 "Dark Appearance" = "Apparence sombre";
 "Data" = "Données";
@@ -264,11 +265,13 @@
 "Delete “%@”?" = "Supprimer « %@ » ?";
 "Deselect Tabs" = "Désélectionner les onglets";
 "Developer" = "Développeur";
+"Developer: %@" = "Développeur : %@";
 "Don't Allow" = "Refuser";
 "Don't attach this page" = "Ne pas joindre cette page";
 "Done" = "Terminé";
 "Download" = "Téléchargement";
 "Download Anyway" = "Télécharger quand même";
+"Downloading %@ of %@" = "Téléchargé %1$@ sur %2$@";
 "Downloading filter lists…" = "Téléchargement des listes de filtres…";
 "Downloading…" = "Téléchargement…";
 "Downloads" = "Téléchargements";
@@ -573,6 +576,7 @@
 "One last Keychain question" = "Une dernière question du trousseau";
 "Only add extensions you trust: they can see and change the pages they have access to." = "N'ajoutez que des extensions de confiance : elles peuvent voir et modifier les pages auxquelles elles ont accès.";
 "Open" = "Ouvrir";
+"Open %@" = "Ouvrir %@";
 "Open %@ to copy your password" = "Ouvrir %@ pour copier le mot de passe";
 "Open Frame in New Tab" = "Ouvrir le cadre dans un nouvel onglet";
 "Open Full Disk Access Settings" = "Ouvrir les réglages d'accès complet au disque";
@@ -696,6 +700,7 @@
 "Remove Tracking from Links" = "Supprimer le pistage des liens";
 "Remove from Favorites" = "Retirer des favoris";
 "Remove from Group" = "Retirer du groupe";
+"Remove the background of any picture, on this Mac: rest the pointer on a picture and click ✂ Cutout (or press ⌥⇧X), or open Cutout and drop your own photos. Four AI engines, transparent PNG at full resolution, nothing uploaded. The engines are downloaded once when you add it (413 MB), then it works offline." = "Supprimez l'arrière-plan de n'importe quelle image, sur ce Mac : laissez le pointeur sur une image et cliquez sur ✂ Cutout (ou appuyez sur ⌥⇧X), ou ouvrez Cutout et déposez vos photos. Quatre moteurs d'IA, PNG transparent en pleine résolution, rien n'est envoyé. Les moteurs sont téléchargés une fois à l'ajout (413 Mo), puis tout fonctionne hors ligne.";
 "Remove tracking from links" = "Supprimer le pistage des liens";
 "Remove tracking parameters from links" = "Supprimer les paramètres de pistage des liens";
 "Remove “%@”?" = "Supprimer « %@ » ?";

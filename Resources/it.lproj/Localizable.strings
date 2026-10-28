@@ -247,6 +247,7 @@
 "Customize This Site…" = "Personalizza questo sito…";
 "Customize a Site…" = "Personalizza un sito…";
 "Customized sites" = "Siti personalizzati";
+"Cutout" = "Cutout";
 "Dark" = "Scuro";
 "Dark Appearance" = "Aspetto scuro";
 "Data" = "Dati";
@@ -264,11 +265,13 @@
 "Delete “%@”?" = "Eliminare “%@”?";
 "Deselect Tabs" = "Deseleziona schede";
 "Developer" = "Sviluppatore";
+"Developer: %@" = "Sviluppatore: %@";
 "Don't Allow" = "Non consentire";
 "Don't attach this page" = "Non allegare questa pagina";
 "Done" = "Fine";
 "Download" = "Download";
 "Download Anyway" = "Scarica comunque";
+"Downloading %@ of %@" = "Scaricati %1$@ di %2$@";
 "Downloading filter lists…" = "Download delle liste di filtri…";
 "Downloading…" = "Download in corso…";
 "Downloads" = "Download";
@@ -573,6 +576,7 @@
 "One last Keychain question" = "Un’ultima domanda del Portachiavi";
 "Only add extensions you trust: they can see and change the pages they have access to." = "Aggiungi solo estensioni di cui ti fidi: possono vedere e modificare le pagine a cui hanno accesso.";
 "Open" = "Apri";
+"Open %@" = "Apri %@";
 "Open %@ to copy your password" = "Apri %@ per copiare la password";
 "Open Frame in New Tab" = "Apri frame in una nuova scheda";
 "Open Full Disk Access Settings" = "Apri le impostazioni di Accesso completo al disco";
@@ -696,6 +700,7 @@
 "Remove Tracking from Links" = "Rimuovi il tracciamento dai link";
 "Remove from Favorites" = "Rimuovi dai preferiti";
 "Remove from Group" = "Rimuovi dal gruppo";
+"Remove the background of any picture, on this Mac: rest the pointer on a picture and click ✂ Cutout (or press ⌥⇧X), or open Cutout and drop your own photos. Four AI engines, transparent PNG at full resolution, nothing uploaded. The engines are downloaded once when you add it (413 MB), then it works offline." = "Rimuovi lo sfondo da qualsiasi immagine, su questo Mac: tieni il puntatore su un'immagine e fai clic su ✂ Cutout (o premi ⌥⇧X), oppure apri Cutout e trascina le tue foto. Quattro motori di AI, PNG trasparente alla risoluzione originale, niente caricato online. I motori si scaricano una volta quando lo aggiungi (413 MB), poi funziona offline.";
 "Remove tracking from links" = "Rimuovi il tracciamento dai link";
 "Remove tracking parameters from links" = "Rimuovi i parametri di tracciamento dai link";
 "Remove “%@”?" = "Rimuovere “%@”?";

@@ -23,6 +23,13 @@ for name in sorted(os.listdir(root)):
         if key in p:
             data = open(os.path.join(folder, p[key]), "rb").read()
             files[p[key]] = hashlib.sha256(data).hexdigest()
+    # A plugin with an app ships its pages in app/ (hashed here) and lists large assets with their own hashes.
+    for f in p.get("app", {}).get("files", []):
+        data = open(os.path.join(folder, "app", f), "rb").read()
+        files["app/" + f] = hashlib.sha256(data).hexdigest()
+    for a in p.get("app", {}).get("assets", []):
+        if not (a.get("url", "").startswith("https://") and len(a.get("sha256", "")) == 64 and a.get("size")):
+            sys.exit(f"{manifest}: every asset needs an https url, a sha256 and a size")
     if not files:
         sys.exit(f"{manifest}: needs js, css or both")
     p["files"] = files
