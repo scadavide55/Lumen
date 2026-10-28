@@ -20,6 +20,9 @@ final class BrowserState {
     var groups: [TabGroup] = []
     /// A tab whose page should be translated; PageTranslationHost picks it up.
     var translateRequest: UUID?
+    /// The window fills its own Space, where macOS hides the traffic lights, so no room is kept for them.
+    var isFullScreen = false
+    @ObservationIgnored private var fullScreenObservers: [NSObjectProtocol] = []
     /// Only the page: no sidebar, toolbar or tabs, until Focus Mode is turned off.
     var focusMode = false
     /// Words typed in the sidebar's tab search; only matching tabs show while it isn't empty.
@@ -133,6 +136,7 @@ final class BrowserState {
         if let keyObserver { NotificationCenter.default.removeObserver(keyObserver) }
         if let lockObserver { NotificationCenter.default.removeObserver(lockObserver) }
         if let closeObserver { NotificationCenter.default.removeObserver(closeObserver) }
+        fullScreenObservers.forEach(NotificationCenter.default.removeObserver)
         if let spareObserver { NotificationCenter.default.removeObserver(spareObserver) }
         tabs.forEach { $0.close() }
         // Closing a window changes what the next launch restores.
@@ -152,6 +156,12 @@ final class BrowserState {
         keyObserver = NotificationCenter.default.addObserver(forName: NSWindow.didBecomeKeyNotification, object: window, queue: .main) { [weak self] _ in
             WindowRegistry.shared.lastFocused = self
             if let self { ExtensionEvents.focused(self) }
+        }
+        isFullScreen = window.styleMask.contains(.fullScreen)
+        fullScreenObservers = [NSWindow.willEnterFullScreenNotification, NSWindow.didExitFullScreenNotification].map { name in
+            NotificationCenter.default.addObserver(forName: name, object: window, queue: .main) { [weak self] note in
+                self?.isFullScreen = note.name == NSWindow.willEnterFullScreenNotification
+            }
         }
         closeObserver = NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: window, queue: .main) { [weak self] _ in
             self?.windowClosed()

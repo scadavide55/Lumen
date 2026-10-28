@@ -8,7 +8,7 @@ struct Sidebar: View {
     var body: some View {
         VStack(spacing: 8) {
             HStack(spacing: 2) {
-                if s.sidebarSide == .left { Spacer().frame(width: 70) }
+                if s.sidebarSide == .left && !b.isFullScreen { Spacer().frame(width: 70) }
                 Spacer(minLength: 0)
                 if showsControls {
                     SidebarToggle()
@@ -918,7 +918,7 @@ struct CompactBar: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            Spacer().frame(width: 72)
+            if !b.isFullScreen { Spacer().frame(width: 72) }
             if let tab = b.current { NavButtons(tab: tab) }
             TabStrip(compact: true)
             if let p = b.profile { ProfileBadge(profile: p, compact: true).fixedSize() }

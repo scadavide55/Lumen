@@ -7,7 +7,7 @@ struct Toolbar: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            if trafficSpace { Spacer().frame(width: 72) }
+            if trafficSpace && !b.isFullScreen { Spacer().frame(width: 72) }
             if s.tabLayout == .vertical { SidebarToggle() }
             if let tab = b.current { ToolbarContent(tab: tab) }
         }

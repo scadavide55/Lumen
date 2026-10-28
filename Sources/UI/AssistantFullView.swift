@@ -106,7 +106,7 @@ struct AssistantFullView: View {
 
     private var header: some View {
         HStack(spacing: 8) {
-            if !listVisible { Spacer().frame(width: 70) }
+            if !listVisible && !b.isFullScreen { Spacer().frame(width: 70) }
             IconButton(systemName: "sidebar.left", help: listVisible ? "Hide Chats" : "Show Chats") { listVisible.toggle() }
             Text(title).font(.system(size: 14, weight: .semibold)).lineLimit(1)
             Spacer()
