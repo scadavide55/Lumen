@@ -251,8 +251,16 @@ struct GroupHeader: View {
         .frame(height: 26)
         .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(group.tint.opacity(hover ? 0.16 : 0.09)))
         .contentShape(Rectangle())
-        .onTapGesture(count: 2) { startRename() }
-        .onTapGesture { withAnimation(.easeOut(duration: 0.15)) { b.toggleCollapsed(group.id) } }
+        // One gesture, read from the click itself: waiting to see whether a double-click follows would hold
+        // the first click back by the double-click interval. A second click undoes the fold and renames instead.
+        .onTapGesture {
+            if (NSApp.currentEvent?.clickCount ?? 1) >= 2 {
+                withAnimation(.easeOut(duration: 0.15)) { b.toggleCollapsed(group.id) }
+                startRename()
+            } else {
+                withAnimation(.easeOut(duration: 0.15)) { b.toggleCollapsed(group.id) }
+            }
+        }
         .onHover { hover = $0 }
         .contextMenu {
             Button("Rename Group…") { startRename() }
@@ -857,8 +865,16 @@ struct GroupChip: View {
         .frame(height: 30)
         .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Color.primary.opacity(hover ? 0.1 : (group.collapsed ? 0.06 : 0))))
         .contentShape(Rectangle())
-        .onTapGesture(count: 2) { startRename() }
-        .onTapGesture { withAnimation(.easeOut(duration: 0.2)) { b.toggleCollapsed(group.id) } }
+        // One gesture, read from the click itself: waiting to see whether a double-click follows would hold
+        // the first click back by the double-click interval. A second click undoes the fold and renames instead.
+        .onTapGesture {
+            if (NSApp.currentEvent?.clickCount ?? 1) >= 2 {
+                withAnimation(.easeOut(duration: 0.2)) { b.toggleCollapsed(group.id) }
+                startRename()
+            } else {
+                withAnimation(.easeOut(duration: 0.2)) { b.toggleCollapsed(group.id) }
+            }
+        }
         .onHover { hover = $0 }
         .popover(isPresented: $renaming, arrowEdge: .bottom) {
             TextField("Group name", text: $name)
