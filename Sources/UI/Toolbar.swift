@@ -192,6 +192,7 @@ struct ShieldPopover: View {
             Toggle("Block ads and trackers", isOn: $s.adBlock)
             Toggle("Hide cookie banners", isOn: $s.hideCookieBanners).disabled(!s.adBlock)
             Toggle("Skip YouTube ads", isOn: $s.youtubeAds).disabled(!s.adBlock)
+            Toggle("Protect against fingerprinting", isOn: $s.fingerprintProtection).disabled(!s.adBlock)
             Toggle("Block third-party cookies", isOn: $s.blockThirdPartyCookies)
             Toggle("Remove tracking from links", isOn: $s.stripTracking)
             HStack {

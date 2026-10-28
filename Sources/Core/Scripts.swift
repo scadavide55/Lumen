@@ -28,6 +28,12 @@ enum Scripts {
             c.addUserScript(WKUserScript(source: youtube.replacingOccurrences(of: "__ALLOW__", with: allow),
                                          injectionTime: .atDocumentStart, forMainFrameOnly: false, in: .page))
         }
+        if s.adBlock && s.fingerprintProtection {
+            // In the page itself and in every frame, before any of the page's scripts run.
+            c.addUserScript(WKUserScript(source: fingerprinting.replacingOccurrences(of: "__ALLOW__", with: allow)
+                                            .replacingOccurrences(of: "__SEED__", with: String(sessionSeed)),
+                                         injectionTime: .atDocumentStart, forMainFrameOnly: false, in: .page))
+        }
         if s.forceDark {
             c.addUserScript(WKUserScript(source: forceDark, injectionTime: .atDocumentStart, forMainFrameOnly: true, in: .defaultClient))
         }
@@ -295,6 +301,89 @@ enum Scripts {
       window.addEventListener('load', unlock);
       setTimeout(unlock, 1500);
       setTimeout(unlock, 4000);
+    })();
+    """#
+
+    // MARK: Fingerprinting
+
+    /// New for every launch of Tacet, so a site sees the same readings while you use it, but not tomorrow.
+    static let sessionSeed = UInt32.random(in: 1...UInt32.max)
+
+    /// Fingerprinting scripts draw on a canvas, render WebGL or process audio and read back the result, which differs
+    /// slightly between Macs. Tacet changes a few of those values by the smallest step, differently for each site
+    /// (so sites can't link visits) but the same within a site (so nothing flickers or breaks). It also hides the
+    /// exact graphics chip and reports a common number of processor cores.
+    static let fingerprinting = #"""
+    (() => {
+      const allow = __ALLOW__;
+      const h = location.hostname;
+      if (!h || allow.some(d => h === d || h.endsWith('.' + d))) return;
+      // A small random generator seeded from this launch and the site's name.
+      let seed = __SEED__ >>> 0;
+      for (const c of h.split('.').slice(-2).join('.')) seed = Math.imul(seed ^ c.charCodeAt(0), 2654435761) >>> 0;
+      const rand = (n) => { let x = (seed ^ Math.imul(n + 1, 0x9E3779B1)) >>> 0; x ^= x << 13; x ^= x >>> 17; x ^= x << 5; return (x >>> 0) / 4294967296; };
+
+      // Canvas: a handful of pixels, chosen from the seed, move by one step in one colour.
+      const noisy = (data, width, height) => {
+        const pixels = width * height;
+        if (!pixels || pixels > 4000000) return;
+        const count = Math.min(20, Math.max(1, pixels >> 10));
+        for (let i = 0; i < count; i++) {
+          const p = Math.floor(rand(i) * pixels) * 4 + Math.floor(rand(i + 99) * 3);
+          data[p] = data[p] ^ 1;
+        }
+      };
+      const Ctx = CanvasRenderingContext2D.prototype;
+      const getImageData = Ctx.getImageData;
+      Ctx.getImageData = function (...args) {
+        const img = getImageData.apply(this, args);
+        noisy(img.data, img.width, img.height);
+        return img;
+      };
+      // toDataURL and toBlob read a noisy copy, so the canvas on screen stays as drawn.
+      const copy = (canvas) => {
+        if (!canvas.width || !canvas.height || canvas.width * canvas.height > 4000000) return null;
+        const c = document.createElement('canvas');
+        c.width = canvas.width; c.height = canvas.height;
+        const ctx = c.getContext('2d');
+        try { ctx.drawImage(canvas, 0, 0); } catch (e) { return null; }
+        const img = getImageData.call(ctx, 0, 0, c.width, c.height);
+        noisy(img.data, img.width, img.height);
+        ctx.putImageData(img, 0, 0);
+        return c;
+      };
+      const C = HTMLCanvasElement.prototype;
+      const toDataURL = C.toDataURL, toBlob = C.toBlob;
+      C.toDataURL = function (...args) { const c = copy(this); return toDataURL.apply(c || this, args); };
+      C.toBlob = function (...args) { const c = copy(this); return toBlob.apply(c || this, args); };
+
+      // WebGL: the graphics chip's exact name becomes Apple's generic one.
+      for (const GL of [window.WebGLRenderingContext, window.WebGL2RenderingContext]) {
+        if (!GL) continue;
+        const getParameter = GL.prototype.getParameter;
+        GL.prototype.getParameter = function (p) {
+          if (p === 37445) return 'Apple Inc.';
+          if (p === 37446) return 'Apple GPU';
+          return getParameter.call(this, p);
+        };
+      }
+
+      // Audio: rendered sound moves by an amount far below hearing, once per buffer.
+      if (window.AudioBuffer) {
+        const getChannelData = AudioBuffer.prototype.getChannelData;
+        const done = new WeakSet();
+        AudioBuffer.prototype.getChannelData = function (...args) {
+          const data = getChannelData.apply(this, args);
+          if (!done.has(data)) {
+            done.add(data);
+            for (let i = 0; i < data.length; i += 100) data[i] += (rand(i) - 0.5) * 1e-7;
+          }
+          return data;
+        };
+      }
+
+      // A common core count instead of this Mac's exact one.
+      try { Object.defineProperty(Navigator.prototype, 'hardwareConcurrency', { get: () => 8, configurable: true }); } catch (e) {}
     })();
     """#
 

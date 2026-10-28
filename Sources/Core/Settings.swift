@@ -387,6 +387,8 @@ final class Settings: Observable {
     @Pref("cookieBanners") var hideCookieBanners = true
     /// Answers the banner with "Reject all" where the site offers it, so it doesn't come back and nothing optional is allowed.
     @Pref("rejectCookies") var rejectCookies = true
+    /// Makes canvas, WebGL and audio readings differ a little per site, so they can't be used to recognise this Mac.
+    @Pref("fingerprinting") var fingerprintProtection = true
     @Pref("thirdPartyCookies") var blockThirdPartyCookies = true
     @Pref("stripTracking") var stripTracking = true
     @Pref("httpsUpgrade") var httpsUpgrade = true

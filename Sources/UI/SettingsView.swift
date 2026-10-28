@@ -326,6 +326,14 @@ struct ShieldPane: View {
                     }
                 }
                 .disabled(!s.adBlock || !s.hideCookieBanners)
+                Toggle(isOn: $s.fingerprintProtection) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Protect against fingerprinting")
+                        Text("Changes canvas, WebGL and audio readings slightly for each site, so they can't be used to recognise your Mac.")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                .disabled(!s.adBlock)
                 Toggle("Skip YouTube ads", isOn: $s.youtubeAds).disabled(!s.adBlock)
             }
             Section {
