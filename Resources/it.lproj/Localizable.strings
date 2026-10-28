@@ -2,16 +2,24 @@
 "%@ is ready. You have Tacet %@." = "%1$@ è pronto. Hai Tacet %2$@.";
 "%@ needs Full Disk Access." = "%@ richiede l'accesso completo al disco.";
 "%@ of %@" = "%1$@ di %2$@";
+"%@ on this site" = "%@ su questo sito";
 "%@ rules active" = "%@ regole attive";
 "%@ rules active. Toggle anytime with ⇧⌘B." = "%@ regole attive. Attivalo o disattivalo quando vuoi con ⇧⌘B.";
 "%@ rules · updated %@" = "%1$@ regole · aggiornate %2$@";
+"%@ this session" = "%@ in questa sessione";
 "%@ wants to open a “%@” link in %@." = "%1$@ vuole aprire un link “%2$@” in %3$@.";
+"%@ · Today" = "%@ · Oggi";
 "%@: %lld bookmarks, %lld history items, %lld cookies" = "%1$@: %2$lld segnalibri, %3$lld voci di cronologia, %4$lld cookie";
 "%d Tabs" = "%d schede";
 "%d duplicate tabs" = "%d schede doppie";
 "%d hidden" = "%d nascosti";
+"%d in data breaches · %d reused · %d weak" = "%1$d in violazioni di dati · %2$d riutilizzate · %3$d deboli";
+"%lld bookmarks" = "%lld segnalibri";
+"%lld cookies" = "%lld cookie";
+"%lld history items" = "%lld voci di cronologia";
 "%lld min read" = "%lld min di lettura";
 "%lld profiles" = "%lld profili";
+"%lld tabs from Spaces and pinned tabs" = "%lld schede da Spazi e schede fissate";
 "(no username)" = "(nessun nome utente)";
 "1 duplicate tab" = "1 scheda doppia";
 "1 profile" = "1 profilo";
@@ -21,7 +29,10 @@
 "A few things worth knowing." = "Alcune cose utili da sapere.";
 "A folder with a manifest.json, or a .zip, .crx (Chrome) or .xpi (Firefox) file. Most extensions work; some features that only Chrome or Firefox have may not." = "Una cartella con un manifest.json, oppure un file .zip, .crx (Chrome) o .xpi (Firefox). La maggior parte delle estensioni funziona; alcune funzioni che esistono solo in Chrome o Firefox potrebbero non andare.";
 "A profile can be deleted once none of its windows are open." = "Puoi eliminare un profilo quando nessuna delle sue finestre è aperta.";
+"A quick answer here, searching the web if needed" = "Una risposta rapida qui, cercando sul web se serve";
 "A quiet, fast browser that blocks ads and trackers for you. Let's get it set up the way you like. It only takes a minute." = "Un browser silenzioso e veloce che blocca pubblicità e tracker per te. Configuriamolo come piace a te: ci vuole solo un minuto.";
+"A sleeping tab shows the page as you last saw it while it loads again, then puts you back where you had scrolled to. No white flash, no jump to the top." = "Una scheda in pausa mostra la pagina com'era l'ultima volta mentre si ricarica, poi ti riporta dove eri arrivato. Niente lampo bianco, niente salto in cima.";
+"A stronger Tacet Shield" = "Tacet Shield più forte";
 "AI" = "AI";
 "API key" = "Chiave API";
 "API key (optional)" = "Chiave API (facoltativa)";
@@ -30,6 +41,7 @@
 "Accent colour" = "Colore principale";
 "Actual Size" = "Dimensioni reali";
 "Ad blocker on or off" = "Attiva o disattiva il blocco pubblicità";
+"AdGuard Base (ads, another list)" = "AdGuard Base (pubblicità, un’altra lista)";
 "Add" = "Aggiungi";
 "Add Bookmark" = "Aggiungi segnalibro";
 "Add Extension" = "Aggiungi estensione";
@@ -59,6 +71,7 @@
 "Allow" = "Consenti";
 "Allow Grouping This Site" = "Permetti di raggruppare questo sito";
 "Allow “%@” to use your %@?" = "Consentire a “%1$@” di usare %2$@?";
+"Also today's unpinned tabs" = "Anche le schede non fissate di oggi";
 "Always" = "Sempre";
 "Always show website titles in tabs" = "Mostra sempre i titoli dei siti nelle schede";
 "An AI assistant in a panel beside the page, for questions about what you're reading." = "Un assistente AI in un pannello accanto alla pagina, per le domande su quello che stai leggendo.";
@@ -72,11 +85,16 @@
 "Apple Passwords and other managers" = "Password di Apple e altri gestori";
 "Apple's model is free, works offline and nothing leaves your Mac, but it is limited: it is much smaller than cloud models, makes more mistakes, reads only the start of long pages and videos, can't see images, and is less reliable at using pages for you. For long or hard questions, use a cloud provider." = "Il modello di Apple è gratuito, funziona offline e niente esce dal Mac, ma è limitato: è molto più piccolo dei modelli cloud, sbaglia più spesso, legge solo l'inizio delle pagine e dei video lunghi, non vede le immagini ed è meno affidabile quando usa le pagine per te. Per domande lunghe o difficili usa un fornitore cloud.";
 "Apple's model, on your Mac" = "Il modello di Apple, sul tuo Mac";
+"Apps installed from sites move to ~/Applications/Tacet Apps and update with Tacet" = "Le app installate dai siti si spostano in ~/Applicazioni/Tacet Apps e si aggiornano con Tacet";
 "Apps, installers and scripts can harm your Mac. Download it only if you trust %@." = "App, programmi di installazione e script possono danneggiare il Mac. Scaricalo solo se ti fidi di %@.";
+"Arc Spaces and pinned tabs" = "Spazi e schede fissate di Arc";
+"Arc stops working on December 22. Tacet reads your Spaces, Favorites, pinned tabs and folders straight from Arc: Favorites become pinned tabs, and each Space and folder a tab group that loads only when you open it." = "Arc smette di funzionare il 22 dicembre. Tacet legge Spazi, Preferiti, schede fissate e cartelle direttamente da Arc: i Preferiti diventano schede fissate, e ogni Spazio e cartella un gruppo di schede che si carica solo quando lo apri.";
+"Arc's Spaces and pinned tabs couldn't be read: %@" = "Non è stato possibile leggere gli Spazi e le schede fissate di Arc: %@";
 "Arrange your tabs" = "Disponi le schede";
 "Articles saved for offline reading" = "Articoli salvati da leggere offline";
 "As the site makes them" = "Come li fa il sito";
 "Ask About It…" = "Chiedi…";
+"Ask Tacet Assistant: %@" = "Chiedi a Tacet Assistant: %@";
 "Ask Tacet Assistant…" = "Chiedi a Tacet Assistant…";
 "Ask about the page you're reading, or anything else." = "Chiedi qualcosa sulla pagina che stai leggendo, o su qualsiasi altra cosa.";
 "Ask questions about the page you're reading, get summaries and explanations, in a panel beside the page. It uses your own API key, and it stays off unless you turn it on." = "Fai domande sulla pagina che stai leggendo, ottieni riassunti e spiegazioni, in un pannello accanto alla pagina. Usa la tua chiave API e resta spento finché non lo attivi.";
@@ -110,6 +128,7 @@
 "Bookmarks" = "Segnalibri";
 "Bookmarks, history and sign-ins from Safari, Chrome, Firefox, Opera and more." = "Segnalibri, cronologia e accessi da Safari, Chrome, Firefox, Opera e altri.";
 "Bring everything with you" = "Porta tutto con te";
+"Bring your Arc sidebar" = "Porta con te la barra di Arc";
 "Bring your bookmarks, history and sign-ins into Tacet. Nothing leaves your Mac." = "Porta in Tacet segnalibri, cronologia e accessi. Niente lascia il tuo Mac.";
 "Browser use" = "Uso del browser";
 "Browser use: let the assistant click, type and scroll on pages" = "Uso del browser: permetti all'assistente di cliccare, scrivere e scorrere nelle pagine";
@@ -125,12 +144,15 @@
 "Cancel" = "Annulla";
 "Cancelled" = "Annullato";
 "Change a site's colours, font and width, hide parts of it, or add your own CSS and JavaScript. On any page, choose Customize This Site from the ⋯ menu or the command bar." = "Cambia colori, carattere e larghezza di un sito, nascondine delle parti o aggiungi CSS e JavaScript tuoi. Su qualsiasi pagina scegli Personalizza questo sito dal menu ⋯ o dalla barra dei comandi.";
+"Changes canvas, WebGL and audio readings slightly for each site, so they can't be used to recognise your Mac." = "Modifica leggermente le letture di canvas, WebGL e audio per ogni sito, così non possono servire a riconoscere il tuo Mac.";
 "Chat History" = "Cronologia chat";
 "Chats in private windows aren't saved." = "Le chat nelle finestre private non vengono salvate.";
+"Check Again" = "Controlla di nuovo";
 "Check Now" = "Controlla ora";
 "Check for Updates" = "Controlla aggiornamenti";
 "Check for Updates…" = "Controlla aggiornamenti…";
 "Check for updates automatically" = "Controlla automaticamente gli aggiornamenti";
+"Check…" = "Controlla…";
 "Choose Apple (on this Mac) in Settings › AI to use the assistant for free, offline, with nothing leaving your Mac. It's smaller than cloud models, so it's best for short, simple questions." = "Scegli Apple (su questo Mac) in Impostazioni › AI per usare l’assistente gratis, offline, senza che niente esca dal Mac. È più piccolo dei modelli cloud, quindi va meglio per domande brevi e semplici.";
 "Choose a model in Settings › AI." = "Scegli un modello in Impostazioni › AI.";
 "Choose a start page" = "Scegli la pagina iniziale";
@@ -149,6 +171,7 @@
 "Click comment sections, sidebars, banners or anything else on the page to hide them on this site." = "Clicca su commenti, barre laterali, banner o qualsiasi altra cosa nella pagina per nasconderli su questo sito.";
 "Click parts of the page to hide them on this site" = "Clicca parti della pagina per nasconderle su questo sito";
 "Click the page icon in the address, or press ⇧⌘R, for a clean reading view." = "Fai clic sull'icona della pagina nell'indirizzo, o premi ⇧⌘R, per una vista di lettura pulita.";
+"Click the shield in the toolbar to see the numbers and the sites" = "Fai clic sullo scudo nella barra per vedere i numeri e i siti";
 "Click to collapse, double-click to rename" = "Clic per comprimere, doppio clic per rinominare";
 "Click what you want to hide on this site · ↑ for a bigger block · Esc when you're done" = "Clicca quello che vuoi nascondere su questo sito · ↑ per un blocco più grande · Esc quando hai finito";
 "Clicking “%@”" = "Clic su “%@”";
@@ -167,6 +190,7 @@
 "Close split view" = "Chiudi vista divisa";
 "Close tab" = "Chiudi scheda";
 "Close tab (⌘W)" = "Chiudi scheda (⌘W)";
+"Close the answer (esc)" = "Chiudi la risposta (esc)";
 "Close this profile's windows first" = "Chiudi prima le finestre di questo profilo";
 "Collapse Group" = "Comprimi gruppo";
 "Colour" = "Colore";
@@ -182,6 +206,7 @@
 "Connection is not secure" = "La connessione non è sicura";
 "Connection is secure" = "La connessione è sicura";
 "Continue" = "Continua";
+"Continue in the chat" = "Continua nella chat";
 "Continue to Site" = "Continua sul sito";
 "Converting rules…" = "Conversione delle regole…";
 "Cookies and site data (signs you out of most sites)" = "Cookie e dati dei siti (ti disconnette dalla maggior parte dei siti)";
@@ -242,6 +267,7 @@
 "Duplicate Tab" = "Duplica scheda";
 "Dusk" = "Tramonto";
 "Each profile keeps its own cookies, sign-ins and site data, so you can be signed in to different accounts at the same time. History, bookmarks, passwords and settings are shared." = "Ogni profilo ha i suoi cookie, accessi e dati dei siti, così puoi essere connesso a account diversi nello stesso momento. Cronologia, segnalibri, password e impostazioni sono in comune.";
+"Easy to guess." = "Facile da indovinare.";
 "EasyList (ads)" = "EasyList (pubblicità)";
 "EasyPrivacy (trackers)" = "EasyPrivacy (tracker)";
 "Edit" = "Modifica";
@@ -255,6 +281,8 @@
 "Everything has a shortcut. You'll find them all in the menus too." = "Tutto ha una scorciatoia. Le trovi anche nei menu.";
 "Everything stays on your Mac. Tacet has no accounts and no analytics." = "Tutto resta sul tuo Mac. Tacet non ha account né statistiche.";
 "Example: #comments, .sidebar { display: none !important; }" = "Esempio: #comments, .sidebar { display: none !important; }";
+"Exit Focus Mode" = "Esci dalla modalità focus";
+"Exit Focus Mode (⇧⌘J)" = "Esci dalla modalità focus (⇧⌘J)";
 "Exit Full Screen Chat" = "Esci dalla chat a schermo intero";
 "Exit Reader" = "Esci da Lettura";
 "Expand Group" = "Espandi gruppo";
@@ -270,7 +298,10 @@
 "Extensions" = "Estensioni";
 "Extensions don't run in private windows. Pages open before you add one start using it when you reload them." = "Le estensioni non funzionano nelle finestre private. Le pagine aperte prima di aggiungerne una la usano quando le ricarichi.";
 "Extensions need macOS 15.4 or later." = "Le estensioni richiedono macOS 15.4 o successivo.";
+"Fanboy Annoyances (pop-ups, social widgets, newsletters)" = "Fanboy Annoyances (pop-up, widget social, newsletter)";
 "Fast and light" = "Veloce e leggero";
+"Favorites become pinned tabs, each Space and folder a tab group in the front window. They load only when you open them." = "I Preferiti diventano schede fissate, ogni Spazio e cartella un gruppo di schede nella finestra in primo piano. Si caricano solo quando li apri.";
+"File › Import from Another Browser…, then choose Arc" = "File › Importa da un altro browser…, poi scegli Arc";
 "Fill any sign-in page with %@. Tacet won't offer to save passwords." = "Compila qualsiasi pagina di accesso con %@. Tacet non proporrà di salvare le password.";
 "Fill sign-in pages with its Auto-Type shortcut. Tacet won't offer to save passwords." = "Compila le pagine di accesso con la sua scorciatoia Auto-Type. Tacet non proporrà di salvare le password.";
 "Fill with %@: press %@" = "Compila con %1$@: premi %2$@";
@@ -282,11 +313,14 @@
 "Find on Page" = "Trova nella pagina";
 "Find on Page…" = "Trova nella pagina…";
 "Find on page" = "Trova nella pagina";
+"Find saved passwords that appeared in data breaches, that you use on more than one site, or that are easy to guess. Only the first 5 characters of a password's hash are ever sent to check it." = "Trova le password salvate comparse in violazioni di dati, usate su più siti o facili da indovinare. Per controllarle viene inviato solo l’inizio (5 caratteri) dell’hash della password.";
 "Find your articles in the Library › Reading List" = "Trovi gli articoli in Libreria › Elenco di lettura";
 "Find…" = "Trova…";
 "Float pages with rounded corners" = "Pagine fluttuanti con angoli arrotondati";
 "Float the page with rounded corners" = "Pagina fluttuante con angoli arrotondati";
 "Flow (animated)" = "Flusso (animato)";
+"Focus Mode" = "Modalità focus";
+"Folder" = "Cartella";
 "Follows your Mac" = "Segue il tuo Mac";
 "Font" = "Carattere";
 "Force dark pages (experimental)" = "Forza pagine scure (sperimentale)";
@@ -294,6 +328,7 @@
 "Forget" = "Dimentica";
 "Forward" = "Avanti";
 "Forward (⌘])" = "Avanti (⌘])";
+"Found in a data breach: change it on this site." = "Trovata in una violazione di dati: cambiala su questo sito.";
 "Free memory used by background tabs" = "Libera la memoria usata dalle schede in background";
 "Free software under the GNU GPL v3" = "Software libero sotto GNU GPL v3";
 "From %@" = "Da %@";
@@ -325,6 +360,7 @@
 "Hibernated tabs keep their place and history but release memory until you open them again." = "Le schede ibernate mantengono posizione e cronologia, ma liberano memoria finché non le riapri.";
 "Hibernation" = "Ibernazione";
 "Hidden elements" = "Elementi nascosti";
+"Hidden trackers (AdGuard)" = "Tracker nascosti (AdGuard)";
 "Hide Chats" = "Nascondi chat";
 "Hide Cookie Banners" = "Nascondi banner dei cookie";
 "Hide bars and pop-ups that stay on screen" = "Nascondi barre e pop-up che restano sullo schermo";
@@ -350,6 +386,7 @@
 "Imported %lld bookmarks." = "Importati %lld segnalibri.";
 "Imported %lld passwords." = "Importate %lld password.";
 "Imported 1 bookmark." = "Importato 1 segnalibro.";
+"Imported from %@: %@." = "Importato da %1$@: %2$@.";
 "Imported from %@: %lld bookmarks, %lld history items, %lld sign-in cookies." = "Importato da %1$@: %2$lld segnalibri, %3$lld voci di cronologia, %4$lld cookie di accesso.";
 "Import…" = "Importa…";
 "In Reader, choose Save for Offline: the article and its images are kept on your Mac, ready without a connection." = "In Lettura scegli Salva offline: l’articolo e le immagini restano sul tuo Mac, pronti anche senza connessione.";
@@ -367,6 +404,7 @@
 "Its cookies, sign-ins and site data will be removed. Saved passwords stay in Tacet." = "I suoi cookie, accessi e dati dei siti verranno rimossi. Le password salvate restano in Tacet.";
 "Its own window and Dock icon" = "Finestra e icona nel Dock tutte sue";
 "Its settings and data are removed too." = "Vengono rimossi anche le sue impostazioni e i suoi dati.";
+"Keep “Spaces and pinned tabs” on" = "Lascia attivo “Spazi e schede fissate”";
 "Keeps one tab per address" = "Tiene una sola scheda per indirizzo";
 "Keeps you signed in to sites." = "Ti mantiene connesso ai siti.";
 "Keeps you signed in to sites. Needs Full Disk Access for Tacet." = "Ti mantiene connesso ai siti. Richiede l'accesso completo al disco per Tacet.";
@@ -399,6 +437,7 @@
 "Looking at the page" = "Analisi della pagina";
 "Looking at your tabs" = "Guardo le tue schede";
 "Looks for a newer Tacet on GitHub" = "Cerca una versione più recente di Tacet su GitHub";
+"Looks for passwords found in data breaches, used on several sites or easy to guess. Only the first 5 characters of each password's SHA-1 hash are sent to Have I Been Pwned; the password never leaves your Mac." = "Cerca password trovate in violazioni di dati, usate su più siti o facili da indovinare. A Have I Been Pwned vengono inviati solo i primi 5 caratteri dell’hash SHA-1 di ogni password: la password non lascia mai il tuo Mac.";
 "Lumen is now Tacet" = "Ora Lumen si chiama Tacet";
 "Main Profile" = "Profilo principale";
 "Make Default" = "Imposta come predefinito";
@@ -411,6 +450,9 @@
 "Mark as Read" = "Segna come letto";
 "Mark as Unread" = "Segna come da leggere";
 "Medium" = "Media";
+"Memory: %@" = "Memoria: %@";
+"Memory: %@, shared with %d other tabs" = "Memoria: %1$@, condivisa con altre %2$d schede";
+"Memory: %@, shared with 1 other tab" = "Memoria: %@, condivisa con un'altra scheda";
 "Model" = "Modello";
 "Model for this chat" = "Modello per questa chat";
 "Monospaced" = "Monospaziato";
@@ -474,6 +516,7 @@
 "No other browsers found. You can skip this step." = "Nessun altro browser trovato. Puoi saltare questo passaggio.";
 "No pop-ups" = "Senza pop-up";
 "No problem. Your current browser stays the default." = "Nessun problema. Il tuo browser attuale resta quello predefinito.";
+"No problems found" = "Nessun problema trovato";
 "No release notes." = "Nessuna nota di rilascio.";
 "No rules could be compiled." = "Non è stato possibile compilare nessuna regola.";
 "No saved chats yet." = "Nessuna chat salvata.";
@@ -498,6 +541,7 @@
 "On" = "Attivo";
 "On sign-up and change-password pages, offer a random password like abcdEf-ghijk2-lmnopq." = "Nelle pagine di registrazione e di cambio password, proponi una password casuale come abcdEf-ghijk2-lmnopq.";
 "On-device model" = "Modello sul Mac";
+"One last Keychain question" = "Un’ultima domanda del Portachiavi";
 "Only add extensions you trust: they can see and change the pages they have access to." = "Aggiungi solo estensioni di cui ti fidi: possono vedere e modificare le pagine a cui hanno accesso.";
 "Open" = "Apri";
 "Open %@ to copy your password" = "Apri %@ per copiare la password";
@@ -535,6 +579,7 @@
 "Page" = "Pagina";
 "Page width" = "Larghezza della pagina";
 "Password" = "Password";
+"Password check" = "Controllo delle password";
 "Password manager" = "Gestore di password";
 "Passwords" = "Password";
 "Passwords are stored in your Mac's Keychain, encrypted by macOS. Tacet asks for Touch ID or your Mac password before filling or showing one." = "Le password sono conservate nel Portachiavi del Mac, cifrate da macOS. Tacet chiede Touch ID o la password del Mac prima di compilarle o mostrarle.";
@@ -560,6 +605,7 @@
 "Press ⌘D on any page, or import bookmarks from another browser." = "Premi ⌘D su qualsiasi pagina, o importa i segnalibri da un altro browser.";
 "Press ⌘L or click the address. Type a site, a search, an open tab, a bookmark or a command." = "Premi ⌘L o fai clic sull'indirizzo. Scrivi un sito, una ricerca, una scheda aperta, un segnalibro o un comando.";
 "Press ⌘L to go anywhere. You can see this tour again from the Help menu, and change anything in Settings." = "Premi ⌘L per andare ovunque. Puoi rivedere questa guida dal menu Aiuto e cambiare tutto nelle Impostazioni.";
+"Presses “Reject all” on cookie banners that offer it, so sites remember your choice." = "Preme “Rifiuta tutto” sui banner dei cookie che lo offrono, così i siti ricordano la tua scelta.";
 "Previous (⇧⌘G)" = "Precedente (⇧⌘G)";
 "Previous Tab" = "Scheda precedente";
 "Previous tab" = "Scheda precedente";
@@ -576,10 +622,12 @@
 "Profile" = "Profilo";
 "Profile %lld" = "Profilo %lld";
 "Profiles" = "Profili";
+"Protect against fingerprinting" = "Proteggi dal fingerprinting";
 "Protection on this site" = "Protezione su questo sito";
 "Provider" = "Fornitore";
 "Purple" = "Viola";
 "Put the address bar in the sidebar" = "Metti la barra degli indirizzi nella barra laterale";
+"Read Aloud" = "Leggi ad alta voce";
 "Read and change all websites you visit" = "Leggere e modificare tutti i siti che visiti";
 "Read and change cookies" = "Leggere e modificare i cookie";
 "Read and change: %@" = "Leggere e modificare: %@";
@@ -598,6 +646,7 @@
 "Recommended" = "Consigliato";
 "Refresh" = "Aggiorna";
 "Refresh List" = "Aggiorna elenco";
+"Reject optional cookies for me" = "Rifiuta per me i cookie facoltativi";
 "Release Notes" = "Note di rilascio";
 "Reload" = "Ricarica";
 "Reload (⌘R)" = "Ricarica (⌘R)";
@@ -623,6 +672,7 @@
 "Reset" = "Ripristina";
 "Reset Site" = "Ripristina sito";
 "Reset zoom" = "Ripristina zoom";
+"Rest the pointer on a tab to see the page, its site and how much memory it uses. Tabs that are sleeping say so, and use none." = "Tieni il puntatore su una scheda per vedere la pagina, il sito e quanta memoria usa. Le schede in pausa lo dicono, e non ne usano.";
 "Restart Now" = "Riavvia ora";
 "Restart Tacet to use the new language." = "Riavvia Tacet per usare la nuova lingua.";
 "Restore windows and tabs when Tacet opens" = "Ripristina finestre e schede all'apertura di Tacet";
@@ -657,6 +707,7 @@
 "Scrolling the page" = "Scorrimento della pagina";
 "Search" = "Cerca";
 "Search %@" = "Cerca con %@";
+"Search Tabs…" = "Cerca nelle schede…";
 "Search URL" = "URL di ricerca";
 "Search and privacy" = "Ricerca e privacy";
 "Search chats" = "Cerca nelle chat";
@@ -667,6 +718,7 @@
 "Search passwords" = "Cerca password";
 "Search reading list" = "Cerca nell'elenco di lettura";
 "Search shortcuts" = "Scorciatoie di ricerca";
+"Search tabs" = "Cerca nelle schede";
 "Search with" = "Cerca con";
 "Search with %@ or enter an address" = "Cerca con %@ o inserisci un indirizzo";
 "Search, enter an address, or run a command" = "Cerca, inserisci un indirizzo o esegui un comando";
@@ -690,6 +742,8 @@
 "Settings (⌘,)" = "Impostazioni (⌘,)";
 "Settings › Extensions" = "Impostazioni › Estensioni";
 "Settings › General › Tabs: when to group, and sites never to group" = "Impostazioni › Generali › Schede: quando raggruppare e quali siti mai";
+"Settings › Passwords › Check…" = "Impostazioni › Password › Controlla…";
+"Settings › Shield: AdGuard, Fanboy Annoyances and hidden trackers" = "Impostazioni › Shield: AdGuard, Fanboy Annoyances e tracker nascosti";
 "Settings…" = "Impostazioni…";
 "Setup and how Tacet works" = "Configurazione e funzionamento di Tacet";
 "Shield" = "Shield";
@@ -701,7 +755,9 @@
 "Show Chats" = "Mostra chat";
 "Show Downloads" = "Mostra download";
 "Show History" = "Mostra cronologia";
+"Show Original" = "Mostra originale";
 "Show Reading List" = "Mostra l'elenco di lettura";
+"Show a preview with memory use when you hover over a tab" = "Mostra un'anteprima con la memoria usata quando passi sopra una scheda";
 "Show clock" = "Mostra orologio";
 "Show colour in tab bar" = "Mostra il colore nella barra delle schede";
 "Show favorites" = "Mostra preferiti";
@@ -743,6 +799,7 @@
 "Skip This Version" = "Salta questa versione";
 "Skip YouTube Ads" = "Salta pubblicità di YouTube";
 "Skip YouTube ads" = "Salta pubblicità di YouTube";
+"Sleeping: uses no memory until you open it" = "In pausa: non usa memoria finché non la apri";
 "Small fixes" = "Piccole correzioni";
 "Software Update" = "Aggiornamento software";
 "Solid" = "Pieno";
@@ -752,6 +809,8 @@
 "Sort Tabs by Site" = "Ordina schede per sito";
 "Sort Tabs by Title" = "Ordina schede per titolo";
 "Sources" = "Fonti";
+"Space" = "Spazio";
+"Spaces and pinned tabs" = "Spazi e schede fissate";
 "Split View" = "Vista divisa";
 "Split View with New Tab" = "Vista divisa con nuova scheda";
 "Split view" = "Vista divisa";
@@ -763,6 +822,8 @@
 "Step %lld of %lld" = "Passaggio %1$lld di %2$lld";
 "Stop" = "Interrompi";
 "Stop Loading" = "Interrompi caricamento";
+"Stop Reading Aloud" = "Smetti di leggere";
+"Stopped" = "Interrotta";
 "Store data" = "Salvare dati";
 "Store unlimited data" = "Salvare dati senza limiti";
 "Strict" = "Rigoroso";
@@ -783,12 +844,14 @@
 "System Appearance" = "Aspetto di sistema";
 "Tab" = "Scheda";
 "Tab %lld" = "Scheda %lld";
+"Tab previews" = "Anteprime delle schede";
 "Tabs" = "Schede";
 "Tabs and windows" = "Schede e finestre";
 "Tabs from the same site gather into a group once there are 2, 3 or 5 of them, as you choose. Groups can be saved, closed and opened again later, whole." = "Le schede dello stesso sito si raccolgono in un gruppo quando sono 2, 3 o 5, come preferisci. I gruppi si possono salvare, chiudere e riaprire più tardi, interi.";
 "Tabs on top" = "Schede in alto";
 "Tabs that show the same address as another tab" = "Schede con lo stesso indirizzo di un'altra scheda";
 "Tabs that tidy themselves" = "Schede che si mettono in ordine";
+"Tabs wake up as you left them" = "Le schede si risvegliano come le avevi lasciate";
 "Tacet %@" = "Tacet %@";
 "Tacet (Keychain and Touch ID)" = "Tacet (Portachiavi e Touch ID)";
 "Tacet Assistant" = "Tacet Assistant";
@@ -796,6 +859,7 @@
 "Tacet Assistant (⇧⌘A)" = "Tacet Assistant (⇧⌘A)";
 "Tacet Assistant answers questions about the page you're reading in a panel on the right (⇧⌘A). It is off unless you turn it on, and nothing is sent until you ask something." = "Tacet Assistant risponde a domande sulla pagina che stai leggendo, in un pannello a destra (⇧⌘A). È spento finché non lo attivi, e non viene inviato nulla finché non chiedi qualcosa.";
 "Tacet Assistant does more" = "Tacet Assistant fa di più";
+"Tacet Assistant stopped after %d steps without finishing. Ask it to continue, or split the task." = "Tacet Assistant si è fermato dopo %d passaggi senza finire. Chiedigli di continuare, o dividi il compito.";
 "Tacet Assistant uses your own key from Anthropic, OpenAI, OpenRouter, DeepSeek or any OpenAI-compatible server. The key stays in your Keychain." = "Tacet Assistant usa la tua chiave di Anthropic, OpenAI, OpenRouter, DeepSeek o di un server compatibile con OpenAI. La chiave resta nel tuo Portachiavi.";
 "Tacet Bookmarks.html" = "Segnalibri Tacet.html";
 "Tacet Setup" = "Configurazione di Tacet";
@@ -814,6 +878,7 @@
 "Tacet is up to date." = "Tacet è aggiornato.";
 "Tacet is your default browser" = "Tacet è il tuo browser predefinito";
 "Tacet looks for Safari, Firefox and Chromium browsers such as Chrome, Opera, Brave, Edge and Arc." = "Tacet cerca Safari, Firefox e i browser Chromium come Chrome, Opera, Brave, Edge e Arc.";
+"Tacet now has a signature of its own, so after this update macOS may ask once more to let Tacet use its Keychain items. Choose Always Allow: future updates won't ask again." = "Tacet ora ha una firma tutta sua, quindi dopo questo aggiornamento macOS potrebbe chiedere ancora una volta di permettere a Tacet di usare i suoi elementi del Portachiavi. Scegli Consenti sempre: i prossimi aggiornamenti non lo chiederanno più.";
 "Tacet opens it from sign-in pages so you can copy passwords. Tacet won't offer to save passwords." = "Tacet lo apre dalle pagine di accesso per copiare le password. Tacet non proporrà di salvare le password.";
 "Tacet remembers your choice for this site. You can change it in Settings › Sites." = "Tacet ricorda la tua scelta per questo sito. Puoi cambiarla in Impostazioni › Siti.";
 "Tacet remembers your choice until you close this tab." = "Tacet ricorda la tua scelta finché non chiudi questa scheda.";
@@ -830,7 +895,7 @@
 "The Apple model isn't available on this Mac." = "Il modello Apple non è disponibile su questo Mac.";
 "The Apple model needs macOS 26 or later." = "Il modello Apple richiede macOS 26 o successivo.";
 "The answer was cut off because it reached the length limit." = "La risposta è stata interrotta perché ha raggiunto il limite di lunghezza.";
-"The app gets its own window and Dock icon, and opens in ~/Applications/Lumen Apps. Sign in once inside the app: it keeps its own cookies." = "L'app ha la sua finestra e la sua icona nel Dock e si trova in ~/Applicazioni/Lumen Apps. Accedi una volta dentro l'app: conserva i suoi cookie.";
+"The app gets its own window and Dock icon, and opens in ~/Applications/Tacet Apps. Sign in once inside the app: it keeps its own cookies." = "L'app ha la sua finestra e la sua icona nel Dock e si trova in ~/Applicazioni/Tacet Apps. Accedi una volta dentro l'app: conserva i suoi cookie.";
 "The app needs a name." = "L'app ha bisogno di un nome.";
 "The app with this extension couldn't be found." = "L'app con questa estensione non è stata trovata.";
 "The assistant can click, type and scroll on the current page. Click to turn off." = "L'assistente può cliccare, scrivere e scorrere nella pagina attuale. Fai clic per disattivare.";
@@ -851,10 +916,12 @@
 "The server address isn't valid. Check it in Settings › AI." = "L'indirizzo del server non è valido. Controllalo in Impostazioni › AI.";
 "The service answered with error %d." = "Il servizio ha risposto con l'errore %d.";
 "The setup fits its window again, removing an extension also deletes what it stored, and tabs sent to a new window come back if the window doesn't open." = "La configurazione torna a stare nella sua finestra, rimuovere un'estensione cancella anche i dati che aveva salvato, e le schede spostate in una nuova finestra tornano indietro se la finestra non si apre.";
+"The shield now shows what it blocked on the page, on the site and since you opened Tacet. It also rejects optional cookies for you, protects against fingerprinting, and can use more filter lists." = "Lo scudo ora mostra cosa ha bloccato sulla pagina, sul sito e da quando hai aperto Tacet. Inoltre rifiuta per te i cookie facoltativi, protegge dal fingerprinting e può usare più liste di filtri.";
 "The site says: “%@”" = "Il sito dice: “%@”";
 "The site's" = "Quello del sito";
 "The update couldn't be verified. It may be damaged or changed; try again later." = "Impossibile verificare l'aggiornamento. Potrebbe essere danneggiato o modificato; riprova più tardi.";
 "The update doesn't come from GitHub." = "L'aggiornamento non proviene da GitHub.";
+"The update isn't signed by Tacet's developer, so it wasn't installed." = "L'aggiornamento non è firmato dallo sviluppatore di Tacet, quindi non è stato installato.";
 "Their buttons appear next to the shield" = "I loro pulsanti compaiono accanto allo scudo";
 "Theme" = "Tema";
 "This Mac can't run the Apple model. It needs Apple silicon." = "Questo Mac non può usare il modello Apple: serve Apple silicon.";
@@ -866,6 +933,7 @@
 "This extension has no settings page." = "Questa estensione non ha una pagina di impostazioni.";
 "This isn't a web extension: there is no manifest.json inside it." = "Questa non è un'estensione web: non contiene un manifest.json.";
 "This model can read images" = "Questo modello sa leggere le immagini";
+"This page is already in your language." = "Questa pagina è già nella tua lingua.";
 "This page is sent with your next message" = "Questa pagina viene inviata con il prossimo messaggio";
 "This page isn't secure. Passwords you type here can be read by others on your network." = "Questa pagina non è sicura. Le password che scrivi qui possono essere lette da altri sulla tua rete.";
 "This page says" = "Questa pagina dice";
@@ -885,14 +953,21 @@
 "Toggle sidebar (⌘S)" = "Mostra/nascondi barra laterale (⌘S)";
 "Too many requests, or the account has no credit left. Try again in a moment." = "Troppe richieste, oppure l'account ha esaurito il credito. Riprova tra poco.";
 "Top bar" = "Barra in alto";
+"Trackers disguised as part of the site, like metrics.example.com. A long list: it takes a minute to prepare." = "Tracker travestiti da parte del sito, come metrics.example.com. È una lista lunga: serve un minuto per prepararla.";
 "Translate" = "Traduci";
+"Translate Page" = "Traduci pagina";
+"Translate a page on this Mac with Apple's translation: nothing leaves your Mac. Have an article read aloud, or hide everything but the page with Focus Mode." = "Traduci una pagina su questo Mac con la traduzione di Apple: niente lascia il tuo Mac. Fatti leggere un articolo ad alta voce, o nascondi tutto tranne la pagina con la modalità focus.";
 "Translate this into %@." = "Traduci questo in %@.";
+"Translate, listen, focus" = "Traduci, ascolta, concentrati";
+"Translated from %@ on this Mac" = "Tradotta su questo Mac · lingua originale: %@";
+"Translating on this Mac…" = "Traduzione su questo Mac…";
 "Translucent" = "Traslucido";
 "Try Again" = "Riprova";
 "Turn Off Ad Blocker" = "Disattiva blocco pubblicità";
 "Turn On" = "Attiva";
 "Turn On Ad Blocker" = "Attiva blocco pubblicità";
 "Turn On…" = "Attiva…";
+"Turn it off in Settings › General › Tabs" = "Disattivala in Impostazioni › Generali › Schede";
 "Turn off animations" = "Disattiva le animazioni";
 "Turn off this site's changes" = "Disattiva le modifiche di questo sito";
 "Turn on" = "Attiva";
@@ -902,6 +977,7 @@
 "Turn on browser use?" = "Attivare l'uso del browser?";
 "Turn on this site's changes" = "Attiva le modifiche di questo sito";
 "Turned off" = "Disattivata";
+"Turning off an extension closes its pages too" = "Disattivare un’estensione chiude anche le sue pagine";
 "Two pages side by side. Right-click a tab and choose Open in Split View." = "Due pagine affiancate. Fai clic destro su una scheda e scegli Apri nella vista divisa.";
 "Type a keyword, a space and your search in the command bar. For example: yt lofi beats" = "Scrivi una parola chiave, uno spazio e la ricerca nella barra dei comandi. Per esempio: yt lofi beats";
 "Type a model name" = "Scrivi il nome di un modello";
@@ -928,6 +1004,7 @@
 "Use Top Tabs" = "Usa schede in alto";
 "Use a cloud provider for long pages and hard questions" = "Per pagine lunghe e domande difficili usa un fornitore cloud";
 "Use the page you're on when you click it" = "Usare la pagina in cui sei quando la clicchi";
+"Used on more than one site." = "Usata su più di un sito.";
 "User agent" = "User agent";
 "Username" = "Nome utente";
 "Version" = "Versione";
@@ -940,6 +1017,9 @@
 "Videos: MP4, MOV or M4V, up to 60 seconds and 300 MB. They play muted, on a loop." = "Video: MP4, MOV o M4V, fino a 60 secondi e 300 MB. Vengono riprodotti senza audio, in loop.";
 "Video…" = "Video…";
 "View release on GitHub" = "Vedi la release su GitHub";
+"View › Focus Mode (⇧⌘J)" = "Vista › Modalità focus (⇧⌘J)";
+"View › Read Aloud (⌥⌘A)" = "Vista › Leggi ad alta voce (⌥⌘A)";
+"View › Translate Page (⌥⌘T)" = "Vista › Traduci pagina (⌥⌘T)";
 "Web Apps" = "Web app";
 "Web access" = "Accesso al web";
 "Web access: search the web and read pages" = "Accesso al web: cerca sul web e leggi le pagine";
@@ -986,12 +1066,17 @@
 "Zoom In" = "Ingrandisci";
 "Zoom Out" = "Riduci";
 "Zoom levels" = "Livelli di zoom";
+"ad or tracker blocked on this page" = "pubblicità o tracker bloccato su questa pagina";
+"ads and trackers blocked on this page" = "pubblicità e tracker bloccati su questa pagina";
+"another language" = "un'altra lingua";
 "camera" = "la fotocamera";
 "camera and microphone" = "fotocamera e microfono";
+"check your saved passwords" = "controllare le password salvate";
 "copy your password for %@" = "copiare la password per %@";
 "export your passwords" = "esportare le password";
 "fill your password for %@" = "compilare la password per %@";
 "formerly Lumen" = "in precedenza Lumen";
+"from %d sites" = "da %d siti";
 "macOS blocked access to %@'s data. Give Tacet Full Disk Access, then try again." = "macOS ha bloccato l'accesso ai dati di %@. Concedi a Tacet l'accesso completo al disco e riprova.";
 "macOS will ask you to confirm." = "macOS ti chiederà di confermare.";
 "microphone" = "il microfono";
@@ -1010,3 +1095,4 @@
 "⋯ menu › Customize This Site…" = "Menu ⋯ › Personalizza questo sito…";
 "⌘-click adds a tab, ⇧-click picks a range" = "⌘-clic aggiunge una scheda, ⇧-clic seleziona un intervallo";
 "⌘-click or ⇧-click tabs to pick them, then group, move, pin or close them together. Drag them all at once too." = "Con ⌘-clic o ⇧-clic selezioni più schede, poi le raggruppi, sposti, fissi o chiudi insieme. Puoi anche trascinarle tutte insieme.";
+"⌥⌘F searches your tabs by title or address" = "⌥⌘F cerca tra le schede per titolo o indirizzo";

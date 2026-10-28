@@ -29,7 +29,7 @@ enum WhatsNew {
              demo: .arc),
         Page(version: "1.6.3", symbol: "shield.lefthalf.filled", title: "A stronger Tacet Shield",
              text: "The shield now shows what it blocked on the page, on the site and since you opened Tacet. It also rejects optional cookies for you, protects against fingerprinting, and can use more filter lists.",
-             how: ["Click the shield in the toolbar to see the numbers and the sites", "Settings › Privacy: AdGuard, Fanboy Annoyances and hidden trackers"],
+             how: ["Click the shield in the toolbar to see the numbers and the sites", "Settings › Shield: AdGuard, Fanboy Annoyances and hidden trackers"],
              demo: .shield),
         Page(version: "1.6.3", symbol: "rectangle.on.rectangle", title: "Tab previews",
              text: "Rest the pointer on a tab to see the page, its site and how much memory it uses. Tabs that are sleeping say so, and use none.",
