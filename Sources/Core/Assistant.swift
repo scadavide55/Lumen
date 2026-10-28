@@ -483,9 +483,20 @@ enum AssistantPrompt {
              properties: [:], required: []),
     ]
 
-    static func clientTools(provider: AIProvider, web: Bool, control: Bool, vision: Bool = false) -> [Tool] {
-        tools + (vision ? visionTools : []) + (web && provider != .anthropic ? webTools : []) + (control ? controlTools : [])
+    static func clientTools(provider: AIProvider, web: Bool, control: Bool, vision: Bool = false, quick: Bool = false) -> [Tool] {
+        // A quick answer in the command bar can only search the web.
+        if quick { return provider == .anthropic ? [] : webTools }
+        return tools + (vision ? visionTools : []) + (web && provider != .anthropic ? webTools : []) + (control ? controlTools : [])
     }
+
+    /// Added for answers asked from the command bar.
+    static let quickPart = """
+
+    This question was asked from the command bar for a quick answer. There is no page attached and you can't see or \
+    use the user's tabs: your only tools search the web and read pages. Answer directly in a few short paragraphs or a \
+    short list, searching the web when the answer depends on current facts, and list your sources. If the user wants \
+    more, they can open the full chat.
+    """
 
     /// Anthropic's own web search and fetch, which run on Anthropic's servers. Newer models get the versions that
     /// filter results before reading them.
@@ -550,7 +561,28 @@ final class AssistantChat {
     /// Screenshots taken by tools in this round, by tool call id, sent with the tool results.
     @ObservationIgnored private var toolImages: [String: Data] = [:]
 
-    init(browser: BrowserState) { self.browser = browser }
+    /// A quick answer from the command bar: web search only, no page, and not saved until it's opened in the chat.
+    @ObservationIgnored let quick: Bool
+
+    init(browser: BrowserState, quick: Bool = false) {
+        self.browser = browser
+        self.quick = quick
+    }
+
+    /// Takes over a quick answer, to go on with it in the full chat.
+    @MainActor
+    func continueFrom(_ other: AssistantChat) {
+        newChat()
+        messages = other.messages
+        transcript = other.transcript
+        transcriptProvider = other.transcriptProvider
+        appleSession = other.appleSession
+        modelChoice = other.modelChoice
+        // The page open now wasn't part of the question.
+        dismissedPageURL = browser?.current?.url
+        other.newChat()
+        saveToHistory()
+    }
 
     /// Text selected on the page that the next message is about.
     var selection: String?
@@ -597,7 +629,7 @@ final class AssistantChat {
 
     /// The page that would be attached to the next message.
     var pageToAttach: Tab? {
-        guard let tab = browser?.current, let url = tab.url, ["http", "https"].contains(url.scheme ?? ""),
+        guard !quick, let tab = browser?.current, let url = tab.url, ["http", "https"].contains(url.scheme ?? ""),
               url != sentPageURL, url != dismissedPageURL else { return nil }
         return tab
     }
@@ -697,7 +729,7 @@ final class AssistantChat {
 
     /// Saves this chat, except in private windows.
     func saveToHistory() {
-        guard let browser, !browser.isPrivate, let first = messages.first(where: { $0.role == .user }),
+        guard !quick, let browser, !browser.isPrivate, let first = messages.first(where: { $0.role == .user }),
               let provider = transcriptProvider else { return }
         let saved = messages.map { m in
             AssistantHistory.SavedMessage(user: m.role == .user, text: m.text, images: m.images.compactMap(Self.jpeg),
@@ -740,8 +772,8 @@ final class AssistantChat {
         guard !model.isEmpty else { fail(L("Choose a model in Settings › AI.")); return }
         let base = provider == .custom ? s.aiBaseURL : provider.defaultBaseURL
         var useTools = true
-        let web = s.aiWeb
-        let control = s.aiControl
+        let web = quick || s.aiWeb
+        let control = !quick && s.aiControl
 
         // The model may call tools several times before it answers; each round is one request.
         for _ in 0..<Self.maxRounds {
@@ -749,7 +781,7 @@ final class AssistantChat {
             let result: AIClient.Result
             do {
                 result = try await AIClient.stream(provider: provider, base: base, key: key, model: model,
-                                                   transcript: transcript, tools: useTools, web: web, control: control,
+                                                   transcript: transcript, tools: useTools, web: web, control: control, quick: quick,
                                                    onText: { [weak self] delta in self?.appendToReply(delta) },
                                                    onServerTool: { [weak self] name, input in self?.noteServerTool(name, input) })
             } catch AIClient.Failure.toolsUnsupported where useTools {
@@ -803,14 +835,14 @@ final class AssistantChat {
         guard #available(macOS 26.0, *) else { fail(L("The Apple model needs macOS 26 or later.")); return }
         if let reason = AppleModel.unavailableReason { fail(reason); return }
         let s = Settings.shared
-        let tools = AppleModel.tools(web: s.aiWeb, control: s.aiControl)
+        let tools = quick ? AssistantPrompt.webTools : AppleModel.tools(web: s.aiWeb, control: s.aiControl)
         let key = tools.map(\.name).joined(separator: ",")
         let session: AppleChatSession
         // The session's tools are fixed when it's made, so turning Web access or Browser use on or off starts a new one.
         if let existing = appleSession as? AppleChatSession, existing.toolKey == key {
             session = existing
         } else {
-            session = AppleChatSession(tools: tools, control: s.aiControl) { [weak self] name, json in
+            session = AppleChatSession(tools: tools, control: !quick && s.aiControl) { [weak self] name, json in
                 await self?.runToolForApple(name, json) ?? "The chat was closed."
             }
             appleSession = session
@@ -1174,7 +1206,7 @@ enum AIClient {
 
     @MainActor
     static func stream(provider: AIProvider, base: String, key: String?, model: String, transcript: [[String: Any]],
-                       tools: Bool, web: Bool, control: Bool, onText: @escaping (String) -> Void,
+                       tools: Bool, web: Bool, control: Bool, quick: Bool = false, onText: @escaping (String) -> Void,
                        onServerTool: @escaping (String, [String: Any]) -> Void) async throws -> Result {
         let trimmed = base.trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
         let path = provider == .anthropic ? "/messages" : "/chat/completions"
@@ -1191,9 +1223,10 @@ enum AIClient {
             request.setValue(anthropicVersion, forHTTPHeaderField: "anthropic-version")
             body["max_tokens"] = 64000
             body["system"] = AssistantPrompt.system(web: web && tools, control: control && tools, vision: vision && tools)
+                + (quick ? AssistantPrompt.quickPart : "")
             body["messages"] = transcript
             if tools {
-                body["tools"] = AssistantPrompt.clientTools(provider: provider, web: web, control: control, vision: vision).map {
+                body["tools"] = AssistantPrompt.clientTools(provider: provider, web: web, control: control, vision: vision, quick: quick).map {
                     ["name": $0.name, "description": $0.description, "input_schema": AssistantPrompt.schema($0), "eager_input_streaming": true] as [String: Any]
                 } + (web ? AssistantPrompt.anthropicWebTools(model: model) : [])
             }
@@ -1208,9 +1241,10 @@ enum AIClient {
                 request.setValue("https://scadavide55.github.io/Tacet/", forHTTPHeaderField: "HTTP-Referer")
                 request.setValue("Tacet", forHTTPHeaderField: "X-Title")
             }
-            body["messages"] = [["role": "system", "content": AssistantPrompt.system(web: web && tools, control: control && tools, vision: vision && tools)]] + transcript
+            body["messages"] = [["role": "system", "content": AssistantPrompt.system(web: web && tools, control: control && tools, vision: vision && tools)
+                                    + (quick ? AssistantPrompt.quickPart : "")]] + transcript
             if tools {
-                body["tools"] = AssistantPrompt.clientTools(provider: provider, web: web, control: control, vision: vision).map {
+                body["tools"] = AssistantPrompt.clientTools(provider: provider, web: web, control: control, vision: vision, quick: quick).map {
                     ["type": "function", "function": ["name": $0.name, "description": $0.description, "parameters": AssistantPrompt.schema($0)]] as [String: Any]
                 }
             }

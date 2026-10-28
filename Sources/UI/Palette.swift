@@ -29,6 +29,8 @@ struct CommandPalette: View {
     @State private var historyTask: Task<Void, Never>?
     /// The rows, rebuilt only when the query or its async results change, never on hover or page loads.
     @State private var list: [PaletteItem] = []
+    /// A quick answer from Tacet Assistant is showing in place of the list.
+    @State private var answering = false
     @FocusState private var focused: Bool
 
     private static let suggestSession: URLSession = {
@@ -53,13 +55,13 @@ struct CommandPalette: View {
                         .focused($focused)
                         .onKeyPress(.downArrow) { move(1, list.count); return .handled }
                         .onKeyPress(.upArrow) { move(-1, list.count); return .handled }
-                        .onKeyPress(.escape) { close(); return .handled }
+                        .onKeyPress(.escape) { answering ? closeAnswer() : close(); return .handled }
                         .onKeyPress(keys: [.return]) { press in
                             run(list, newTab: press.modifiers.contains(.command))
                             return .handled
                         }
                         .onSubmit { run(list, newTab: false) }
-                        .onExitCommand { close() }
+                        .onExitCommand { answering ? closeAnswer() : close() }
                     if b.isPrivate {
                         Image(systemName: "eyeglasses").foregroundStyle(.purple).help("Private window")
                     }
@@ -67,7 +69,11 @@ struct CommandPalette: View {
                 .padding(.horizontal, 16)
                 .frame(height: 54)
 
-                if !list.isEmpty {
+                if answering {
+                    Divider()
+                    QuickAnswer(chat: b.quickAnswer, close: closeAnswer, expand: expandAnswer)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                } else if !list.isEmpty {
                     Divider()
                     ScrollViewReader { proxy in
                         ScrollView {
@@ -117,7 +123,9 @@ struct CommandPalette: View {
             fetchHistory(query)
             DispatchQueue.main.async { focused = true }
         }
+        .animation(.easeOut(duration: 0.22), value: answering)
         .onChange(of: query) { _, q in
+            if answering { closeAnswer() }
             selection = 0
             refresh()
             fetchHistory(q)
@@ -147,13 +155,43 @@ struct CommandPalette: View {
     private func close() {
         suggestTask?.cancel()
         historyTask?.cancel()
+        if answering { closeAnswer() }
         b.paletteVisible = false
+    }
+
+    // MARK: Quick answers
+
+    private func ask(_ question: String) {
+        let chat = b.quickAnswer
+        chat.newChat()
+        chat.draft = question
+        chat.send()
+        answering = true
+    }
+
+    private func closeAnswer() {
+        b.quickAnswer.newChat()
+        answering = false
+    }
+
+    /// Goes on with the question in the full chat.
+    private func expandAnswer() {
+        b.assistant.continueFrom(b.quickAnswer)
+        answering = false
+        b.assistantVisible = true
+        b.assistantExpanded = true
+        close()
     }
 
     private func run(_ list: [PaletteItem], newTab: Bool) {
         guard b.paletteVisible else { return }
         if list.indices.contains(selection) {
             let item = list[selection]
+            // Asking keeps the command bar open: the answer shows in it.
+            if item.id == "ask" {
+                ask(query.trimmingCharacters(in: .whitespacesAndNewlines))
+                return
+            }
             close()
             item.run(newTab)
         } else {
@@ -236,6 +274,11 @@ struct CommandPalette: View {
                 subtitle: isAddress ? L("Open address") : String(format: L("Search %@"), shortcut?.name ?? s.engine.name),
                 badge: "↩",
                 run: { navigate(url, newTab: $0) }))
+        }
+
+        if s.aiEnabled, InputResolver.addressURL(q) == nil, URL(string: q)?.scheme == nil {
+            out.append(PaletteItem(id: "ask", icon: .symbol("sparkles"), title: String(format: L("Ask Tacet Assistant: %@"), q),
+                                   subtitle: L("A quick answer here, searching the web if needed"), badge: "↩", run: { _ in }))
         }
 
         let lower = q.lowercased()
@@ -445,5 +488,47 @@ struct PaletteRow: View, Equatable {
         .padding(.horizontal, 8)
         .frame(height: 42)
         .background(RoundedRectangle(cornerRadius: 9, style: .continuous).fill(selected ? AnyShapeStyle(.tint) : AnyShapeStyle(.clear)))
+    }
+}
+
+/// Tacet Assistant's answer inside the command bar, as it arrives. ✕ closes it; the arrows open it in the full chat.
+struct QuickAnswer: View {
+    var chat: AssistantChat
+    let close: () -> Void
+    let expand: () -> Void
+    @Environment(BrowserState.self) var b
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 8) {
+                Image(systemName: "sparkles").foregroundStyle(.tint)
+                Text("Tacet Assistant").font(.system(size: 12, weight: .semibold))
+                Text(Settings.shared.aiModelName).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1)
+                Spacer()
+                if chat.busy { ProgressView().controlSize(.small) }
+                Button(action: expand) { Image(systemName: "arrow.up.left.and.arrow.down.right") }
+                    .buttonStyle(.borderless).help("Continue in the chat")
+                    .disabled(chat.messages.isEmpty)
+                Button(action: close) { Image(systemName: "xmark") }
+                    .buttonStyle(.borderless).help("Close the answer (esc)")
+            }
+            .padding(.horizontal, 14).padding(.vertical, 8)
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        if let answer = chat.messages.last(where: { $0.role == .assistant }) {
+                            AssistantBubble(message: answer, thinking: chat.busy)
+                        }
+                        Color.clear.frame(height: 1).id("end")
+                    }
+                    .padding(.horizontal, 14).padding(.bottom, 12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(maxHeight: 380)
+                .fixedSize(horizontal: false, vertical: true)
+                .onChange(of: chat.messages.last?.text) { _, _ in proxy.scrollTo("end", anchor: .bottom) }
+            }
+        }
+        .animation(.easeOut(duration: 0.15), value: chat.messages.last?.text.count)
     }
 }

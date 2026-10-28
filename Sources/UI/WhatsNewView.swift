@@ -15,7 +15,7 @@ enum WhatsNew {
         let demo: Demo
     }
 
-    enum Demo { case rename, groups, picking, assistant, apple, reading, customize, extensions, fixes }
+    enum Demo { case arc, shield, preview, wake, translate, passwords, keychain, rename, groups, picking, assistant, apple, reading, customize, extensions, fixes }
 
     /// What's new for someone who last saw the welcome of `seen` (empty when they never did).
     static func pages(since seen: String) -> [Page] {
@@ -23,6 +23,33 @@ enum WhatsNew {
     }
 
     static let all: [Page] = [
+        Page(version: "1.6.3", symbol: "square.and.arrow.down.on.square", title: "Bring your Arc sidebar",
+             text: "Arc stops working on December 22. Tacet reads your Spaces, Favorites, pinned tabs and folders straight from Arc: Favorites become pinned tabs, and each Space and folder a tab group that loads only when you open it.",
+             how: ["File › Import from Another Browser…, then choose Arc", "Keep “Spaces and pinned tabs” on"],
+             demo: .arc),
+        Page(version: "1.6.3", symbol: "shield.lefthalf.filled", title: "A stronger Tacet Shield",
+             text: "The shield now shows what it blocked on the page, on the site and since you opened Tacet. It also rejects optional cookies for you, protects against fingerprinting, and can use more filter lists.",
+             how: ["Click the shield in the toolbar to see the numbers and the sites", "Settings › Privacy: AdGuard, Fanboy Annoyances and hidden trackers"],
+             demo: .shield),
+        Page(version: "1.6.3", symbol: "rectangle.on.rectangle", title: "Tab previews",
+             text: "Rest the pointer on a tab to see the page, its site and how much memory it uses. Tabs that are sleeping say so, and use none.",
+             how: ["Turn it off in Settings › General › Tabs", "⌥⌘F searches your tabs by title or address"],
+             demo: .preview),
+        Page(version: "1.6.3", symbol: "moon.zzz", title: "Tabs wake up as you left them",
+             text: "A sleeping tab shows the page as you last saw it while it loads again, then puts you back where you had scrolled to. No white flash, no jump to the top.",
+             how: [], demo: .wake),
+        Page(version: "1.6.3", symbol: "translate", title: "Translate, listen, focus",
+             text: "Translate a page on this Mac with Apple's translation: nothing leaves your Mac. Have an article read aloud, or hide everything but the page with Focus Mode.",
+             how: ["View › Translate Page (⌥⌘T)", "View › Read Aloud (⌥⌘A)", "View › Focus Mode (⇧⌘J)"],
+             demo: .translate),
+        Page(version: "1.6.3", symbol: "key.fill", title: "Password check",
+             text: "Find saved passwords that appeared in data breaches, that you use on more than one site, or that are easy to guess. Only the first 5 characters of a password's hash are ever sent to check it.",
+             how: ["Settings › Passwords › Check…"], demo: .passwords),
+        Page(version: "1.6.3", symbol: "checkmark.seal", title: "One last Keychain question",
+             text: "Tacet now has a signature of its own, so after this update macOS may ask once more to let Tacet use its Keychain items. Choose Always Allow: future updates won't ask again.",
+             how: ["Apps installed from sites move to ~/Applications/Tacet Apps and update with Tacet",
+                   "Turning off an extension closes its pages too"],
+             demo: .keychain),
         Page(version: "1.6.2", symbol: "moon.circle", title: "Lumen is now Tacet",
              text: "Same browser, new name. There were already other browsers called Lumen, and the name sounded too much like an AI product. Tacet is the mark in music for silence, where an instrument stays quiet: like the ads and trackers Tacet keeps out.",
              how: ["Your tabs, passwords, settings and extensions are all still here",
@@ -135,6 +162,13 @@ private struct DemoView: View {
             // A 4-second loop, eased so each step settles before the next.
             let t = context.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 4) / 4
             switch demo {
+            case .arc: ArcDemo(t: t)
+            case .shield: ShieldDemo(t: t)
+            case .preview: PreviewDemo(t: t)
+            case .wake: WakeDemo(t: t)
+            case .translate: TranslateDemo(t: t)
+            case .passwords: PasswordsDemo(t: t)
+            case .keychain: KeychainDemo(t: t)
             case .rename: RenameDemo(t: t)
             case .groups: GroupsDemo(t: t)
             case .picking: PickingDemo(t: t)
@@ -166,6 +200,152 @@ private struct Chip: View {
         }
         .frame(width: width, height: 26)
         .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(Color.primary.opacity(0.08)))
+    }
+}
+
+/// Arc's sidebar rows slide over and become groups.
+private struct ArcDemo: View {
+    let t: Double
+    var body: some View {
+        let move = step(t, 0.25, 0.6)
+        HStack(spacing: 46) {
+            VStack(alignment: .leading, spacing: 6) {
+                ForEach(0..<4) { i in Chip(color: [.pink, .pink, .teal, .teal][i], width: 110) }
+            }
+            .opacity(1 - 0.6 * move).offset(x: 40 * move)
+            Image(systemName: "arrow.right").foregroundStyle(.secondary).opacity(1 - move)
+            VStack(alignment: .leading, spacing: 6) {
+                ForEach(0..<2) { g in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(verbatim: g == 0 ? "🏠 Home" : "💼 Work").font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(g == 0 ? Color.pink : Color.teal)
+                        Chip(color: g == 0 ? .pink : .teal, width: 110)
+                    }
+                    .opacity(step(t, 0.45 + Double(g) * 0.12, 0.6 + Double(g) * 0.12))
+                }
+            }
+        }
+    }
+}
+
+/// The page counter climbs as requests are stopped.
+private struct ShieldDemo: View {
+    let t: Double
+    var body: some View {
+        let n = Int(step(t, 0.1, 0.75) * 23)
+        HStack(spacing: 18) {
+            Image(systemName: "shield.lefthalf.filled").font(.system(size: 54)).foregroundStyle(.tint)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(verbatim: "\(n)").font(.system(size: 40, weight: .bold, design: .rounded)).monospacedDigit()
+                ForEach(0..<3) { i in
+                    HStack(spacing: 6) {
+                        Image(systemName: "xmark.circle.fill").foregroundStyle(.red).font(.system(size: 10))
+                        RoundedRectangle(cornerRadius: 2).fill(Color.primary.opacity(0.25)).frame(width: [90, 70, 110][i], height: 5)
+                    }
+                    .opacity(step(t, 0.2 + Double(i) * 0.15, 0.3 + Double(i) * 0.15))
+                }
+            }
+        }
+    }
+}
+
+/// A card opens under a tab the pointer rests on.
+private struct PreviewDemo: View {
+    let t: Double
+    var body: some View {
+        let open = step(t, 0.3, 0.45)
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) { Chip(color: .blue); Chip(color: .orange); Chip(color: .green) }
+            VStack(alignment: .leading, spacing: 5) {
+                RoundedRectangle(cornerRadius: 4).fill(Color.orange.opacity(0.35)).frame(width: 170, height: 60)
+                RoundedRectangle(cornerRadius: 2).fill(Color.primary.opacity(0.4)).frame(width: 120, height: 6)
+                HStack(spacing: 4) {
+                    Image(systemName: "memorychip").font(.system(size: 9))
+                    Text(verbatim: "86 MB").font(.system(size: 10, weight: .medium))
+                }
+                .foregroundStyle(.secondary)
+            }
+            .padding(8)
+            .background(RoundedRectangle(cornerRadius: 8).fill(.regularMaterial))
+            .offset(x: 78)
+            .opacity(open).scaleEffect(0.9 + 0.1 * open, anchor: .topLeading)
+        }
+        .overlay(alignment: .topLeading) {
+            Image(systemName: "cursorarrow").font(.system(size: 16)).offset(x: 100, y: 12 - 20 * (1 - step(t, 0.05, 0.25)))
+        }
+    }
+}
+
+/// The picture of the page holds until the page has loaded behind it.
+private struct WakeDemo: View {
+    let t: Double
+    var body: some View {
+        let fade = step(t, 0.55, 0.7)
+        ZStack(alignment: .topLeading) {
+            VStack(alignment: .leading, spacing: 6) {
+                ForEach(0..<5) { i in RoundedRectangle(cornerRadius: 2).fill(Color.primary.opacity(0.3)).frame(width: [220, 200, 210, 160, 190][i], height: 6) }
+            }
+            .opacity(step(t, 0.35, 0.55))
+            VStack(alignment: .leading, spacing: 6) {
+                ForEach(0..<5) { i in RoundedRectangle(cornerRadius: 2).fill(Color.accentColor.opacity(0.35)).frame(width: [220, 200, 210, 160, 190][i], height: 6) }
+            }
+            .opacity(1 - fade)
+        }
+        .padding(16)
+        .background(RoundedRectangle(cornerRadius: 10).fill(Color(nsColor: .textBackgroundColor)))
+    }
+}
+
+/// Words change language in place; a speaker and the focus frame follow.
+private struct TranslateDemo: View {
+    let t: Double
+    var body: some View {
+        let swap = step(t, 0.25, 0.45)
+        HStack(spacing: 30) {
+            ZStack {
+                Text(verbatim: "Bonjour").opacity(1 - swap)
+                Text(verbatim: "Ciao").opacity(swap)
+            }
+            .font(.system(size: 30, weight: .semibold, design: .rounded)).frame(width: 140)
+            Image(systemName: "speaker.wave.2.fill").font(.system(size: 28)).foregroundStyle(.tint)
+                .opacity(step(t, 0.5, 0.6)).scaleEffect(1 + 0.08 * sin(t * .pi * 8) * step(t, 0.5, 0.6))
+            Image(systemName: "viewfinder").font(.system(size: 34)).foregroundStyle(.secondary).opacity(step(t, 0.7, 0.8))
+        }
+    }
+}
+
+/// Three saved passwords get checked, one turns out to be breached.
+private struct PasswordsDemo: View {
+    let t: Double
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(0..<3) { i in
+                let shown = step(t, 0.2 + Double(i) * 0.15, 0.3 + Double(i) * 0.15)
+                HStack(spacing: 8) {
+                    Image(systemName: "key.fill").foregroundStyle(.secondary).font(.system(size: 12))
+                    Text(verbatim: "••••••••••").font(.system(size: 13, design: .monospaced))
+                    Image(systemName: i == 1 ? "exclamationmark.octagon.fill" : "checkmark.circle.fill")
+                        .foregroundStyle(i == 1 ? Color.red : Color.green).opacity(shown)
+                }
+            }
+        }
+    }
+}
+
+/// A Keychain prompt, answered once.
+private struct KeychainDemo: View {
+    let t: Double
+    var body: some View {
+        let allow = step(t, 0.45, 0.55)
+        VStack(spacing: 10) {
+            Image(systemName: "lock.fill").font(.system(size: 30)).foregroundStyle(.secondary)
+            HStack(spacing: 8) {
+                Capsule().fill(Color.primary.opacity(0.1)).frame(width: 60, height: 20)
+                Capsule().fill(Color.accentColor.opacity(0.4 + 0.6 * allow)).frame(width: 90, height: 20)
+                    .overlay(Text(verbatim: "Always Allow").font(.system(size: 9, weight: .semibold)).foregroundStyle(.white))
+            }
+            Image(systemName: "checkmark.seal.fill").font(.system(size: 22)).foregroundStyle(.green).opacity(step(t, 0.6, 0.7))
+        }
     }
 }
 

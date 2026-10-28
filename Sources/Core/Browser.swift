@@ -57,6 +57,8 @@ final class BrowserState {
     /// "Welcome to Tacet <version>": what's new, once after an update.
     var showWhatsNew = false
     @ObservationIgnored private(set) lazy var assistant = AssistantChat(browser: self)
+    /// The answer shown in the command bar when you ask Tacet Assistant from there.
+    @ObservationIgnored private(set) lazy var quickAnswer = AssistantChat(browser: self, quick: true)
     @ObservationIgnored var palettePrefill = ""
     @ObservationIgnored weak var window: NSWindow?
 
