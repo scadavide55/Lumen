@@ -84,7 +84,7 @@ T = {
     'Software Update': ('Aggiornamento software', 'Mise à jour logicielle'),
     'Step %lld of %lld': ('Passaggio %1$lld di %2$lld', 'Étape %1$lld sur %2$lld'),
     'Teal': ('Verde acqua', 'Turquoise'),
-    'The app gets its own window and Dock icon, and opens in ~/Applications/Lumen Apps. Sign in once inside the app: it keeps its own cookies.': ("L'app ha la sua finestra e la sua icona nel Dock e si trova in ~/Applicazioni/Lumen Apps. Accedi una volta dentro l'app: conserva i suoi cookie.", "L'app a sa propre fenêtre et icône dans le Dock, dans ~/Applications/Lumen Apps. Connectez-vous une fois dans l'app : elle garde ses propres cookies."),
+    'The app gets its own window and Dock icon, and opens in ~/Applications/Tacet Apps. Sign in once inside the app: it keeps its own cookies.': ("L'app ha la sua finestra e la sua icona nel Dock e si trova in ~/Applicazioni/Tacet Apps. Accedi una volta dentro l'app: conserva i suoi cookie.", "L'app a sa propre fenêtre et icône dans le Dock, dans ~/Applications/Tacet Apps. Connectez-vous une fois dans l'app : elle garde ses propres cookies."),
     'The app needs a name.': ("L'app ha bisogno di un nome.", "L'app a besoin d'un nom."),
     "The download doesn't contain Tacet.": ('Il download non contiene Tacet.', 'Le téléchargement ne contient pas Tacet.'),
     "The downloaded version isn't newer than this one.": ('La versione scaricata non è più recente di questa.', "La version téléchargée n'est pas plus récente que celle-ci."),

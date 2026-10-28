@@ -1125,6 +1125,19 @@ final class PullToRefresh {
 
 // MARK: - What Tacet Shield blocked
 
+/// Totals since Tacet opened: everything blocked, and per site you visited. Kept in memory only.
+@Observable
+final class ShieldStats {
+    static let shared = ShieldStats()
+    private(set) var session = 0
+    private(set) var bySite: [String: Int] = [:]
+
+    func note(on site: String?) {
+        session += 1
+        if let site { bySite[site, default: 0] += 1 }
+    }
+}
+
 extension Tab {
     /// WebKit tells its own browser about every request a content rule list blocked; it isn't public API, so the
     /// name is matched exactly and nothing breaks if a WebKit version stops calling it.
@@ -1134,6 +1147,7 @@ extension Tab {
               (action.value(forKey: "blockedLoad") as? Bool) == true else { return }
         let site = url.host.map { PasswordStore.site($0) } ?? url.absoluteString
         blockedHere[site, default: 0] += 1
+        ShieldStats.shared.note(on: host.map(PasswordStore.site))
     }
 
     var blockedCount: Int { blockedHere.values.reduce(0, +) }

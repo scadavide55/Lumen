@@ -71,7 +71,7 @@ struct InstallAppSheet: View {
                 .shadow(color: .black.opacity(0.2), radius: 8, y: 3)
                 TextField("App name", text: $name).textFieldStyle(.roundedBorder).frame(width: 280).multilineTextAlignment(.center)
                 Text(c.startURL.absoluteString).font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle).frame(maxWidth: 360)
-                Text("The app gets its own window and Dock icon, and opens in ~/Applications/Lumen Apps. Sign in once inside the app: it keeps its own cookies.")
+                Text("The app gets its own window and Dock icon, and opens in ~/Applications/Tacet Apps. Sign in once inside the app: it keeps its own cookies.")
                     .font(.caption).foregroundStyle(.secondary).multilineTextAlignment(.center).frame(maxWidth: 380)
                 if let error { Label(error, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange).font(.callout) }
                 HStack {

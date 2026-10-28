@@ -2,15 +2,16 @@ import AppKit
 import WebKit
 
 /// Sites installed as their own apps. Each one is a copy of Tacet with the site's name and icon
-/// in ~/Applications/Lumen Apps; when Tacet starts from such a copy it shows only that site.
+/// in ~/Applications/Tacet Apps; when Tacet starts from such a copy it shows only that site.
 enum WebApp {
     /// The site this copy of Tacet is dedicated to, or nil for the normal browser.
     static let url: URL? = (Bundle.main.object(forInfoDictionaryKey: "LumenWebAppURL") as? String).flatMap(URL.init)
     static var isActive: Bool { url != nil }
     static var site: String? { url?.host.map(PasswordStore.site) }
 
-    /// Still "Lumen Apps", Tacet's former name, so apps installed before the rename keep working.
-    static let folder: URL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications/Lumen Apps", isDirectory: true)
+    static let folder: URL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications/Tacet Apps", isDirectory: true)
+    /// Where apps were installed before Lumen became Tacet.
+    static let oldFolder: URL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications/Lumen Apps", isDirectory: true)
     static let browserBundleID = "com.lumen.browser"
 
     /// Opens a link in the main Tacet browser.
@@ -105,6 +106,52 @@ enum WebApp {
         let first = title.components(separatedBy: CharacterSet(charactersIn: "|–—·:-")).first?.trimmingCharacters(in: .whitespaces) ?? title
         if !first.isEmpty && first.count <= 30 { return first }
         return host.map { BrowserState.siteName(PasswordStore.site($0)) } ?? "Web App"
+    }
+
+    // MARK: Keeping installed apps current
+
+    /// Each installed app is a copy of Tacet from the day it was installed. At launch, the browser renames the old
+    /// "Lumen Apps" folder (a rename keeps Dock icons pointing at the apps) and rebuilds every app that's older than
+    /// itself, keeping its name, icon, site and data. Apps that are open are left for the next launch.
+    static func refreshInstalled() {
+        guard !isActive else { return }
+        DispatchQueue.global(qos: .utility).async {
+            let fm = FileManager.default
+            if fm.fileExists(atPath: oldFolder.path), !fm.fileExists(atPath: folder.path) {
+                try? fm.moveItem(at: oldFolder, to: folder)
+            }
+            let current = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"
+            for app in installed() {
+                guard let info = NSDictionary(contentsOf: app.url.appendingPathComponent("Contents/Info.plist")),
+                      let id = info["CFBundleIdentifier"] as? String else { continue }
+                let version = info["CFBundleShortVersionString"] as? String ?? "0"
+                guard UpdateChecker.isNewer(current, than: version),
+                      NSRunningApplication.runningApplications(withBundleIdentifier: id).isEmpty else { continue }
+                rebuild(app.url, keeping: info)
+            }
+        }
+    }
+
+    /// Builds a fresh copy next to the app, then swaps it in; the old one stays if anything fails.
+    private static func rebuild(_ app: URL, keeping old: NSDictionary) {
+        let fm = FileManager.default
+        let fresh = app.deletingLastPathComponent().appendingPathComponent("." + UUID().uuidString + ".app")
+        defer { try? fm.removeItem(at: fresh) }
+        do { try fm.copyItem(at: Bundle.main.bundleURL, to: fresh) } catch { return }
+        let plistURL = fresh.appendingPathComponent("Contents/Info.plist")
+        guard let plist = NSMutableDictionary(contentsOf: plistURL) else { return }
+        for key in ["CFBundleIdentifier", "CFBundleName", "CFBundleDisplayName", "LumenWebAppURL"] { plist[key] = old[key] }
+        plist.removeObject(forKey: "CFBundleURLTypes")
+        plist.removeObject(forKey: "CFBundleDocumentTypes")
+        if let icon = old["CFBundleIconFile"] as? String, icon == "AppIcon" {
+            let from = app.appendingPathComponent("Contents/Resources/AppIcon.icns")
+            if (try? fm.copyItem(at: from, to: fresh.appendingPathComponent("Contents/Resources/AppIcon.icns"))) != nil {
+                plist["CFBundleIconFile"] = icon
+            }
+        }
+        guard plist.write(to: plistURL, atomically: true),
+              run("/usr/bin/codesign", ["--force", "--deep", "--sign", "-", fresh.path]) else { return }
+        _ = try? fm.replaceItemAt(app, withItemAt: fresh)
     }
 
     // MARK: Installing

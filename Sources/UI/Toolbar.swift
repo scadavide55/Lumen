@@ -233,6 +233,14 @@ struct BlockedOnPage: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            let stats = ShieldStats.shared
+            HStack(spacing: 14) {
+                if let site = tab.host.map(PasswordStore.site) {
+                    Text(String(format: L("%@ on this site"), (stats.bySite[site] ?? 0).formatted()))
+                }
+                Text(String(format: L("%@ this session"), stats.session.formatted()))
+            }
+            .font(.caption).foregroundStyle(.secondary)
             if expanded {
                 ForEach(tab.blockedHere.sorted { $0.value > $1.value }.prefix(12), id: \.key) { site, n in
                     HStack {

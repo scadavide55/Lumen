@@ -395,6 +395,12 @@ extension Extensions {
 
     func unload(_ id: UUID) {
         guard let context = runtime.contexts[id] else { return }
+        // Its own pages (settings, popups opened in a tab) stop working without it, so they close with it.
+        for b in WindowRegistry.shared.browsers where !b.isPrivate {
+            for t in b.tabs where t.url?.scheme == "webkit-extension" && t.url.flatMap({ controller.extensionContext(for: $0) }) === context {
+                b.close(t)
+            }
+        }
         try? controller.unload(context)
         runtime.contexts[id] = nil
     }
