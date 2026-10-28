@@ -30,7 +30,7 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 > [!NOTE]
 > **Lumen is now Tacet.** Same browser, new name: there were already other browsers called Lumen, and the name sounded too much like an AI product. Updating keeps all your tabs, passwords and settings.
 >
-> **1.6.2** has a new icon and a few fixes. **1.6.1** brought web extensions, an offline Reading List, Customize Site, tab organising and a much more capable Tacet Assistant, including Apple's on-device model. Tacet Assistant is still a beta. If something doesn't work, please report it in [Issues](https://github.com/scadavide55/Tacet/issues).
+> **1.6.3** brings your Arc sidebar across, a stronger Tacet Shield, tab previews, translation on your Mac and a password check. **1.6.2** has a new icon and a few fixes. **1.6.1** brought web extensions, an offline Reading List, Customize Site, tab organising and a much more capable Tacet Assistant, including Apple's on-device model. Tacet Assistant is still a beta. If something doesn't work, please report it in [Issues](https://github.com/scadavide55/Tacet/issues).
 
 ## Features
 
@@ -41,6 +41,7 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 - Reads your other tabs without switching to them, searches your history and bookmarks, and takes screenshots of the page when the layout matters
 - Full transcripts of YouTube videos, to summarise or ask about a video
 - Select text and right-click for Tacet Assistant › Explain, Translate, Summarise or Ask About It
+- Ask from the command bar for a quick answer that searches the web, then continue in the full chat if you want
 - **Web access** (on by default): searches the web and reads pages, with the sources listed under each answer
 - Opens pages and searches in new tabs, switches between your tabs and groups them when you ask
 - **Browser use** (off by default): clicks, types, scrolls and drags on the current page for you. It never fills in passwords or card numbers, and asks before sending, buying or deleting anything
@@ -57,7 +58,10 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 - Built-in ad and tracker blocking that works offline, toggled with ⇧⌘B
 - Optional EasyList and EasyPrivacy filter lists, converted to WebKit rules and refreshed weekly
 - Turn protection off for a single site from the shield button
-- Hides cookie consent banners and skips YouTube ads
+- Shows what it blocked on the page, on the site and since you opened Tacet
+- Hides cookie consent banners, rejects optional cookies for you, and skips YouTube ads
+- Protects against fingerprinting: canvas, WebGL and audio readings change slightly for each site
+- Optional AdGuard Base, Fanboy Annoyances and hidden (CNAME) tracker lists
 - Blocks third-party cookies
 
 **Privacy**
@@ -72,9 +76,11 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 - Saves passwords in the macOS Keychain and fills them after Touch ID
 - Suggests strong passwords on sign-up pages (optional)
 - Imports and exports CSV for Apple Passwords, and works alongside 1Password, KeePassXC and others
+- Password check: finds passwords from data breaches (only a 5-character hash prefix is sent), reused or weak ones
 
 **Moving in**
 - Imports bookmarks, history and sign-ins from Safari, Chrome, Firefox, Opera, Brave, Edge, Arc and other Chromium browsers
+- From Arc, also your Spaces, Favorites, pinned tabs and folders, as tab groups and pinned tabs
 - A guided setup on first launch, in English, Italian or French
 
 **Tabs and windows**
@@ -88,7 +94,8 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 - Install any site as an app with its own window and Dock icon
 - Vertical tabs in a resizable sidebar, or tabs along the top
 - Pinned tabs, drag to reorder, split view, reopen closed tabs
-- Background tabs hibernate to save memory, shown in grey, and wake up where you left them
+- Background tabs hibernate to save memory, shown in grey, and wake up showing the page as you left it, scrolled to the same place
+- Hover over a tab for a preview with its page, site and memory use; search tabs with ⌥⌘F
 - Windows and tabs come back when you reopen Tacet
 
 **Getting around**
@@ -96,6 +103,7 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 - Search shortcuts, for example `yt lofi` searches YouTube
 - Choice of search engine: DuckDuckGo, Google, Bing, Brave, Startpage, Ecosia, Kagi or your own
 - Reader mode, find on page, per-site zoom
+- Translate pages on your Mac with Apple's translation, have them read aloud, or hide everything but the page with Focus Mode
 - Reading List: save articles in Reader with their images to read later, even offline
 - Bookmarks with HTML import and export, searchable history, downloads
 
