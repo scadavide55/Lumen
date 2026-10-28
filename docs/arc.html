@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Switch from Arc — Tacet</title>
+<meta name="description" content="Arc stops working on December 22, 2026. Tacet brings your Spaces, Favorites, pinned tabs and folders across in one step, with vertical tabs, a command bar and an assistant that runs on your Mac.">
+<meta name="theme-color" content="#07080f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f6f5f2" media="(prefers-color-scheme: light)">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Switch from Arc to Tacet">
+<meta property="og:description" content="Arc stops working on December 22. Bring your Spaces, Favorites and pinned tabs to Tacet in one step.">
+<meta property="og:image" content="https://scadavide55.github.io/Tacet/assets/screenshot.jpg">
+<meta property="og:url" content="https://scadavide55.github.io/Tacet/arc.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://scadavide55.github.io/Tacet/arc.html">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/icon.png">
+<script>
+  // Same choice as the main page, applied before anything draws.
+  (() => {
+    let t = null;
+    try { t = localStorage.getItem('theme'); } catch (e) {}
+    document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+  })();
+</script>
+<style>
+:root {
+  --bg: #07080f; --card: rgba(255,255,255,.035); --line: rgba(255,255,255,.08);
+  --fg: #f3f2ef; --muted: #9a9cb2; --faint: #6b6e86; --accent: #7b79f2; --coral: #ff7a3a;
+  --btn-fg: #0a0b12; --radius: 18px; --max: 980px;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Inter, system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg: #f6f5f2; --card: rgba(20,22,40,.04); --line: rgba(20,22,40,.1);
+  --fg: #15162a; --muted: #5b5e78; --faint: #8a8da3; --btn-fg: #fff; color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { overflow-x: clip; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.6 var(--font); -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+nav { border-bottom: 1px solid var(--line); }
+nav .wrap { display: flex; align-items: center; gap: 16px; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; text-decoration: none; }
+.brand img { width: 28px; height: 28px; }
+nav .back { margin-left: auto; color: var(--muted); text-decoration: none; font-size: 15px; }
+nav .back:hover { color: var(--fg); }
+header { padding: 80px 0 40px; text-align: center; }
+.eclipse { position: relative; width: 64px; height: 64px; margin: 0 auto 26px; border-radius: 50%;
+  background: linear-gradient(135deg, #ffc24a, #ff5a2a); box-shadow: 0 0 60px 8px rgba(255,122,58,.3); }
+.eclipse::after { content: ""; position: absolute; inset: 0; border-radius: 50%; transform: translate(-9px, 8px);
+  background: radial-gradient(circle at 35% 30%, #3b3752, #14121d 90%); }
+.date { display: inline-block; font-size: 14px; color: var(--coral); border: 1px solid color-mix(in srgb, var(--coral) 40%, transparent);
+  padding: 4px 12px; border-radius: 999px; margin-bottom: 18px; }
+h1 { font-size: clamp(36px, 6vw, 60px); line-height: 1.05; letter-spacing: -.035em; margin: 0 0 18px; }
+.lead { font-size: 20px; color: var(--muted); max-width: 680px; margin: 0 auto 30px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; border-radius: 12px; font-weight: 600; text-decoration: none; }
+.btn.primary { background: var(--fg); color: var(--btn-fg); }
+.btn.ghost { border: 1px solid var(--line); background: var(--card); }
+.actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+section { padding: 56px 0; }
+h2 { font-size: clamp(26px, 4vw, 36px); letter-spacing: -.025em; margin: 0 0 22px; }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: s; }
+.step { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
+.step b { display: block; margin-bottom: 6px; }
+.step b::before { counter-increment: s; content: counter(s); display: inline-grid; place-items: center; width: 26px; height: 26px;
+  border-radius: 50%; background: var(--accent); color: #fff; font-size: 14px; margin-right: 10px; }
+.step p { margin: 0; color: var(--muted); font-size: 15.5px; }
+.map { width: 100%; border-collapse: collapse; font-size: 16px; }
+.map th, .map td { text-align: left; padding: 13px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.map th { color: var(--muted); font-weight: 600; font-size: 14px; }
+.map td:first-child { font-weight: 600; white-space: nowrap; }
+.map .how { color: var(--muted); }
+.tag { font-size: 12.5px; padding: 2px 8px; border-radius: 999px; margin-left: 6px; white-space: nowrap; }
+.tag.auto { background: color-mix(in srgb, #34c759 20%, transparent); color: #34c759; }
+.tag.hand { background: color-mix(in srgb, var(--coral) 18%, transparent); color: var(--coral); }
+.tag.none { background: var(--card); color: var(--faint); border: 1px solid var(--line); }
+code { font: 14px var(--mono); background: var(--card); border: 1px solid var(--line); padding: 2px 6px; border-radius: 6px; }
+.faq details { border-bottom: 1px solid var(--line); padding: 16px 0; }
+.faq summary { cursor: pointer; font-weight: 600; }
+.faq p { color: var(--muted); margin: 10px 0 0; }
+footer { padding: 40px 0 60px; color: var(--faint); font-size: 14px; text-align: center; }
+@media (max-width: 760px) {
+  .steps { grid-template-columns: 1fr; }
+  .map td:first-child { white-space: normal; }
+  .map th:nth-child(3), .map td:nth-child(3) { display: none; }
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="wrap">
+    <a class="brand" href="./"><img src="assets/icon.png" alt="">Tacet</a>
+    <a class="back" href="./">← All about Tacet</a>
+  </div>
+</nav>
+
+<header>
+  <div class="wrap">
+    <div class="eclipse" aria-hidden="true"></div>
+    <div class="date">Arc stops working on December 22, 2026</div>
+    <h1>Your Arc sidebar,<br>moved in one step.</h1>
+    <p class="lead">Tacet reads your Spaces, Favorites, pinned tabs and folders straight from Arc and rebuilds them as tab groups and pinned tabs, with your history, bookmarks and sign-ins. Vertical tabs, a command bar, split view and an assistant that can run on your Mac are already there.</p>
+    <div class="actions">
+      <a class="btn primary" id="dl" href="https://github.com/scadavide55/Tacet/releases/latest">Download Tacet</a>
+      <a class="btn ghost" href="./#compare">Compare with Arc</a>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>Three steps, about a minute</h2>
+    <div class="steps">
+      <div class="step"><b>Download Tacet</b><p>Open the .dmg and drag Tacet to Applications. It's free and open source, for macOS 14 or later.</p></div>
+      <div class="step"><b>Choose Arc</b><p>The setup lists the browsers on your Mac: pick Arc and keep “Arc Spaces and pinned tabs” ticked. Later, use File › Import from Another Browser.</p></div>
+      <div class="step"><b>Allow, then browse</b><p>When macOS asks about “Arc Safe Storage”, choose Allow to keep your sign-ins. Your Spaces appear as folded tab groups that load only when you open them.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>What comes across</h2>
+    <table class="map">
+      <thead><tr><th>In Arc</th><th>In Tacet</th><th>How</th></tr></thead>
+      <tbody>
+        <tr><td>Spaces</td><td>A tab group for each Space, with its emoji and name</td><td class="how"><span class="tag auto">Automatic</span></td></tr>
+        <tr><td>Favorites</td><td>Pinned tabs, the icons at the top of the sidebar</td><td class="how"><span class="tag auto">Automatic</span></td></tr>
+        <tr><td>Pinned tabs</td><td>Tabs in their Space's group</td><td class="how"><span class="tag auto">Automatic</span></td></tr>
+        <tr><td>Folders</td><td>Their own groups, named “Space · Folder”</td><td class="how"><span class="tag auto">Automatic</span></td></tr>
+        <tr><td>Today's tabs</td><td>A “Today” group per Space, if you want them</td><td class="how"><span class="tag auto">Optional</span></td></tr>
+        <tr><td>History and bookmarks</td><td>History and bookmarks</td><td class="how"><span class="tag auto">Automatic</span></td></tr>
+        <tr><td>Signed-in sites</td><td>Still signed in</td><td class="how"><span class="tag auto">Automatic</span> after you allow Keychain access</td></tr>
+        <tr><td>Passwords</td><td>Saved in your Mac's Keychain, behind Touch ID</td><td class="how"><span class="tag hand">By hand</span> export a CSV from Arc's password settings, then Settings › Passwords › Import</td></tr>
+        <tr><td>Boosts</td><td>Customize Site: theme, font, width, hidden elements, your own CSS and JavaScript</td><td class="how"><span class="tag hand">By hand</span> Tacet can't read Boosts, so recreate the ones you use</td></tr>
+        <tr><td>Profiles</td><td>Tacet has profiles too, each with its own sign-ins</td><td class="how"><span class="tag hand">By hand</span> each Arc profile is imported into your main Tacet profile; pick which one in the import window</td></tr>
+        <tr><td>Command bar (⌘T)</td><td>Command bar (⌘L or ⌘K): sites, searches, tabs, history, bookmarks and commands</td><td class="how"><span class="tag auto">Built in</span></td></tr>
+        <tr><td>Split View</td><td>Split view (⌥⌘S)</td><td class="how"><span class="tag auto">Built in</span></td></tr>
+        <tr><td>Ad blocking</td><td>Tacet Shield, on from the start, off for a site in one click</td><td class="how"><span class="tag auto">Built in</span></td></tr>
+        <tr><td>Arc Max</td><td>Tacet Assistant: Apple's model on your Mac, or your own key</td><td class="how"><span class="tag auto">Built in</span></td></tr>
+        <tr><td>Little Arc, Easels, Notes</td><td>Nothing like them yet</td><td class="how"><span class="tag none">Not in Tacet</span></td></tr>
+        <tr><td>Sync between Macs</td><td>Not yet</td><td class="how"><span class="tag none">Not in Tacet</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="faq">
+  <div class="wrap">
+    <h2>Questions from Arc users</h2>
+    <details><summary>Do I need to do this before December 22?</summary>
+      <p>Yes. Tacet reads Arc's files on your Mac, and Arc may remove them once it stops working. Importing now is safest; you can keep using Arc until then.</p></details>
+    <details><summary>Will it open hundreds of tabs at once?</summary>
+      <p>No. Imported tabs wait folded in their groups and load only when you click them, so a big sidebar doesn't slow your Mac down.</p></details>
+    <details><summary>Is Tacet built on Chromium, like Arc?</summary>
+      <p>No, on WebKit, the engine of Safari. Sites behave as they do in Safari, with its speed and battery life. Chrome extensions are supported on macOS 15.4 or later, as are Safari and Firefox ones.</p></details>
+    <details><summary>What does it cost? Who's behind it?</summary>
+      <p>Nothing. Tacet is free and open source under the GPL-3.0, has no accounts and no analytics, and is made by one person. The code is on <a href="https://github.com/scadavide55/Tacet">GitHub</a>.</p></details>
+    <details><summary>macOS says Tacet is damaged. What now?</summary>
+      <p>Tacet isn't notarized by Apple yet. The download is fine: run <code>xattr -dr com.apple.quarantine /Applications/Tacet.app</code> once in Terminal, then open it normally.</p></details>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">Tacet, formerly Lumen · <a href="./">Home</a> · <a href="https://github.com/scadavide55/Tacet">GitHub</a> · Arc is a trademark of The Browser Company, which isn't connected with Tacet.</div>
+</footer>
+
+<script>
+  // The newest .dmg, straight from GitHub; the releases page if that fails.
+  fetch('https://api.github.com/repos/scadavide55/Tacet/releases/latest', { headers: { Accept: 'application/vnd.github+json' } })
+    .then((r) => r.ok ? r.json() : Promise.reject())
+    .then((rel) => {
+      const dmg = (rel.assets || []).find((a) => /\.dmg$/i.test(a.name));
+      if (dmg && /^https:\/\/github\.com\//.test(dmg.browser_download_url)) document.getElementById('dl').href = dmg.browser_download_url;
+    })
+    .catch(() => {});
+</script>
+</body>
+</html>
