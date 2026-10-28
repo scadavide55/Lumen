@@ -294,6 +294,11 @@ struct LumenCommands: Commands {
             Button("Hibernate Other Tabs") { b?.hibernateOthers() }.disabled(b == nil)
             Divider()
             Button("Group Tabs by Site") { b?.groupBySiteNow() }.disabled(b == nil)
+            Button("Search Tabs…") {
+                // The sidebar's search when the sidebar shows; otherwise the command bar, which finds open tabs too.
+                if Settings.shared.tabLayout == .vertical, b?.sidebarVisible == true { b?.tabFilterVisible = true } else { b?.showPalette("") }
+            }
+            .keyboardShortcut("f", modifiers: [.command, .option]).disabled(b == nil)
             Button("Close Duplicate Tabs") { b?.closeDuplicates() }.disabled(b == nil || b?.duplicateCount == 0)
             Menu("Sort Tabs") {
                 ForEach(BrowserState.TabSort.allCases) { o in Button(o.label) { b?.sortTabs(by: o) } }

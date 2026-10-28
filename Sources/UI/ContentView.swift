@@ -194,6 +194,16 @@ struct TabPane: View {
         let r: CGFloat = s.insetContent ? s.cornerRadius : 0
         ZStack {
             if let wv = tab.webView { WebContainer(webView: wv, radius: r) }
+            if let look = tab.sleepImage {
+                // The page as it was, top-aligned, until it has loaded again.
+                GeometryReader { geo in
+                    Image(nsImage: look).resizable().aspectRatio(contentMode: .fill)
+                        .frame(width: geo.size.width, height: geo.size.height, alignment: .top).clipped()
+                }
+                .clipShape(RoundedRectangle(cornerRadius: r, style: .continuous))
+                .allowsHitTesting(false)
+                .transition(.opacity)
+            }
             if tab.isStartPage {
                 StartPage(tab: tab).clipShape(RoundedRectangle(cornerRadius: r, style: .continuous))
             }

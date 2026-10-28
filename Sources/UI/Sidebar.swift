@@ -25,6 +25,8 @@ struct Sidebar: View {
             if let p = b.profile { ProfileBadge(profile: p) }
             if !b.pinnedTabs.isEmpty { PinnedGrid() }
 
+            if b.tabFilterVisible || b.tabs.count >= 12 { TabFilterField() }
+
             ScrollView {
                 LazyVStack(spacing: 2) {
                     NewTabRow()
@@ -153,6 +155,21 @@ extension Sidebar {
     var entries: [SidebarEntry] {
         var out: [SidebarEntry] = []
         var seen = Set<UUID>()
+        let words = b.tabFilter.lowercased().split(separator: " ").map(String.init)
+        if !words.isEmpty {
+            // Searching: every matching tab, with its group's name above it, folded groups included.
+            for t in b.regularTabs {
+                let hay = (t.title + " " + (t.url?.absoluteString ?? "")).lowercased()
+                guard words.allSatisfy(hay.contains) else { continue }
+                if let gid = t.groupID, let g = b.groups.first(where: { $0.id == gid }) {
+                    if seen.insert(gid).inserted { out.append(.header(g)) }
+                    out.append(.tab(t, grouped: true))
+                } else {
+                    out.append(.tab(t, grouped: false))
+                }
+            }
+            return out
+        }
         for t in b.regularTabs {
             if let gid = t.groupID, let g = b.groups.first(where: { $0.id == gid }) {
                 if !seen.contains(gid) { seen.insert(gid); out.append(.header(g)) }
@@ -162,6 +179,42 @@ extension Sidebar {
             }
         }
         return out
+    }
+}
+
+/// Search the open tabs by title or address; Esc clears it. Shown with ⌥⌘F, and always once there are many tabs.
+struct TabFilterField: View {
+    @Environment(BrowserState.self) var b
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        @Bindable var b = b
+        HStack(spacing: 6) {
+            Image(systemName: "magnifyingglass").font(.system(size: 11)).foregroundStyle(.secondary)
+            TextField(L("Search tabs"), text: $b.tabFilter)
+                .textFieldStyle(.plain).font(.system(size: 12.5))
+                .focused($focused)
+                .onExitCommand { b.tabFilter = ""; b.tabFilterVisible = false; focused = false }
+                .onSubmit {
+                    // Return opens the first match.
+                    let words = b.tabFilter.lowercased().split(separator: " ").map(String.init)
+                    if let t = b.regularTabs.first(where: { t in
+                        let hay = (t.title + " " + (t.url?.absoluteString ?? "")).lowercased()
+                        return words.allSatisfy(hay.contains)
+                    }) { b.select(t) }
+                    b.tabFilter = ""
+                    b.tabFilterVisible = false
+                }
+            if !b.tabFilter.isEmpty {
+                Button { b.tabFilter = "" } label: { Image(systemName: "xmark.circle.fill").font(.system(size: 11)) }
+                    .buttonStyle(.plain).foregroundStyle(.secondary)
+            }
+        }
+        .padding(.horizontal, 8)
+        .frame(height: 26)
+        .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(Color.primary.opacity(0.06)))
+        .onAppear { if b.tabFilterVisible { focused = true } }
+        .onChange(of: b.tabFilterVisible) { _, visible in if visible { focused = true } }
     }
 }
 
@@ -302,7 +355,7 @@ struct TabRow: View, Equatable {
             let placement: BrowserState.DropPlacement = location.y < h * 0.28 ? .before : (location.y > h * 0.72 ? .after : .group)
             return b.handleDrop(items, on: tab, placement: placement, pinned: false)
         }
-        .help(tab.url?.absoluteString ?? tab.title)
+        .tabPreview(tab, edge: Settings.shared.sidebarSide == .left ? .trailing : .leading)
     }
 }
 
@@ -352,7 +405,7 @@ struct PinnedTile: View, Equatable {
             .contextMenu { TabMenu(tab: tab) }
             .draggable(b.dragPayload(for: tab))
             .dropDestination(for: String.self) { items, _ in b.handleDrop(items, before: tab, pinned: true) }
-            .help(tab.title)
+            .tabPreview(tab, edge: Settings.shared.sidebarSide == .left ? .trailing : .leading)
     }
 }
 
@@ -937,7 +990,7 @@ struct TabChip: View, Equatable {
                 : (location.x < width * 0.25 ? .before : (location.x > width * 0.75 ? .after : .group))
             return b.handleDrop(items, on: tab, placement: placement, pinned: tab.isPinned)
         }
-        .help(tab.title)
+        .tabPreview(tab, edge: .bottom)
     }
 }
 

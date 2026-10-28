@@ -18,6 +18,9 @@ final class BrowserState {
         }
     }
     var groups: [TabGroup] = []
+    /// Words typed in the sidebar's tab search; only matching tabs show while it isn't empty.
+    var tabFilter = ""
+    var tabFilterVisible = false
     /// Tabs picked with ⌘-click or ⇧-click, to move, group or close together.
     var marked: Set<UUID> = []
     /// Where ⇧-click ranges start.
@@ -202,6 +205,7 @@ final class BrowserState {
         if let g = tab.groupID, let i = groups.firstIndex(where: { $0.id == g }), groups[i].collapsed { groups[i].collapsed = false }
         if splitID == tab.id { splitID = selectedID }
         current?.lastActive = Date()
+        if let old = current, old !== tab { old.rememberLook() }
         tab.ensureWebView()
         tab.lastActive = Date()
         selectedID = tab.id

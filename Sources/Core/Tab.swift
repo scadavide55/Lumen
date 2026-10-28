@@ -31,6 +31,14 @@ final class Tab: NSObject, Identifiable {
     /// Picking elements on the page to hide.
     var pickingElements = false
     @ObservationIgnored var lastActive = Date()
+    /// What the page looked like when it went to sleep, shown over it while it wakes up so there's no white flash.
+    var sleepImage: NSImage?
+    /// The page as it looked when you last left the tab, as JPEG, and where it was scrolled to.
+    @ObservationIgnored private var lastLook: (jpeg: Data, scroll: CGPoint)?
+    @ObservationIgnored private var waking = false
+
+    /// The picture of the page from when you last left it, for the preview shown when hovering over the tab.
+    var previewImage: NSImage? { isSelected ? nil : lastLook.flatMap { NSImage(data: $0.jpeg) } }
 
     @ObservationIgnored private var restoreState: Data?
     @ObservationIgnored private var pendingURL: URL?
@@ -142,6 +150,12 @@ final class Tab: NSObject, Identifiable {
         let target = pendingURL
         restoreState = nil
         pendingURL = nil
+        if state != nil, let look = lastLook, let image = NSImage(data: look.jpeg) {
+            sleepImage = image
+            waking = true
+            // A page that never finishes loading isn't hidden for long.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in self?.finishWaking(restoreScroll: false) }
+        }
         ContentBlocker.shared.whenReady { [weak self, weak wv] in
             guard let self, let wv, self.webView === wv else { return }
             self.applyBlocking(for: target ?? self.url)
@@ -192,6 +206,35 @@ final class Tab: NSObject, Identifiable {
             wv.observe(\.themeColor) { [weak self] w, _ in if self?.themeColor != w.themeColor { self?.themeColor = w.themeColor } },
         ]
         webView = wv
+    }
+
+    /// Keeps a small picture of the page and its scroll position as the tab goes to the background, for when it wakes.
+    func rememberLook() {
+        guard let wv = webView, wv.window != nil, url != nil, !isReader, !isPrivate else { return }
+        let config = WKSnapshotConfiguration()
+        config.snapshotWidth = NSNumber(value: min(1200, Double(wv.bounds.width)))
+        wv.takeSnapshot(with: config) { [weak self] image, _ in
+            guard let image, let tiff = image.tiffRepresentation,
+                  let jpeg = NSBitmapImageRep(data: tiff)?.representation(using: .jpeg, properties: [.compressionFactor: 0.6]) else { return }
+            wv.evaluateJavaScript("[window.scrollX, window.scrollY]", in: nil, in: .defaultClient) { result in
+                let xy = (try? result.get()) as? [Double] ?? [0, 0]
+                self?.lastLook = (jpeg, CGPoint(x: xy.first ?? 0, y: xy.last ?? 0))
+            }
+        }
+    }
+
+    /// The page has loaded after waking: puts it back where it was scrolled to if it didn't do that itself,
+    /// then lets the picture fade.
+    private func finishWaking(restoreScroll: Bool) {
+        guard waking else { return }
+        waking = false
+        if restoreScroll, let wv = webView, let y = lastLook?.scroll.y, y > 40 {
+            let x = lastLook?.scroll.x ?? 0
+            wv.evaluateJavaScript("if (Math.abs(window.scrollY - \(y)) > 40) window.scrollTo(\(x), \(y))", in: nil, in: .defaultClient)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) { [weak self] in
+            withAnimation(.easeOut(duration: 0.2)) { self?.sleepImage = nil }
+        }
     }
 
     /// Releases the web view but keeps enough state to restore the page and its history.
@@ -748,6 +791,7 @@ extension Tab: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        if waking { finishWaking(restoreScroll: true) }
         guard navigation !== internalNavigation, !isPrivate, !isReader, let u = webView.url else { return }
         History.shared.record(url: u, title: webView.title ?? "")
     }

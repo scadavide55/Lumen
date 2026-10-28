@@ -354,6 +354,8 @@ final class Settings: Observable {
     @Pref("checkUpdates") var checkUpdates = true
     @Pref("paletteOnNewTab") var paletteOnNewTab = true
     @Pref("organizeTabs") var organizeTabs = false
+    /// A card with the page, its site and its memory when the pointer rests on a tab.
+    @Pref("tabPreviews") var tabPreviews = true
     /// How many tabs from one site make a group: 2, 3 or 5.
     @Pref("groupThreshold") var groupThreshold = 3
     /// Sites never grouped by site, as registrable domains ("github.com").

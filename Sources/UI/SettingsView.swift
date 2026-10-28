@@ -75,6 +75,7 @@ struct GeneralPane: View {
             Section("Tabs") {
                 Toggle("Restore windows and tabs when Tacet opens", isOn: $s.restoreSession)
                 Toggle("Open the command bar on every new tab", isOn: $s.paletteOnNewTab)
+                Toggle("Show a preview with memory use when you hover over a tab", isOn: $s.tabPreviews)
                 Picker("Organize tabs", selection: $s.organizeTabs) {
                     Text("Manually").tag(false)
                     Text("Automatically by site").tag(true)
