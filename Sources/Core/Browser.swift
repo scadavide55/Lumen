@@ -18,6 +18,10 @@ final class BrowserState {
         }
     }
     var groups: [TabGroup] = []
+    /// A tab whose page should be translated; PageTranslationHost picks it up.
+    var translateRequest: UUID?
+    /// Only the page: no sidebar, toolbar or tabs, until Focus Mode is turned off.
+    var focusMode = false
     /// Words typed in the sidebar's tab search; only matching tabs show while it isn't empty.
     var tabFilter = ""
     var tabFilterVisible = false

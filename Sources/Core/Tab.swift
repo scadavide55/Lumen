@@ -36,6 +36,11 @@ final class Tab: NSObject, Identifiable {
     /// The page as it looked when you last left the tab, as JPEG, and where it was scrolled to.
     @ObservationIgnored private var lastLook: (jpeg: Data, scroll: CGPoint)?
     @ObservationIgnored private var waking = false
+    /// Page translation: in progress, done (from which language), or why it couldn't be.
+    var translating = false
+    var translatedFrom: String?
+    var translationError: String?
+    var readingAloud = false
 
     /// The picture of the page from when you last left it, for the preview shown when hovering over the tab.
     var previewImage: NSImage? { isSelected ? nil : lastLook.flatMap { NSImage(data: $0.jpeg) } }
@@ -245,7 +250,10 @@ final class Tab: NSObject, Identifiable {
         tearDown()
     }
 
-    func close() { tearDown() }
+    func close() {
+        if readingAloud { MainActor.assumeIsolated { ReadAloud.shared.stop() } }
+        tearDown()
+    }
 
     private func tearDown() {
         observers = []
@@ -778,6 +786,10 @@ extension Tab: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        // A new page isn't translated, and isn't the one being read aloud.
+        if translatedFrom != nil { translatedFrom = nil }
+        if translationError != nil { translationError = nil }
+        if readingAloud { ReadAloud.shared.stop() }
         let host = webView.url?.host?.lowercased()
         let z = host.flatMap { Settings.shared.siteZoom[$0] } ?? Settings.shared.defaultZoom
         if abs(webView.pageZoom - z) > 0.001 { webView.pageZoom = z }

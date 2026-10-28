@@ -228,6 +228,18 @@ struct LumenCommands: Commands {
             }
             Divider()
             Button("Reader") { b?.current?.toggleReader() }.keyboardShortcut("r", modifiers: [.command, .shift]).disabled(b == nil)
+            if b?.current?.translatedFrom != nil {
+                Button("Show Original") { b?.current?.showOriginal() }.keyboardShortcut("t", modifiers: [.command, .option])
+            } else {
+                Button("Translate Page") { b?.current?.translatePage() }
+                    .keyboardShortcut("t", modifiers: [.command, .option]).disabled(b?.current?.url == nil)
+            }
+            Button(b?.current?.readingAloud == true ? "Stop Reading Aloud" : "Read Aloud") {
+                if let t = b?.current { ReadAloud.shared.toggle(t) }
+            }
+            .keyboardShortcut("a", modifiers: [.command, .option]).disabled(b?.current?.url == nil)
+            Button(b?.focusMode == true ? "Exit Focus Mode" : "Focus Mode") { b?.focusMode.toggle() }
+                .keyboardShortcut("j", modifiers: [.command, .shift]).disabled(b == nil)
             Button("Split View") {
                 guard let b else { return }
                 b.splitTab == nil ? b.splitWithNewTab() : b.closeSplit()

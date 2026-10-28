@@ -117,11 +117,15 @@ struct BrowserLayout: View {
         .animation(.easeOut(duration: 0.15), value: b.peekSidebar)
         .animation(.easeOut(duration: 0.18), value: b.assistantVisible)
         .animation(.easeOut(duration: 0.2), value: b.assistantExpanded)
+        .animation(.easeOut(duration: 0.25), value: b.focusMode)
     }
 
     @ViewBuilder private var layout: some View {
         ZStack {
-            if vertical {
+            if #available(macOS 15.0, *) { PageTranslationHost() }
+            if b.focusMode {
+                FocusLayout()
+            } else if vertical {
                 HStack(spacing: 0) {
                     if sidebarShown && left {
                         Sidebar(showsControls: controlsInSidebar).frame(width: sidebarWidth)
@@ -149,6 +153,33 @@ struct BrowserLayout: View {
                     MainColumn(toolbar: false, trafficSpace: false, leadingFlush: false, trailingFlush: false)
                 }
             }
+        }
+    }
+}
+
+/// Focus Mode: the page alone, with a way out that appears when the pointer reaches the top of the window.
+struct FocusLayout: View {
+    @Environment(BrowserState.self) var b
+    @State private var showExit = false
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ZStack {
+                WindowDragArea()
+                if showExit {
+                    Button { b.focusMode = false } label: {
+                        Label("Exit Focus Mode", systemImage: "arrow.down.right.and.arrow.up.left").font(.system(size: 11.5, weight: .medium))
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, 10).padding(.vertical, 4)
+                    .background(.regularMaterial, in: Capsule())
+                    .help("Exit Focus Mode (⇧⌘J)")
+                    .transition(.opacity)
+                }
+            }
+            .frame(height: 30)
+            .onHover { inside in withAnimation(.easeOut(duration: 0.15)) { showExit = inside } }
+            PageArea().padding([.horizontal, .bottom], 6)
         }
     }
 }
@@ -220,6 +251,10 @@ struct TabPane: View {
             if let menu = tab.loginMenu { LoginMenuView(tab: tab, menu: menu) }
         }
         .overlay(alignment: .top) { PullIndicator(pull: tab.pull) }
+        .overlay(alignment: .top) {
+            if tab.translating || tab.translatedFrom != nil || tab.translationError != nil { TranslationBar(tab: tab) }
+        }
+        .animation(.easeOut(duration: 0.2), value: tab.translating)
         .overlay(alignment: .top) {
             VStack(spacing: 0) {
                 if tab.insecureWarning { InsecurePasswordBanner(tab: tab) }

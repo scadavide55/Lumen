@@ -377,6 +377,13 @@ struct PageMenu: View {
                 Button("Save for Offline") { tab.saveForOffline() }.disabled(tab.url == nil)
             }
             Button("Find on Page…") { b.showFind() }.disabled(tab.url == nil)
+            if tab.translatedFrom != nil {
+                Button("Show Original") { tab.showOriginal() }
+            } else {
+                Button("Translate Page") { tab.translatePage() }.disabled(tab.url == nil)
+            }
+            Button(tab.readingAloud ? LocalizedStringKey("Stop Reading Aloud") : "Read Aloud") { ReadAloud.shared.toggle(tab) }.disabled(tab.url == nil)
+            Button("Focus Mode") { b.focusMode = true }
             Menu("Zoom") {
                 Button("Zoom In") { tab.zoom(1) }
                 Button("Zoom Out") { tab.zoom(-1) }
