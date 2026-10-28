@@ -20,6 +20,7 @@ struct ContentView: View {
     @Environment(\.openWindow) private var openWindow
     static var onboardingShown = false
     static var updateChecked = false
+    static var profileAsked = false
 
     init(isPrivate: Bool, profileID: UUID? = nil) {
         _holder = StateObject(wrappedValue: BrowserHolder(BrowserState(isPrivate: isPrivate, profileID: profileID)))
@@ -37,6 +38,14 @@ struct ContentView: View {
             .ignoresSafeArea()
             .onAppear {
                 guard !browser.isPrivate, !WebApp.isActive else { return }
+                // The first window of a fresh start asks for a profile, unless it reopened the last session or a link.
+                if !ContentView.profileAsked {
+                    ContentView.profileAsked = true
+                    if settings.onboarded, settings.askProfileAtLaunch, !settings.profiles.isEmpty, !browser.restored,
+                       browser.profileID == nil, !browser.tabs.contains(where: { $0.url != nil }) {
+                        browser.showProfilePicker = true
+                    }
+                }
                 // Saved windows reopen one at a time: each one opens the next, since macOS can drop
                 // windows asked for all at once.
                 if Session.shared.hasPendingWindows {
@@ -66,6 +75,7 @@ struct ContentView: View {
                 }
             }
             .sheet(isPresented: Bindable(browser).showOnboarding) { OnboardingView() }
+            .sheet(isPresented: Bindable(browser).showProfilePicker) { ProfilePicker() }
             .sheet(isPresented: Bindable(browser).showWhatsNew, onDismiss: { settings.welcomedVersion = UpdateChecker.currentVersion }) { WhatsNewView() }
             .sheet(isPresented: Bindable(browser).showAssistantIntro, onDismiss: { settings.aiIntroduced = true }) { AssistantIntro() }
             .sheet(isPresented: Bindable(browser).customizingSite) {
@@ -621,5 +631,46 @@ struct ReaderSaveButton: View {
         .onHover { hover = $0 }
         .padding(16)
         .help(saved ? "Saved in the Reading List. Click to save it again." : "Saves the article with its images, to read without a connection")
+    }
+}
+
+/// "Who's browsing?": the main profile and each one you made. Picking another opens its window in place of this one.
+struct ProfilePicker: View {
+    @Environment(BrowserState.self) var b
+    @Environment(\.openWindow) private var openWindow
+    @Bindable private var s = Settings.shared
+
+    var body: some View {
+        VStack(spacing: 18) {
+            Text("Who's browsing?").font(.system(size: 22, weight: .bold))
+            HStack(spacing: 14) {
+                tile(name: L("Main Profile"), color: .accentColor) { b.showProfilePicker = false }
+                ForEach(s.profiles) { p in
+                    tile(name: p.name, color: p.tint) {
+                        b.showProfilePicker = false
+                        openWindow(id: "profile", value: p.id)
+                        // This window was only the main profile's start page.
+                        let window = b.window
+                        DispatchQueue.main.async { window?.close() }
+                    }
+                }
+            }
+            Toggle("Ask every time Tacet opens", isOn: $s.askProfileAtLaunch).toggleStyle(.checkbox).font(.callout)
+        }
+        .padding(28)
+        .frame(minWidth: 360)
+    }
+
+    private func tile(name: String, color: Color, pick: @escaping () -> Void) -> some View {
+        Button(action: pick) {
+            VStack(spacing: 8) {
+                Image(systemName: "person.crop.circle.fill").font(.system(size: 52)).foregroundStyle(color)
+                Text(name).font(.system(size: 13, weight: .medium)).lineLimit(1)
+            }
+            .frame(width: 104, height: 104)
+            .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.primary.opacity(0.05)))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 }

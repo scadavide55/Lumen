@@ -69,6 +69,9 @@ final class BrowserState {
     @ObservationIgnored private var closeObserver: NSObjectProtocol?
     /// Set when the window closes. Its state can outlive the window for a while, but it's never saved or offered again.
     @ObservationIgnored private(set) var isClosed = false
+    /// Reopened from the last session, so it already knows its profile.
+    @ObservationIgnored private(set) var restored = false
+    var showProfilePicker = false
     @ObservationIgnored private var lockObserver: NSObjectProtocol?
 
     var current: Tab? { tabs.first { $0.id == selectedID } }
@@ -81,6 +84,7 @@ final class BrowserState {
         self.isPrivate = isPrivate
         // A window restored from the last session reopens in the profile it had.
         let snap = WebApp.isActive || isPrivate || profileID != nil ? nil : Session.shared.takePending()
+        restored = snap != nil
         let pid = isPrivate ? nil : (profileID ?? snap?.profile)
         let profile = pid.flatMap { id in Settings.shared.profiles.first { $0.id == id } }
         self.profileID = profile?.id

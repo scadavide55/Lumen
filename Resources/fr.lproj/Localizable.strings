@@ -97,8 +97,10 @@
 "Ask Tacet Assistant: %@" = "Demander à Tacet Assistant : %@";
 "Ask Tacet Assistant…" = "Demandez à l'Assistant Tacet…";
 "Ask about the page you're reading, or anything else." = "Posez une question sur la page que vous lisez, ou sur autre chose.";
+"Ask every time Tacet opens" = "Demander à chaque ouverture de Tacet";
 "Ask questions about the page you're reading, get summaries and explanations, in a panel beside the page. It uses your own API key, and it stays off unless you turn it on." = "Posez des questions sur la page que vous lisez, obtenez des résumés et des explications, dans un panneau à côté de la page. Il utilise votre propre clé API et reste désactivé tant que vous ne l'activez pas.";
 "Ask where to save each download" = "Demander où enregistrer chaque téléchargement";
+"Ask which profile to use when Tacet opens" = "Demander quel profil utiliser à l’ouverture de Tacet";
 "At the end" = "À la fin";
 "Attach Image" = "Joindre une image";
 "Aurora" = "Aurore";
@@ -1040,6 +1042,7 @@
 "When three or more tabs are open from the same site, Tacet groups them, for example into “GitHub”." = "Quand trois onglets ou plus sont ouverts sur le même site, Tacet les regroupe, par exemple dans « GitHub ».";
 "When you ask something, your message, the attached page and any images are sent to the provider you chose, under their privacy terms. With a server on your own Mac, such as Ollama, nothing leaves your computer unless the assistant searches the web. Your API key is kept in the macOS Keychain." = "Quand vous posez une question, votre message, la page jointe et les éventuelles images sont envoyés au fournisseur choisi, selon ses conditions de confidentialité. Avec un serveur sur votre Mac, comme Ollama, rien ne quitte votre ordinateur, sauf si l'assistant fait une recherche sur le web. Votre clé API est conservée dans le trousseau macOS.";
 "When you ask, the assistant can use the page in the current tab for you, where you're signed in. It asks before sending, buying or deleting anything, and never fills in passwords or card numbers. A page can try to trick it, so watch what it does and press Stop if needed." = "Quand vous le demandez, l'assistant peut utiliser pour vous la page de l'onglet actuel, où vous êtes connecté. Il demande confirmation avant d'envoyer, d'acheter ou de supprimer quoi que ce soit, et ne saisit jamais de mots de passe ni de numéros de carte. Une page peut tenter de le tromper : surveillez ce qu'il fait et appuyez sur Arrêter si besoin.";
+"Who's browsing?" = "Qui navigue ?";
 "Width" = "Largeur";
 "Window locked" = "Fenêtre verrouillée";
 "Window style" = "Style de fenêtre";

@@ -162,6 +162,9 @@ struct ProfilesSection: View {
                 let n = s.profiles.count + 1
                 s.profiles.append(Profile(name: String(format: L("Profile %lld"), n), color: n % TabGroup.colors.count))
             }
+            if !s.profiles.isEmpty {
+                Toggle("Ask which profile to use when Tacet opens", isOn: $s.askProfileAtLaunch)
+            }
         } header: {
             Text("Profiles")
         } footer: {

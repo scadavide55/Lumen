@@ -365,6 +365,8 @@ final class Settings: Observable {
     @Pref("alwaysShowTitles") var alwaysShowTitles = false
     @Pref("pullToRefresh") var pullToRefresh = true
     @Pref("profiles") var profiles: [Profile] = []
+    /// With profiles set up, the first window asks which one to use, as Chrome does.
+    @Pref("askProfile") var askProfileAtLaunch = true
     @Pref("onboarded") var onboarded = false
 
     // Search
