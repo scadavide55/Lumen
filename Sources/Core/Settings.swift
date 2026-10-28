@@ -383,6 +383,9 @@ final class Settings: Observable {
     @Pref("adBlock") var adBlock = true
     @Pref("easyList") var easyList = false
     @Pref("easyPrivacy") var easyPrivacy = false
+    @Pref("adGuardBase") var adGuardBase = false
+    @Pref("fanboyAnnoyance") var fanboyAnnoyance = false
+    @Pref("cnameTrackers") var cnameTrackers = false
     @Pref("youtubeAds") var youtubeAds = true
     @Pref("cookieBanners") var hideCookieBanners = true
     /// Answers the banner with "Reject all" where the site offers it, so it doesn't come back and nothing optional is allowed.

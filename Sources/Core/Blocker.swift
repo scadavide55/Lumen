@@ -29,7 +29,39 @@ final class ContentBlocker {
     static let sources: [(key: String, url: URL)] = [
         ("easyList", URL(string: "https://easylist.to/easylist/easylist.txt")!),
         ("easyPrivacy", URL(string: "https://easylist.to/easylist/easyprivacy.txt")!),
+        ("adGuardBase", URL(string: "https://filters.adtidy.org/extension/safari/filters/2.txt")!),
+        ("fanboyAnnoyance", URL(string: "https://easylist.to/easylist/fanboy-annoyance.txt")!),
+        ("cnameTrackers", URL(string: "https://raw.githubusercontent.com/AdguardTeam/cname-trackers/master/data/combined_disguised_trackers.txt")!),
     ]
+
+    static func isEnabled(_ key: String) -> Bool {
+        let s = Settings.shared
+        switch key {
+        case "easyList": return s.easyList
+        case "easyPrivacy": return s.easyPrivacy
+        case "adGuardBase": return s.adGuardBase
+        case "fanboyAnnoyance": return s.fanboyAnnoyance
+        case "cnameTrackers": return s.cnameTrackers
+        default: return false
+        }
+    }
+
+    static var anyListEnabled: Bool { sources.contains { isEnabled($0.key) } }
+
+    /// Trackers hidden behind a site's own subdomain (metrics.example.com pointing at a tracking company), which
+    /// blocking by name alone misses. AdGuard's list has one line per subdomain found, including hundreds of
+    /// thousands of generated ones under a few sites; those sites are left out and each tracking company's own
+    /// domain is blocked whole, which keeps the list small enough to compile.
+    static func trimCNAMEList(_ text: String) -> String {
+        let hosts = text.split(separator: "\n").compactMap { line -> String? in
+            guard line.hasPrefix("||"), line.hasSuffix("^") else { return nil }
+            return String(line.dropFirst(2).dropLast())
+        }
+        var perSite: [String: Int] = [:]
+        for h in hosts { perSite[PublicSuffix.registrable(h), default: 0] += 1 }
+        let kept = hosts.filter { perSite[PublicSuffix.registrable($0), default: 0] <= 200 }
+        return kept.map { "||" + $0 + "^" }.joined(separator: "\n")
+    }
 
     var ruleCount: Int { (Settings.shared.adBlock ? builtInCount + filterCount : 0) }
 
@@ -71,7 +103,7 @@ final class ContentBlocker {
         NotificationCenter.default.addObserver(forName: .settingChanged, object: nil, queue: .main) { [weak self] note in
             guard let self, let key = note.userInfo?["key"] as? String else { return }
             switch key {
-            case "easyList", "easyPrivacy": self.updateFilterLists()
+            case "easyList", "easyPrivacy", "adGuardBase", "fanboyAnnoyance", "cnameTrackers": self.updateFilterLists()
             case "adBlock", "thirdPartyCookies", "allowlist":
                 NotificationCenter.default.post(name: .blockerChanged, object: nil)
             default: break
@@ -100,15 +132,13 @@ final class ContentBlocker {
 
     func updateIfStale() {
         let s = Settings.shared
-        guard s.easyList || s.easyPrivacy else { return }
+        guard Self.anyListEnabled else { return }
         let age = lastUpdated.map { Date().timeIntervalSince($0) } ?? .infinity
         if filters.isEmpty || age > 7 * 86_400 { updateFilterLists() }
     }
 
     func updateFilterLists() {
-        let enabled = Self.sources.filter { src in
-            src.key == "easyList" ? Settings.shared.easyList : Settings.shared.easyPrivacy
-        }
+        let enabled = Self.sources.filter { Self.isEnabled($0.key) }
         guard !enabled.isEmpty else { removeFilters(); return }
         guard !updating else { return }
         updating = true
@@ -130,6 +160,8 @@ final class ContentBlocker {
             }.resume()
         }
         group.notify(queue: .main) {
+            // The CNAME list is trimmed off the main thread with the conversion below.
+            let keys = enabled.map(\.key)
             let downloaded = texts.compactMap { $0 }
             guard downloaded.count == texts.count else {
                 self.updating = false
@@ -138,7 +170,8 @@ final class ContentBlocker {
             }
             self.status = L("Converting rules…")
             DispatchQueue.global(qos: .utility).async {
-                let out = FilterConverter.convert(downloaded.joined(separator: "\n"))
+                let prepared = zip(keys, downloaded).map { key, text in key == "cnameTrackers" ? Self.trimCNAMEList(text) : text }
+                let out = FilterConverter.convert(prepared.joined(separator: "\n"))
                 let chunks = Self.chunks(out)
                 DispatchQueue.main.async { self.compileFilters(chunks, total: out.block.count + out.hide.count) }
             }

@@ -339,6 +339,16 @@ struct ShieldPane: View {
             Section {
                 Toggle("EasyList (ads)", isOn: $s.easyList).disabled(!s.adBlock)
                 Toggle("EasyPrivacy (trackers)", isOn: $s.easyPrivacy).disabled(!s.adBlock)
+                Toggle("AdGuard Base (ads, another list)", isOn: $s.adGuardBase).disabled(!s.adBlock)
+                Toggle("Fanboy Annoyances (pop-ups, social widgets, newsletters)", isOn: $s.fanboyAnnoyance).disabled(!s.adBlock)
+                Toggle(isOn: $s.cnameTrackers) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Hidden trackers (AdGuard)")
+                        Text("Trackers disguised as part of the site, like metrics.example.com. A long list: it takes a minute to prepare.")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                .disabled(!s.adBlock)
                 HStack {
                     if blocker.updating {
                         ProgressView().controlSize(.small)
@@ -353,7 +363,7 @@ struct ShieldPane: View {
                     }
                     Spacer()
                     Button("Update Now") { blocker.updateFilterLists() }
-                        .disabled(blocker.updating || !(s.easyList || s.easyPrivacy))
+                        .disabled(blocker.updating || !ContentBlocker.anyListEnabled)
                 }
                 .font(.caption)
             } header: {
