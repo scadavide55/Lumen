@@ -1068,6 +1068,7 @@ T = {
     'Password check': ('Controllo delle password', 'Vérification des mots de passe'),
     'Check…': ('Controlla…', 'Vérifier…'),
     'Check Again': ('Controlla di nuovo', 'Vérifier à nouveau'),
+    'Looking in the Tacet Guide': ('Consulto la Guida di Tacet', 'Je consulte le Guide de Tacet'),
     'Video Speed': ('Velocità video', 'Vitesse vidéo'),
     'Change the speed of any video with ] and [ (in steps of 0.25×), and press \\ to go back to normal. A small label shows the speed.': ('Cambia la velocità di qualsiasi video con ] e [ (a passi di 0,25×) e premi \\ per tornare normale. Una piccola etichetta mostra la velocità.', 'Changez la vitesse de n’importe quelle vidéo avec ] et [ (par pas de 0,25×), et appuyez sur \\ pour revenir à la normale. Une petite étiquette affiche la vitesse.'),
     'Picture in Picture': ('Picture in Picture', 'Image dans l’image'),

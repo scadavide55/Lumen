@@ -10,7 +10,7 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" build
 cp Info.plist "$APP/Contents/Info.plist"
 cp Resources/Tacet.icns "$APP/Contents/Resources/Tacet.icns"
 cp -R Resources/*.lproj "$APP/Contents/Resources/"
-cp Resources/public_suffix_list.txt "$APP/Contents/Resources/"
+cp Resources/public_suffix_list.txt Resources/TacetGuide.md "$APP/Contents/Resources/"
 SLICES=""
 for ARCH in $ARCHS; do
     find Sources -name '*.swift' -print0 | xargs -0 swiftc -O -swift-version 5 -parse-as-library \

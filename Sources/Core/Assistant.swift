@@ -228,6 +228,12 @@ enum AssistantPrompt {
     private static let base = """
     You are Tacet Assistant, the AI assistant built into Tacet, a native web browser for macOS. You appear in a panel \
     beside the page the user is browsing, and you help them understand, summarise and work with what they read.
+    You are part of Tacet \(UpdateChecker.currentVersion). Tacet was called Lumen until version 1.6.2, and you were \
+    called Lumen Assistant. For any question about Tacet itself (a feature, where something is, a shortcut, a \
+    setting, what's new, the versions, the name, who made it, how it's built, its engine), call tacet_guide with a
+    few words from the question and answer from what it returns, with the exact menu path or shortcut. Never guess \
+    about Tacet: if the guide doesn't say, say you don't know. You can't change Tacet's settings yourself; explain \
+    where they are.
 
     What you receive:
     - When the user has a web page open, its address, title and text may be attached to their message inside a <page> \
@@ -239,6 +245,11 @@ enum AssistantPrompt {
 
     Your tools are grouped by what they do below. Use a tool only when it helps with the request, and say in a few words what you're \
     about to do before you use one.
+
+    Knowing Tacet:
+    - tacet_guide: searches the Tacet Guide, Tacet's own manual, by a few words, and returns the matching sections: \
+    features, menus, keyboard shortcuts, settings, versions, the rename from Lumen, who made Tacet and how. Call it \
+    for every question about Tacet itself, then answer with the exact menu path or shortcut it gives.
 
     Reading what the user has open:
     - get_page_content: returns the address, title and text of the page in the current tab. Use it when the user asks \
@@ -381,6 +392,10 @@ enum AssistantPrompt {
     }
 
     static let tools: [Tool] = [
+        Tool(name: "tacet_guide",
+             description: "Searches the Tacet Guide, Tacet's own manual, and returns the sections that match: features, menus, keyboard shortcuts, settings, versions and what's new, the rename from Lumen, who made Tacet and how. Use it for every question about Tacet itself. Leave the query empty to list all sections.",
+             properties: ["query": ["type": "string", "description": "A few English words for what the user asks, such as \"plugins shortcut\" or \"who made Tacet\" (the guide is in English, whatever language the user writes in)."]],
+             required: []),
         Tool(name: "get_page_content",
              description: "Returns the address, title and visible text of the page open in the current tab.",
              properties: [:], required: []),
@@ -484,8 +499,9 @@ enum AssistantPrompt {
     ]
 
     static func clientTools(provider: AIProvider, web: Bool, control: Bool, vision: Bool = false, quick: Bool = false) -> [Tool] {
-        // A quick answer in the command bar can only search the web.
-        if quick { return provider == .anthropic ? [] : webTools }
+        // A quick answer in the command bar can only search the web, and read the Tacet Guide.
+        let guide = tools.filter { $0.name == "tacet_guide" }
+        if quick { return guide + (provider == .anthropic ? [] : webTools) }
         return tools + (vision ? visionTools : []) + (web && provider != .anthropic ? webTools : []) + (control ? controlTools : [])
     }
 
@@ -493,7 +509,7 @@ enum AssistantPrompt {
     static let quickPart = """
 
     This question was asked from the command bar for a quick answer. There is no page attached and you can't see or \
-    use the user's tabs: your only tools search the web and read pages. Answer directly in a few short paragraphs or a \
+    use the user's tabs: your only tools search the web, read pages and read the Tacet Guide. Answer directly in a few short paragraphs or a \
     short list, searching the web when the answer depends on current facts, and list your sources. If the user wants \
     more, they can open the full chat.
     """
@@ -835,7 +851,8 @@ final class AssistantChat {
         guard #available(macOS 26.0, *) else { fail(L("The Apple model needs macOS 26 or later.")); return }
         if let reason = AppleModel.unavailableReason { fail(reason); return }
         let s = Settings.shared
-        let tools = quick ? AssistantPrompt.webTools : AppleModel.tools(web: s.aiWeb, control: s.aiControl)
+        let tools = quick ? AssistantPrompt.tools.filter { $0.name == "tacet_guide" } + AssistantPrompt.webTools
+            : AppleModel.tools(web: s.aiWeb, control: s.aiControl)
         let key = tools.map(\.name).joined(separator: ",")
         let session: AppleChatSession
         // The session's tools are fixed when it's made, so turning Web access or Browser use on or off starts a new one.
@@ -924,6 +941,10 @@ final class AssistantChat {
             noteActivity(String(format: L("Searching your history for “%@”"), query))
             let days = Self.number(args["days"])
             return (await AssistantSources.searchHistory(query, days: days > 0 ? days : nil), false)
+        case "tacet_guide":
+            let query = (args["query"] as? String) ?? ""
+            noteActivity(L("Looking in the Tacet Guide"))
+            return (TacetGuide.lookup(query), false)
         case "search_bookmarks":
             guard let query = (args["query"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines), !query.isEmpty else {
                 return ("The query is empty.", true)

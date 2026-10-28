@@ -1,0 +1,113 @@
+# Tacet Guide
+
+Everything Tacet Assistant knows about Tacet. Each section starts with "## ". Menu paths use the English names; the app's menus follow the Mac's language (Italian and French are translated).
+
+## About Tacet: what it is, who made it, how, engine, license
+Tacet is a free, open-source web browser for the Mac, "the quiet browser for your Mac": minimal, fast and private. It is built on WebKit, the same engine as Safari, so sites behave as in Safari, with Safari's speed and battery life; it is not based on Chromium.
+- Made by one independent developer, scadavide55 on GitHub. It is open source under the GNU General Public License v3.0 (GPL-3.0).
+- Written in Swift with SwiftUI and AppKit, on WebKit's WKWebView. It builds with a small script (build.sh) and the Xcode command-line tools, as a universal app for Apple silicon and Intel.
+- Requirements: macOS 14 Sonoma or later. Web extensions need macOS 15.4; page translation needs macOS 15; Apple's on-device model needs macOS 26 with Apple Intelligence.
+- Website: https://scadavide55.github.io/Tacet/ · Code and releases: https://github.com/scadavide55/Tacet · Report a bug: Help › Report a Bug (opens GitHub Issues).
+- Tacet has no accounts and no analytics. It talks only to the sites you visit, plus things you turn on (filter lists, search suggestions, the AI provider you choose, Tacet Plugins, update checks on GitHub).
+- The current version is shown in Tacet › About Tacet and in Settings › General.
+
+## Why Lumen became Tacet (the name)
+Tacet used to be called Lumen, and Tacet Assistant used to be called Lumen Assistant. The name changed in version 1.6.2 because there were already other browsers called Lumen, and the name sounded too much like an AI product. "Tacet" is the mark in music for silence, where an instrument stays quiet, like the ads and trackers Tacet keeps out. The icon, "Eclissi", is an eclipse: a dark disc in front of the sun leaving a crescent of light.
+Updating from Lumen keeps everything: tabs, passwords, AI key, settings, history, bookmarks and extensions. After quitting once, Lumen.app in Applications is renamed Tacet.app. The project moved to github.com/scadavide55/Tacet.
+
+## Version history (what came when)
+- 1.5.x: tab groups, Lumen Shield, passwords with Touch ID, importing from other browsers, the assistant (beta) appears in 1.5.4.
+- 1.6: first stable release; the assistant gets web access and browser use, chat history, full-window chat.
+- 1.6.1: tab organising (grouping threshold, saved groups, picking several tabs, moving tabs to other windows and profiles, sorting, duplicates), the assistant reads other tabs, history, bookmarks, YouTube transcripts and screenshots, Apple's on-device model, offline Reading List, Customize Site, web extensions.
+- 1.6.2: Lumen becomes Tacet, new icon.
+- 1.6.3: Arc import (Spaces and pinned tabs), stronger Tacet Shield (counts, cookie rejection, fingerprinting protection, more lists), tab previews with memory use, tabs that wake up as you left them, tab search, page translation, read aloud, Focus Mode, password check, asking the assistant from the command bar, its own signing certificate.
+- 1.6.4: Tacet Plugins (beta), choosing a profile when Tacet opens, Tacet Assistant knows all about Tacet.
+
+## Keyboard shortcuts
+⌘T new tab · ⌘W close tab · ⇧⌘T reopen closed tab · ⌘N new window · ⇧⌘N new private window · ⇧⌘W close window · ⌘L or ⌘K command bar · ⌘S show or hide the sidebar · ⌃Tab / ⌃⇧Tab next / previous tab · ⌘1…⌘9 go to a tab (⌘9 the last) · ⌘[ / ⌘] back / forward · ⌘R reload · ⌥⌘R reload ignoring cache · ⌘. stop · ⌘F find · ⌘G / ⇧⌘G find next / previous · ⇧⌘R Reader · ⌥⌘T translate page · ⌥⌘A read aloud · ⇧⌘J Focus Mode · ⌥⌘S split view · ⌘+ / ⌘− / ⌘0 zoom · ⌘D bookmark the page · ⌘Y history · ⌥⌘B bookmarks · ⌥⌘L downloads · ⇧⌘C copy link · ⌘P print · ⇧⌘E export as PDF · ⇧⌘S screenshot of the page · ⇧⌘A Tacet Assistant · ⇧⌘B turn Tacet Shield on or off · ⇧⌘M mute tab · ⌥⌘F search tabs · ⇧⌘P Tacet Plugins · ⌃⌘L lock the window with Touch ID · ⌘, Settings. Help › Keyboard Shortcuts shows them all.
+
+## Command bar
+Press ⌘L or ⌘K, or click the address. Type an address, a search, the name of an open tab, a bookmark, something from your history or a command (for example "dark", "pip", "plugins", "sort tabs"). ↩ opens, ⌘↩ opens in a new tab, ↑↓ select, esc closes. Search shortcuts: type a keyword, a space and the search, such as "yt lofi beats" (YouTube), "w" (Wikipedia), "gh" (GitHub), "maps", "r" (Reddit); add your own in Settings › Search. With the assistant on, "Ask Tacet Assistant" gives a quick answer right in the command bar (see the assistant section).
+
+## Tabs, sidebar and layouts
+- Layouts (Settings › Appearance, or the setup): Sidebar (vertical tabs, resizable), Separate (tabs along the top) or Compact. The sidebar can be on the left or right, and can hold the address bar. Hide it with ⌘S; hover the window's edge to peek at it.
+- Pinned tabs sit at the top as icons: right-click a tab › Pin. Drag tabs to reorder.
+- Hovering over a tab shows a preview: the page as you last saw it, its site and how much memory it uses (or that it's sleeping). Turn previews off in Settings › General › Tabs.
+- Search your tabs with ⌥⌘F (Tab › Search Tabs…); Return opens the first match.
+- Background tabs hibernate to save memory (Settings › General › Hibernate background tabs) and are shown in grey. When you open one, it shows the page as you left it while it loads, then scrolls back to where you were. Tab › Hibernate Other Tabs frees memory now.
+- Pick several tabs with ⌘-click and ⇧-click, then right-click to group, move, pin or close them together, or drag them.
+- Tab menu: next/previous, pin, duplicate, mute, hibernate others, group by site, search tabs, close duplicate tabs, sort tabs (by site, title or last opened), saved groups.
+- Move tabs or whole groups to another window or profile: right-click › Move to Window.
+- Close tabs automatically after a day, week or month (Settings › General › Tabs). Restore windows and tabs when Tacet opens is on by default.
+
+## Tab groups
+Drag a tab onto another to make a group, or right-click › Add to New Group. Click a group's name to fold or unfold it; double-click to rename it; right-click for New Tab in Group, Colour, Never Group This Site, Ungroup Tabs, Save and Close Group, Close Group and Move Group to Window. Tacet can group tabs from the same site automatically (Settings › General › Organize tabs: Automatically by site, when a site has 2, 3 or 5 tabs), except sites you exclude; Tab › Group Tabs by Site does it once. Saved groups come back from Tab › Saved Groups with all their tabs. Tacet Assistant can group tabs by topic when you ask ("put my Rome trip tabs in a group").
+
+## Windows, profiles and private browsing
+- Private windows (⇧⌘N) forget history, cookies and site data when you close them. Settings › Shield can lock private windows with Touch ID when Tacet is in the background; ⌃⌘L locks any window now.
+- Profiles keep their own cookies, sign-ins and site data, so you can be signed in to different accounts at once; history, bookmarks, passwords and settings are shared. Create one in Settings › General › Profiles › Add Profile, rename it, pick its colour, and press Open Window. File › New Window in Profile opens one too.
+- When you have profiles, Tacet asks "Who's browsing?" when it opens (unless it reopens your last windows or opens from a link); turn it off with "Ask which profile to use when Tacet opens" in Settings › General.
+- Split view (⌥⌘S, or right-click a tab › Open in Split View) shows two pages side by side.
+
+## Tacet Shield (ad and tracker blocking)
+Built-in blocking of ads and trackers with WebKit's content blocker, before they load, offline. Turn it on or off everywhere with ⇧⌘B, or for one site from the shield button in the toolbar (Toggle Shield for This Site). The shield's panel shows how many ads and trackers were blocked on this page, on this site and since Tacet opened, and from which sites. Options (shield panel, Shield menu, Settings › Shield):
+- hide cookie consent banners, and reject optional cookies for you (presses "Reject all");
+- skip YouTube ads;
+- fingerprinting protection: canvas, WebGL and audio readings change slightly per site, the exact graphics chip and core count are hidden;
+- block third-party cookies; remove tracking parameters (utm_, fbclid, gclid…) from links;
+- optional filter lists, updated weekly: EasyList, EasyPrivacy, AdGuard Base, Fanboy Annoyances and AdGuard's hidden (CNAME) trackers.
+Sites where the shield is off are listed in Settings › Shield.
+
+## Privacy and security
+Upgrades connections to HTTPS (with an HTTPS-only option), sends Global Privacy Control, warns about fraudulent sites (Apple's Safe Browsing), asks before downloading apps, installers and scripts, can clear cookies, cache and history when Tacet quits, and clears browsing data by time range (Settings › Shield). Favicons are never fetched from your local network. Tacet updates are signed: it installs only updates signed with its developer's key and certificate.
+
+## Passwords
+Tacet saves passwords in the Mac's Keychain and fills them after Touch ID or your Mac password (Settings › Passwords). It can suggest strong passwords on sign-up pages, import and export CSV for Apple Passwords and other managers, and work alongside 1Password, KeePassXC, Bitwarden and others (Password manager picker). Password check (Settings › Passwords › Check…) finds passwords found in data breaches (via Have I Been Pwned; only the first 5 characters of each password's SHA-1 hash are sent), reused on several sites, or easy to guess.
+
+## Importing from other browsers and moving in
+File › Import from Another Browser… (or the setup) brings bookmarks, history and sign-ins (cookies) from Safari, Chrome, Firefox, Opera, Brave, Edge, Arc, Vivaldi, Zen and other Chromium or Firefox browsers. From Arc it also brings Spaces, Favorites, pinned tabs and folders: Favorites become pinned tabs, each Space and folder a tab group that loads only when opened (Arc stops working on December 22, 2026). Passwords come from a CSV export (Settings › Passwords › Import from CSV). Safari's data needs Full Disk Access for Tacet. Make Tacet your default browser from the setup or System Settings.
+
+## Reading, translation, listening and Focus Mode
+- Reader (⇧⌘R, or the page icon in the address) shows a clean version of an article.
+- Reading List: Bookmarks › Save for Offline keeps the Reader version with its images on your Mac; open saved articles from Bookmarks › Show Reading List or the Library.
+- Translate Page (⌥⌘T, View menu or the ⋯ menu) translates on your Mac with Apple's translation (macOS 15+): nothing leaves your Mac; Show Original puts it back.
+- Read Aloud (⌥⌘A) reads the article with the Mac's voices.
+- Focus Mode (⇧⌘J) hides everything but the page; move the pointer to the top to exit.
+- Find on page (⌘F), per-site zoom, print, export as PDF, screenshot of the page.
+
+## Customize Site
+The ⋯ menu › Customize This Site… gives any site its own light or dark theme, font, page width, hidden floating bars and images, reduced motion, elements you hide by clicking them (Pick Elements to Hide: ↑ selects a bigger block, Esc finishes), and your own CSS and JavaScript. Changes show as you make them. All customized sites are in Settings › Sites. Settings › Sites also has Force dark pages, default and per-site zoom, and camera and microphone permissions.
+
+## Tacet Plugins (beta)
+A store of small plugins made for Tacet and checked by its developer, that work on every Mac. Open it with ⇧⌘P, the puzzle button at the bottom of the sidebar, the command bar ("Tacet Plugins") or Settings › Extensions › Open Tacet Plugins. Each card says who made the plugin and whether it's "Verified by Tacet"; Add installs it, the switch turns it on or off, Remove removes it, and plugins update by themselves. Plugins are signed and checked file by file, and run in their own space that pages can't reach. Plugins include YouTube without Shorts, YouTube Focus, Copy as Markdown (⌥⇧C), Reading Progress, Hide Comments, Video Speed ([ ] and \), Picture in Picture (⌥⇧P), Keyboard Navigation (F for link hints, J/K to scroll), Back to Top, Word Count (⌥⇧W), Other Sites in New Tabs, AMP to Original, Google Just Results, Amazon Without Sponsored, X Without Distractions, Stack Overflow Clean, GitHub Wide and Old Reddit.
+
+## Web extensions
+On macOS 15.4 or later, Settings › Extensions adds web extensions, the same kind Safari, Chrome and Firefox use: the Safari extensions that come with your apps in one click, or a folder, .zip, .crx (Chrome) or .xpi (Firefox) file. Tacet shows what an extension can do before adding it. Their buttons appear next to the shield, with badges and popups; right-click menu items and settings pages work too. Extensions never run in private windows; turning one off closes its pages, and removing one deletes its data.
+
+## Sites as apps
+File › Install Site as App… makes any site an app with its own window, Dock icon and cookies, in ~/Applications/Tacet Apps. These apps update together with Tacet.
+
+## Appearance and start page
+Settings › Appearance: light, dark or system appearance, any accent colour, window tint that follows the site's colour, floating page with rounded corners, compact tabs, sidebar position, full address, link addresses on hover, pull down at the top of a page to reload. The start page has a clock, a greeting, favourites and backgrounds: gradients, animated gradients, your own photo or a short video (Settings › Appearance › Start page background, and Settings › General › Start page).
+
+## Search
+Settings › Search: the search engine (DuckDuckGo, Google, Bing, Brave, Startpage, Ecosia, Kagi or your own with %s), search suggestions (off by default, never in private windows) and search shortcuts.
+
+## Library: history, bookmarks, downloads, Reading List
+⌘Y opens history, ⌥⌘B bookmarks, ⌥⌘L downloads, and the Reading List is in the Library too. History › Clear History removes the last hour, today or everything. Bookmarks import and export as HTML.
+
+## Tacet Assistant
+An AI assistant (beta) in a panel beside the page (⇧⌘A), or full-window. It was called Lumen Assistant before the rename. It is off until you turn it on in Settings › AI, and nothing is sent until you ask.
+- Providers: your own key from Anthropic, OpenAI, OpenRouter, DeepSeek, or any OpenAI-compatible server such as Ollama or LM Studio on your Mac; or Apple's on-device model (macOS 26 with Apple Intelligence: free, offline, private, but smaller and less reliable). Keys stay in the Keychain. Pick the model in Settings › AI or in the chat.
+- It reads the page you're on, your other tabs, your history and bookmarks, YouTube transcripts, and can take a screenshot of the page; it opens pages and searches, switches tabs and groups tabs.
+- Web access (on by default) lets it search the web and read pages, listing sources. Browser use (off by default, the button below the chat box) lets it click, type, scroll and drag on the page; it never fills passwords or card numbers and asks before sending, buying or deleting.
+- Select text and right-click › Tacet Assistant › Explain, Translate, Summarise or Ask About It.
+- In the command bar, type a question and choose "Ask Tacet Assistant" for a quick answer that searches the web; ✕ closes it, the arrows continue it in the full chat.
+- Chats are saved on your Mac (never in private windows) and listed in the chat history.
+- It can't change Tacet's settings itself; it explains where they are.
+
+## Updates
+Tacet checks GitHub for updates once a day (Settings › General › Updates) and can install them for you; Tacet › Check for Updates… checks now. Each version shows a "Welcome to Tacet" screen with what's new, once. Updates are signed, so only real ones install.
+
+## Installing and troubleshooting
+Download the .dmg from the website or GitHub, open it and drag Tacet to Applications. Tacet isn't notarized by Apple yet, so the first time macOS may say it "is damaged and can't be opened": the download is fine; run `xattr -dr com.apple.quarantine /Applications/Tacet.app` once in Terminal, then open it. If macOS asks for Keychain access after an update, choose Always Allow. If a site misbehaves, turn the shield off for that site from the shield button, or try Reload Ignoring Cache (⌥⌘R). Report bugs from Help › Report a Bug.

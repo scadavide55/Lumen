@@ -459,6 +459,7 @@
 "Look and feel" = "Aspetto";
 "Looking at the page" = "Analisi della pagina";
 "Looking at your tabs" = "Guardo le tue schede";
+"Looking in the Tacet Guide" = "Consulto la Guida di Tacet";
 "Looks for a newer Tacet on GitHub" = "Cerca una versione più recente di Tacet su GitHub";
 "Looks for passwords found in data breaches, used on several sites or easy to guess. Only the first 5 characters of each password's SHA-1 hash are sent to Have I Been Pwned; the password never leaves your Mac." = "Cerca password trovate in violazioni di dati, usate su più siti o facili da indovinare. A Have I Been Pwned vengono inviati solo i primi 5 caratteri dell’hash SHA-1 di ogni password: la password non lascia mai il tuo Mac.";
 "Lumen is now Tacet" = "Ora Lumen si chiama Tacet";

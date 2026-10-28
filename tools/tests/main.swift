@@ -138,6 +138,13 @@ check(PasswordStore.isWeak("password"), "weak: common short password")
 check(PasswordStore.isWeak("aaaaaaaaaaaaaaa"), "weak: one repeated character")
 check(!PasswordStore.isWeak("abcdEf-ghijk2-lmnopq"), "weak: a suggested password is strong")
 
+// MARK: Tacet Guide
+check(TacetGuide.sections.count > 15, "guide: sections load")
+check(TacetGuide.lookup("Tacet Plugins shortcut").contains("⇧⌘P"), "guide: plugins shortcut")
+check(TacetGuide.lookup("who made Tacet engine").contains("scadavide55"), "guide: who made it")
+check(TacetGuide.lookup("why Lumen renamed").contains("Lumen Assistant"), "guide: the rename")
+check(TacetGuide.lookup("").contains("Sections of the Tacet Guide"), "guide: empty query lists sections")
+
 // MARK: AI providers
 
 check(AIProvider.anthropic.guessesImages("claude-opus-5-5"), "vision: claude")
