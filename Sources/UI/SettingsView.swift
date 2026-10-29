@@ -275,6 +275,9 @@ struct AppearancePane: View {
                     ForEach(ChromeStyle.allCases) { Text($0.label).tag($0) }
                 }
             }
+            Section("App icon") {
+                AppIconPicker()
+            }
             Section("Tabs") {
                 TabLayoutPicker().frame(maxWidth: .infinity)
                 Toggle("Show colour in tab bar", isOn: $s.siteTint)

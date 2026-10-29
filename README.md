@@ -156,7 +156,7 @@ A minimal, fast and private macOS browser built on WebKit, with a native ad bloc
 open Tacet.app
 ```
 
-`tools/test.sh` runs the logic tests (addresses, link cleaning, password sites, CSV, filter lists, history database, and WebKit compiling Shield's rules). `build.sh` compiles everything in `Sources` for Apple silicon and Intel, assembles a universal `Tacet.app` and signs it ad hoc. `tools/make-dmg.sh` then packages it as a disk image. Translations live in `tools/translations.py`; run it to regenerate the `.lproj` files. To regenerate the icon, run `swift tools/make-icon.swift Resources/Tacet.iconset` followed by `iconutil -c icns Resources/Tacet.iconset -o Resources/Tacet.icns`.
+`tools/test.sh` runs the logic tests (addresses, link cleaning, password sites, CSV, filter lists, history database, and WebKit compiling Shield's rules). `build.sh` compiles everything in `Sources` for Apple silicon and Intel, assembles a universal `Tacet.app` and signs it ad hoc. `tools/make-dmg.sh` then packages it as a disk image. Translations live in `tools/translations.py`; run it to regenerate the `.lproj` files. The app icons are drawn as SVGs in `docs/assets/logo-prototypes`; `python3 tools/make-icons.py` (needs Pillow) renders the default icon set and `Tacet.icns`, the alternatives you can pick in Settings › Appearance into `Resources/AppIcons`, and the site's icon and favicon.
 
 ## Installing a downloaded build
 

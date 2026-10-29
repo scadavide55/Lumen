@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Tacet — Half moon, soft: Half disc, night with a soft terminator, the way a real quarter moon looks, and the gold rim kept. -->
+  <defs>
+    <clipPath id="body"><path d="M284 100 H740 A184 184 0 0 1 924 284 V740 A184 184 0 0 1 740 924 H284 A184 184 0 0 1 100 740 V284 A184 184 0 0 1 284 100 Z"/></clipPath>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".12"/><stop offset=".4" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#221d36"/><stop offset="1" stop-color="#0b0a12"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3d6"/><stop offset="1" stop-color="#d9a85c"/></linearGradient><linearGradient id="term" x1="0" y1="0" x2="1" y2="0"><stop offset=".38" stop-color="#16131f"/><stop offset=".56" stop-color="#e9d8b6"/><stop offset="1" stop-color="#fff8ea"/></linearGradient>
+  </defs>
+  <g clip-path="url(#body)">
+    <rect width="1024" height="1024" fill="url(#bg)"/>
+    <circle cx="512" cy="512" r="300" fill="url(#term)"/>
+    <circle cx="512" cy="512" r="300" fill="none" stroke="url(#gold)" stroke-width="22"/>
+  </g>
+  <path d="M284 100 H740 A184 184 0 0 1 924 284 V740 A184 184 0 0 1 740 924 H284 A184 184 0 0 1 100 740 V284 A184 184 0 0 1 284 100 Z" fill="url(#sheen)"/>
+  <path d="M284 100 H740 A184 184 0 0 1 924 284 V740 A184 184 0 0 1 740 924 H284 A184 184 0 0 1 100 740 V284 A184 184 0 0 1 284 100 Z" fill="none" stroke="#000" stroke-opacity=".1" stroke-width="4"/>
+</svg>

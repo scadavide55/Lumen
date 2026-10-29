@@ -138,6 +138,7 @@ enum WebApp {
         let fresh = app.deletingLastPathComponent().appendingPathComponent("." + UUID().uuidString + ".app")
         defer { try? fm.removeItem(at: fresh) }
         do { try fm.copyItem(at: Bundle.main.bundleURL, to: fresh) } catch { return }
+        AppIcon.stripCustomIcon(at: fresh)
         let plistURL = fresh.appendingPathComponent("Contents/Info.plist")
         guard let plist = NSMutableDictionary(contentsOf: plistURL) else { return }
         for key in ["CFBundleIdentifier", "CFBundleName", "CFBundleDisplayName", "LumenWebAppURL"] { plist[key] = old[key] }
@@ -181,6 +182,7 @@ enum WebApp {
             try fm.createDirectory(at: folder, withIntermediateDirectories: true)
             if fm.fileExists(atPath: app.path) { try fm.removeItem(at: app) }
             try fm.copyItem(at: Bundle.main.bundleURL, to: app)
+            AppIcon.stripCustomIcon(at: app)
         } catch {
             return .failure(.failed(error.localizedDescription))
         }

@@ -108,6 +108,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
         if #available(macOS 15.4, *) { Extensions.shared.start() }
+        AppIcon.applyChosen()
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }

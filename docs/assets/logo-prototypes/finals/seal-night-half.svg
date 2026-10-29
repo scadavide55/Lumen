@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Tacet — Seal, night, half: Half disc, seal pressed on the black lacquer of Seal, night. -->
+  <defs>
+    <clipPath id="body"><path d="M284 100 H740 A184 184 0 0 1 924 284 V740 A184 184 0 0 1 740 924 H284 A184 184 0 0 1 100 740 V284 A184 184 0 0 1 284 100 Z"/></clipPath>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".12"/><stop offset=".4" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <filter id="stamp" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="5" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.6 1.75" result="m"/><feComposite in="SourceGraphic" in2="m" operator="in"/></filter><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26201f"/><stop offset="1" stop-color="#0e0b0b"/></linearGradient><mask id="half"><rect width="1024" height="1024" fill="#fff"/><path d="M512 262 A250 250 0 0 1 512 762 Z" fill="#000"/></mask>
+  </defs>
+  <g clip-path="url(#body)">
+    <rect width="1024" height="1024" fill="url(#bg)"/>
+    <g filter="url(#stamp)" transform="rotate(-6 512 512)"><circle cx="512" cy="512" r="300" fill="#d2432c" mask="url(#half)"/></g>
+  </g>
+  <path d="M284 100 H740 A184 184 0 0 1 924 284 V740 A184 184 0 0 1 740 924 H284 A184 184 0 0 1 100 740 V284 A184 184 0 0 1 284 100 Z" fill="url(#sheen)"/>
+  <path d="M284 100 H740 A184 184 0 0 1 924 284 V740 A184 184 0 0 1 740 924 H284 A184 184 0 0 1 100 740 V284 A184 184 0 0 1 284 100 Z" fill="none" stroke="#000" stroke-opacity=".1" stroke-width="4"/>
+</svg>

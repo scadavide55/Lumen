@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Tacet — t., gold, ocean: t. gold on the deep blue of your first round of stars. -->
+  <defs>
+    <clipPath id="body"><path d="M284 100 H740 A184 184 0 0 1 924 284 V740 A184 184 0 0 1 740 924 H284 A184 184 0 0 1 100 740 V284 A184 184 0 0 1 284 100 Z"/></clipPath>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".12"/><stop offset=".4" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b4a6b"/><stop offset="1" stop-color="#07152a"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3d6"/><stop offset="1" stop-color="#d9a85c"/></linearGradient><linearGradient id="sun" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffc35a"/><stop offset="1" stop-color="#f2551f"/></linearGradient><filter id="bloom" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="22"/></filter><filter id="drop" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000" flood-opacity=".45"/></filter>
+  </defs>
+  <g clip-path="url(#body)">
+    <rect width="1024" height="1024" fill="url(#bg)"/>
+    <path transform="translate(379.2 318.0) scale(0.4100)" d="M490 859Q508 848 521 848Q539 848 560 886Q483 956 425 978Q367 1000 303 1000Q266 1000 232 991Q198 982 171 958Q143 934 127 893Q110 851 110 787V283H0V237Q0 229 4 218Q7 207 26 207Q75 207 117 179Q160 150 185 94Q206 51 230 26Q255 0 279 0H317V191H532Q532 250 524 266Q516 283 494 283H317V736Q317 791 321 823Q325 855 333 872Q341 888 355 893Q369 897 387 897Q407 897 435 887Q462 877 490 859Z" fill="url(#gold)" filter="url(#drop)"/>
+    <circle cx="642" cy="704" r="56" fill="#ff8a3d" filter="url(#bloom)" opacity=".6"/><circle cx="642" cy="704" r="28" fill="url(#sun)"/>
+  </g>
+  <path d="M284 100 H740 A184 184 0 0 1 924 284 V740 A184 184 0 0 1 740 924 H284 A184 184 0 0 1 100 740 V284 A184 184 0 0 1 284 100 Z" fill="url(#sheen)"/>
+  <path d="M284 100 H740 A184 184 0 0 1 924 284 V740 A184 184 0 0 1 740 924 H284 A184 184 0 0 1 100 740 V284 A184 184 0 0 1 284 100 Z" fill="none" stroke="#000" stroke-opacity=".1" stroke-width="4"/>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Tacet — Seal, corona: Last light carved into a round vermilion seal on lacquer: the rays and the moon are the bare ground. -->
+  <defs>
+    <clipPath id="body"><path d="M284 100 H740 A184 184 0 0 1 924 284 V740 A184 184 0 0 1 740 924 H284 A184 184 0 0 1 100 740 V284 A184 184 0 0 1 284 100 Z"/></clipPath>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".12"/><stop offset=".4" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <filter id="stamp" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="5" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.6 1.75" result="m"/><feComposite in="SourceGraphic" in2="m" operator="in"/></filter><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26201f"/><stop offset="1" stop-color="#0e0b0b"/></linearGradient><mask id="carve"><rect width="1024" height="1024" fill="#fff"/><circle cx="512" cy="512" r="130" fill="#000"/><g stroke="#000" stroke-width="16" stroke-linecap="round"><line x1="662" y1="512" x2="772" y2="512"/><line x1="657" y1="551" x2="725" y2="569"/><line x1="642" y1="587" x2="737" y2="642"/><line x1="618" y1="618" x2="668" y2="668"/><line x1="587" y1="642" x2="642" y2="737"/><line x1="551" y1="657" x2="569" y2="725"/><line x1="512" y1="662" x2="512" y2="772"/><line x1="473" y1="657" x2="455" y2="725"/><line x1="437" y1="642" x2="382" y2="737"/><line x1="406" y1="618" x2="356" y2="668"/><line x1="382" y1="587" x2="287" y2="642"/><line x1="367" y1="551" x2="299" y2="569"/><line x1="362" y1="512" x2="252" y2="512"/><line x1="367" y1="473" x2="299" y2="455"/><line x1="382" y1="437" x2="287" y2="382"/><line x1="406" y1="406" x2="356" y2="356"/><line x1="437" y1="382" x2="382" y2="287"/><line x1="473" y1="367" x2="455" y2="299"/><line x1="512" y1="362" x2="512" y2="252"/><line x1="551" y1="367" x2="569" y2="299"/><line x1="587" y1="382" x2="642" y2="287"/><line x1="618" y1="406" x2="668" y2="356"/><line x1="642" y1="437" x2="737" y2="382"/><line x1="657" y1="473" x2="725" y2="455"/></g></mask>
+  </defs>
+  <g clip-path="url(#body)">
+    <rect width="1024" height="1024" fill="url(#bg)"/>
+    <g filter="url(#stamp)"><circle cx="512" cy="512" r="310" fill="#d2432c" mask="url(#carve)"/></g>
+  </g>
+  <path d="M284 100 H740 A184 184 0 0 1 924 284 V740 A184 184 0 0 1 740 924 H284 A184 184 0 0 1 100 740 V284 A184 184 0 0 1 284 100 Z" fill="url(#sheen)"/>
+  <path d="M284 100 H740 A184 184 0 0 1 924 284 V740 A184 184 0 0 1 740 924 H284 A184 184 0 0 1 100 740 V284 A184 184 0 0 1 284 100 Z" fill="none" stroke="#000" stroke-opacity=".1" stroke-width="4"/>
+</svg>

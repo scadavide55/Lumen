@@ -91,6 +91,7 @@
 "Answers come from your AI provider and can be wrong." = "Le risposte arrivano dal tuo fornitore di AI e possono essere sbagliate.";
 "Any server that speaks the OpenAI Chat Completions API, such as Ollama or LM Studio." = "Qualsiasi server compatibile con l'API Chat Completions di OpenAI, come Ollama o LM Studio.";
 "Anything you send to this site, like passwords or card numbers, could be read by others." = "Quello che invii a questo sito, come password o numeri di carta, potrebbe essere letto da altri.";
+"App icon" = "Icona dell'app";
 "App name" = "Nome dell'app";
 "Appearance" = "Aspetto";
 "Apple (on this Mac)" = "Apple (su questo Mac)";
@@ -177,6 +178,7 @@
 "Choose Apple (on this Mac) in Settings › AI to use the assistant for free, offline, with nothing leaving your Mac. It's smaller than cloud models, so it's best for short, simple questions." = "Scegli Apple (su questo Mac) in Impostazioni › AI per usare l’assistente gratis, offline, senza che niente esca dal Mac. È più piccolo dei modelli cloud, quindi va meglio per domande brevi e semplici.";
 "Choose a model in Settings › AI." = "Scegli un modello in Impostazioni › AI.";
 "Choose a start page" = "Scegli la pagina iniziale";
+"Choose an icon" = "Scegli un'icona";
 "Choose light or dark, and a colour for Tacet's accents." = "Scegli chiaro o scuro e un colore per i dettagli di Tacet.";
 "Choose your search engine" = "Scegli il motore di ricerca";
 "Choose…" = "Scegli…";
@@ -245,6 +247,9 @@
 "Copy password" = "Copia password";
 "Copy to your clipboard" = "Copiare negli appunti";
 "Corner radius" = "Raggio degli angoli";
+"Corona t" = "Corona t";
+"Corona t, gold" = "Corona t, oro";
+"Corona, gold" = "Corona, oro";
 "Couldn't check for updates." = "Impossibile controllare gli aggiornamenti.";
 "Couldn't create the app." = "Impossibile creare l'app.";
 "Couldn't download the filter lists. Check your connection." = "Impossibile scaricare le liste di filtri. Controlla la connessione.";
@@ -301,6 +306,7 @@
 "Easy to guess." = "Facile da indovinare.";
 "EasyList (ads)" = "EasyList (pubblicità)";
 "EasyPrivacy (trackers)" = "EasyPrivacy (tracker)";
+"Eclipse (until 1.6.4)" = "Eclissi (fino alla 1.6.4)";
 "Edit" = "Modifica";
 "Edit…" = "Modifica…";
 "Ember" = "Brace";
@@ -375,6 +381,7 @@
 "GitHub Wide" = "GitHub largo";
 "Go Back" = "Torna indietro";
 "Go to tab" = "Vai alla scheda";
+"Gold seal" = "Sigillo d'oro";
 "Good afternoon" = "Buon pomeriggio";
 "Good evening" = "Buonasera";
 "Good morning" = "Buongiorno";
@@ -391,6 +398,12 @@
 "Groups tabs from the same site now" = "Raggruppa subito le schede dello stesso sito";
 "HTTPS-only mode" = "Modalità solo HTTPS";
 "HTTPS-only mode is on. %@ only works over HTTP, so anyone on your network could see or change what you send." = "La modalità solo HTTPS è attiva. %@ funziona solo via HTTP, quindi chiunque sulla tua rete potrebbe vedere o modificare ciò che invii.";
+"Half moon" = "Mezza luna";
+"Half moon, corona" = "Mezza luna, corona";
+"Half moon, soft" = "Mezza luna, sfumata";
+"Half moon, t" = "Mezza luna, t";
+"Half seal" = "Mezzo sigillo";
+"Half seal, t." = "Mezzo sigillo, t.";
 "Hibernate Other Tabs" = "Iberna le altre schede";
 "Hibernate Tab" = "Iberna scheda";
 "Hibernate Tabs" = "Sospendi schede";
@@ -468,6 +481,7 @@
 "Last Hour" = "Ultima ora";
 "Last Tab" = "Ultima scheda";
 "Last hour" = "Ultima ora";
+"Last light" = "Ultima luce";
 "Later" = "Più tardi";
 "Layout" = "Disposizione";
 "Learn Tacet" = "Impara Tacet";
@@ -800,6 +814,8 @@
 "Saving…" = "Salvataggio…";
 "Scroll up at the top of a page to reload it" = "Scorri verso l'alto in cima a una pagina per ricaricarla";
 "Scrolling the page" = "Scorrimento della pagina";
+"Seal, corona" = "Sigillo, corona";
+"Seal, t." = "Sigillo, t.";
 "Search" = "Cerca";
 "Search %@" = "Cerca con %@";
 "Search Tabs…" = "Cerca nelle schede…";
@@ -1021,6 +1037,7 @@
 "The key is saved in your Keychain. You can change the model in Settings › AI." = "La chiave viene salvata nel Portachiavi. Puoi cambiare il modello in Impostazioni › AI.";
 "The model declined to answer this request." = "Il modello ha rifiutato di rispondere a questa richiesta.";
 "The new icon is an eclipse: a dark disc in front of the sun" = "La nuova icona è un'eclissi: un disco scuro davanti al sole";
+"The one in your Dock and in Finder. Seal, corona is Tacet's own; the others are its alternatives. You can change it later in Settings › Appearance." = "Quella nel Dock e nel Finder. Sigillo, corona è l'icona di Tacet; le altre sono alternative. Puoi cambiarla in seguito in Impostazioni › Aspetto.";
 "The plugin list couldn't be verified, so nothing was installed." = "Non è stato possibile verificare l'elenco dei plugin, quindi non è stato installato niente.";
 "The puzzle button lists your plugins and extensions. A click opens, runs, turns on or off, or explains each one, so there are no shortcuts to remember." = "Il pulsante col pezzo di puzzle elenca plugin ed estensioni. Un clic apre, esegue, attiva o disattiva, o spiega ognuno, così non devi ricordare scorciatoie.";
 "The quiet browser for your Mac" = "Il browser silenzioso per il tuo Mac";
@@ -1215,6 +1232,9 @@
 "macOS will ask you to confirm." = "macOS ti chiederà di confermare.";
 "microphone" = "il microfono";
 "show your password for %@" = "mostrare la password per %@";
+"t. coin" = "Moneta t.";
+"t., half lit" = "t., in penombra";
+"t., ocean" = "t., oceano";
 "this site" = "questo sito";
 "unlock this window" = "sbloccare questa finestra";
 "unlock your private window" = "sbloccare la finestra privata";

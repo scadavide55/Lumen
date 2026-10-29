@@ -191,3 +191,48 @@ struct LayoutSketch: View {
         .clipShape(RoundedRectangle(cornerRadius: 6))
     }
 }
+
+/// The app icons Tacet ships with, as a grid of tiles. The choice shows in the Dock right away.
+struct AppIconPicker: View {
+    @Bindable private var s = Settings.shared
+    var tile: CGFloat = 56
+
+    var body: some View {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: tile + 34), spacing: 8)], spacing: 12) {
+            ForEach(AppIcon.all) { icon in
+                let selected = s.appIcon == icon.id
+                Button { s.appIcon = icon.id } label: {
+                    VStack(spacing: 5) {
+                        Group {
+                            if let image = AppIconPicker.image(for: icon) {
+                                Image(nsImage: image).resizable().interpolation(.high)
+                            } else {
+                                RoundedRectangle(cornerRadius: tile * 0.22, style: .continuous).fill(Color.primary.opacity(0.08))
+                            }
+                        }
+                        .frame(width: tile, height: tile)
+                        .padding(4)
+                        .background(RoundedRectangle(cornerRadius: tile * 0.3, style: .continuous)
+                            .fill(selected ? Color.accentColor.opacity(0.16) : .clear))
+                        .overlay(RoundedRectangle(cornerRadius: tile * 0.3, style: .continuous)
+                            .stroke(selected ? Color.accentColor : .clear, lineWidth: 2))
+                        Text(L(icon.name)).font(.system(size: 10.5, weight: selected ? .semibold : .regular))
+                            .lineLimit(2).multilineTextAlignment(.center).frame(height: 26, alignment: .top)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .help(L(icon.name))
+            }
+        }
+    }
+
+    /// Pictures are read once; the grid is redrawn every time the choice changes.
+    private static var cache: [String: NSImage] = [:]
+    static func image(for icon: AppIcon) -> NSImage? {
+        if let image = cache[icon.id] { return image }
+        let image = icon.image
+        cache[icon.id] = image
+        return image
+    }
+}

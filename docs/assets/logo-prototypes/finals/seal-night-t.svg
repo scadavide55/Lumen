@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Tacet — Seal, night, t.: Seal, night carving the Athelas t and its stop instead of the Didot T. -->
+  <defs>
+    <clipPath id="body"><path d="M284 100 H740 A184 184 0 0 1 924 284 V740 A184 184 0 0 1 740 924 H284 A184 184 0 0 1 100 740 V284 A184 184 0 0 1 284 100 Z"/></clipPath>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".12"/><stop offset=".4" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <filter id="stamp" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="5" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.6 1.75" result="m"/><feComposite in="SourceGraphic" in2="m" operator="in"/></filter><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26201f"/><stop offset="1" stop-color="#0e0b0b"/></linearGradient><mask id="carve"><rect width="1024" height="1024" fill="#fff"/><path transform="translate(387.6 318.0) scale(0.3800)" d="M490 859Q508 848 521 848Q539 848 560 886Q483 956 425 978Q367 1000 303 1000Q266 1000 232 991Q198 982 171 958Q143 934 127 893Q110 851 110 787V283H0V237Q0 229 4 218Q7 207 26 207Q75 207 117 179Q160 150 185 94Q206 51 230 26Q255 0 279 0H317V191H532Q532 250 524 266Q516 283 494 283H317V736Q317 791 321 823Q325 855 333 872Q341 888 355 893Q369 897 387 897Q407 897 435 887Q462 877 490 859Z" fill="#000"/><circle cx="626" cy="676" r="26" fill="#000"/></mask>
+  </defs>
+  <g clip-path="url(#body)">
+    <rect width="1024" height="1024" fill="url(#bg)"/>
+    <g transform="rotate(-4 512 512)" filter="url(#stamp)"><rect x="252" y="252" width="520" height="520" rx="34" fill="#d2432c" mask="url(#carve)"/></g>
+  </g>
+  <path d="M284 100 H740 A184 184 0 0 1 924 284 V740 A184 184 0 0 1 740 924 H284 A184 184 0 0 1 100 740 V284 A184 184 0 0 1 284 100 Z" fill="url(#sheen)"/>
+  <path d="M284 100 H740 A184 184 0 0 1 924 284 V740 A184 184 0 0 1 740 924 H284 A184 184 0 0 1 100 740 V284 A184 184 0 0 1 284 100 Z" fill="none" stroke="#000" stroke-opacity=".1" stroke-width="4"/>
+</svg>

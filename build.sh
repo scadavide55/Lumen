@@ -9,6 +9,7 @@ rm -rf "$APP" build
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" build
 cp Info.plist "$APP/Contents/Info.plist"
 cp Resources/Tacet.icns "$APP/Contents/Resources/Tacet.icns"
+cp -R Resources/AppIcons "$APP/Contents/Resources/"
 cp -R Resources/*.lproj "$APP/Contents/Resources/"
 cp Resources/public_suffix_list.txt Resources/TacetGuide.md "$APP/Contents/Resources/"
 SLICES=""

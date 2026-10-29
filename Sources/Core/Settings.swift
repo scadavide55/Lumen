@@ -335,6 +335,8 @@ final class Settings: Observable {
     @Pref("compactTabs") var compactTabs = false
     @Pref("showFullURL") var showFullURL = false
     @Pref("statusBar") var statusBar = true
+    /// The icon in the Dock and in Finder, by AppIcon id.
+    @Pref("appIcon") var appIcon = AppIcon.defaultID
 
     // Start page
     @Pref("startBackground") var startBackground = StartBackground.aurora
@@ -501,6 +503,7 @@ final class Settings: Observable {
 
     func didChange(_ key: String) {
         if key == "theme" { applyTheme() }
+        if key == "appIcon" { AppIcon.applyChosen(force: true) }
         NotificationCenter.default.post(name: .settingChanged, object: self, userInfo: ["key": key])
     }
 

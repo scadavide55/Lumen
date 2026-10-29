@@ -5,13 +5,13 @@ import WebKit
 /// First-launch setup, organised in sections with a sidebar, and a tour of Tacet.
 struct OnboardingView: View {
     enum Step: Int, CaseIterable {
-        case welcome, switchOver, importData, google, passwords, theme, background, tabs, search, shield, assistant, tour, shortcuts, done
+        case welcome, switchOver, importData, google, passwords, theme, icon, background, tabs, search, shield, assistant, tour, shortcuts, done
 
         var section: Section {
             switch self {
             case .welcome: .welcome
             case .switchOver, .importData, .google, .passwords: .moveIn
-            case .theme, .background, .tabs: .look
+            case .theme, .icon, .background, .tabs: .look
             case .search, .shield, .assistant: .privacy
             case .tour, .shortcuts: .learn
             case .done: .done
@@ -100,6 +100,7 @@ struct OnboardingView: View {
         case .google: GoogleStep()
         case .passwords: PasswordsStep()
         case .theme: ThemeStep()
+        case .icon: IconStep()
         case .background: BackgroundStep()
         case .tabs: TabsStep()
         case .search: SearchStep()
@@ -727,6 +728,15 @@ private struct ThemeStep: View {
                 .pickerStyle(.segmented)
                 .frame(width: 360)
             }
+        }
+    }
+}
+
+private struct IconStep: View {
+    var body: some View {
+        StepPage(symbol: "app.badge", title: "Choose an icon",
+                 subtitle: "The one in your Dock and in Finder. Seal, corona is Tacet's own; the others are its alternatives. You can change it later in Settings › Appearance.") {
+            AppIconPicker(tile: 64).frame(width: 640)
         }
     }
 }

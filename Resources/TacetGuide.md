@@ -94,6 +94,7 @@ File › Install Site as App… makes any site an app with its own window, Dock 
 
 ## Appearance and start page
 Settings › Appearance: light, dark or system appearance, any accent colour, window tint that follows the site's colour, floating page with rounded corners, compact tabs, sidebar position, full address, link addresses on hover, pull down at the top of a page to reload. The start page has a clock, a greeting, favourites and backgrounds: gradients, animated gradients, your own photo or a short video (Settings › Appearance › Start page background, and Settings › General › Start page).
+App icon (Settings › Appearance › App icon, or the "Choose an icon" step of the setup): Tacet's own icon is Seal, corona, a vermilion seal with a corona of rays carved in it. Sixteen alternatives can replace it: Gold seal; Half seal; Seal, t.; Half seal, t.; t. coin; t., ocean; t., half lit; Half moon; Half moon, t; Half moon, soft; Half moon, corona; Corona, gold; Corona t; Corona t, gold; Last light; and Eclipse (until 1.6.4), the icon Tacet had until 1.6.4. The choice shows in the Dock at once and is set on Tacet.app, so Finder and the Dock show it while Tacet is closed too; after an update it comes back at the next launch. Sites installed as apps keep their own icons.
 
 ## Search
 Settings › Search: the search engine (DuckDuckGo, Google, Bing, Brave, Startpage, Ecosia, Kagi or your own with %s), search suggestions (off by default, never in private windows) and search shortcuts.
