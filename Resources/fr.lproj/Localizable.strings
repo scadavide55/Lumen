@@ -31,6 +31,7 @@
 "A few things worth knowing." = "Quelques choses à savoir.";
 "A focus timer in a tab of its own: 25 minutes of work and 5 of rest, or your own lengths. The time left shows in the tab's title, so you can see it from the tab list, and a soft sound says when it's done." = "Un minuteur de concentration dans son propre onglet : 25 minutes de travail et 5 de pause, ou vos propres durées. Le temps restant s'affiche dans le titre de l'onglet, visible depuis la liste, et un son doux annonce la fin.";
 "A folder with a manifest.json, or a .zip, .crx (Chrome) or .xpi (Firefox) file. Most extensions work; some features that only Chrome or Firefox have may not." = "Un dossier avec un manifest.json, ou un fichier .zip, .crx (Chrome) ou .xpi (Firefox). La plupart des extensions fonctionnent ; certaines fonctions propres à Chrome ou Firefox peuvent ne pas marcher.";
+"A new icon" = "Une nouvelle icône";
 "A profile can be deleted once none of its windows are open." = "Un profil peut être supprimé lorsqu'aucune de ses fenêtres n'est ouverte.";
 "A quick answer here, searching the web if needed" = "Une réponse rapide ici, en cherchant sur le web si besoin";
 "A quiet, fast browser that blocks ads and trackers for you. Let's get it set up the way you like. It only takes a minute." = "Un navigateur discret et rapide qui bloque les publicités et les traqueurs pour vous. Configurons-le à votre goût : cela ne prend qu'une minute.";
@@ -356,6 +357,7 @@
 "Find saved passwords that appeared in data breaches, that you use on more than one site, or that are easy to guess. Only the first 5 characters of a password's hash are ever sent to check it." = "Trouvez les mots de passe enregistrés apparus dans des fuites de données, utilisés sur plusieurs sites ou faciles à deviner. Seuls les 5 premiers caractères du hachage sont envoyés pour vérifier.";
 "Find your articles in the Library › Reading List" = "Retrouvez vos articles dans Bibliothèque › Liste de lecture";
 "Find…" = "Rechercher…";
+"Fixes from your reports" = "Corrections issues de vos signalements";
 "Float pages with rounded corners" = "Pages flottantes aux coins arrondis";
 "Float the Video" = "Détacher la vidéo";
 "Float the page with rounded corners" = "Page flottante aux coins arrondis";
@@ -452,6 +454,7 @@
 "Import…" = "Importer…";
 "In Reader, choose Save for Offline: the article and its images are kept on your Mac, ready without a connection." = "En mode Lecture, choisissez Enregistrer hors ligne : l’article et ses images restent sur votre Mac, prêts sans connexion.";
 "In the Passwords app choose File › Export All Passwords, then pick that file here. Apple doesn't let other browsers read Passwords directly." = "Dans l'app Mots de passe, choisissez Fichier › Exporter tous les mots de passe, puis choisissez ce fichier ici. Apple ne permet pas aux autres navigateurs de lire directement Mots de passe.";
+"In the compact layout the whole top bar moves the window. Sign-in fields built from web components, like Reddit's, now fill. A Safari import that waited for Full Disk Access finishes by itself once you turn it on." = "Dans la disposition compacte, toute la barre du haut déplace la fenêtre. Les champs de connexion faits de composants web, comme ceux de Reddit, se remplissent désormais. Une importation depuis Safari qui attendait l'accès complet au disque se termine toute seule dès que vous l'activez.";
 "Install" = "Installer";
 "Install Site as App…" = "Installer le site comme app…";
 "Install Update" = "Installer la mise à jour";
@@ -815,6 +818,7 @@
 "Scroll up at the top of a page to reload it" = "Faire défiler vers le haut en haut d'une page pour la recharger";
 "Scrolling the page" = "Défilement de la page";
 "Seal, corona" = "Sceau, couronne";
+"Seal, corona is Tacet's new icon. Prefer another? Pick one of sixteen alternatives, including Eclipse, the icon Tacet had until now. The Dock and Finder show it at once." = "Sceau, couronne est la nouvelle icône de Tacet. Vous en préférez une autre ? Choisissez parmi seize alternatives, dont Éclipse, l'icône que Tacet avait jusqu'ici. Le Dock et le Finder l'affichent aussitôt.";
 "Seal, t." = "Sceau, t.";
 "Search" = "Rechercher";
 "Search %@" = "Rechercher avec %@";
@@ -853,6 +857,7 @@
 "Settings" = "Réglages";
 "Settings (⌘,)" = "Réglages (⌘,)";
 "Settings › AI › Ollama or LM Studio" = "Réglages › IA › Ollama ou LM Studio";
+"Settings › Appearance › App icon" = "Réglages › Apparence › Icône de l'app";
 "Settings › Extensions" = "Réglages › Extensions";
 "Settings › General › Move to another Mac" = "Réglages › Général › Passer à un autre Mac";
 "Settings › General › Tabs: when to group, and sites never to group" = "Réglages › Général › Onglets : quand grouper, et les sites à ne jamais grouper";
@@ -1014,6 +1019,7 @@
 "Talk to its app on your Mac" = "Communiquer avec son app sur le Mac";
 "Teal" = "Turquoise";
 "Tell sites not to sell or share my data (Global Privacy Control)" = "Demander aux sites de ne pas vendre ni partager mes données (Global Privacy Control)";
+"Thanks to everyone who opened an issue on GitHub" = "Merci à tous ceux qui ont ouvert un ticket sur GitHub";
 "The API key was refused. Check it in Settings › AI." = "La clé API a été refusée. Vérifiez-la dans Réglages › IA.";
 "The Apple model declined to answer this request." = "Le modèle Apple a refusé de répondre à cette demande.";
 "The Apple model doesn't support this language yet." = "Le modèle Apple ne prend pas encore en charge cette langue.";

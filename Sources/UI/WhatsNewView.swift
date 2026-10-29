@@ -15,7 +15,7 @@ enum WhatsNew {
         let demo: Demo
     }
 
-    enum Demo { case store, cutout, extMenu, localAI, pinned, arc, shield, preview, wake, translate, passwords, keychain, rename, groups, picking, assistant, apple, reading, customize, extensions, fixes }
+    enum Demo { case icons, store, cutout, extMenu, localAI, pinned, arc, shield, preview, wake, translate, passwords, keychain, rename, groups, picking, assistant, apple, reading, customize, extensions, fixes }
 
     /// What's new for someone who last saw the welcome of `seen` (empty when they never did).
     static func pages(since seen: String) -> [Page] {
@@ -23,6 +23,13 @@ enum WhatsNew {
     }
 
     static let all: [Page] = [
+        Page(version: "1.6.5", symbol: "app.badge", title: "A new icon",
+             text: "Seal, corona is Tacet's new icon. Prefer another? Pick one of sixteen alternatives, including Eclipse, the icon Tacet had until now. The Dock and Finder show it at once.",
+             how: ["Settings › Appearance › App icon"],
+             demo: .icons),
+        Page(version: "1.6.5", symbol: "checkmark.seal", title: "Fixes from your reports",
+             text: "In the compact layout the whole top bar moves the window. Sign-in fields built from web components, like Reddit's, now fill. A Safari import that waited for Full Disk Access finishes by itself once you turn it on.",
+             how: ["Thanks to everyone who opened an issue on GitHub"], demo: .fixes),
         Page(version: "1.6.4", symbol: "storefront", title: "Tacet Plugins",
              text: "A store of small plugins made for Tacet and checked by us, that work on every Mac: YouTube without Shorts, Copy as Markdown, Smart Dark Mode, Focus Timer and many more. Each says who made it and whether it's verified.",
              how: ["Window › Tacet Plugins (⇧⌘P), or the store button in the sidebar", "Add installs it; plugins update by themselves"],
@@ -185,6 +192,7 @@ private struct DemoView: View {
             // A 4-second loop, eased so each step settles before the next.
             let t = context.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 4) / 4
             switch demo {
+            case .icons: IconsDemo(t: t)
             case .store: StoreDemo(t: t)
             case .cutout: CutoutDemo(t: t)
             case .extMenu: ExtMenuDemo(t: t)
@@ -228,6 +236,35 @@ private struct Chip: View {
         }
         .frame(width: width, height: 26)
         .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(Color.primary.opacity(0.08)))
+    }
+}
+
+/// The choice moves along a row of icons, and the big one, as in the Dock, follows it.
+private struct IconsDemo: View {
+    let t: Double
+    private static let ids = ["seal-corona", "seal-night-gold", "half-moon-corona", "corona-gold", "eclipse"]
+    var body: some View {
+        let chosen = min(Self.ids.count - 1, Int(t * Double(Self.ids.count)))
+        HStack(spacing: 26) {
+            icon(Self.ids[chosen], 92).id(chosen).transition(.opacity)
+            HStack(spacing: 8) {
+                ForEach(Array(Self.ids.enumerated()), id: \.offset) { i, id in
+                    icon(id, 40)
+                        .padding(3)
+                        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.accentColor.opacity(i == chosen ? 0.16 : 0)))
+                        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(i == chosen ? Color.accentColor : .clear, lineWidth: 2))
+                }
+            }
+        }
+        .animation(.easeOut(duration: 0.3), value: chosen)
+    }
+
+    private func icon(_ id: String, _ size: CGFloat) -> some View {
+        Group {
+            if let image = AppIconPicker.image(for: AppIcon.find(id)) { Image(nsImage: image).resizable().interpolation(.high) }
+            else { RoundedRectangle(cornerRadius: size * 0.22, style: .continuous).fill(Color.primary.opacity(0.08)) }
+        }
+        .frame(width: size, height: size)
     }
 }
 
