@@ -33,6 +33,7 @@
 "3 months" = "3 mesi";
 "3 tabs" = "3 schede";
 "5 tabs" = "5 schede";
+"A Space keeps a whole set of tabs, groups and pinned tabs with a note to yourself. Leave School, open Coding, and come back to School exactly as it was." = "Uno spazio tiene un intero insieme di schede, gruppi e schede fissate, con una nota per te. Lasci Scuola, apri Programmazione e ritrovi Scuola esattamente com'era.";
 "A few things worth knowing." = "Alcune cose utili da sapere.";
 "A focus timer in a tab of its own: 25 minutes of work and 5 of rest, or your own lengths. The time left shows in the tab's title, so you can see it from the tab list, and a soft sound says when it's done." = "Un timer di concentrazione in una scheda tutta sua: 25 minuti di lavoro e 5 di pausa, o le durate che vuoi. Il tempo che resta compare nel titolo della scheda, così lo vedi dall'elenco delle schede, e un suono leggero ti avvisa quando finisce.";
 "A folder with a manifest.json, or a .zip, .crx (Chrome) or .xpi (Firefox) file. Most extensions work; some features that only Chrome or Firefox have may not." = "Una cartella con un manifest.json, oppure un file .zip, .crx (Chrome) o .xpi (Firefox). La maggior parte delle estensioni funziona; alcune funzioni che esistono solo in Chrome o Firefox potrebbero non andare.";
@@ -744,6 +745,7 @@
 "Other Sites in New Tabs" = "Altri siti in nuove schede";
 "Page" = "Pagina";
 "Page width" = "Larghezza della pagina";
+"Passkeys and a safer Tacet" = "Passkey e un Tacet più sicuro";
 "Password" = "Password";
 "Password check" = "Controllo delle password";
 "Password manager" = "Gestore di password";
@@ -780,6 +782,7 @@
 "Press ⌥⇧P to float the video you're watching in its own small window, on any site, even ones that hide the button." = "Premi ⌥⇧P per far galleggiare il video che stai guardando in una piccola finestra, su qualsiasi sito, anche quelli che nascondono il pulsante.";
 "Press ⌥⇧W to see how many words and characters are in the text you selected, or in the whole page, and how long it takes to read." = "Premi ⌥⇧W per vedere quante parole e caratteri ci sono nel testo selezionato, o in tutta la pagina, e quanto tempo serve a leggerlo.";
 "Presses “Reject all” on cookie banners that offer it, so sites remember your choice." = "Preme “Rifiuta tutto” sui banner dei cookie che lo offrono, così i siti ricordano la tua scelta.";
+"Preview, highlight, take notes" = "Anteprima, evidenziazioni, note";
 "Previous (⇧⌘G)" = "Precedente (⇧⌘G)";
 "Previous Space" = "Spazio precedente";
 "Previous Tab" = "Scheda precedente";
@@ -871,6 +874,8 @@
 "Right-click a picked tab for everything you can do with them" = "Tasto destro su una scheda selezionata per tutto quello che puoi fare";
 "Right-click a pinned tab › Back to Pinned Address" = "Clic destro su una scheda fissata › Torna all'indirizzo fissato";
 "Right-click a plugin to turn it off for one site" = "Clic destro su un plugin per disattivarlo su un solo sito";
+"Right-click selected text › Highlight" = "Clic destro sul testo selezionato › Evidenzia";
+"Rules, drafts and automations" = "Regole, bozze e automazioni";
 "Run" = "Esegui";
 "Run Now" = "Esegui ora";
 "Run scripts on pages" = "Eseguire script nelle pagine";
@@ -907,6 +912,7 @@
 "Seal, t." = "Sigillo, t.";
 "Search" = "Cerca";
 "Search %@" = "Cerca con %@";
+"Search History, or type in the command bar" = "Cerca nella Cronologia, o scrivi nella barra dei comandi";
 "Search Tabs…" = "Cerca nelle schede…";
 "Search URL" = "URL di ricerca";
 "Search and privacy" = "Ricerca e privacy";
@@ -938,6 +944,7 @@
 "Select text and right-click › Tacet Assistant" = "Seleziona del testo, tasto destro › Tacet Assistant";
 "Select text on a page, right-click it and choose Highlight." = "Seleziona del testo in una pagina, fai clic destro e scegli Evidenzia.";
 "Send" = "Invia";
+"Send a site's links to a profile, a Space or a private window. Get back text you hadn't sent when a page reloads. Run your own steps with a shortcut." = "Manda i link di un sito a un profilo, a uno spazio o a una finestra privata. Ritrova il testo non inviato quando una pagina si ricarica. Esegui i tuoi passi con una scorciatoia.";
 "Separate" = "Separato";
 "Serif" = "Con grazie";
 "Server address" = "Indirizzo del server";
@@ -947,10 +954,13 @@
 "Settings (⌘,)" = "Impostazioni (⌘,)";
 "Settings › AI › Ollama or LM Studio" = "Impostazioni › AI › Ollama o LM Studio";
 "Settings › Appearance › App icon" = "Impostazioni › Aspetto › Icona dell'app";
+"Settings › Automations, then ⌃⌥⌘1 to ⌃⌥⌘9" = "Impostazioni › Automazioni, poi da ⌃⌥⌘1 a ⌃⌥⌘9";
 "Settings › Extensions" = "Impostazioni › Estensioni";
 "Settings › General › Move to another Mac" = "Impostazioni › Generali › Passa a un altro Mac";
+"Settings › General › Opening rules" = "Impostazioni › Generali › Regole di apertura";
 "Settings › General › Tabs: when to group, and sites never to group" = "Impostazioni › Generali › Schede: quando raggruppare e quali siti mai";
 "Settings › Passwords › Check…" = "Impostazioni › Password › Controlla…";
+"Settings › Shield › Searching what pages said" = "Impostazioni › Shield › Cercare nel testo delle pagine";
 "Settings › Shield: AdGuard, Fanboy Annoyances and hidden trackers" = "Impostazioni › Shield: AdGuard, Fanboy Annoyances e tracker nascosti";
 "Settings…" = "Impostazioni…";
 "Setup and how Tacet works" = "Configurazione e funzionamento di Tacet";
@@ -967,6 +977,7 @@
 "Show Downloads" = "Mostra download";
 "Show History" = "Mostra cronologia";
 "Show Link Hints" = "Mostra le etichette dei link";
+"Show Older History" = "Mostra cronologia più vecchia";
 "Show Original" = "Mostra originale";
 "Show Reading List" = "Mostra l'elenco di lettura";
 "Show a Page Beside This One…" = "Mostra una pagina accanto a questa…";
@@ -996,6 +1007,7 @@
 "Sidebar width" = "Larghezza della barra laterale";
 "Sign In" = "Accedi";
 "Sign In with Safari" = "Accedi con Safari";
+"Sign In with Safari, then I'm Signed In" = "Accedi con Safari, poi Ho fatto l'accesso";
 "Sign in once and you're signed in to Gmail, YouTube, Drive and every Google service in Tacet." = "Accedi una volta e sei connesso a Gmail, YouTube, Drive e tutti i servizi Google in Tacet.";
 "Sign in to %@" = "Accedi a %@";
 "Sign in to %@ in Safari with Touch ID, and Tacet brings the sign-in back here. Or close this and choose another way to sign in, like a password or a code." = "Accedi a %@ in Safari con Touch ID e Tacet riporta qui l'accesso. Oppure chiudi questo avviso e scegli un altro modo per accedere, come una password o un codice.";
@@ -1120,6 +1132,7 @@
 "Tacet is up to date." = "Tacet è aggiornato.";
 "Tacet is your default browser" = "Tacet è il tuo browser predefinito";
 "Tacet keeps the passwords you save in it in your Mac's Keychain and asks for Touch ID before filling them. It can't see the ones saved in Safari: bring them over below. Already use another password manager? Pick it here." = "Tacet conserva nel Portachiavi del Mac le password che salvi in Tacet e chiede Touch ID prima di compilarle. Non vede quelle salvate in Safari: portale qui sotto. Usi già un altro gestore di password? Sceglilo qui.";
+"Tacet keeps the text of the pages you read on this Mac, so a sentence you remember finds the page again, with the passage. No AI, nothing leaves your Mac." = "Tacet conserva su questo Mac il testo delle pagine che leggi, così una frase che ricordi ritrova la pagina, con il passaggio. Niente AI, niente lascia il tuo Mac.";
 "Tacet keeps the text of the pages you visit on this Mac, so a search in History or the command bar finds a page by a sentence you remember. Never kept: private windows, pages with a password field and the sites below. Nothing leaves your Mac." = "Tacet conserva su questo Mac il testo delle pagine che visiti, così una ricerca nella Cronologia o nella barra dei comandi ritrova una pagina da una frase che ricordi. Mai conservate: finestre private, pagine con un campo password e i siti qui sotto. Niente lascia il tuo Mac.";
 "Tacet looks for Safari, Firefox and Chromium browsers such as Chrome, Opera, Brave, Edge and Arc." = "Tacet cerca Safari, Firefox e i browser Chromium come Chrome, Opera, Brave, Edge e Arc.";
 "Tacet needs Full Disk Access" = "Tacet ha bisogno dell'Accesso completo al disco";
@@ -1156,6 +1169,7 @@
 "The field it was in isn't on the page now, or already has text. Paste it where you want it." = "Il campo in cui era non c'è più nella pagina, oppure contiene già del testo. Incollalo dove vuoi.";
 "The file couldn't be found." = "Il file non è stato trovato.";
 "The file couldn't be unpacked." = "Il file non può essere estratto.";
+"The icons at the bottom of the sidebar, or the Space button at the top" = "Le icone in fondo alla barra laterale, o il pulsante Spazio in alto";
 "The key is saved in your Keychain. You can change the model in Settings › AI." = "La chiave viene salvata nel Portachiavi. Puoi cambiare il modello in Impostazioni › AI.";
 "The model declined to answer this request." = "Il modello ha rifiutato di rispondere a questa richiesta.";
 "The new icon is an eclipse: a dark disc in front of the sun" = "La nuova icona è un'eclissi: un disco scuro davanti al sole";
@@ -1304,6 +1318,7 @@
 "What's new" = "Novità";
 "When %d or more tabs are open from the same site, Tacet groups them, for example into “GitHub”." = "Quando sono aperte %d o più schede dello stesso sito, Tacet le raggruppa, per esempio in “GitHub”.";
 "When a link opens a Google AMP copy of an article, goes to the publisher's own page instead, which is complete and isn't served through Google." = "Quando un link apre una copia AMP di Google di un articolo, va invece alla pagina dell’editore, che è completa e non passa da Google.";
+"When a site asks for a passkey, Tacet signs you in through Safari with Touch ID. Tacet Assistant asks before buttons it can't judge, and a broken certificate is never opened over HTTP behind your back." = "Quando un sito chiede una passkey, Tacet ti fa accedere tramite Safari con Touch ID. Tacet Assistant chiede prima di premere pulsanti che non sa valutare, e un certificato non valido non viene mai aperto in HTTP alle tue spalle.";
 "When three or more tabs are open from the same site, Tacet groups them, for example into “GitHub”." = "Quando hai aperto tre o più schede dello stesso sito, Tacet le raggruppa, per esempio in “GitHub”.";
 "When you ask something, your message, the attached page and any images are sent to the provider you chose, under their privacy terms. With a server on your own Mac, such as Ollama, nothing leaves your computer unless the assistant searches the web. Your API key is kept in the macOS Keychain." = "Quando chiedi qualcosa, il tuo messaggio, la pagina allegata e le eventuali immagini vengono inviati al fornitore che hai scelto, secondo le sue condizioni sulla privacy. Con un server sul tuo Mac, come Ollama, non esce nulla dal computer, a meno che l'assistente non cerchi sul web. La chiave API è conservata nel Portachiavi di macOS.";
 "When you ask, the assistant can use the page in the current tab for you, where you're signed in. It asks before sending, buying or deleting anything, and never fills in passwords or card numbers. A page can try to trick it, so watch what it does and press Stop if needed." = "Quando glielo chiedi, l'assistente può usare per te la pagina nella scheda attuale, dove hai già fatto l'accesso. Chiede conferma prima di inviare, comprare o eliminare qualcosa, e non inserisce mai password o numeri di carta. Una pagina può provare a ingannarlo, quindi controlla cosa fa e premi Interrompi se serve.";
@@ -1388,6 +1403,9 @@
 "“Summarise this video”" = "“Riassumi questo video”";
 "⇧⌘N opens a window that forgets everything when you close it." = "⇧⌘N apre una finestra che dimentica tutto quando la chiudi.";
 "⋯ menu › Customize This Site…" = "Menu ⋯ › Personalizza questo sito…";
+"⌃⌘← and ⌃⌘→ go to the previous and next Space" = "⌃⌘← e ⌃⌘→ passano allo spazio precedente e successivo";
 "⌘-click adds a tab, ⇧-click picks a range" = "⌘-clic aggiunge una scheda, ⇧-clic seleziona un intervallo";
 "⌘-click or ⇧-click tabs to pick them, then group, move, pin or close them together. Drag them all at once too." = "Con ⌘-clic o ⇧-clic selezioni più schede, poi le raggruppi, sposti, fissi o chiudi insieme. Puoi anche trascinarle tutte insieme.";
+"⌥-click a link to read it over the page without leaving it. Select text to highlight it in a colour with a note; Library › Highlights keeps them all, ready for Obsidian." = "⌥-clic su un link per leggerlo sopra la pagina senza lasciarla. Seleziona del testo per evidenziarlo con un colore e una nota; Libreria › Evidenziazioni le tiene tutte, pronte per Obsidian.";
+"⌥-click a link; Esc closes the preview" = "⌥-clic su un link; Esc chiude l'anteprima";
 "⌥⌘F searches your tabs by title or address" = "⌥⌘F cerca tra le schede per titolo o indirizzo";

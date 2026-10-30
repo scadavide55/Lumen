@@ -90,12 +90,12 @@ check(!UpdateChecker.isNewer("1.5", than: "1.5.0"), "1.5 == 1.5.0")
 check(!UpdateChecker.isNewer("1.5.3", than: "1.5.4"), "1.5.3 < 1.5.4")
 
 // MARK: Welcome pages
-eq(WhatsNew.pages(since: "1.6.4").map(\.version), Array(repeating: "1.6.5", count: 2), "welcome after 1.6.4: only 1.6.5 pages")
-eq(Set(WhatsNew.pages(since: "1.6.3").map(\.version)), ["1.6.4", "1.6.5"], "welcome after 1.6.3: 1.6.4 and 1.6.5 pages")
-eq(Set(WhatsNew.pages(since: "1.6.1").map(\.version)), ["1.6.2", "1.6.3", "1.6.4", "1.6.5"], "welcome after 1.6.1: every newer page")
+eq(WhatsNew.pages(since: "1.6.5").map(\.version), Array(repeating: "1.7", count: 5), "welcome after 1.6.5: only 1.7 pages")
+eq(Set(WhatsNew.pages(since: "1.6.4").map(\.version)), ["1.6.5", "1.7"], "welcome after 1.6.4: 1.6.5 and 1.7 pages")
+eq(Set(WhatsNew.pages(since: "1.6.1").map(\.version)), ["1.6.2", "1.6.3", "1.6.4", "1.6.5", "1.7"], "welcome after 1.6.1: every newer page")
 eq(WhatsNew.pages(since: "1.6").count, WhatsNew.all.count, "welcome after 1.6: every page")
 eq(WhatsNew.pages(since: "").count, WhatsNew.all.count, "welcome never seen: every page")
-check(WhatsNew.pages(since: "1.6.5").isEmpty, "welcome already seen: nothing")
+check(WhatsNew.pages(since: "1.7").isEmpty, "welcome already seen: nothing")
 
 // MARK: Arc's sidebar
 do {
@@ -694,6 +694,50 @@ eq(stored.load()?.n, 2, "storage: a delayed save waits")
 StoredFiles.flushAll()
 eq(stored.load()?.n, 3, "storage: quitting writes what was waiting")
 stored.delete()
+
+// MARK: Long conversations fit the model
+
+do {
+    let big = String(repeating: "x", count: 5000)
+    let convo: [[String: Any]] = [
+        ["role": "user", "content": "first " + big],
+        ["role": "assistant", "content": "ok " + big],
+        ["role": "user", "content": [["type": "text", "text": "second"], ["type": "image", "source": ["data": big]]]],
+        ["role": "assistant", "content": [["type": "tool_use", "id": "t1", "name": "x", "input": [:]]]],
+        ["role": "user", "content": [["type": "tool_result", "tool_use_id": "t1", "content": big]]],
+        ["role": "user", "content": "latest " + big],
+    ]
+    eq(AssistantChat.fitted(convo, budget: 1_000_000).count, 6, "context: a short conversation is left alone")
+    let fit = AssistantChat.fitted(convo, budget: 12_000)
+    eq(fit.last?["content"] as? String, "latest " + big, "context: the latest request stays whole")
+    check(((fit.first?["content"] as? String) ?? "").count < 2000, "context: older text is shortened", "\(fit.first ?? [:])")
+    let tiny = AssistantChat.fitted(convo, budget: 6_000)
+    check(tiny.count < convo.count && (tiny.first?["role"] as? String) == "user", "context: oldest turns go, starting at a request", "\(tiny.count)")
+}
+
+// MARK: History beyond what's kept in memory
+
+do {
+    let url = FileManager.default.temporaryDirectory.appendingPathComponent("tacet-history-\(UUID().uuidString).sqlite")
+    if let hdb = HistoryDB(url) {
+        let now = Date()
+        hdb.save((0..<5).map { i in HistoryEntry(url: URL(string: "https://site\(i).example/page_\(i)")!, title: "Page \(i) 100%",
+                                                 date: now.addingTimeInterval(-Double(i) * 3600), visits: i + 1) })
+        hdb.flush()
+        eq(hdb.count(), 5, "history: counted on disk")
+        eq(hdb.load(limit: 2).map(\.title), ["Page 0 100%", "Page 1 100%"], "history: newest page first")
+        eq(hdb.load(limit: 2, offset: 2).map(\.title), ["Page 2 100%", "Page 3 100%"], "history: the next page")
+        let cutoff = now.addingTimeInterval(-2.5 * 3600)
+        eq(hdb.search(["page"], before: cutoff, limit: 10).map(\.title), ["Page 3 100%", "Page 4 100%"], "history: older entries found on disk")
+        eq(hdb.search(["site4", "100%"], before: cutoff, limit: 10).count, 1, "history: every word must match, % taken literally")
+        eq(hdb.search(["page_"], before: now.addingTimeInterval(60), limit: 10).count, 5, "history: _ taken literally")
+        eq(hdb.search(["xx%"], before: now.addingTimeInterval(60), limit: 10).count, 0, "history: % isn't a wildcard")
+        eq(hdb.entry(for: URL(string: "https://site2.example/page_2")!)?.visits, 3, "history: an entry found by its address")
+    } else {
+        check(false, "history: temporary database opens")
+    }
+    try? FileManager.default.removeItem(at: url)
+}
 
 // MARK: Finding pages by what they said
 

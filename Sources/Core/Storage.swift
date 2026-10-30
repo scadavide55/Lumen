@@ -258,10 +258,14 @@ struct HistoryEntry: Codable, Identifiable, Hashable {
 @Observable
 final class History {
     static let shared = History()
-    /// Newest first, one entry per URL.
+    /// How many of the newest entries are kept in memory; older ones stay on disk, where searches still find them.
+    static let memoryLimit = 5000
+    /// The newest entries, newest first, one per URL.
     private(set) var entries: [HistoryEntry] {
         didSet { haystacks = nil }
     }
+    /// Whether older entries are on disk, beyond `entries`.
+    private(set) var hasOlder = false
     /// Lowercased "title url" per entry, built once and reused by every search until the history changes.
     @ObservationIgnored private var haystacks: [String]?
     private let db = HistoryDB(Paths.file("history.sqlite"))
@@ -274,7 +278,8 @@ final class History {
             db.flush()
             legacy.delete()
         }
-        entries = db?.load() ?? []
+        entries = db?.load(limit: Self.memoryLimit) ?? []
+        hasOlder = entries.count == Self.memoryLimit && (db?.count() ?? 0) > Self.memoryLimit
     }
 
     func record(url: URL, title: String) {
@@ -282,12 +287,30 @@ final class History {
         var entry = HistoryEntry(url: url, title: title, date: Date())
         if let i = entries.firstIndex(where: { $0.url == url }) {
             entry = entries.remove(at: i)
-            entry.date = Date()
-            entry.visits += 1
-            if !title.isEmpty { entry.title = title }
+        } else if hasOlder, let old = db?.entry(for: url) {
+            // An old page visited again: its count carries on.
+            entry = old
+        } else {
+            entry.visits = 0
         }
+        entry.date = Date()
+        entry.visits += 1
+        if !title.isEmpty { entry.title = title }
         entries.insert(entry, at: 0)
         db?.save([entry])
+        // Memory keeps the newest; the rest is on disk.
+        if entries.count > Self.memoryLimit + 500 {
+            entries.removeLast(entries.count - Self.memoryLimit)
+            hasOlder = true
+        }
+    }
+
+    /// Another page of older entries, for the History list.
+    func loadOlder() {
+        guard hasOlder, let more = db?.load(limit: Self.memoryLimit, offset: entries.count) else { return }
+        let known = Set(entries.map(\.url))
+        entries += more.filter { !known.contains($0.url) }
+        hasOlder = more.count == Self.memoryLimit
     }
 
     /// Merges history from another browser, keeping the newest visit per URL. Returns how many entries were new.
@@ -322,8 +345,10 @@ final class History {
     }
 
     func remove(_ ids: Set<UUID>) {
-        // What those pages said goes with them.
-        PageText.shared.forget(urls: entries.filter { ids.contains($0.id) }.map(\.url))
+        // What those pages said goes with them; some may only be on disk.
+        let inMemory = entries.filter { ids.contains($0.id) }
+        let onDisk = ids.count > inMemory.count ? (db?.entries(ids.subtracting(inMemory.map(\.id))) ?? []) : []
+        PageText.shared.forget(urls: (inMemory + onDisk).map(\.url))
         entries.removeAll { ids.contains($0.id) }
         db?.delete(ids)
     }
@@ -343,16 +368,28 @@ final class History {
     /// `search` on a background thread, so typing never waits for a large history.
     @MainActor
     func searchInBackground(_ query: String, limit: Int = 8) async -> [HistoryEntry] {
-        await inBackground { entries, hay in History.search(query, entries: entries, haystacks: hay, limit: limit) }
+        let recent = await inBackground { entries, hay in History.search(query, entries: entries, haystacks: hay, limit: limit) }
+        return recent.count >= limit ? recent : recent + (await older(query, limit: limit - recent.count, excluding: recent))
+    }
+
+    /// Matches among the entries kept only on disk.
+    @MainActor
+    private func older(_ query: String, limit: Int, excluding shown: [HistoryEntry]) async -> [HistoryEntry] {
+        guard hasOlder, limit > 0, let db, let oldest = entries.last?.date else { return [] }
+        let words = query.lowercased().split(separator: " ").map(String.init)
+        let seen = Set(shown.map(\.url))
+        let found = await Task.detached(priority: .userInitiated) { db.search(words, before: oldest, limit: limit) }.value
+        return found.filter { !seen.contains($0.url) }
     }
 
     /// Entries containing every word of `query`, newest first, found on a background thread.
     @MainActor
     func filterInBackground(_ query: String, limit: Int = 500) async -> [HistoryEntry] {
-        await inBackground { entries, hay in
+        let recent = await inBackground { entries, hay in
             let words = query.lowercased().split(separator: " ").map(String.init)
             return Array(entries.indices.lazy.filter { i in words.allSatisfy { hay[i].contains($0) } }.prefix(limit).map { entries[$0] })
         }
+        return recent.count >= limit ? recent : recent + (await older(query, limit: limit - recent.count, excluding: recent))
     }
 
     /// Runs `work` off the main thread with the history and its lowercase index, building the index if needed.

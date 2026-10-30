@@ -33,6 +33,7 @@
 "3 months" = "3 mois";
 "3 tabs" = "3 onglets";
 "5 tabs" = "5 onglets";
+"A Space keeps a whole set of tabs, groups and pinned tabs with a note to yourself. Leave School, open Coding, and come back to School exactly as it was." = "Un espace garde tout un ensemble d'onglets, de groupes et d'onglets épinglés, avec une note pour vous. Quittez École, ouvrez Code, et retrouvez École exactement comme vous l'aviez laissé.";
 "A few things worth knowing." = "Quelques choses à savoir.";
 "A focus timer in a tab of its own: 25 minutes of work and 5 of rest, or your own lengths. The time left shows in the tab's title, so you can see it from the tab list, and a soft sound says when it's done." = "Un minuteur de concentration dans son propre onglet : 25 minutes de travail et 5 de pause, ou vos propres durées. Le temps restant s'affiche dans le titre de l'onglet, visible depuis la liste, et un son doux annonce la fin.";
 "A folder with a manifest.json, or a .zip, .crx (Chrome) or .xpi (Firefox) file. Most extensions work; some features that only Chrome or Firefox have may not." = "Un dossier avec un manifest.json, ou un fichier .zip, .crx (Chrome) ou .xpi (Firefox). La plupart des extensions fonctionnent ; certaines fonctions propres à Chrome ou Firefox peuvent ne pas marcher.";
@@ -744,6 +745,7 @@
 "Other Sites in New Tabs" = "Autres sites dans de nouveaux onglets";
 "Page" = "Page";
 "Page width" = "Largeur de la page";
+"Passkeys and a safer Tacet" = "Clés d'accès et un Tacet plus sûr";
 "Password" = "Mot de passe";
 "Password check" = "Vérification des mots de passe";
 "Password manager" = "Gestionnaire de mots de passe";
@@ -780,6 +782,7 @@
 "Press ⌥⇧P to float the video you're watching in its own small window, on any site, even ones that hide the button." = "Appuyez sur ⌥⇧P pour faire flotter la vidéo dans sa propre petite fenêtre, sur n’importe quel site, même ceux qui cachent le bouton.";
 "Press ⌥⇧W to see how many words and characters are in the text you selected, or in the whole page, and how long it takes to read." = "Appuyez sur ⌥⇧W pour voir combien de mots et de caractères compte le texte sélectionné, ou toute la page, et le temps de lecture.";
 "Presses “Reject all” on cookie banners that offer it, so sites remember your choice." = "Appuie sur « Tout refuser » sur les bannières de cookies qui le proposent, pour que les sites retiennent votre choix.";
+"Preview, highlight, take notes" = "Aperçu, surlignage, notes";
 "Previous (⇧⌘G)" = "Précédent (⇧⌘G)";
 "Previous Space" = "Espace précédent";
 "Previous Tab" = "Onglet précédent";
@@ -871,6 +874,8 @@
 "Right-click a picked tab for everything you can do with them" = "Clic droit sur un onglet choisi pour tout ce que vous pouvez faire";
 "Right-click a pinned tab › Back to Pinned Address" = "Clic droit sur un onglet épinglé › Revenir à l'adresse épinglée";
 "Right-click a plugin to turn it off for one site" = "Clic droit sur un plugin pour le désactiver sur un seul site";
+"Right-click selected text › Highlight" = "Clic droit sur le texte sélectionné › Surligner";
+"Rules, drafts and automations" = "Règles, brouillons et automatisations";
 "Run" = "Exécuter";
 "Run Now" = "Exécuter maintenant";
 "Run scripts on pages" = "Exécuter des scripts sur les pages";
@@ -907,6 +912,7 @@
 "Seal, t." = "Sceau, t.";
 "Search" = "Rechercher";
 "Search %@" = "Rechercher avec %@";
+"Search History, or type in the command bar" = "Cherchez dans l'Historique, ou tapez dans la barre de commandes";
 "Search Tabs…" = "Rechercher dans les onglets…";
 "Search URL" = "URL de recherche";
 "Search and privacy" = "Recherche et confidentialité";
@@ -938,6 +944,7 @@
 "Select text and right-click › Tacet Assistant" = "Sélectionnez du texte, clic droit › Tacet Assistant";
 "Select text on a page, right-click it and choose Highlight." = "Sélectionnez du texte sur une page, faites un clic droit et choisissez Surligner.";
 "Send" = "Envoyer";
+"Send a site's links to a profile, a Space or a private window. Get back text you hadn't sent when a page reloads. Run your own steps with a shortcut." = "Envoyez les liens d'un site vers un profil, un espace ou une fenêtre privée. Récupérez le texte non envoyé quand une page se recharge. Lancez vos propres étapes avec un raccourci.";
 "Separate" = "Séparé";
 "Serif" = "Serif";
 "Server address" = "Adresse du serveur";
@@ -947,10 +954,13 @@
 "Settings (⌘,)" = "Réglages (⌘,)";
 "Settings › AI › Ollama or LM Studio" = "Réglages › IA › Ollama ou LM Studio";
 "Settings › Appearance › App icon" = "Réglages › Apparence › Icône de l'app";
+"Settings › Automations, then ⌃⌥⌘1 to ⌃⌥⌘9" = "Réglages › Automatisations, puis ⌃⌥⌘1 à ⌃⌥⌘9";
 "Settings › Extensions" = "Réglages › Extensions";
 "Settings › General › Move to another Mac" = "Réglages › Général › Passer à un autre Mac";
+"Settings › General › Opening rules" = "Réglages › Général › Règles d'ouverture";
 "Settings › General › Tabs: when to group, and sites never to group" = "Réglages › Général › Onglets : quand grouper, et les sites à ne jamais grouper";
 "Settings › Passwords › Check…" = "Réglages › Mots de passe › Vérifier…";
+"Settings › Shield › Searching what pages said" = "Réglages › Shield › Rechercher dans le texte des pages";
 "Settings › Shield: AdGuard, Fanboy Annoyances and hidden trackers" = "Réglages › Shield : AdGuard, Fanboy Annoyances et traqueurs cachés";
 "Settings…" = "Réglages…";
 "Setup and how Tacet works" = "Configuration et fonctionnement de Tacet";
@@ -967,6 +977,7 @@
 "Show Downloads" = "Afficher les téléchargements";
 "Show History" = "Afficher l'historique";
 "Show Link Hints" = "Afficher les repères des liens";
+"Show Older History" = "Afficher l'historique plus ancien";
 "Show Original" = "Afficher l'original";
 "Show Reading List" = "Afficher la liste de lecture";
 "Show a Page Beside This One…" = "Afficher une page à côté de celle-ci…";
@@ -996,6 +1007,7 @@
 "Sidebar width" = "Largeur de la barre latérale";
 "Sign In" = "Se connecter";
 "Sign In with Safari" = "Se connecter avec Safari";
+"Sign In with Safari, then I'm Signed In" = "Se connecter avec Safari, puis Je suis connecté";
 "Sign in once and you're signed in to Gmail, YouTube, Drive and every Google service in Tacet." = "Connectez-vous une fois pour accéder à Gmail, YouTube, Drive et tous les services Google dans Tacet.";
 "Sign in to %@" = "Se connecter à %@";
 "Sign in to %@ in Safari with Touch ID, and Tacet brings the sign-in back here. Or close this and choose another way to sign in, like a password or a code." = "Connectez-vous à %@ dans Safari avec Touch ID, et Tacet récupère la connexion ici. Ou fermez ceci et choisissez une autre façon de vous connecter, comme un mot de passe ou un code.";
@@ -1120,6 +1132,7 @@
 "Tacet is up to date." = "Tacet est à jour.";
 "Tacet is your default browser" = "Tacet est votre navigateur par défaut";
 "Tacet keeps the passwords you save in it in your Mac's Keychain and asks for Touch ID before filling them. It can't see the ones saved in Safari: bring them over below. Already use another password manager? Pick it here." = "Tacet conserve dans le trousseau de votre Mac les mots de passe que vous y enregistrez et demande Touch ID avant de les remplir. Il ne voit pas ceux enregistrés dans Safari : importez-les ci-dessous. Vous utilisez déjà un autre gestionnaire ? Choisissez-le ici.";
+"Tacet keeps the text of the pages you read on this Mac, so a sentence you remember finds the page again, with the passage. No AI, nothing leaves your Mac." = "Tacet conserve sur ce Mac le texte des pages que vous lisez : une phrase dont vous vous souvenez retrouve la page, avec le passage. Pas d'IA, rien ne quitte votre Mac.";
 "Tacet keeps the text of the pages you visit on this Mac, so a search in History or the command bar finds a page by a sentence you remember. Never kept: private windows, pages with a password field and the sites below. Nothing leaves your Mac." = "Tacet conserve sur ce Mac le texte des pages que vous visitez, pour qu'une recherche dans l'Historique ou la barre de commandes retrouve une page à partir d'une phrase dont vous vous souvenez. Jamais conservés : fenêtres privées, pages avec un champ de mot de passe et les sites ci-dessous. Rien ne quitte votre Mac.";
 "Tacet looks for Safari, Firefox and Chromium browsers such as Chrome, Opera, Brave, Edge and Arc." = "Tacet recherche Safari, Firefox et les navigateurs Chromium comme Chrome, Opera, Brave, Edge et Arc.";
 "Tacet needs Full Disk Access" = "Tacet a besoin de l'accès complet au disque";
@@ -1156,6 +1169,7 @@
 "The field it was in isn't on the page now, or already has text. Paste it where you want it." = "Le champ où il se trouvait n'est plus sur la page, ou contient déjà du texte. Collez-le où vous voulez.";
 "The file couldn't be found." = "Le fichier est introuvable.";
 "The file couldn't be unpacked." = "Le fichier n'a pas pu être décompressé.";
+"The icons at the bottom of the sidebar, or the Space button at the top" = "Les icônes en bas de la barre latérale, ou le bouton Espace en haut";
 "The key is saved in your Keychain. You can change the model in Settings › AI." = "La clé est enregistrée dans votre trousseau. Vous pouvez changer de modèle dans Réglages › IA.";
 "The model declined to answer this request." = "Le modèle a refusé de répondre à cette demande.";
 "The new icon is an eclipse: a dark disc in front of the sun" = "La nouvelle icône est une éclipse : un disque sombre devant le soleil";
@@ -1304,6 +1318,7 @@
 "What's new" = "Nouveautés";
 "When %d or more tabs are open from the same site, Tacet groups them, for example into “GitHub”." = "Quand %d onglets ou plus sont ouverts sur le même site, Tacet les regroupe, par exemple dans « GitHub ».";
 "When a link opens a Google AMP copy of an article, goes to the publisher's own page instead, which is complete and isn't served through Google." = "Quand un lien ouvre une copie AMP de Google d’un article, va plutôt sur la page de l’éditeur, complète et non servie par Google.";
+"When a site asks for a passkey, Tacet signs you in through Safari with Touch ID. Tacet Assistant asks before buttons it can't judge, and a broken certificate is never opened over HTTP behind your back." = "Quand un site demande une clé d'accès, Tacet vous connecte via Safari avec Touch ID. Tacet Assistant demande avant les boutons qu'il ne peut pas juger, et un certificat invalide n'est jamais ouvert en HTTP à votre insu.";
 "When three or more tabs are open from the same site, Tacet groups them, for example into “GitHub”." = "Quand trois onglets ou plus sont ouverts sur le même site, Tacet les regroupe, par exemple dans « GitHub ».";
 "When you ask something, your message, the attached page and any images are sent to the provider you chose, under their privacy terms. With a server on your own Mac, such as Ollama, nothing leaves your computer unless the assistant searches the web. Your API key is kept in the macOS Keychain." = "Quand vous posez une question, votre message, la page jointe et les éventuelles images sont envoyés au fournisseur choisi, selon ses conditions de confidentialité. Avec un serveur sur votre Mac, comme Ollama, rien ne quitte votre ordinateur, sauf si l'assistant fait une recherche sur le web. Votre clé API est conservée dans le trousseau macOS.";
 "When you ask, the assistant can use the page in the current tab for you, where you're signed in. It asks before sending, buying or deleting anything, and never fills in passwords or card numbers. A page can try to trick it, so watch what it does and press Stop if needed." = "Quand vous le demandez, l'assistant peut utiliser pour vous la page de l'onglet actuel, où vous êtes connecté. Il demande confirmation avant d'envoyer, d'acheter ou de supprimer quoi que ce soit, et ne saisit jamais de mots de passe ni de numéros de carte. Une page peut tenter de le tromper : surveillez ce qu'il fait et appuyez sur Arrêter si besoin.";
@@ -1388,6 +1403,9 @@
 "“Summarise this video”" = "« Résume cette vidéo »";
 "⇧⌘N opens a window that forgets everything when you close it." = "⇧⌘N ouvre une fenêtre qui oublie tout à sa fermeture.";
 "⋯ menu › Customize This Site…" = "Menu ⋯ › Personnaliser ce site…";
+"⌃⌘← and ⌃⌘→ go to the previous and next Space" = "⌃⌘← et ⌃⌘→ passent à l'espace précédent et suivant";
 "⌘-click adds a tab, ⇧-click picks a range" = "⌘-clic ajoute un onglet, ⇧-clic choisit une plage";
 "⌘-click or ⇧-click tabs to pick them, then group, move, pin or close them together. Drag them all at once too." = "⌘-clic ou ⇧-clic pour choisir des onglets, puis les grouper, déplacer, épingler ou fermer ensemble. Glissez-les aussi tous à la fois.";
+"⌥-click a link to read it over the page without leaving it. Select text to highlight it in a colour with a note; Library › Highlights keeps them all, ready for Obsidian." = "⌥-clic sur un lien pour le lire par-dessus la page sans la quitter. Sélectionnez du texte pour le surligner en couleur avec une note ; Bibliothèque › Surlignages les garde toutes, prêtes pour Obsidian.";
+"⌥-click a link; Esc closes the preview" = "⌥-clic sur un lien ; Échap ferme l'aperçu";
 "⌥⌘F searches your tabs by title or address" = "⌥⌘F recherche dans vos onglets par titre ou adresse";

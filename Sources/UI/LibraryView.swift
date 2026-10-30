@@ -62,7 +62,7 @@ struct HistoryList: View {
     @State private var pageHits: [PageText.Hit] = []
 
     private var groups: [(Date, [HistoryEntry])] {
-        let list = query.isEmpty ? Array(history.entries.prefix(3000)) : (results ?? [])
+        let list = query.isEmpty ? history.entries : (results ?? [])
         let cal = Calendar.current
         let grouped = Dictionary(grouping: list) { cal.startOfDay(for: $0.date) }
         return grouped.sorted { $0.key > $1.key }.map { ($0.key, $0.value.sorted { $0.date > $1.date }) }
@@ -94,6 +94,12 @@ struct HistoryList: View {
                         .tag(e.id)
                     }
                 }
+            }
+            if query.isEmpty && history.hasOlder {
+                Button("Show Older History") { history.loadOlder() }
+                    .buttonStyle(.link)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
             }
         }
         .overlay {
@@ -134,7 +140,9 @@ struct HistoryList: View {
     }
 
     private func urls(_ ids: Set<UUID>) -> [URL] {
-        history.entries.filter { ids.contains($0.id) }.map(\.url)
+        // Search results can include older entries that aren't loaded.
+        var seen = Set<UUID>()
+        return ((results ?? []) + history.entries).filter { ids.contains($0.id) && seen.insert($0.id).inserted }.map(\.url)
     }
 
     private func copy(_ urls: [URL]) {

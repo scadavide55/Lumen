@@ -3,7 +3,7 @@ import SQLite3
 
 /// History on disk as SQLite, so a visit writes one row instead of rewriting the whole history.
 /// Writes go through a serial queue in the background; `flush` waits for them.
-final class HistoryDB {
+final class HistoryDB: @unchecked Sendable {
     private var db: OpaquePointer?
     private let queue = DispatchQueue(label: "lumen.history", qos: .utility)
     private static let transient = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
@@ -22,10 +22,46 @@ final class HistoryDB {
 
     deinit { sqlite3_close(db) }
 
-    /// Every entry, newest first.
-    func load() -> [HistoryEntry] {
+    /// Newest first: a page of `limit` entries after the first `offset` ones.
+    func load(limit: Int = .max, offset: Int = 0) -> [HistoryEntry] {
+        rows("SELECT id, url, title, date, visits FROM visits ORDER BY date DESC LIMIT ? OFFSET ?", [min(limit, Int(Int32.max)), offset])
+    }
+
+    /// How many entries there are.
+    func count() -> Int {
+        queue.sync {
+            var n = 0
+            query("SELECT count(*) FROM visits", []) { n = Int(sqlite3_column_int64($0, 0)) }
+            return n
+        }
+    }
+
+    /// The entry for an address, if there is one.
+    func entry(for url: URL) -> HistoryEntry? {
+        queue.sync { rows("SELECT id, url, title, date, visits FROM visits WHERE url = ?", [url.absoluteString]).first }
+    }
+
+    func entries(_ ids: Set<UUID>) -> [HistoryEntry] {
+        guard !ids.isEmpty else { return [] }
+        return queue.sync { ids.flatMap { rows("SELECT id, url, title, date, visits FROM visits WHERE id = ?", [$0.uuidString]) } }
+    }
+
+    /// Entries older than `date` whose title or address has every word, newest first: the part of the history that
+    /// isn't kept in memory.
+    func search(_ words: [String], before date: Date, limit: Int) -> [HistoryEntry] {
+        guard !words.isEmpty else { return [] }
+        let like = words.map { _ in "(title || ' ' || url) LIKE ? ESCAPE '\\'" }.joined(separator: " AND ")
+        let patterns = words.map { "%" + $0.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "%", with: "\\%")
+            .replacingOccurrences(of: "_", with: "\\_") + "%" }
+        return queue.sync {
+            rows("SELECT id, url, title, date, visits FROM visits WHERE date < ? AND \(like) ORDER BY date DESC LIMIT ?",
+                 [date.timeIntervalSince1970] + patterns + [limit])
+        }
+    }
+
+    private func rows(_ sql: String, _ values: [Any]) -> [HistoryEntry] {
         var out: [HistoryEntry] = []
-        query("SELECT id, url, title, date, visits FROM visits ORDER BY date DESC", []) { s in
+        query(sql, values) { s in
             guard let idText = Self.text(s, 0), let id = UUID(uuidString: idText),
                   let urlText = Self.text(s, 1), let url = URL(string: urlText) else { return }
             out.append(HistoryEntry(id: id, url: url, title: Self.text(s, 2) ?? "",

@@ -913,7 +913,8 @@ final class AssistantChat {
             let result: AIClient.Result
             do {
                 result = try await AIClient.stream(provider: provider, base: base, key: key, model: model,
-                                                   transcript: transcript, tools: useTools, web: web, control: control, quick: quick,
+                                                   transcript: Self.fitted(transcript, budget: Self.contextBudget(provider)),
+                                                   tools: useTools, web: web, control: control, quick: quick,
                                                    onText: { [weak self] delta in self?.appendToReply(delta) },
                                                    onServerTool: { [weak self] name, input in self?.noteServerTool(name, input) })
                 showPendingText()
@@ -1056,6 +1057,71 @@ final class AssistantChat {
         let (output, _) = await runTool(AIClient.ToolCall(id: UUID().uuidString, name: name, arguments: args ?? [:]))
         transcript.append(["role": "tool", "content": output])
         return AppleModel.shorten(output)
+    }
+
+    // MARK: Fitting the conversation
+
+    /// Roughly how much conversation (in bytes of JSON, pictures included) a request carries: models on this Mac take
+    /// far less than the big hosted ones.
+    static func contextBudget(_ provider: AIProvider) -> Int {
+        switch provider {
+        case .ollama, .lmStudio, .apple: 32_000
+        case .deepSeek: 250_000
+        default: 600_000
+        }
+    }
+
+    /// Keeps a long conversation within the model's reach. The latest request and everything since (its tool rounds)
+    /// stay whole; older pages, tool results and pictures are shortened first, and if that isn't enough the oldest
+    /// turns go. The chat on screen keeps everything.
+    static func fitted(_ transcript: [[String: Any]], budget: Int) -> [[String: Any]] {
+        func size(_ m: [String: Any]) -> Int { (try? JSONSerialization.data(withJSONObject: m))?.count ?? 0 }
+        var out = transcript
+        var total = out.reduce(0) { $0 + size($1) }
+        guard total > budget, let current = out.lastIndex(where: isRequest) else { return out }
+        var protect = current
+        for i in 0..<protect where total > budget {
+            let before = size(out[i])
+            out[i] = shortened(out[i])
+            total += size(out[i]) - before
+        }
+        // Whole turns go, oldest first, so a tool call is never left without its result.
+        while total > budget, let next = out.indices.dropFirst().first(where: { $0 < protect && isRequest(out[$0]) }) {
+            total -= out[0..<next].reduce(0) { $0 + size($1) }
+            out.removeSubrange(0..<next)
+            protect -= next
+        }
+        return out
+    }
+
+    /// A message the user typed, as opposed to a tool's result sent back in a user message.
+    private static func isRequest(_ m: [String: Any]) -> Bool {
+        guard m["role"] as? String == "user" else { return false }
+        if m["content"] is String { return true }
+        let blocks = m["content"] as? [[String: Any]] ?? []
+        return !blocks.contains { $0["type"] as? String == "tool_result" }
+    }
+
+    private static let shortNote = "\n[Shortened to fit the model's limit.]"
+
+    private static func shortened(_ m: [String: Any]) -> [String: Any] {
+        func cut(_ s: String) -> String { s.count > 1500 ? String(s.prefix(1500)) + shortNote : s }
+        func block(_ b: [String: Any]) -> [String: Any] {
+            var b = b
+            switch b["type"] as? String {
+            case "image", "image_url": return ["type": "text", "text": "[A picture was here.]"]
+            case "text": if let t = b["text"] as? String { b["text"] = cut(t) }
+            case "tool_result":
+                if let t = b["content"] as? String { b["content"] = cut(t) }
+                if let parts = b["content"] as? [[String: Any]] { b["content"] = parts.map(block) }
+            default: break
+            }
+            return b
+        }
+        var m = m
+        if let s = m["content"] as? String { m["content"] = cut(s) }
+        if let parts = m["content"] as? [[String: Any]] { m["content"] = parts.map(block) }
+        return m
     }
 
     enum Approval { case allow, allowPage, deny }
