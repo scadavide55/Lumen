@@ -207,22 +207,28 @@ enum PageControl {
         }
     }
 
-    /// Whether clicking an element (or pressing Return in it) could send, buy, delete or publish something: a form's
-    /// submit button, or a control whose words say so. Those wait for the user's OK, whatever the model was told.
+    /// How much a click could change: a plain link only goes somewhere (`.link`); a submit button, or a control whose
+    /// words say it sends, buys, deletes or publishes, is `.risky`; anything else is `.unknown`, since the page decides
+    /// what a button does and its label can say anything ("Continue").
+    enum Risk: Int { case link, unknown, risky }
+
     @MainActor
-    static func risk(of ref: Any?, submitting: Bool, in webView: WKWebView) async -> (label: String, risky: Bool) {
+    static func risk(of ref: Any?, submitting: Bool, in webView: WKWebView) async -> (label: String, risk: Risk) {
         let js = prelude + """
         const el = byRef(args.ref);
-        if (!el) return ['', false];
+        if (!el) return ['', 1];
         const words = /\\b(send|buy|purchase|pay|order|checkout|check out|delete|remove|confirm|submit|publish|post|share|subscribe|unsubscribe|transfer|donate|book|reserve|sign out|log out|invia|acquista|compra|paga|ordina|elimina|cancella|rimuovi|conferma|pubblica|condividi|iscriviti|trasferisci|dona|prenota|esci|envoyer|acheter|payer|commander|supprimer|confirmer|publier|partager|réserver|donner)\\b/i;
         const text = [label(el), el.getAttribute('aria-label') || '', el.value || '', el.title || ''].join(' ');
         const submit = (el.tagName === 'BUTTON' && (el.getAttribute('type') || 'submit') === 'submit' && !!el.form)
-          || (el.tagName === 'INPUT' && ['submit', 'image'].includes(el.type));
-        return [label(el), submit || (args.submitting && !!el.form) || words.test(text)];
+          || (el.tagName === 'INPUT' && ['submit', 'image'].includes(el.type)) || (args.submitting && !!el.form);
+        if (submit || words.test(text)) return [label(el), 2];
+        const link = el.closest('a[href]');
+        const plain = link && /^https?:/i.test(link.href) && !link.closest('form') && link.getAttribute('role') !== 'button';
+        return [label(el), plain && !args.submitting ? 0 : 1];
         """
         let r = try? await webView.callAsyncJavaScript(js, arguments: ["args": ["ref": ref ?? 0, "submitting": submitting]], in: nil, contentWorld: world)
         let pair = r as? [Any] ?? []
-        return ((pair.first as? String) ?? "", (pair.last as? Bool) ?? true)
+        return ((pair.first as? String) ?? "", Risk(rawValue: (pair.last as? Int) ?? 2) ?? .risky)
     }
 
     /// Short words for the activity line, such as "Clicking “Sign in”".

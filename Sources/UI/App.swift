@@ -145,6 +145,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         AppRename.afterQuit()
         History.shared.flush()
         PageText.shared.flush()
+        StoredFiles.flushAll()
         guard Settings.shared.clearOnQuit else { return .terminateNow }
         DataCleaner.clear(range: .all, history: true, cookies: true, cache: true) {
             sender.reply(toApplicationShouldTerminate: true)
@@ -166,7 +167,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Shortcuts that menus can't express: ⌘= next to ⌘+, ⇧⌘] / ⇧⌘[ and ⌥⌘→ / ⌥⌘← to switch tabs.
     private static func handleExtraShortcut(_ event: NSEvent) -> Bool {
         let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask).subtracting([.capsLock, .numericPad, .function])
+        // Esc closes a link preview, wherever the keyboard is; ⌘↩ keeps it as a tab.
+        if let b = WindowRegistry.shared.lastFocused, b.preview != nil, b.window?.isKeyWindow == true {
+            if flags.isEmpty, event.keyCode == 53 { b.closePreview(); return true }
+            if flags == [.command], event.keyCode == 36 { b.keepPreview(); return true }
+        }
         guard flags.contains(.command), let b = WindowRegistry.shared.lastFocused, b.window?.isKeyWindow == true else { return false }
+        // ⌃⌥⌘1 to ⌃⌥⌘9 run the automation with that shortcut.
+        if flags == [.control, .option, .command], let n = Int(event.charactersIgnoringModifiers ?? ""),
+           let a = Settings.shared.automations.first(where: { $0.shortcut == n }) {
+            Task { @MainActor in await AutomationRunner.run(a, in: b) }
+            return true
+        }
         switch (flags, event.keyCode) {
         case ([.command], 24) where event.charactersIgnoringModifiers == "=":
             b.current?.zoom(1)
@@ -338,16 +350,24 @@ struct LumenCommands: Commands {
                 }
             }
             Divider()
+            if let b, !s.automations.isEmpty {
+                Menu("Automations") {
+                    ForEach(s.automations) { a in
+                        Button(a.name) { Task { @MainActor in await AutomationRunner.run(a, in: b) } }
+                    }
+                }
+                Divider()
+            }
             Button("New Space…") { if let b { SpaceActions.askNew(in: b) } }.disabled(b == nil || b?.isPrivate == true)
             Button("Next Space") { b?.switchSpace(by: 1) }
                 .keyboardShortcut(.rightArrow, modifiers: [.control, .command])
-                .disabled(b == nil || b?.isPrivate == true || Spaces.shared.items.isEmpty)
+                .disabled(b == nil || b?.isPrivate == true || Spaces.shared.items(for: b?.profileID).isEmpty)
             Button("Previous Space") { b?.switchSpace(by: -1) }
                 .keyboardShortcut(.leftArrow, modifiers: [.control, .command])
-                .disabled(b == nil || b?.isPrivate == true || Spaces.shared.items.isEmpty)
-            if let b, !b.isPrivate, !Spaces.shared.items.isEmpty {
+                .disabled(b == nil || b?.isPrivate == true || Spaces.shared.items(for: b?.profileID).isEmpty)
+            if let b, !b.isPrivate, !Spaces.shared.items(for: b.profileID).isEmpty {
                 Menu("Spaces") {
-                    ForEach(Spaces.shared.items) { sp in
+                    ForEach(Spaces.shared.items(for: b.profileID)) { sp in
                         Toggle(sp.name, isOn: Binding(get: { b.spaceID == sp.id }, set: { _ in b.switchSpace(to: sp.id) }))
                     }
                 }

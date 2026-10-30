@@ -203,6 +203,7 @@ struct CommandPalette: View {
     }
 
     private func navigate(_ url: URL, newTab: Bool) {
+        if OpeningRules.route(url, from: b) { return }
         if newTab || b.current == nil {
             b.newTab(url: url)
         } else {
@@ -394,8 +395,13 @@ struct CommandPalette: View {
                 s.tabLayout = s.tabLayout == .vertical ? .horizontal : .vertical
             },
         ]
+        for a in s.automations where !a.steps.isEmpty {
+            list.append(PaletteItem(id: "auto" + a.id.uuidString, icon: .symbol("bolt"), title: a.name,
+                                    subtitle: a.shortcutLabel ?? a.steps.map(\.label).joined(separator: " · "), badge: "Automation",
+                                    run: { _ in Task { @MainActor in await AutomationRunner.run(a, in: b) } }))
+        }
         if !b.isPrivate {
-            for space in Spaces.shared.items where space.id != b.spaceID {
+            for space in Spaces.shared.items(for: b.profileID) where space.id != b.spaceID {
                 list.append(PaletteItem(id: "space" + space.id.uuidString, icon: .symbol(space.symbol),
                                         title: String(format: L("Switch to %@"), space.name),
                                         subtitle: space.note.isEmpty ? L("Space") : space.note, badge: "Command",

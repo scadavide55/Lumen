@@ -79,10 +79,17 @@ final class HistoryDB {
 
     private func exec(_ sql: String) { sqlite3_exec(db, sql, nil, nil, nil) }
 
+    /// Runs the writes as one: if any of them fails, none of them is kept.
     private func transaction(_ body: () -> Void) {
+        failed = false
         exec("BEGIN")
         body()
-        exec("COMMIT")
+        if failed {
+            exec("ROLLBACK")
+            NSLog("Tacet: a database write failed and was undone: %@", String(cString: sqlite3_errmsg(db)))
+        } else {
+            exec("COMMIT")
+        }
     }
 
     private func bind(_ stmt: OpaquePointer, _ values: [Any]) {
@@ -97,12 +104,15 @@ final class HistoryDB {
         }
     }
 
+    /// Set when a write in the current transaction fails.
+    private var failed = false
+
     private func run(_ sql: String, _ values: [Any]) {
         var stmt: OpaquePointer?
-        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK, let stmt else { return }
+        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK, let stmt else { failed = true; return }
         defer { sqlite3_finalize(stmt) }
         bind(stmt, values)
-        sqlite3_step(stmt)
+        if sqlite3_step(stmt) != SQLITE_DONE { failed = true }
     }
 
     private func query(_ sql: String, _ values: [Any], _ row: (OpaquePointer) -> Void) {

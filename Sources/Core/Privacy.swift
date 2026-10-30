@@ -166,7 +166,14 @@ enum HTTPSUpgrade {
         return c.url
     }
 
-    /// Errors that mean the host does not really speak HTTPS.
+    /// Certificate problems: the connection may be tampered with, so these never fall back to HTTP on their own.
+    static func isCertificateError(_ error: NSError) -> Bool {
+        error.domain == NSURLErrorDomain && [NSURLErrorServerCertificateHasBadDate, NSURLErrorServerCertificateUntrusted,
+                                             NSURLErrorServerCertificateHasUnknownRoot, NSURLErrorServerCertificateNotYetValid,
+                                             NSURLErrorClientCertificateRejected].contains(error.code)
+    }
+
+    /// Errors that mean the host does not really speak HTTPS, or might not.
     static func shouldFallBack(_ error: NSError) -> Bool {
         guard error.domain == NSURLErrorDomain else { return false }
         return [NSURLErrorSecureConnectionFailed, NSURLErrorServerCertificateHasBadDate,

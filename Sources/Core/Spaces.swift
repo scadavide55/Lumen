@@ -13,6 +13,9 @@ struct Space: Codable, Identifiable {
     var color = 0
     /// A line to yourself, such as where to pick up.
     var note = ""
+    /// The profile it belongs to (nil: the main one). Its tabs only ever open in that profile's windows, so sign-ins
+    /// and site data never cross profiles.
+    var profile: UUID?
     var saved: WindowSnapshot?
 
     var tint: Color { TabGroup.colors[color % TabGroup.colors.count] }
@@ -34,9 +37,13 @@ final class Spaces {
 
     func space(_ id: UUID?) -> Space? { id.flatMap { id in items.first { $0.id == id } } }
 
+    /// The Spaces of one profile, in order.
+    func items(for profile: UUID?) -> [Space] { items.filter { $0.profile == profile } }
+
     @discardableResult
-    func add(_ name: String) -> Space {
-        let space = Space(name: name, symbol: Space.symbols[items.count % Space.symbols.count], color: items.count)
+    func add(_ name: String, profile: UUID?) -> Space {
+        let n = items(for: profile).count
+        let space = Space(name: name, symbol: Space.symbols[n % Space.symbols.count], color: n, profile: profile)
         items.append(space)
         persist()
         return space

@@ -11,6 +11,10 @@ enum Scripts {
 
         c.addUserScript(WKUserScript(source: bridge, injectionTime: .atDocumentEnd, forMainFrameOnly: true, in: .defaultClient))
         c.addUserScript(WKUserScript(source: logins, injectionTime: .atDocumentEnd, forMainFrameOnly: true, in: .defaultClient))
+        c.addUserScript(WKUserScript(source: highlights, injectionTime: .atDocumentEnd, forMainFrameOnly: true, in: .defaultClient))
+        if s.recoverDrafts {
+            c.addUserScript(WKUserScript(source: drafts, injectionTime: .atDocumentEnd, forMainFrameOnly: true, in: .defaultClient))
+        }
         if s.gpc {
             c.addUserScript(WKUserScript(source: gpc, injectionTime: .atDocumentStart, forMainFrameOnly: false, in: .page))
         }
@@ -93,6 +97,15 @@ enum Scripts {
         setHover(a && a.href && !a.href.startsWith('javascript:') ? a.href : null);
       }, true);
       document.documentElement.addEventListener('mouseleave', () => setHover(null));
+      // ⌥-click a link: it opens in a preview over the page instead of leaving it.
+      document.addEventListener('click', (e) => {
+        if (!e.altKey || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+        const a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+        if (!a || !/^https?:/.test(a.href)) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        post({ type: 'preview', url: a.href });
+      }, true);
       window.addEventListener('blur', () => setHover(null));
 
       // Whether the page (or the panel last scrolled) is at its top, for pull to refresh.
@@ -124,6 +137,162 @@ enum Scripts {
         document.querySelectorAll('video, audio').forEach(v => { v.muted = m; });
         media();
       };
+    })();
+    """#
+
+    // MARK: Drafts
+
+    /// Tells Tacet what you're writing in a field, a moment after you stop typing, so it can be put back after a reload.
+    /// Only text of some length, never in password, card or one-time-code fields; a sent form or an emptied field
+    /// clears it.
+    static let drafts = #"""
+    (() => {
+      if (window.__tacetDrafts) return;
+      const post = (m) => { try { webkit.messageHandlers.lumen.postMessage(m); } catch (e) {} };
+      const fields = () => [...document.querySelectorAll('textarea, input, [contenteditable=""], [contenteditable="true"]')];
+      const fieldOf = (t) => {
+        let el = null;
+        if (t instanceof HTMLTextAreaElement) el = t;
+        else if (t instanceof HTMLInputElement && /^(text|email|url|)$/.test(t.type)) el = t;
+        else if (t && t.isContentEditable) { el = t; while (el.parentElement && el.parentElement.isContentEditable) el = el.parentElement; }
+        if (!el) return null;
+        if (el.type === 'password' || /cc-|password|one-time-code/.test(el.getAttribute('autocomplete') || '')) return null;
+        const key = el.name ? 'name:' + el.name : el.id ? 'id:' + el.id : el.tagName.toLowerCase() + ':' + fields().indexOf(el);
+        const label = (el.labels && el.labels[0] && el.labels[0].textContent) || el.getAttribute('aria-label')
+          || el.placeholder || el.getAttribute('data-placeholder') || '';
+        return { el, key, label: label.trim().slice(0, 80) };
+      };
+      const valueOf = (el) => (el.isContentEditable ? el.innerText : el.value) || '';
+      const report = (f) => {
+        const text = valueOf(f.el);
+        if (text.trim().length >= 40) post({ type: 'draft', key: f.key, label: f.label, text: text.slice(0, 20000) });
+        else if (!text.trim()) post({ type: 'draftDone', key: f.key });
+      };
+      const timers = new Map();
+      document.addEventListener('input', (e) => {
+        const f = fieldOf(e.composedPath ? e.composedPath()[0] : e.target);
+        if (!f) return;
+        clearTimeout(timers.get(f.key));
+        timers.set(f.key, setTimeout(() => report(f), 1200));
+      }, true);
+      // Chats send with Return and empty the box without an input event: check it a moment later.
+      document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' || e.shiftKey) return;
+        const f = fieldOf(e.composedPath ? e.composedPath()[0] : e.target);
+        if (f) setTimeout(() => { if (!valueOf(f.el).trim()) post({ type: 'draftDone', key: f.key }); }, 1500);
+      }, true);
+      document.addEventListener('submit', (e) => {
+        for (const el of e.target.querySelectorAll('textarea, input, [contenteditable]')) { const f = fieldOf(el); if (f) post({ type: 'draftDone', key: f.key }); }
+      }, true);
+      window.__tacetDrafts = {
+        /// Puts the text back in its field if the field is there and empty: 'ok', 'busy' or 'missing'.
+        restore(key, text) {
+          const el = fields().find((x) => { const f = fieldOf(x); return f && f.key === key; });
+          if (!el) return 'missing';
+          if (valueOf(el).trim()) return 'busy';
+          el.focus();
+          if (el.isContentEditable) {
+            document.execCommand('insertText', false, text);
+          } else {
+            const setter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), 'value')?.set;
+            setter ? setter.call(el, text) : (el.value = text);
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+          return 'ok';
+        },
+      };
+    })();
+    """#
+
+    // MARK: Highlights
+
+    /// Marks passages on the page. Each is found by its words and the characters around them, in the page's text as
+    /// written (scripts and styles left out), and wrapped piece by piece so it can span links, bold and paragraphs.
+    static let highlights = #"""
+    (() => {
+      if (window.__tacetHL) return;
+      const post = (m) => { try { webkit.messageHandlers.lumen.postMessage(m); } catch (e) {} };
+      const index = () => {
+        const walker = document.createTreeWalker(document.body || document.documentElement, NodeFilter.SHOW_TEXT, {
+          acceptNode: (n) => n.parentElement && !n.parentElement.closest('script, style, noscript, textarea, title') ? 1 : 2,
+        });
+        const nodes = [], starts = [];
+        let text = '', n;
+        while ((n = walker.nextNode())) { nodes.push(n); starts.push(text.length); text += n.data; }
+        return { nodes, starts, text };
+      };
+      const wrap = (idx, start, end, h) => {
+        let count = 0;
+        for (let i = 0; i < idx.nodes.length; i++) {
+          const ns = idx.starts[i], ne = ns + idx.nodes[i].data.length;
+          if (ne <= start || ns >= end) continue;
+          let node = idx.nodes[i];
+          const a = Math.max(start, ns) - ns, b = Math.min(end, ne) - ns;
+          if (!node.data.slice(a, b).trim()) continue;
+          if (b < node.data.length) node.splitText(b);
+          if (a > 0) node = node.splitText(a);
+          const m = document.createElement('mark');
+          m.className = 'tacet-hl';
+          m.dataset.tacetHl = h.id;
+          m.style.cssText = 'background:' + h.css + ' !important; color: inherit !important; border-radius: 2px; padding: 0; box-decoration-break: clone';
+          if (h.note) m.title = h.note;
+          node.parentNode.insertBefore(m, node);
+          m.appendChild(node);
+          count++;
+        }
+        return count;
+      };
+      const marked = (id) => document.querySelector('mark[data-tacet-hl="' + id + '"]');
+
+      window.__tacetHL = {
+        /// The selection's words and surroundings, marked at once with the id and colour given.
+        capture(h) {
+          const sel = getSelection();
+          if (!sel || sel.isCollapsed || !sel.rangeCount) return null;
+          const r = sel.getRangeAt(0), idx = index();
+          let start = -1, end = -1;
+          idx.nodes.forEach((n, i) => {
+            if (!r.intersectsNode(n)) return;
+            if (start < 0) start = idx.starts[i] + (n === r.startContainer ? r.startOffset : 0);
+            end = idx.starts[i] + (n === r.endContainer ? r.endOffset : n.data.length);
+          });
+          if (start < 0 || end <= start || !idx.text.slice(start, end).trim()) return null;
+          const out = { quote: idx.text.slice(start, end), prefix: idx.text.slice(Math.max(0, start - 32), start), suffix: idx.text.slice(end, end + 32) };
+          wrap(idx, start, end, h);
+          sel.removeAllRanges();
+          return out;
+        },
+        /// Puts saved highlights back; returns how many were found.
+        apply(list) {
+          let found = 0;
+          for (const h of list) {
+            if (marked(h.id)) { found++; continue; }
+            const idx = index();
+            let at = idx.text.indexOf(h.prefix + h.quote + h.suffix);
+            if (at >= 0) at += h.prefix.length; else at = idx.text.indexOf(h.quote);
+            if (at >= 0 && wrap(idx, at, at + h.quote.length, h)) found++;
+          }
+          return found;
+        },
+        remove(id) {
+          document.querySelectorAll('mark[data-tacet-hl="' + id + '"]').forEach((m) => {
+            const parent = m.parentNode;
+            while (m.firstChild) parent.insertBefore(m.firstChild, m);
+            parent.removeChild(m);
+            parent.normalize();
+          });
+        },
+        note(id, text) { document.querySelectorAll('mark[data-tacet-hl="' + id + '"]').forEach((m) => { m.title = text; }); },
+      };
+
+      // Which highlight the pointer is on, for the right-click menu.
+      let hovered = null;
+      document.addEventListener('mouseover', (e) => {
+        const m = e.target && e.target.closest ? e.target.closest('mark.tacet-hl') : null;
+        const id = m ? m.dataset.tacetHl : null;
+        if (id !== hovered) { hovered = id; post({ type: 'hlHover', id }); }
+      }, true);
     })();
     """#
 
@@ -275,7 +444,7 @@ enum Scripts {
 
     // MARK: HTTPS-only interstitial
 
-    static func httpsOnlyPage(url: URL) -> String {
+    static func httpsOnlyPage(url: URL, certificate: Bool = false) -> String {
         func esc(_ s: String) -> String {
             s.replacingOccurrences(of: "&", with: "&amp;").replacingOccurrences(of: "<", with: "&lt;").replacingOccurrences(of: "\"", with: "&quot;")
         }
@@ -294,8 +463,9 @@ enum Scripts {
         .back { background: #5e5ce6; color: white; }
         .go { color: #d9534f; }
         </style></head><body><div class="box"><div class="icon">🔒</div>
-        <h1>\(esc(L("This site doesn't support a secure connection")))</h1>
-        <p>\(esc(String(format: L("HTTPS-only mode is on. %@ only works over HTTP, so anyone on your network could see or change what you send."), host)))</p>
+        <h1>\(esc(certificate ? L("This site's secure connection has a problem") : L("This site doesn't support a secure connection")))</h1>
+        <p>\(esc(certificate ? String(format: L("The certificate %@ presented isn't valid. Someone on your network could be in the way. Continuing opens the site over plain HTTP, where what you send can be read."), host)
+            : String(format: L("HTTPS-only mode is on. %@ only works over HTTP, so anyone on your network could see or change what you send."), host)))</p>
         <a class="back" href="javascript:history.back()">\(esc(L("Go Back")))</a>
         <a class="go" href="lumen-continue-http:\(esc(url.absoluteString))">\(esc(L("Continue to Site")))</a>
         </div></body></html>

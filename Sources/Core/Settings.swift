@@ -369,6 +369,12 @@ final class Settings: Observable {
     @Pref("alwaysShowTitles") var alwaysShowTitles = false
     @Pref("pullToRefresh") var pullToRefresh = true
     @Pref("profiles") var profiles: [Profile] = []
+    /// Keep long text typed into pages until it's sent, to put it back after a reload: see Drafts.
+    @Pref("recoverDrafts") var recoverDrafts = true
+    /// Saved lists of steps: see Automation.
+    @Pref("automations") var automations: [Automation] = []
+    /// Where links to particular sites open: see OpeningRules.
+    @Pref("openingRules") var openingRules: [OpeningRule] = []
     /// With profiles set up, the first window asks which one to use, as Chrome does.
     @Pref("askProfile") var askProfileAtLaunch = true
     @Pref("onboarded") var onboarded = false
@@ -514,6 +520,7 @@ final class Settings: Observable {
         if key == "appIcon" { AppIcon.applyChosen(force: true) }
         if key == "rememberPageText" && !rememberPageText { PageText.shared.clear() }
         if key == "pageTextDays" { PageText.shared.prune(keepingDays: pageTextDays) }
+        if key == "recoverDrafts" && !recoverDrafts { Drafts.shared.clear() }
         NotificationCenter.default.post(name: .settingChanged, object: self, userInfo: ["key": key])
     }
 

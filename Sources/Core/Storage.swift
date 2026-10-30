@@ -24,24 +24,58 @@ enum Paths {
     }
 }
 
+/// Every StoredFile, so Tacet can write all pending changes before it quits.
+enum StoredFiles {
+    fileprivate static let all = NSHashTable<AnyObject>.weakObjects()
+    fileprivate static let lock = NSLock()
+
+    /// Writes every change still waiting for its delay. Called when Tacet quits, so nothing made just before is lost.
+    static func flushAll() {
+        lock.lock()
+        let files = all.allObjects.compactMap { $0 as? Flushable }
+        lock.unlock()
+        files.forEach { $0.flush() }
+    }
+}
+
+protocol Flushable: AnyObject { func flush() }
+
 /// A document on disk, as JSON or a binary property list, with debounced background writes.
-final class StoredFile<T: Codable> {
+final class StoredFile<T: Codable>: Flushable {
     enum Format { case json, binaryPlist }
 
     let url: URL
     private let format: Format
     private var pending: DispatchWorkItem?
+    /// The write waiting for its delay, run at once by `flush`.
+    private var pendingWrite: (() -> Void)?
     private let queue = DispatchQueue(label: "lumen.storage", qos: .utility)
 
     init(_ name: String, format: Format = .json) {
         url = Paths.file(name)
         self.format = format
+        register()
     }
 
     /// A file anywhere, for the tests.
     init(at url: URL, format: Format = .json) {
         self.url = url
         self.format = format
+        register()
+    }
+
+    private func register() {
+        StoredFiles.lock.lock()
+        StoredFiles.all.add(self)
+        StoredFiles.lock.unlock()
+    }
+
+    /// Writes a change still waiting for its delay, now.
+    func flush() {
+        pending?.cancel()
+        pending = nil
+        if let write = pendingWrite { queue.sync(execute: write) }
+        pendingWrite = nil
     }
 
     func load() -> T? {
@@ -58,7 +92,9 @@ final class StoredFile<T: Codable> {
 
     func save(_ value: T, delay: TimeInterval = 1) {
         pending?.cancel()
-        let item = DispatchWorkItem { [url, format] in Self.write(value, to: url, format: format) }
+        let write = { [url, format] in Self.write(value, to: url, format: format) }
+        pendingWrite = write
+        let item = DispatchWorkItem(block: write)
         pending = item
         queue.asyncAfter(deadline: .now() + delay, execute: item)
     }
@@ -66,11 +102,13 @@ final class StoredFile<T: Codable> {
     /// Waits for a write already under way, so an older value can never land after this one.
     func saveNow(_ value: T) {
         pending?.cancel()
+        pendingWrite = nil
         queue.sync { Self.write(value, to: url, format: format) }
     }
 
     func delete() {
         pending?.cancel()
+        pendingWrite = nil
         queue.sync { try? FileManager.default.removeItem(at: url) }
     }
 
@@ -463,7 +501,25 @@ final class WindowRegistry {
         return pendingURLs
     }
 
-    /// Opens URLs in the frontmost normal window. Returns false when no window exists yet.
+    /// Opens a window; set by the first window's view, which can open windows.
+    var openWindow: ((_ id: String, _ profile: UUID?) -> Void)?
+    private var routed: [(url: URL, privately: Bool, profile: UUID?)] = []
+
+    /// Opens a new private or profile window for a link an opening rule sends there.
+    func openRouted(_ url: URL, privately: Bool, profile: UUID?) {
+        routed.append((url, privately, profile))
+        openWindow?(privately ? "private" : (profile == nil ? "main" : "profile"), profile)
+    }
+
+    /// The links waiting for a window like this one.
+    func takeRouted(privately: Bool, profile: UUID?) -> [URL] {
+        let mine = routed.filter { $0.privately == privately && (privately || $0.profile == profile) }
+        routed.removeAll { $0.privately == privately && (privately || $0.profile == profile) }
+        return mine.map(\.url)
+    }
+
+    /// Opens URLs in the frontmost normal window, or where an opening rule sends them. Returns false when no window
+    /// exists yet.
     @discardableResult
     func open(_ urls: [URL]) -> Bool {
         let target = (lastFocused.flatMap { $0.isPrivate ? nil : $0 }) ?? browsers.first { !$0.isPrivate }
@@ -471,7 +527,7 @@ final class WindowRegistry {
             pendingURLs += urls
             return false
         }
-        for u in urls { b.newTab(url: u) }
+        for u in urls where !OpeningRules.route(u, from: b) { b.newTab(url: u) }
         b.window?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         return true

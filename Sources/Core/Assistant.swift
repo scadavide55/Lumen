@@ -676,6 +676,8 @@ final class AssistantChat {
     var draft = ""
     var images: [ImageAttachment] = []
     private(set) var busy = false
+    /// A page where the user allowed the assistant's clicks, until it changes or a new request starts.
+    @ObservationIgnored private var allowedPage: (tab: UUID, url: URL?)?
 
     @ObservationIgnored weak var browser: BrowserState?
     /// The conversation in the provider's own format, including tool calls and their results.
@@ -812,6 +814,7 @@ final class AssistantChat {
     }
 
     func send() {
+        allowedPage = nil
         let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !busy, !text.isEmpty || !images.isEmpty else { return }
         let s = Settings.shared
@@ -857,6 +860,7 @@ final class AssistantChat {
 
     /// Saves this chat, except in private windows.
     func saveToHistory() {
+        showPendingText()
         guard !quick, let browser, !browser.isPrivate, let first = messages.first(where: { $0.role == .user }),
               let provider = transcriptProvider else { return }
         let saved = messages.map { m in
@@ -912,6 +916,7 @@ final class AssistantChat {
                                                    transcript: transcript, tools: useTools, web: web, control: control, quick: quick,
                                                    onText: { [weak self] delta in self?.appendToReply(delta) },
                                                    onServerTool: { [weak self] name, input in self?.noteServerTool(name, input) })
+                showPendingText()
             } catch AIClient.Failure.toolsUnsupported where useTools {
                 useTools = false
                 continue
@@ -1032,6 +1037,7 @@ final class AssistantChat {
                 reply += delta
                 self?.appendToReply(delta)
             }
+            showPendingText()
             transcript.append(["role": "assistant", "content": reply])
         } catch is CancellationError {
             appleSession = nil
@@ -1052,19 +1058,31 @@ final class AssistantChat {
         return AppleModel.shorten(output)
     }
 
-    /// Asks before a click that could send, buy, delete or publish something.
+    enum Approval { case allow, allowPage, deny }
+
+    /// Asks before a click Tacet can't tell is harmless. "Allow on This Page" covers the other controls on the same
+    /// page until it changes; never sending, buying, deleting or publishing.
     @MainActor
-    private func confirmPageAction(_ label: String, on tab: Tab) async -> Bool {
+    private func confirmPageAction(_ label: String, on tab: Tab, risky: Bool) async -> Approval {
         let alert = NSAlert()
         alert.messageText = String(format: L("Tacet Assistant wants to click “%@” on %@."),
                                    label.isEmpty ? L("a button") : label, InputResolver.displayHost(tab.url))
-        alert.informativeText = L("This could send, buy, delete or publish something. Allow it only if it's what you asked for.")
+        alert.informativeText = risky ? L("This could send, buy, delete or publish something. Allow it only if it's what you asked for.")
+            : L("Tacet can't tell what this button does on this site. Allow it if it's part of what you asked for.")
         alert.addButton(withTitle: L("Allow"))
+        if !risky { alert.addButton(withTitle: L("Allow on This Page")) }
         alert.addButton(withTitle: L("Don't Allow"))
         alert.buttons.last?.keyEquivalent = "\u{1b}"
-        guard let window = tab.webView?.window ?? NSApp.keyWindow else { return alert.runModal() == .alertFirstButtonReturn }
+        let pick: (NSApplication.ModalResponse) -> Approval = { r in
+            switch r {
+            case .alertFirstButtonReturn: .allow
+            case .alertSecondButtonReturn where !risky: .allowPage
+            default: .deny
+            }
+        }
+        guard let window = tab.webView?.window ?? NSApp.keyWindow else { return pick(alert.runModal()) }
         return await withCheckedContinuation { done in
-            alert.beginSheetModal(for: window) { done.resume(returning: $0 == .alertFirstButtonReturn) }
+            alert.beginSheetModal(for: window) { done.resume(returning: pick($0)) }
         }
     }
 
@@ -1206,11 +1224,16 @@ final class AssistantChat {
             }
             // Sending, buying, deleting or publishing needs the user's OK here, not only the model's word for it.
             if action == .click || action == .type && (args["submit"] as? Bool ?? false) {
-                let (label, risky) = await PageControl.risk(of: args["ref"], submitting: action == .type, in: wv)
-                if risky {
-                    guard await confirmPageAction(label, on: tab) else {
+                let (label, risk) = await PageControl.risk(of: args["ref"], submitting: action == .type, in: wv)
+                // A plain link only goes somewhere. Other controls need an OK, unless the user allowed this page (still
+                // the same page) for anything but sending, buying, deleting or publishing, which is always asked.
+                let pageAllowed = allowedPage.map { $0.tab == tab.id && $0.url == tab.url } ?? false
+                if risk == .risky || risk == .unknown && !pageAllowed {
+                    let answer = await confirmPageAction(label, on: tab, risky: risk == .risky)
+                    guard answer != .deny else {
                         return ("The user didn't allow this. Don't try it another way; ask in the chat what they'd like to do.", true)
                     }
+                    if answer == .allowPage { allowedPage = (tab.id, tab.url) }
                     if Task.isCancelled || browser.current !== tab || tab.webView !== wv { return ("Stopped.", true) }
                 }
             }
@@ -1290,8 +1313,23 @@ final class AssistantChat {
         return 0
     }
 
+    /// Streamed text waiting to be shown: it's shown about 20 times a second rather than on every word, so the reply
+    /// isn't laid out and scrolled again for each one.
+    @ObservationIgnored private var pendingText = ""
+    @ObservationIgnored private var showScheduled = false
+
     private func appendToReply(_ delta: String) {
-        guard let i = messages.indices.last else { return }
+        pendingText += delta
+        guard !showScheduled else { return }
+        showScheduled = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in self?.showPendingText() }
+    }
+
+    private func showPendingText() {
+        showScheduled = false
+        guard !pendingText.isEmpty, let i = messages.indices.last else { pendingText = ""; return }
+        let delta = pendingText
+        pendingText = ""
         // Text written after a tool starts a new paragraph instead of running on from the text before it.
         if paragraphBreak, !messages[i].text.isEmpty, !messages[i].text.hasSuffix("\n"), !delta.hasPrefix("\n") {
             messages[i].text += "\n\n"
@@ -1301,12 +1339,14 @@ final class AssistantChat {
     }
 
     private func noteActivity(_ note: String) {
+        showPendingText()
         guard let i = messages.indices.last else { return }
         messages[i].activity.append(note)
         paragraphBreak = true
     }
 
     private func fail(_ message: String) {
+        showPendingText()
         guard let i = messages.indices.last else { return }
         messages[i].error = message
     }

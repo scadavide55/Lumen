@@ -11,10 +11,11 @@ struct SettingsView: View {
             SearchPane().tabItem { Label("Search", systemImage: "magnifyingglass") }
             SitesPane().tabItem { Label("Sites", systemImage: "globe") }
             AIPane().tabItem { Label("AI", systemImage: "sparkles") }
+            AutomationsPane().tabItem { Label("Automations", systemImage: "bolt") }
             ExtensionsPane().tabItem { Label("Extensions", systemImage: "puzzlepiece.extension") }
             AdvancedPane().tabItem { Label("Advanced", systemImage: "wrench.and.screwdriver") }
         }
-        .frame(width: 600, height: 560)
+        .frame(width: 680, height: 560)
         .tint(Settings.shared.accent)
     }
 }
@@ -72,6 +73,7 @@ struct GeneralPane: View {
                     }
                 }
             }
+            OpeningRulesSettings()
             Section("Tabs") {
                 Toggle("Restore windows and tabs when Tacet opens", isOn: $s.restoreSession)
                 Toggle("Open the command bar on every new tab", isOn: $s.paletteOnNewTab)
@@ -402,6 +404,13 @@ struct ShieldPane: View {
                 Toggle("Lock private windows with Touch ID when Tacet is in the background", isOn: $s.lockPrivateWindows)
                 Toggle("Tell sites not to sell or share my data (Global Privacy Control)", isOn: $s.gpc)
                 Toggle("Clear cookies, cache and history when Tacet quits", isOn: $s.clearOnQuit)
+                Toggle(isOn: $s.recoverDrafts) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Keep unsent text to put it back")
+                        Text("Long text you write in a page is kept on this Mac until it's sent, so a reload or a closed tab doesn't lose it. Never passwords, card numbers or private windows; nothing older than a week.")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
                 Button("Clear Browsing Data…") { showClear = true }
             }
             PageTextSettings()

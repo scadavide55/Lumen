@@ -9,10 +9,10 @@ struct SpaceBar: View {
 
     var body: some View {
         HStack(spacing: 3) {
-            ForEach(spaces.items) { space in
+            ForEach(spaces.items(for: b.profileID)) { space in
                 SpaceButton(space: space, current: space.id == b.spaceID)
             }
-            IconButton(systemName: "plus", help: spaces.items.isEmpty ? "New Space: a set of tabs to leave and come back to" : "New Space") {
+            IconButton(systemName: "plus", help: spaces.items(for: b.profileID).isEmpty ? "New Space: a set of tabs to leave and come back to" : "New Space") {
                 SpaceActions.askNew(in: b)
             }
             Spacer(minLength: 0)
@@ -128,9 +128,9 @@ struct SpaceMenuButton: View {
     private var spaces = Spaces.shared
 
     var body: some View {
-        if !b.isPrivate, !spaces.items.isEmpty {
+        if !b.isPrivate, !spaces.items(for: b.profileID).isEmpty {
             Menu {
-                ForEach(spaces.items) { space in
+                ForEach(spaces.items(for: b.profileID)) { space in
                     Toggle(isOn: Binding(get: { b.spaceID == space.id }, set: { _ in b.switchSpace(to: space.id) })) {
                         Label(space.name, systemImage: space.symbol)
                     }

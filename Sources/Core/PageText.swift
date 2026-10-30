@@ -17,7 +17,8 @@ final class PageText: @unchecked Sendable {
         /// The matching passage, with the words found between \u{2} and \u{3}.
         let snippet: String
         let date: Date
-        let space: UUID?
+        /// The Spaces it was read in.
+        let spaces: [UUID]
     }
 
     /// The most text kept per page: enough for an article, without letting one huge page fill the disk.
@@ -51,16 +52,21 @@ final class PageText: @unchecked Sendable {
         return !s.pageTextExcluded.contains { host == $0 || host.hasSuffix("." + $0) }
     }
 
-    /// Replaces what's kept for the address.
+    /// Replaces what's kept for the address. A page read in several Spaces belongs to all of them.
     func keep(url: URL, title: String, text: String, space: UUID?) {
         let body = String(text.prefix(Self.charLimit))
         guard body.count >= 80 else { return }
         let date = Date().timeIntervalSince1970
         queue.async { [self] in
+            var spaces = Set<String>()
+            query("SELECT space FROM pages WHERE url = ?", [url.absoluteString]) { s in
+                spaces.formUnion((Self.text(s, 0) ?? "").split(separator: " ").map(String.init))
+            }
+            if let space { spaces.insert(space.uuidString) }
             transaction {
                 run("DELETE FROM pages WHERE url = ?", [url.absoluteString])
                 run("INSERT INTO pages (url, title, body, date, space) VALUES (?, ?, ?, ?, ?)",
-                    [url.absoluteString, title, body, date, space?.uuidString as Any])
+                    [url.absoluteString, title, body, date, spaces.sorted().joined(separator: " ")])
             }
         }
     }
@@ -74,7 +80,7 @@ final class PageText: @unchecked Sendable {
             queue.async { [self] in
                 var hits: [Hit] = []
                 let sql = "SELECT url, title, snippet(pages, 2, char(2), char(3), '…', 14), date, space FROM pages WHERE pages MATCH ?"
-                    + (space == nil ? "" : " AND space = ?") + " ORDER BY bm25(pages, 0, 4, 1) LIMIT ?"
+                    + (space == nil ? "" : " AND instr(space, ?) > 0") + " ORDER BY bm25(pages, 0, 4, 1) LIMIT ?"
                 var values: [Any] = [match]
                 if let space { values.append(space.uuidString) }
                 values.append(limit)
@@ -82,7 +88,7 @@ final class PageText: @unchecked Sendable {
                     guard let u = Self.text(s, 0).flatMap(URL.init(string:)) else { return }
                     hits.append(Hit(url: u, title: Self.text(s, 1) ?? "", snippet: Self.text(s, 2) ?? "",
                                     date: Date(timeIntervalSince1970: sqlite3_column_double(s, 3)),
-                                    space: Self.text(s, 4).flatMap(UUID.init(uuidString:))))
+                                    spaces: (Self.text(s, 4) ?? "").split(separator: " ").compactMap { UUID(uuidString: String($0)) }))
                 }
                 done.resume(returning: hits)
             }
@@ -150,18 +156,28 @@ final class PageText: @unchecked Sendable {
 
     private func exec(_ sql: String) { sqlite3_exec(db, sql, nil, nil, nil) }
 
+    /// Runs the writes as one: if any of them fails, none of them is kept.
     private func transaction(_ body: () -> Void) {
+        failed = false
         exec("BEGIN")
         body()
-        exec("COMMIT")
+        if failed {
+            exec("ROLLBACK")
+            NSLog("Tacet: a database write failed and was undone: %@", String(cString: sqlite3_errmsg(db)))
+        } else {
+            exec("COMMIT")
+        }
     }
+
+    /// Set when a write in the current transaction fails.
+    private var failed = false
 
     private func run(_ sql: String, _ values: [Any]) {
         var stmt: OpaquePointer?
-        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK, let stmt else { return }
+        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK, let stmt else { failed = true; return }
         defer { sqlite3_finalize(stmt) }
         bind(stmt, values)
-        sqlite3_step(stmt)
+        if sqlite3_step(stmt) != SQLITE_DONE { failed = true }
     }
 
     private func query(_ sql: String, _ values: [Any], _ row: (OpaquePointer) -> Void) {

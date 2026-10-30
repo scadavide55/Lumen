@@ -577,6 +577,53 @@ eq(js("document.getElementById('host').shadowRoot.getElementById('u').shadowRoot
 eq(js("document.getElementById('host').shadowRoot.getElementById('p').shadowRoot.querySelector('input').value") as? String,
    "hunter2", "logins: fills the password in a shadow root")
 
+// MARK: Highlights are marked, removed and found again
+
+func pageJS(_ code: String, _ args: [String: Any] = [:]) -> Any? {
+    var out: Any?, done = false
+    wv.callAsyncJavaScript(code, arguments: args, in: nil, in: .page) { r in out = try? r.get(); done = true }
+    let deadline = Date().addingTimeInterval(10)
+    while !done && Date() < deadline { RunLoop.main.run(until: Date().addingTimeInterval(0.02)) }
+    return out
+}
+_ = js("document.body.innerHTML = '<p id=\"p\">The cat sat on <b>the warm</b> mat. The cat sat again.</p>'")
+_ = js(Scripts.highlights)
+_ = js("""
+const p = document.getElementById('p'); const r = document.createRange();
+r.setStart(p.firstChild, 4); r.setEnd(p.childNodes[2], 4);
+getSelection().removeAllRanges(); getSelection().addRange(r); 1
+""")
+let hlFound = pageJS("return window.__tacetHL.capture({ id: 'h1', css: 'yellow', note: '' })") as? [String: Any]
+eq(hlFound?["quote"] as? String, "cat sat on the warm mat", "highlights: the selection's words are kept")
+eq(pageJS("return document.querySelectorAll('mark[data-tacet-hl=h1]').length") as? Int, 3, "highlights: marked across bold text, piece by piece")
+let hlBack = pageJS("""
+window.__tacetHL.remove('h1');
+const gone = document.querySelectorAll('mark').length === 0 && document.getElementById('p').textContent === 'The cat sat on the warm mat. The cat sat again.';
+const n = window.__tacetHL.apply([{ id: 'h1', quote: q, prefix: 'The ', suffix: ' The cat', css: 'yellow', note: 'n' }]);
+return gone && n === 1 && document.querySelector('mark').textContent === 'cat sat on '
+""", ["q": hlFound?["quote"] as? String ?? ""])
+eq(hlBack as? Bool, true, "highlights: removed cleanly and found again by its words")
+let sampleHL = Highlight(url: URL(string: "https://example.com/a")!, title: "A [page]", quote: "one\n two", prefix: "", suffix: "", note: "mine")
+check(sampleHL.markdown.hasPrefix("> one two\n\nmine\n\n— [A [page\\]](https://example.com/a)"), "highlights: Markdown with quote, note and source", sampleHL.markdown)
+check(sampleHL.linkToPassage.absoluteString.hasSuffix("#:~:text=one%20two"), "highlights: link opens at the passage", sampleHL.linkToPassage.absoluteString)
+
+// MARK: Drafts go back into their field
+
+_ = js("document.body.innerHTML = '<textarea name=\"msg\"></textarea><input type=\"password\" name=\"pw\">'")
+_ = js(Scripts.drafts)
+eq(pageJS("return window.__tacetDrafts.restore('name:msg', 'Hello again')") as? String, "ok", "drafts: put back into an empty field")
+eq(pageJS("return document.querySelector('textarea').value") as? String, "Hello again", "drafts: the text is there")
+eq(pageJS("return window.__tacetDrafts.restore('name:msg', 'other')") as? String, "busy", "drafts: a field with text isn't overwritten")
+eq(pageJS("return window.__tacetDrafts.restore('name:pw', 'secret')") as? String, "missing", "drafts: never a password field")
+
+// MARK: Opening rules
+
+let ghRule = OpeningRule(site: "github.com", action: .reuseTab)
+check(ghRule.matches(URL(string: "https://gist.github.com/x")!) && ghRule.matches(URL(string: "https://github.com")!), "rules: a site and its subdomains")
+check(!ghRule.matches(URL(string: "https://notgithub.com")!), "rules: a lookalike site doesn't match")
+eq(OpeningRule.normalizedSite(" https://www.GitHub.com/tacet "), "github.com", "rules: typed site is tidied")
+eq(OpeningRule.normalizedSite("not a site"), nil, "rules: not a site")
+
 // MARK: A passkey request is turned down and reported
 
 _ = js("window.passkeyAsked = 0; window.addEventListener('tacet-passkey', () => window.passkeyAsked++)")
@@ -634,15 +681,18 @@ for d in [swapOK, swapBadCopy, swapNoMove] {
     try? FileManager.default.removeItem(at: d)
 }
 
-// MARK: Saving: a save made now is never overwritten by an older one still being written
+// MARK: Saving: the newest value wins, and nothing waiting is lost when Tacet quits
 
 struct Big: Codable { var n: Int; var pad: [String] }
 let stored = StoredFile<Big>(at: FileManager.default.temporaryDirectory.appendingPathComponent("tacet-order-\(UUID().uuidString).json"))
 stored.save(Big(n: 1, pad: Array(repeating: String(repeating: "x", count: 1000), count: 5000)), delay: 0)
-Thread.sleep(forTimeInterval: 0.01)
 stored.saveNow(Big(n: 2, pad: []))
-Thread.sleep(forTimeInterval: 0.5)
+stored.flush()
 eq(stored.load()?.n, 2, "storage: the newest save wins")
+stored.save(Big(n: 3, pad: []), delay: 60)
+eq(stored.load()?.n, 2, "storage: a delayed save waits")
+StoredFiles.flushAll()
+eq(stored.load()?.n, 3, "storage: quitting writes what was waiting")
 stored.delete()
 
 // MARK: Finding pages by what they said
@@ -675,6 +725,17 @@ do {
     index.clear()
     eq(found("memory"), [], "page text: clearing removes everything")
     eq(PageText.matchExpression("a \"b"), "\"a\"* \"b\"*", "page text: query becomes quoted prefixes")
+    let spaceA = UUID(), spaceB = UUID()
+    let long = "Spaces keep their own reading. " + String(repeating: "Filler words here. ", count: 10)
+    index.keep(url: swift, title: "Profiling apps", text: long, space: spaceA)
+    index.keep(url: swift, title: "Profiling apps", text: long, space: spaceB)
+    func inSpace(_ id: UUID) -> Int {
+        var out: Int?
+        Task { out = await index.search("reading", space: id).count }
+        while out == nil { RunLoop.main.run(until: Date().addingTimeInterval(0.02)) }
+        return out ?? -1
+    }
+    eq([inSpace(spaceA), inSpace(spaceB)], [1, 1], "page text: a page read in two Spaces is found in both")
     try? FileManager.default.removeItem(at: dbURL)
 }
 

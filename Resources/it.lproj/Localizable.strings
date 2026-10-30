@@ -62,6 +62,7 @@
 "Add Extension" = "Aggiungi estensione";
 "Add Profile" = "Aggiungi profilo";
 "Add Site Style…" = "Aggiungi stile del sito…";
+"Add Step" = "Aggiungi passo";
 "Add a note: where to pick up next time" = "Aggiungi una nota: da dove riprendere la prossima volta";
 "Add an API key to start" = "Aggiungi una chiave API per iniziare";
 "Add from a File or Folder…" = "Aggiungi da un file o una cartella…";
@@ -89,12 +90,15 @@
 "All websites" = "Tutti i siti";
 "Allow" = "Consenti";
 "Allow Grouping This Site" = "Permetti di raggruppare questo sito";
+"Allow on This Page" = "Consenti su questa pagina";
 "Allow “%@” to use your %@?" = "Consentire a “%1$@” di usare %2$@?";
+"Also in the command bar (type its name) and in Tab › Automations." = "Anche nella barra dei comandi (scrivi il suo nome) e in Scheda › Automazioni.";
 "Also today's unpinned tabs" = "Anche le schede non fissate di oggi";
 "Always" = "Sempre";
 "Always show website titles in tabs" = "Mostra sempre i titoli dei siti nelle schede";
 "Amazon Without Sponsored" = "Amazon senza sponsorizzati";
 "An AI assistant in a panel beside the page, for questions about what you're reading." = "Un assistente AI in un pannello accanto alla pagina, per le domande su quello che stai leggendo.";
+"An address, such as github.com/notifications." = "Un indirizzo, per esempio github.com/notifications.";
 "And more" = "E altro ancora";
 "Animate gradient backgrounds" = "Anima gli sfondi sfumati";
 "Answers come from your AI provider and can be wrong." = "Le risposte arrivano dal tuo fornitore di AI e possono essere sbagliate.";
@@ -129,6 +133,8 @@
 "Automatically" = "Automaticamente";
 "Automatically by site" = "Automaticamente per sito";
 "Automatically close tabs" = "Chiudi le schede automaticamente";
+"Automation" = "Automazione";
+"Automations" = "Automazioni";
 "Back" = "Indietro";
 "Back (⌘[)" = "Indietro (⌘[)";
 "Back / forward" = "Indietro / avanti";
@@ -187,6 +193,7 @@
 "Choose Apple (on this Mac) in Settings › AI to use the assistant for free, offline, with nothing leaving your Mac. It's smaller than cloud models, so it's best for short, simple questions." = "Scegli Apple (su questo Mac) in Impostazioni › AI per usare l’assistente gratis, offline, senza che niente esca dal Mac. È più piccolo dei modelli cloud, quindi va meglio per domande brevi e semplici.";
 "Choose a model in Settings › AI." = "Scegli un modello in Impostazioni › AI.";
 "Choose a start page" = "Scegli la pagina iniziale";
+"Choose an automation, or make one with +." = "Scegli un'automazione, o creane una con +.";
 "Choose an icon" = "Scegli un'icona";
 "Choose light or dark, and a colour for Tacet's accents." = "Scegli chiaro o scuro e un colore per i dettagli di Tacet.";
 "Choose your search engine" = "Scegli il motore di ricerca";
@@ -201,6 +208,7 @@
 "Clear History" = "Cancella cronologia";
 "Clear cookies, cache and history when Tacet quits" = "Cancella cookie, cache e cronologia quando esci da Tacet";
 "Clear data for %@?" = "Cancellare i dati di %@?";
+"Clear the decks" = "Fai spazio";
 "Click comment sections, sidebars, banners or anything else on the page to hide them on this site." = "Clicca su commenti, barre laterali, banner o qualsiasi altra cosa nella pagina per nasconderli su questo sito.";
 "Click parts of the page to hide them on this site" = "Clicca parti della pagina per nasconderle su questo sito";
 "Click the page icon in the address, or press ⇧⌘R, for a clean reading view." = "Fai clic sull'icona della pagina nell'indirizzo, o premi ⇧⌘R, per una vista di lettura pulita.";
@@ -211,6 +219,7 @@
 "Clicking “%@”" = "Clic su “%@”";
 "Close" = "Chiudi";
 "Close %d Tabs" = "Chiudi %d schede";
+"Close (Esc)" = "Chiudi (Esc)";
 "Close (⇧⌘A)" = "Chiudi (⇧⌘A)";
 "Close Duplicate Tabs" = "Chiudi schede duplicate";
 "Close Group" = "Chiudi gruppo";
@@ -225,8 +234,10 @@
 "Close tab" = "Chiudi scheda";
 "Close tab (⌘W)" = "Chiudi scheda (⌘W)";
 "Close the answer (esc)" = "Chiudi la risposta (esc)";
+"Close the other tabs" = "Chiudi le altre schede";
 "Close this profile's windows first" = "Chiudi prima le finestre di questo profilo";
 "Collapse Group" = "Comprimi gruppo";
+"Collect selected links" = "Raccogli i link selezionati";
 "Colour" = "Colore";
 "Colours" = "Colori";
 "Colours, fonts, hidden elements, CSS and JavaScript" = "Colori, caratteri, elementi nascosti, CSS e JavaScript";
@@ -253,8 +264,10 @@
 "Copy Link as Markdown" = "Copia link in Markdown";
 "Copy Page or Selection as Markdown" = "Copia pagina o selezione come Markdown";
 "Copy as Markdown" = "Copia come Markdown";
+"Copy as Markdown note" = "Copia come nota Markdown";
 "Copy link" = "Copia link";
 "Copy password" = "Copia password";
+"Copy title, link and selection as Markdown" = "Copia titolo, link e selezione come Markdown";
 "Copy to your clipboard" = "Copiare negli appunti";
 "Corner radius" = "Raggio degli angoli";
 "Corona t" = "Corona t";
@@ -283,6 +296,7 @@
 "Cutout: remove backgrounds" = "Cutout: togli gli sfondi";
 "Dark" = "Scuro";
 "Dark Appearance" = "Aspetto scuro";
+"Dark appearance" = "Aspetto scuro";
 "Data" = "Dati";
 "Data folder" = "Cartella dei dati";
 "Default model" = "Modello predefinito";
@@ -296,10 +310,12 @@
 "Delete Space…" = "Elimina spazio…";
 "Delete all saved articles?" = "Eliminare tutti gli articoli salvati?";
 "Delete all saved chats?" = "Eliminare tutte le chat salvate?";
+"Delete automation" = "Elimina automazione";
 "Delete “%@”?" = "Eliminare “%@”?";
 "Deselect Tabs" = "Deseleziona schede";
 "Developer" = "Sviluppatore";
 "Developer: %@" = "Sviluppatore: %@";
+"Discard" = "Scarta";
 "Don't Allow" = "Non consentire";
 "Don't attach this page" = "Non allegare questa pagina";
 "Done" = "Fine";
@@ -320,6 +336,7 @@
 "EasyPrivacy (trackers)" = "EasyPrivacy (tracker)";
 "Eclipse (until 1.6.4)" = "Eclissi (fino alla 1.6.4)";
 "Edit" = "Modifica";
+"Edit Highlight Note…" = "Modifica nota dell'evidenziazione…";
 "Edit Note…" = "Modifica nota…";
 "Edit…" = "Modifica…";
 "Ember" = "Brace";
@@ -332,6 +349,7 @@
 "Everything has a shortcut. You'll find them all in the menus too." = "Tutto ha una scorciatoia. Le trovi anche nei menu.";
 "Everything stays on your Mac. Tacet has no accounts and no analytics." = "Tutto resta sul tuo Mac. Tacet non ha account né statistiche.";
 "Example: #comments, .sidebar { display: none !important; }" = "Esempio: #comments, .sidebar { display: none !important; }";
+"Examples" = "Esempi";
 "Exit Focus Mode" = "Esci dalla modalità focus";
 "Exit Focus Mode (⇧⌘J)" = "Esci dalla modalità focus (⇧⌘J)";
 "Exit Full Screen Chat" = "Esci dalla chat a schermo intero";
@@ -341,6 +359,7 @@
 "Explain the text I selected" = "Spiega il testo che ho selezionato";
 "Explain this." = "Spiegami questo.";
 "Export Settings and Plugins…" = "Esporta impostazioni e plugin…";
+"Export as Markdown…" = "Esporta in Markdown…";
 "Export as PDF" = "Esporta come PDF";
 "Export as PDF…" = "Esporta come PDF…";
 "Export to CSV…" = "Esporta in CSV…";
@@ -380,6 +399,7 @@
 "Folder" = "Cartella";
 "Follows your Mac" = "Segue il tuo Mac";
 "Font" = "Carattere";
+"For links from other apps, addresses you type and links opened in a new tab. Links inside a page and sign-in windows are never moved. Right-click › Open Link in New Tab opens a link where you are, whatever the rules." = "Per i link da altre app, gli indirizzi che scrivi e i link aperti in una nuova scheda. I link dentro una pagina e le finestre di accesso non vengono mai spostati. Clic destro › Apri link in nuova scheda apre un link dove sei, qualunque regola ci sia.";
 "Force dark pages (experimental)" = "Forza pagine scure (sperimentale)";
 "Forest" = "Foresta";
 "Forget" = "Dimentica";
@@ -444,6 +464,9 @@
 "Hides YouTube's home feed, the recommended videos next to the one you're watching and the suggestions at its end, so you watch what you came for. Search and subscriptions stay." = "Nasconde la home di YouTube, i video consigliati accanto a quello che guardi e i suggerimenti alla fine, così guardi solo ciò per cui sei venuto. Ricerca e iscrizioni restano.";
 "Hides comment sections on YouTube, news sites, blogs and Reddit, for a quieter read. Turn it off for a moment from Tacet Plugins when you want to read them." = "Nasconde i commenti su YouTube, siti di notizie, blog e Reddit, per una lettura più tranquilla. Disattivalo per un attimo da Tacet Plugins quando vuoi leggerli.";
 "Hides sponsored products and ad banners from Amazon's search results and product pages, so you see what matches your search." = "Nasconde prodotti sponsorizzati e banner pubblicitari dai risultati e dalle pagine prodotto di Amazon, così vedi ciò che corrisponde alla tua ricerca.";
+"Highlight" = "Evidenzia";
+"Highlight with Note…" = "Evidenzia con nota…";
+"Highlights" = "Evidenziazioni";
 "History" = "Cronologia";
 "History and Bookmarks" = "Cronologia e segnalibri";
 "History and bookmarks (⌘Y)" = "Cronologia e segnalibri (⌘Y)";
@@ -491,7 +514,10 @@
 "Its own window and Dock icon" = "Finestra e icona nel Dock tutte sue";
 "Its settings and data are removed too." = "Vengono rimossi anche le sue impostazioni e i suoi dati.";
 "Its tabs, groups and note are deleted with it." = "Le sue schede, i gruppi e la nota vengono eliminati con lui.";
+"Just this page" = "Solo questa pagina";
+"Keep it as a tab (⌘↩)" = "Tienila come scheda (⌘↩)";
 "Keep it for" = "Conservalo per";
+"Keep unsent text to put it back" = "Conserva il testo non inviato per poterlo rimettere";
 "Keep “Spaces and pinned tabs” on" = "Lascia attivo “Spazi e schede fissate”";
 "Keeps one tab per address" = "Tiene una sola scheda per indirizzo";
 "Keeps you signed in to sites." = "Ti mantiene connesso ai siti.";
@@ -517,6 +543,8 @@
 "Library" = "Libreria";
 "Light" = "Chiaro";
 "Light Appearance" = "Aspetto chiaro";
+"Light appearance" = "Aspetto chiaro";
+"Links" = "Link";
 "Links from Mail, Messages and every other app will open in Tacet. You can change this anytime in System Settings." = "I link da Mail, Messaggi e ogni altra app si apriranno in Tacet. Puoi cambiarlo quando vuoi in Impostazioni di Sistema.";
 "Links that lead to a different site open in a new tab, so the page you were reading stays where it was." = "I link che portano a un altro sito si aprono in una nuova scheda, così la pagina che stavi leggendo resta dov’era.";
 "Links you open in other apps go to your default browser." = "I link che apri da altre app vanno al browser predefinito.";
@@ -525,6 +553,7 @@
 "Loading…" = "Caricamento…";
 "Lock Window with Touch ID" = "Blocca finestra con Touch ID";
 "Lock private windows with Touch ID when Tacet is in the background" = "Blocca le finestre private con Touch ID quando Tacet è in background";
+"Long text you write in a page is kept on this Mac until it's sent, so a reload or a closed tab doesn't lose it. Never passwords, card numbers or private windows; nothing older than a week." = "Il testo lungo che scrivi in una pagina resta su questo Mac finché non lo invii, così un ricaricamento o una scheda chiusa non te lo fanno perdere. Mai password, numeri di carta o finestre private; niente di più vecchio di una settimana.";
 "Look and feel" = "Aspetto";
 "Looking at the page" = "Analisi della pagina";
 "Looking at your tabs" = "Guardo le tue schede";
@@ -580,6 +609,7 @@
 "Never group these sites" = "Non raggruppare mai questi siti";
 "Never keep pages from: bank.com" = "Non conservare mai le pagine di: banca.it";
 "Never save passwords for" = "Non salvare mai le password per";
+"New Automation" = "Nuova automazione";
 "New Chat" = "Nuova chat";
 "New Group" = "Nuovo gruppo";
 "New Private Window" = "Nuova finestra privata";
@@ -592,6 +622,7 @@
 "New Window" = "Nuova finestra";
 "New Window in %@" = "Nuova finestra in %@";
 "New Window in Profile" = "Nuova finestra nel profilo";
+"New automation" = "Nuova automazione";
 "New private window" = "Nuova finestra privata";
 "New private window (⇧⌘N)" = "Nuova finestra privata (⇧⌘N)";
 "New tab" = "Nuova scheda";
@@ -607,6 +638,7 @@
 "Next to current tab" = "Accanto alla scheda corrente";
 "No Bookmarks" = "Nessun segnalibro";
 "No Downloads" = "Nessun download";
+"No Highlights" = "Nessuna evidenziazione";
 "No History" = "Nessuna cronologia";
 "No Other Browsers Found" = "Nessun altro browser trovato";
 "No Results" = "Nessun risultato";
@@ -639,6 +671,7 @@
 "Not found" = "Non trovato";
 "Not now" = "Non ora";
 "Not supported by this model" = "Non supportate da questo modello";
+"Note" = "Nota";
 "Note for %@" = "Nota per %@";
 "Nothing hidden yet." = "Ancora niente di nascosto.";
 "Nothing is sent anywhere. You can turn it on later in Settings › AI." = "Non viene inviato nulla. Puoi attivarlo più tardi in Impostazioni › AI.";
@@ -662,6 +695,8 @@
 "Only add extensions you trust: they can see and change the pages they have access to." = "Aggiungi solo estensioni di cui ti fidi: possono vedere e modificare le pagine a cui hanno accesso.";
 "Open" = "Apri";
 "Open %@" = "Apri %@";
+"Open %@ in a new tab" = "Apri %@ in una nuova scheda";
+"Open %@ in this tab" = "Apri %@ in questa scheda";
 "Open %@ to copy your password" = "Apri %@ per copiare la password";
 "Open Frame in New Tab" = "Apri frame in una nuova scheda";
 "Open Full Disk Access Settings" = "Apri le impostazioni di Accesso completo al disco";
@@ -669,6 +704,7 @@
 "Open Image in New Tab" = "Apri immagine in una nuova scheda";
 "Open Link in Background Tab" = "Apri link in una scheda in background";
 "Open Link in New Tab" = "Apri link in una nuova scheda";
+"Open Link in Preview" = "Apri link in anteprima";
 "Open Link in Split View" = "Apri link nella vista divisa";
 "Open Location…" = "Apri indirizzo…";
 "Open Original Page" = "Apri la pagina originale";
@@ -679,19 +715,26 @@
 "Open Tacet Plugins" = "Apri Tacet Plugins";
 "Open Video in New Tab" = "Apri video in una nuova scheda";
 "Open Window" = "Apri finestra";
+"Open a Page in This Tab…" = "Apri una pagina in questa scheda…";
+"Open a Page in a New Tab…" = "Apri una pagina in una nuova scheda…";
 "Open address" = "Apri indirizzo";
 "Open an article in Reader (⇧⌘R) and choose Save for Offline to read it later, even without a connection." = "Apri un articolo in Lettura (⇧⌘R) e scegli Salva offline per leggerlo più tardi, anche senza connessione.";
+"Open as Tab" = "Apri come scheda";
 "Open in Split View" = "Apri nella vista divisa";
 "Open in Tacet" = "Apri in Tacet";
+"Open in a private window" = "Apri in una finestra privata";
+"Open in the %@ Space" = "Apri nello spazio %@";
 "Open it with ⇧⌘A or the sparkles button. You can turn it off in Settings › AI." = "Aprilo con ⇧⌘A o con il pulsante con le stelline. Puoi disattivarlo in Impostazioni › AI.";
 "Open new tabs" = "Apri le nuove schede";
 "Open pages in tabs instead of windows" = "Apri le pagine in schede invece che in finestre";
 "Open tabs" = "Schede aperte";
 "Open the command bar on every new tab" = "Apri la barra dei comandi a ogni nuova scheda";
+"Open the selected links in a new group" = "Apri i link selezionati in un nuovo gruppo";
 "Open “%@”?" = "Aprire “%@”?";
 "OpenAI-compatible" = "Compatibile con OpenAI";
 "Opening %@" = "Apertura di %@";
 "Opening a new tab" = "Apertura di una nuova scheda";
+"Opening rules" = "Regole di apertura";
 "Opens Reddit in its classic layout at old.reddit.com: lighter, faster and with more posts on screen. Galleries, chat and settings still open in the new design." = "Apre Reddit nel suo aspetto classico su old.reddit.com: più leggero, più veloce e con più post sullo schermo. Gallerie, chat e impostazioni si aprono ancora nel nuovo design.";
 "Optional" = "Facoltativo";
 "Optional. Tacet never sees your password: you type it on Google's own page." = "Facoltativo. Tacet non vede mai la tua password: la scrivi direttamente sulla pagina di Google.";
@@ -758,7 +801,9 @@
 "Protection on this site" = "Protezione su questo sito";
 "Provider" = "Fornitore";
 "Purple" = "Viola";
+"Put It Back" = "Rimettilo";
 "Put the address bar in the sidebar" = "Metti la barra degli indirizzi nella barra laterale";
+"Put the other tabs to sleep" = "Metti a riposo le altre schede";
 "Read" = "Letta";
 "Read Aloud" = "Leggi ad alta voce";
 "Read and change all websites you visit" = "Leggere e modificare tutti i siti che visiti";
@@ -791,11 +836,13 @@
 "Remove" = "Rimuovi";
 "Remove Background with %@" = "Rimuovi lo sfondo con %@";
 "Remove Bookmark" = "Rimuovi segnalibro";
+"Remove Highlight" = "Rimuovi evidenziazione";
 "Remove Tracking from Links" = "Rimuovi il tracciamento dai link";
 "Remove from Favorites" = "Rimuovi dai preferiti";
 "Remove from Group" = "Rimuovi dal gruppo";
 "Remove the background of any picture, on this Mac, with no upload. Its AI engines download once when you add it, then it works offline." = "Togli lo sfondo da qualsiasi immagine, su questo Mac, senza caricare niente online. I suoi motori di AI si scaricano una volta quando lo aggiungi, poi funziona offline.";
 "Remove the background of any picture, on this Mac: rest the pointer on a picture and click ✂ Cutout (or press ⌥⇧X), or open Cutout and drop your own photos. Four AI engines, transparent PNG at full resolution, nothing uploaded. The engines are downloaded once when you add it (413 MB), then it works offline." = "Rimuovi lo sfondo da qualsiasi immagine, su questo Mac: tieni il puntatore su un'immagine e fai clic su ✂ Cutout (o premi ⌥⇧X), oppure apri Cutout e trascina le tue foto. Quattro motori di AI, PNG trasparente alla risoluzione originale, niente caricato online. I motori si scaricano una volta quando lo aggiungi (413 MB), poi funziona offline.";
+"Remove this rule" = "Rimuovi questa regola";
 "Remove tracking from links" = "Rimuovi il tracciamento dai link";
 "Remove tracking parameters from links" = "Rimuovi i parametri di tracciamento dai link";
 "Remove “%@”?" = "Rimuovere “%@”?";
@@ -825,6 +872,7 @@
 "Right-click a pinned tab › Back to Pinned Address" = "Clic destro su una scheda fissata › Torna all'indirizzo fissato";
 "Right-click a plugin to turn it off for one site" = "Clic destro su un plugin per disattivarlo su un solo sito";
 "Run" = "Esegui";
+"Run Now" = "Esegui ora";
 "Run scripts on pages" = "Eseguire script nelle pagine";
 "Run tasks on a schedule" = "Eseguire attività programmate";
 "Runs in the page on this site every time it loads, with access to everything on it. Only add code you wrote or trust." = "Viene eseguito nella pagina di questo sito ogni volta che si carica, con accesso a tutto il suo contenuto. Aggiungi solo codice scritto da te o di cui ti fidi.";
@@ -864,6 +912,7 @@
 "Search and privacy" = "Ricerca e privacy";
 "Search chats" = "Cerca nelle chat";
 "Search engine" = "Motore di ricerca";
+"Search highlights and notes" = "Cerca evidenziazioni e note";
 "Search history" = "Cerca nella cronologia";
 "Search history and what pages said" = "Cerca nella cronologia e nel testo delle pagine";
 "Search or enter address" = "Cerca o inserisci un indirizzo";
@@ -887,6 +936,7 @@
 "See which requests it blocked" = "Vedere quali richieste ha bloccato";
 "Select" = "Seleziona";
 "Select text and right-click › Tacet Assistant" = "Seleziona del testo, tasto destro › Tacet Assistant";
+"Select text on a page, right-click it and choose Highlight." = "Seleziona del testo in una pagina, fai clic destro e scegli Evidenzia.";
 "Send" = "Invia";
 "Separate" = "Separato";
 "Serif" = "Con grazie";
@@ -908,7 +958,9 @@
 "Shield button" = "Pulsante Shield";
 "Shield rules" = "Regole Shield";
 "Shield stops ads and trackers before they load, using the content blocker built into WebKit. Pages load faster, and you can switch it off for any site from the shield button." = "Shield ferma pubblicità e tracker prima che vengano caricati, usando il blocco dei contenuti integrato in WebKit. Le pagine si caricano più in fretta e puoi disattivarlo per qualsiasi sito dal pulsante a scudo.";
+"Shortcut" = "Scorciatoia";
 "Shortcut: %@" = "Scorciatoia: %@";
+"Show %@ beside this page" = "Mostra %@ accanto a questa pagina";
 "Show All History" = "Mostra tutta la cronologia";
 "Show Bookmarks" = "Mostra segnalibri";
 "Show Chats" = "Mostra chat";
@@ -917,6 +969,7 @@
 "Show Link Hints" = "Mostra le etichette dei link";
 "Show Original" = "Mostra originale";
 "Show Reading List" = "Mostra l'elenco di lettura";
+"Show a Page Beside This One…" = "Mostra una pagina accanto a questa…";
 "Show a preview with memory use when you hover over a tab" = "Mostra un'anteprima con la memoria usata quando passi sopra una scheda";
 "Show clock" = "Mostra orologio";
 "Show colour in tab bar" = "Mostra il colore nella barra delle schede";
@@ -924,15 +977,18 @@
 "Show greeting" = "Mostra saluto";
 "Show in Finder" = "Mostra nel Finder";
 "Show it again" = "Mostralo di nuovo";
+"Show it next to this page in split view" = "Mostrala accanto a questa pagina in vista divisa";
 "Show link addresses on hover" = "Mostra l'indirizzo dei link al passaggio del mouse";
 "Show or hide the sidebar" = "Mostra o nascondi la barra laterale";
 "Show password" = "Mostra password";
 "Show search suggestions" = "Mostra suggerimenti di ricerca";
 "Show search suggestions as I type" = "Mostra suggerimenti mentre scrivo";
 "Show the full address" = "Mostra l'indirizzo completo";
+"Show the page in Reader" = "Mostra la pagina in Lettura";
 "Show two pages side by side" = "Mostra due pagine affiancate";
 "Shown at the top of the sidebar in this Space." = "Compare in cima alla barra laterale in questo spazio.";
 "Shows what's blocked and lets you turn protection off for the current site." = "Mostra cosa viene bloccato e ti permette di disattivare la protezione per il sito corrente.";
+"Side by Side" = "Affianca";
 "Sidebar" = "Barra laterale";
 "Sidebar on the left" = "Barra laterale a sinistra";
 "Sidebar on the right" = "Barra laterale a destra";
@@ -953,6 +1009,7 @@
 "Site information" = "Informazioni sul sito";
 "Site styles" = "Stili dei siti";
 "Site, for example youtube.com" = "Sito, per esempio youtube.com";
+"Site, such as github.com" = "Sito, per esempio github.com";
 "Sites" = "Siti";
 "Sites that don't support HTTPS won't open until you confirm." = "I siti senza HTTPS non si aprono finché non confermi.";
 "Sites where Shield is off" = "Siti in cui Shield è disattivato";
@@ -990,6 +1047,8 @@
 "Start page background" = "Sfondo della pagina iniziale";
 "Steadier than ever" = "Più stabile che mai";
 "Step %lld of %lld" = "Passaggio %1$lld di %2$lld";
+"Steps" = "Passi";
+"Steps Tacet runs in order, the same way every time. Start from + or an example." = "Passi che Tacet esegue in ordine, sempre allo stesso modo. Parti da + o da un esempio.";
 "Stop" = "Interrompi";
 "Stop Loading" = "Interrompi caricamento";
 "Stop Reading Aloud" = "Smetti di leggere";
@@ -1010,9 +1069,13 @@
 "Swap panes" = "Scambia pannelli";
 "Switch to %@" = "Passa a %@";
 "Switch to Tab" = "Vai alla scheda";
+"Switch to a Space" = "Passa a uno spazio";
+"Switch to its open tab" = "Passa alla sua scheda aperta";
+"Switch to the %@ Space" = "Passa allo spazio %@";
 "Switching to %@" = "Passaggio a %@";
 "System" = "Sistema";
 "System Appearance" = "Aspetto di sistema";
+"System appearance" = "Aspetto di sistema";
 "Tab" = "Scheda";
 "Tab %lld" = "Scheda %lld";
 "Tab previews" = "Anteprime delle schede";
@@ -1047,6 +1110,7 @@
 "Tacet Shield is on with %@ rules" = "Tacet Shield è attivo con %@ regole";
 "Tacet Website" = "Sito web di Tacet";
 "Tacet can't replace itself here. Move Tacet to the Applications folder, or install the update from GitHub." = "Tacet non può sostituirsi in questa posizione. Sposta Tacet nella cartella Applicazioni o installa l'aggiornamento da GitHub.";
+"Tacet can't tell what this button does on this site. Allow it if it's part of what you asked for." = "Tacet non sa cosa fa questo pulsante su questo sito. Consentilo se fa parte di quello che hai chiesto.";
 "Tacet can't use passkeys yet" = "Tacet non può ancora usare le passkey";
 "Tacet couldn't play this file." = "Tacet non riesce a riprodurre questo file.";
 "Tacet forgets the history, cookies and site data of this window when you close it." = "Tacet dimentica cronologia, cookie e dati dei siti di questa finestra quando la chiudi.";
@@ -1085,9 +1149,11 @@
 "The assistant can look things up and open pages that appear in the chat. With Anthropic, searches and pages are handled on Anthropic's servers." = "L'assistente può cercare informazioni e aprire le pagine che compaiono nella chat. Con Anthropic, ricerche e pagine passano dai server di Anthropic.";
 "The assistant can search the web and read pages. Click to turn off." = "L'assistente può cercare sul web e leggere le pagine. Fai clic per disattivare.";
 "The built-in list works offline. Filter lists add tens of thousands of community-maintained rules." = "La lista integrata funziona offline. Le liste di filtri aggiungono decine di migliaia di regole curate dalla comunità.";
+"The certificate %@ presented isn't valid. Someone on your network could be in the way. Continuing opens the site over plain HTTP, where what you send can be read." = "Il certificato presentato da %@ non è valido. Qualcuno sulla tua rete potrebbe essere in mezzo. Continuando, il sito si apre in HTTP semplice, dove quello che invii può essere letto.";
 "The download doesn't contain Tacet." = "Il download non contiene Tacet.";
 "The downloaded version isn't newer than this one." = "La versione scaricata non è più recente di questa.";
 "The extension's popup couldn't be shown." = "Il popup dell'estensione non può essere mostrato.";
+"The field it was in isn't on the page now, or already has text. Paste it where you want it." = "Il campo in cui era non c'è più nella pagina, oppure contiene già del testo. Incollalo dove vuoi.";
 "The file couldn't be found." = "Il file non è stato trovato.";
 "The file couldn't be unpacked." = "Il file non può essere estratto.";
 "The key is saved in your Keychain. You can change the model in Settings › AI." = "La chiave viene salvata nel Portachiavi. Puoi cambiare il modello in Impostazioni › AI.";
@@ -1128,6 +1194,7 @@
 "This page stopped working more than once, so Tacet stopped reloading it." = "Questa pagina ha smesso di funzionare più volte, quindi Tacet ha smesso di ricaricarla.";
 "This site doesn't support a secure connection" = "Questo sito non supporta una connessione sicura";
 "This site requires a username and password." = "Questo sito richiede nome utente e password.";
+"This site's secure connection has a problem" = "La connessione sicura di questo sito ha un problema";
 "This window uses the cookies, sign-ins and site data of this profile." = "Questa finestra usa i cookie, gli accessi e i dati dei siti di questo profilo.";
 "Time range" = "Intervallo di tempo";
 "Tint the window with the site's colour" = "Colora la finestra con il colore del sito";
@@ -1151,6 +1218,7 @@
 "Translating on this Mac…" = "Traduzione su questo Mac…";
 "Translucent" = "Traslucido";
 "Try Again" = "Riprova";
+"Turn Focus Mode on or off" = "Attiva o disattiva Focus Mode";
 "Turn Off" = "Disattiva";
 "Turn Off Ad Blocker" = "Disattiva blocco pubblicità";
 "Turn Off Everywhere" = "Disattiva ovunque";
@@ -1198,6 +1266,7 @@
 "Use Top Tabs" = "Usa schede in alto";
 "Use a cloud provider for long pages and hard questions" = "Per pagine lunghe e domande difficili usa un fornitore cloud";
 "Use another way to sign in" = "Accedi in un altro modo";
+"Use the %@ profile" = "Usa il profilo %@";
 "Use the page you're on when you click it" = "Usare la pagina in cui sei quando la clicchi";
 "Used on more than one site." = "Usata su più di un sito.";
 "User agent" = "User agent";
@@ -1241,6 +1310,7 @@
 "When you copy a link or an address, tracking parts such as utm_source, fbclid and gclid are removed, so what you paste is short and doesn't follow you. Press ⌥⇧L to copy the page's clean address." = "Quando copi un link o un indirizzo, le parti di tracciamento come utm_source, fbclid e gclid vengono tolte, così quello che incolli è corto e non ti segue. Premi ⌥⇧L per copiare l'indirizzo pulito della pagina.";
 "When you're signed in, come back and click I'm Signed In." = "Quando hai fatto l'accesso, torna qui e fai clic su Ho fatto l'accesso.";
 "Where to pick up next time" = "Da dove riprendere la prossima volta";
+"Which page?" = "Quale pagina?";
 "Who's browsing?" = "Chi sta navigando?";
 "Width" = "Larghezza";
 "Window locked" = "Finestra bloccata";
@@ -1258,6 +1328,8 @@
 "Yes, Use Tacet" = "Sì, usa Tacet";
 "You can change any choice later in Settings." = "Puoi cambiare ogni scelta più tardi nelle Impostazioni.";
 "You can change this anytime in Settings › AI." = "Puoi cambiarlo quando vuoi in Impostazioni › AI.";
+"You didn't send %d texts you wrote here" = "Non hai inviato %d testi che avevi scritto qui";
+"You didn't send what you wrote here" = "Non hai inviato quello che avevi scritto qui";
 "You'll be signed out of this site and its saved preferences will be removed." = "Verrai disconnesso da questo sito e le sue preferenze salvate verranno rimosse.";
 "You're all set" = "Tutto pronto";
 "You're already signed in to Google." = "Hai già effettuato l'accesso a Google.";
@@ -1274,6 +1346,7 @@
 "Your passwords" = "Le tue password";
 "Your tabs live here. Drag to reorder, right-click to pin. Hide it with ⌘S; hover the edge to peek." = "Qui vivono le tue schede. Trascina per riordinarle, clic destro per fissarle. Nascondila con ⌘S; passa sul bordo per vederla.";
 "Your tabs, passwords, settings and extensions are all still here" = "Schede, password, impostazioni ed estensioni sono tutte ancora qui";
+"Your text is on the clipboard" = "Il tuo testo è negli appunti";
 "Yours to customise" = "Personalizzabile";
 "Zoom" = "Zoom";
 "Zoom In" = "Ingrandisci";
@@ -1291,6 +1364,7 @@
 "fill your password for %@" = "compilare la password per %@";
 "formerly Lumen" = "in precedenza Lumen";
 "from %d sites" = "da %d siti";
+"in use" = "in uso";
 "macOS blocked access to %@'s data. Give Tacet Full Disk Access, then try again." = "macOS ha bloccato l'accesso ai dati di %@. Concedi a Tacet l'accesso completo al disco e riprova.";
 "macOS will ask you to confirm." = "macOS ti chiederà di confermare.";
 "microphone" = "il microfono";

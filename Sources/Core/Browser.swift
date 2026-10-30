@@ -36,6 +36,8 @@ final class BrowserState {
     var selectedID: UUID? {
         didSet {
             sessionChanged()
+            // A preview belongs to the page it was opened over.
+            if selectedID != oldValue, preview != nil { closePreview() }
             if selectedID != oldValue, let t = current {
                 ExtensionEvents.activated(t, previous: oldValue.flatMap { id in tabs.first { $0.id == id } })
             }
@@ -45,6 +47,8 @@ final class BrowserState {
     /// The Space this window shows; nil until Spaces are used.
     var spaceID: UUID? { didSet { sessionChanged() } }
     var space: Space? { Spaces.shared.space(spaceID) }
+    /// A link open over the page; see `openPreview`.
+    var preview: Tab?
     var sidebarVisible: Bool {
         didSet { if !isPrivate { Settings.shared.sidebarVisible = sidebarVisible } }
     }
@@ -112,6 +116,7 @@ final class BrowserState {
             // Tabs moved here from another window, which opened this one for them.
             if let move = WindowRegistry.shared.takePendingMove(profile: profileID) { adopt(move) }
         }
+        if !WebApp.isActive { for u in WindowRegistry.shared.takeRouted(privately: isPrivate, profile: profileID) { newTab(url: u) } }
         if tabs.isEmpty { newTab() }
 
         timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in self?.hibernateIdle() }
@@ -180,12 +185,13 @@ final class BrowserState {
         if !isPrivate { saveSpace() }
         // Its pages stop now (sound, video, timers), even if something still holds on to the window's state.
         for t in tabs { t.close() }
+        closePreview()
         if WindowRegistry.shared.lastFocused === self { WindowRegistry.shared.lastFocused = nil }
         if !isPrivate { Session.shared.scheduleSave() }
     }
 
     private func restore(_ snap: WindowSnapshot) {
-        if !isPrivate, let id = snap.space, Spaces.shared.space(id) != nil { spaceID = id }
+        if !isPrivate, let id = snap.space, Spaces.shared.space(id)?.profile == profileID { spaceID = id }
         groups = snap.groups ?? []
         tabs = snap.tabs.map { s in
             let t = Tab(browser: self, url: s.url, title: s.title, state: s.state, pinned: s.pinned)
@@ -207,6 +213,36 @@ final class BrowserState {
                        split: splitID.flatMap { id in tabs.firstIndex { $0.id == id } }, space: spaceID)
     }
 
+    // MARK: Link preview
+
+    /// Opens a link over the page without leaving it (⌥-click, or right-click › Open Link in Preview). It's a whole
+    /// tab, kept aside: Esc closes it, or it becomes a tab of its own or the other half of a split view.
+    func openPreview(_ url: URL) {
+        closePreview()
+        let t = Tab(browser: self, url: url)
+        t.ensureWebView()
+        preview = t
+    }
+
+    func closePreview() {
+        preview?.close()
+        preview = nil
+    }
+
+    func keepPreview() {
+        guard let t = preview else { return }
+        preview = nil
+        insert(t, after: current)
+        select(t)
+    }
+
+    func splitPreview() {
+        guard let t = preview else { return }
+        preview = nil
+        insert(t, after: current)
+        openSplit(t)
+    }
+
     // MARK: Spaces
 
     /// Keeps how this window's Space is now, so it comes back like this.
@@ -219,14 +255,14 @@ final class BrowserState {
     /// Leaves this window's Space as it is and shows another one in its place. A Space open in another window is
     /// brought forward instead of being opened twice.
     func switchSpace(to id: UUID) {
-        guard !isPrivate, id != spaceID, let target = Spaces.shared.space(id) else { return }
+        guard !isPrivate, id != spaceID, let target = Spaces.shared.space(id), target.profile == profileID else { return }
         if let other = WindowRegistry.shared.browsers.first(where: { $0 !== self && !$0.isClosed && $0.spaceID == id }) {
             other.window?.makeKeyAndOrderFront(nil)
             return
         }
         // Tabs open before Spaces were used aren't lost: they become a Space of their own.
         if spaceID == nil, tabs.contains(where: { $0.url != nil }) {
-            spaceID = Spaces.shared.add(L("Main")).id
+            spaceID = Spaces.shared.add(L("Main"), profile: profileID).id
         }
         saveSpace()
         let old = tabs
@@ -245,13 +281,14 @@ final class BrowserState {
     func newSpace(named name: String) {
         guard !isPrivate else { return }
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        let space = Spaces.shared.add(trimmed.isEmpty ? String(format: L("Space %d"), Spaces.shared.items.count + 1) : trimmed)
+        let space = Spaces.shared.add(trimmed.isEmpty ? String(format: L("Space %d"), Spaces.shared.items(for: profileID).count + 1) : trimmed,
+                                      profile: profileID)
         switchSpace(to: space.id)
     }
 
     /// The next or previous Space, in the order they're listed.
     func switchSpace(by offset: Int) {
-        let all = Spaces.shared.items
+        let all = Spaces.shared.items(for: profileID)
         guard !all.isEmpty else { return }
         let i = all.firstIndex { $0.id == spaceID } ?? (offset > 0 ? -1 : 0)
         switchSpace(to: all[(i + offset + all.count) % all.count].id)
@@ -326,6 +363,7 @@ final class BrowserState {
     /// ⌘-click: opens next to the opener, keeping successive links in order.
     func openInBackground(_ url: URL, from opener: Tab?, select: Bool = false) {
         if WebApp.isActive { WebApp.openInBrowser(url); return }
+        if OpeningRules.route(url, from: self) { return }
         var anchor = opener
         if let opener, let last = lastOpened, last.opener == opener.id,
            let t = tabs.first(where: { $0.id == last.tab }) { anchor = t }
@@ -505,11 +543,13 @@ final class BrowserState {
         var regular: [Tab] = []
         var placed = Set<UUID>()
         let unpinned = tabs.filter { !$0.isPinned }
+        // Each group's tabs, gathered once, so many groups don't mean scanning every tab for each.
+        let members = Dictionary(grouping: unpinned.filter { $0.groupID != nil }, by: { $0.groupID! })
         for t in unpinned {
             guard let g = t.groupID else { regular.append(t); continue }
             if placed.contains(g) { continue }
             placed.insert(g)
-            regular += unpinned.filter { $0.groupID == g }
+            regular += members[g] ?? []
         }
         tabs = tabs.filter(\.isPinned) + regular
     }

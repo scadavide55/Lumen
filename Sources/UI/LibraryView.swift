@@ -9,10 +9,12 @@ final class LibraryRouter {
 
 struct LibraryView: View {
     enum Section: String, CaseIterable, Identifiable {
-        case history, bookmarks, readingList, downloads
+        case history, bookmarks, readingList, highlights, downloads
         var id: String { rawValue }
         var label: String { self == .readingList ? L("Reading List") : L(rawValue.capitalized) }
-        var symbol: String { ["history": "clock", "bookmarks": "book", "readingList": "eyeglasses", "downloads": "arrow.down.circle"][rawValue]! }
+        var symbol: String {
+            ["history": "clock", "bookmarks": "book", "readingList": "eyeglasses", "highlights": "highlighter", "downloads": "arrow.down.circle"][rawValue]!
+        }
     }
 
     static var requestedSection: Section {
@@ -34,6 +36,7 @@ struct LibraryView: View {
             case .history: HistoryList(open: open)
             case .bookmarks: BookmarkList(open: open)
             case .readingList: ReadingListView(openOnline: open)
+            case .highlights: HighlightsList(open: open)
             case .downloads: DownloadsList()
             }
         }
@@ -308,5 +311,97 @@ struct ReadingListView: View {
             tab.openOffline(a)
         }
         b.window?.makeKeyAndOrderFront(nil)
+    }
+}
+
+// MARK: - Highlights
+
+/// Every passage you highlighted, with its note and page: search them, open the page at the passage, or take them
+/// to a notes app as Markdown.
+struct HighlightsList: View {
+    let open: ([URL]) -> Void
+    private var store = Highlights.shared
+    @State private var query = ""
+    @State private var selection = Set<UUID>()
+
+    private var shown: [Highlight] {
+        let words = query.lowercased().split(separator: " ").map(String.init)
+        guard !words.isEmpty else { return store.items }
+        return store.items.filter { h in
+            let hay = (h.quote + " " + h.note + " " + h.title + " " + (h.url.host ?? "")).lowercased()
+            return words.allSatisfy { hay.contains($0) }
+        }
+    }
+
+    var body: some View {
+        let list = shown
+        List(selection: $selection) {
+            ForEach(list) { h in
+                HStack(alignment: .top, spacing: 10) {
+                    RoundedRectangle(cornerRadius: 2).fill(Color(nsColor: Highlight.colors[h.color % Highlight.colors.count].swatch)).frame(width: 4)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(h.plainQuote).lineLimit(4)
+                        if !h.note.isEmpty {
+                            Label(h.note, systemImage: "note.text").font(.callout).foregroundStyle(.secondary).lineLimit(3)
+                        }
+                        Text((h.title.isEmpty ? (h.url.host ?? "") : h.title) + " · " + h.date.formatted(date: .abbreviated, time: .omitted))
+                            .font(.caption).foregroundStyle(.tertiary).lineLimit(1)
+                    }
+                }
+                .padding(.vertical, 3)
+                .tag(h.id)
+            }
+        }
+        .overlay {
+            if list.isEmpty {
+                ContentUnavailableView(query.isEmpty ? LocalizedStringKey("No Highlights") : "No Results", systemImage: "highlighter",
+                                       description: query.isEmpty ? Text("Select text on a page, right-click it and choose Highlight.") : nil)
+            }
+        }
+        .contextMenu(forSelectionType: UUID.self) { ids in
+            Button("Open") { open(picked(ids).map(\.linkToPassage)) }
+            Button("Copy as Markdown") { copy(store.markdown(picked(ids))) }
+            if ids.count == 1, let h = picked(ids).first {
+                Button("Edit Note…") { editNote(h) }
+                Menu("Colour") {
+                    ForEach(Highlight.colors.indices, id: \.self) { i in
+                        Button(L(Highlight.colors[i].name)) { store.update(h.id) { $0.color = i } }
+                    }
+                }
+            }
+            Divider()
+            Button("Delete") { store.remove(ids) }
+        } primaryAction: { ids in
+            open(picked(ids).map(\.linkToPassage))
+        }
+        .onDeleteCommand { store.remove(selection) }
+        .searchable(text: $query, placement: .toolbar, prompt: "Search highlights and notes")
+        .toolbar {
+            Button("Export as Markdown…") { export(list) }.disabled(list.isEmpty)
+        }
+        .navigationTitle("Highlights")
+    }
+
+    private func picked(_ ids: Set<UUID>) -> [Highlight] { store.items.filter { ids.contains($0.id) } }
+
+    private func copy(_ text: String) {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(text, forType: .string)
+    }
+
+    private func editNote(_ h: Highlight) {
+        Dialogs.prompt(nil, title: L("Note"), message: h.plainQuote.count > 160 ? String(h.plainQuote.prefix(160)) + "…" : h.plainQuote,
+                       defaultText: h.note) { text in
+            guard let text else { return }
+            store.update(h.id) { $0.note = text.trimmingCharacters(in: .whitespacesAndNewlines) }
+        }
+    }
+
+    private func export(_ list: [Highlight]) {
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [UTType(filenameExtension: "md") ?? .plainText]
+        panel.nameFieldStringValue = L("Highlights") + ".md"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do { try store.markdown(list).write(to: url, atomically: true, encoding: .utf8) } catch { NSAlert(error: error).runModal() }
     }
 }

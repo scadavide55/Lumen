@@ -37,6 +37,10 @@ struct ContentView: View {
             .frame(minWidth: 640, minHeight: 420)
             .ignoresSafeArea()
             .onAppear {
+                // Lets opening rules open a private or profile window for a link.
+                WindowRegistry.shared.openWindow = { id, profile in
+                    if id == "profile", let profile { openWindow(id: id, value: profile) } else { openWindow(id: id) }
+                }
                 guard !browser.isPrivate, !WebApp.isActive else { return }
                 // The first window of a fresh start asks for a profile, unless it reopened the last session or a link.
                 if !ContentView.profileAsked {
@@ -223,6 +227,53 @@ struct PageArea: View {
             if let tab = b.current { TabPane(tab: tab, isSplit: false).id(tab.id) }
             if let split = b.splitTab { TabPane(tab: split, isSplit: true).id(split.id) }
         }
+        .overlay {
+            if let preview = b.preview { LinkPreviewPanel(tab: preview).id(preview.id).transition(.opacity) }
+        }
+        .animation(.easeOut(duration: 0.15), value: b.preview?.id)
+    }
+}
+
+/// A link opened over the page (⌥-click): the page stays behind it, dimmed, as it was.
+struct LinkPreviewPanel: View {
+    var tab: Tab
+    @Environment(BrowserState.self) var b
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.28)
+                .contentShape(Rectangle())
+                .onTapGesture { b.closePreview() }
+            VStack(spacing: 0) {
+                HStack(spacing: 8) {
+                    FaviconView(tab: tab, size: 14)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(tab.title.isEmpty ? InputResolver.displayHost(tab.url) : tab.title)
+                            .font(.system(size: 12.5, weight: .semibold)).lineLimit(1)
+                        Text(InputResolver.displayHost(tab.url)).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1)
+                    }
+                    Spacer(minLength: 8)
+                    Button("Side by Side") { b.splitPreview() }.help("Show it next to this page in split view")
+                    Button("Open as Tab") { b.keepPreview() }.buttonStyle(.borderedProminent).help("Keep it as a tab (⌘↩)")
+                    Button { b.closePreview() } label: { Image(systemName: "xmark").font(.system(size: 11, weight: .bold)) }
+                        .buttonStyle(.plain).foregroundStyle(.secondary).help("Close (Esc)")
+                }
+                .controlSize(.small)
+                .padding(.horizontal, 12).frame(height: 40)
+                Divider()
+                ZStack {
+                    if let wv = tab.webView { WebContainer(webView: wv, radius: 0) }
+                    if tab.isLoading && tab.webView?.url == nil { ProgressView().controlSize(.small) }
+                }
+                .overlay(alignment: .top) { if tab.isLoading { LoadingLine(load: tab.load) } }
+            }
+            .background(Color(nsColor: .textBackgroundColor))
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.primary.opacity(0.12)))
+            .shadow(color: .black.opacity(0.3), radius: 24, y: 8)
+            .padding(.horizontal, 48).padding(.vertical, 28)
+        }
+        .onAppear { tab.ensureWebView() }
     }
 }
 
@@ -270,10 +321,12 @@ struct TabPane: View {
             VStack(spacing: 0) {
                 if tab.insecureWarning { InsecurePasswordBanner(tab: tab) }
                 if let help = tab.passkeyHelp { PasskeyBanner(tab: tab, help: help) }
+                if !tab.draftOffer.isEmpty { DraftBanner(tab: tab) }
                 if let pending = tab.pendingSave { SavePasswordBanner(tab: tab, pending: pending) }
             }
             .animation(.easeOut(duration: 0.2), value: tab.pendingSave)
             .animation(.easeOut(duration: 0.2), value: tab.passkeyHelp)
+            .animation(.easeOut(duration: 0.2), value: tab.draftOffer)
             .animation(.easeOut(duration: 0.2), value: tab.insecureWarning)
         }
         .overlay(alignment: .bottomTrailing) {

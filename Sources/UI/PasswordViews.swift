@@ -186,6 +186,47 @@ struct PasskeyBanner: View {
     }
 }
 
+/// "You didn't send what you wrote here": text kept from an earlier visit, to put back.
+struct DraftBanner: View {
+    var tab: Tab
+
+    var body: some View {
+        let first = tab.draftOffer[0]
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "doc.badge.clock").font(.system(size: 18)).foregroundStyle(.tint)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(tab.draftOffer.count == 1 ? L("You didn't send what you wrote here") : String(format: L("You didn't send %d texts you wrote here"), tab.draftOffer.count))
+                    .font(.system(size: 13, weight: .semibold))
+                Text((first.label.isEmpty ? "" : first.label + " · ") + first.date.formatted(.relative(presentation: .named)))
+                    .font(.system(size: 11.5)).foregroundStyle(.secondary)
+                Text(first.text.split(whereSeparator: \.isNewline).joined(separator: " "))
+                    .font(.system(size: 11.5)).foregroundStyle(.secondary).lineLimit(2)
+                HStack(spacing: 8) {
+                    Button("Put It Back") { tab.restoreDrafts() }.buttonStyle(.borderedProminent)
+                    Button("Copy") {
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(tab.draftOffer.map(\.text).joined(separator: "\n\n"), forType: .string)
+                        tab.draftOffer = []
+                    }
+                    Button("Discard") { tab.discardDrafts() }
+                }
+                .padding(.top, 5)
+            }
+            Spacer(minLength: 8)
+            Button { tab.draftOffer = [] } label: { Image(systemName: "xmark").font(.system(size: 10, weight: .bold)) }
+                .buttonStyle(.plain).foregroundStyle(.secondary).help("Not now")
+        }
+        .controlSize(.small)
+        .padding(12)
+        .frame(maxWidth: 560)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.primary.opacity(0.1)))
+        .shadow(color: .black.opacity(0.18), radius: 14, y: 4)
+        .padding(10)
+        .transition(.move(edge: .top).combined(with: .opacity))
+    }
+}
+
 /// Warning shown when a password field appears on an unencrypted page.
 struct InsecurePasswordBanner: View {
     var tab: Tab

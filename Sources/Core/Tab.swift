@@ -35,6 +35,10 @@ final class Tab: NSObject, Identifiable {
     var loginMenu: LoginMenu?
     var pendingSave: PendingLogin?
     var insecureWarning = false
+    /// Unsent text from an earlier visit to this page, offered back in a banner.
+    var draftOffer: [Draft] = []
+    /// The highlight under the pointer, for the right-click menu.
+    @ObservationIgnored var hoveredHighlight: UUID?
     /// A site asked for a passkey, which Tacet can't use yet: the banner that offers Safari instead.
     var passkeyHelp: PasskeyHelp?
     /// Picking elements on the page to hide.
@@ -584,6 +588,17 @@ final class Tab: NSObject, Identifiable {
             if loginMenu != nil { loginMenu = nil }
         case "insecurePassword":
             insecureWarning = true
+        case "draft":
+            guard Settings.shared.recoverDrafts, !isPrivate, let page = url, let key = body["key"] as? String,
+                  let text = body["text"] as? String else { return }
+            Drafts.shared.keep(page: page, field: key, label: body["label"] as? String ?? "", text: text)
+            draftOffer.removeAll { $0.field == key }
+        case "draftDone":
+            if let page = url, let key = body["key"] as? String { Drafts.shared.forget(page: page, field: key) }
+        case "hlHover":
+            hoveredHighlight = (body["id"] as? String).flatMap(UUID.init(uuidString:))
+        case "preview":
+            if let raw = body["url"] as? String, let u = URL(string: raw), ["http", "https"].contains(u.scheme ?? "") { browser?.openPreview(u) }
         case "passkey":
             guard let host, passkeyHelp == nil || passkeyHelp?.site != PasswordStore.site(host) else { return }
             passkeyHelp = PasskeyHelp(site: PasswordStore.site(host), url: url)
@@ -595,6 +610,94 @@ final class Tab: NSObject, Identifiable {
         default:
             break
         }
+    }
+
+    // MARK: Drafts
+
+    /// Offers back what you were writing on this page last time, if it wasn't sent.
+    private func offerDrafts() {
+        let found = Settings.shared.recoverDrafts && !isPrivate ? Drafts.shared.on(url) : []
+        if draftOffer != found { draftOffer = found }
+    }
+
+    /// Puts each draft back in its field; any whose field is gone or already filled is copied instead.
+    func restoreDrafts() {
+        let offer = draftOffer
+        draftOffer = []
+        guard let wv = webView else { return }
+        var leftovers: [String] = []
+        let group = DispatchGroup()
+        for d in offer {
+            group.enter()
+            wv.callAsyncJavaScript("return window.__tacetDrafts ? window.__tacetDrafts.restore(k, t) : 'missing'",
+                                   arguments: ["k": d.field, "t": d.text], in: nil, in: .defaultClient) { result in
+                if ((try? result.get()) as? String) != "ok" { leftovers.append(d.text) }
+                group.leave()
+            }
+        }
+        group.notify(queue: .main) {
+            guard !leftovers.isEmpty else { return }
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(leftovers.joined(separator: "\n\n"), forType: .string)
+            Dialogs.alert(wv.window, title: L("Your text is on the clipboard"),
+                          message: L("The field it was in isn't on the page now, or already has text. Paste it where you want it.")) {}
+        }
+    }
+
+    func discardDrafts() {
+        Drafts.shared.forget(Set(draftOffer.map(\.id)))
+        draftOffer = []
+    }
+
+    // MARK: Highlights
+
+    /// Puts this page's highlights back, again a little later for pages that fill in as they load.
+    func applyHighlights() {
+        let list = Highlights.shared.on(url)
+        guard !list.isEmpty, !isPrivate else { return }
+        let payload = list.map { ["id": $0.id.uuidString, "quote": $0.quote, "prefix": $0.prefix, "suffix": $0.suffix, "css": $0.css, "note": $0.note] }
+        // Only into the same web view, still on the same page: a later run must not mark another document.
+        guard let wv = webView, let page = url.map(Highlight.pageKey) else { return }
+        for delay in [0.0, 1.5, 4.0] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                guard let self, self.webView === wv, wv.url.map(Highlight.pageKey) == page else { return }
+                wv.callAsyncJavaScript("return window.__tacetHL && window.__tacetHL.apply(list)", arguments: ["list": payload],
+                                                   in: nil, in: .defaultClient) { _ in }
+            }
+        }
+    }
+
+    /// Marks the selected text in a colour, then asks for a note when wanted.
+    func highlightSelection(color: Int, askNote: Bool = false) {
+        guard !isPrivate, let page = url, let wv = webView else { return }
+        let id = UUID()
+        let css = Highlight.colors[color % Highlight.colors.count].css
+        wv.callAsyncJavaScript("return window.__tacetHL && window.__tacetHL.capture(h)", arguments: ["h": ["id": id.uuidString, "css": css, "note": ""]],
+                               in: nil, in: .defaultClient) { [weak self] result in
+            guard let self, let found = (try? result.get()) as? [String: Any], let quote = found["quote"] as? String else { return }
+            let h = Highlight(id: id, url: Highlight.pageKey(page), title: self.title, quote: quote,
+                              prefix: found["prefix"] as? String ?? "", suffix: found["suffix"] as? String ?? "", color: color)
+            Highlights.shared.add(h)
+            if askNote { self.editHighlightNote(id) }
+        }
+    }
+
+    func editHighlightNote(_ id: UUID) {
+        guard let h = Highlights.shared.items.first(where: { $0.id == id }) else { return }
+        Dialogs.prompt(webView?.window, title: L("Note"), message: h.plainQuote.count > 160 ? String(h.plainQuote.prefix(160)) + "…" : h.plainQuote,
+                       defaultText: h.note) { [weak self] text in
+            guard let text else { return }
+            let note = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            Highlights.shared.update(id) { $0.note = note }
+            self?.webView?.callAsyncJavaScript("window.__tacetHL && window.__tacetHL.note(i, t)", arguments: ["i": id.uuidString, "t": note],
+                                               in: nil, in: .defaultClient) { _ in }
+        }
+    }
+
+    func removeHighlight(_ id: UUID) {
+        Highlights.shared.remove([id])
+        webView?.callAsyncJavaScript("window.__tacetHL && window.__tacetHL.remove(i)", arguments: ["i": id.uuidString], in: nil, in: .defaultClient) { _ in }
+        if hoveredHighlight == id { hoveredHighlight = nil }
     }
 
     // MARK: What the page said
@@ -724,10 +827,10 @@ final class Tab: NSObject, Identifiable {
                                arguments: ["p": password], in: nil, in: .defaultClient) { _ in }
     }
 
-    private func showHTTPSOnlyPage(_ url: URL, in webView: WKWebView) {
+    private func showHTTPSOnlyPage(_ url: URL, in webView: WKWebView, certificate: Bool = false) {
         failedURL = url
         internalLoad = true
-        internalNavigation = webView.loadHTMLString(Scripts.httpsOnlyPage(url: url), baseURL: nil)
+        internalNavigation = webView.loadHTMLString(Scripts.httpsOnlyPage(url: url, certificate: certificate), baseURL: nil)
     }
 
     private func openExternal(_ url: URL) {
@@ -749,10 +852,13 @@ final class Tab: NSObject, Identifiable {
         if e.domain == "WebKitErrorDomain" && (e.code == 102 || e.code == 204) { return }
         let failing = (e.userInfo[NSURLErrorFailingURLErrorKey] as? URL) ?? webView.url
         if let up = upgrade, let f = failing, f.scheme == "https", f.host?.lowercased() == up.host, HTTPSUpgrade.shouldFallBack(e) {
-            HTTPSUpgrade.httpOnly.insert(up.host)
+            // A bad certificate doesn't mean the site has no HTTPS: someone on the network may be in the way. The
+            // user decides, and the site isn't remembered as HTTP-only.
+            let certificate = HTTPSUpgrade.isCertificateError(e)
+            if !certificate { HTTPSUpgrade.httpOnly.insert(up.host) }
             upgrade = nil
-            if Settings.shared.httpsOnly && !HTTPSUpgrade.userAllowed.contains(up.host) {
-                showHTTPSOnlyPage(up.original, in: webView)
+            if (certificate || Settings.shared.httpsOnly) && !HTTPSUpgrade.userAllowed.contains(up.host) {
+                showHTTPSOnlyPage(up.original, in: webView, certificate: certificate)
             } else {
                 webView.load(URLRequest(url: up.original))
             }
@@ -912,6 +1018,8 @@ extension Tab: WKNavigationDelegate {
         guard navigation !== internalNavigation, !isPrivate, !isReader, let u = webView.url else { return }
         History.shared.record(url: u, title: webView.title ?? "")
         keepPageText(of: u, in: webView)
+        applyHighlights()
+        offerDrafts()
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
@@ -961,7 +1069,10 @@ extension Tab: WKNavigationDelegate {
 extension Tab: WKUIDelegate {
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration,
                  for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
-        browser?.openPopup(configuration: configuration, from: self, features: windowFeatures)
+        // A link that opens a new tab follows the opening rules; sign-in pop-ups (sized windows) never do.
+        if navigationAction.navigationType == .linkActivated, windowFeatures.width == nil, windowFeatures.height == nil,
+           let url = navigationAction.request.url, OpeningRules.route(url, from: browser) { return nil }
+        return browser?.openPopup(configuration: configuration, from: self, features: windowFeatures)
     }
 
     func webViewDidClose(_ webView: WKWebView) {
@@ -1046,12 +1157,14 @@ final class LumenWebView: WKWebView {
             if let id = item.identifier?.rawValue, let title = renames[id] { item.title = title }
         }
         addAssistantItems(to: menu)
+        addHighlightItems(to: menu)
         addCutoutItem(to: menu, at: convert(event.locationInWindow, from: nil))
         addExtensionItems(to: menu)
         guard let tab, let browser = tab.browser, let link = tab.hoverURL, let url = URL(string: link) else { return }
         let anchor = menu.items.firstIndex { $0.identifier?.rawValue == "WKMenuItemIdentifierOpenLinkInNewWindow" }
         var index = (anchor ?? -1) + 1
         let extra = [
+            ActionMenuItem(L("Open Link in Preview")) { browser.openPreview(url) },
             ActionMenuItem(L("Open Link in Background Tab")) { browser.openInBackground(url, from: tab) },
             ActionMenuItem(L("Open Link in Split View")) {
                 let t = browser.newTab(url: url, select: false, after: tab)
@@ -1116,6 +1229,35 @@ extension LumenWebView {
         }
         let item = NSMenuItem(title: L("Tacet Assistant"), action: nil, keyEquivalent: "")
         item.image = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
+        item.submenu = sub
+        menu.insertItem(item, at: copy + 1)
+    }
+}
+
+extension LumenWebView {
+    /// Highlight for selected text; note and removal on a highlight.
+    func addHighlightItems(to menu: NSMenu) {
+        guard let tab, !tab.isPrivate, tab.url != nil else { return }
+        if let id = tab.hoveredHighlight, Highlights.shared.items.contains(where: { $0.id == id }) {
+            menu.insertItem(.separator(), at: 0)
+            menu.insertItem(ActionMenuItem(L("Remove Highlight")) { tab.removeHighlight(id) }, at: 0)
+            menu.insertItem(ActionMenuItem(L("Edit Highlight Note…")) { tab.editHighlightNote(id) }, at: 0)
+        }
+        guard let copy = menu.items.firstIndex(where: { $0.identifier?.rawValue == "WKMenuItemIdentifierCopy" }) else { return }
+        let sub = NSMenu()
+        for (i, c) in Highlight.colors.enumerated() {
+            let item = ActionMenuItem(L(c.name)) { tab.highlightSelection(color: i) }
+            item.image = NSImage(size: NSSize(width: 12, height: 12), flipped: false) { rect in
+                c.swatch.setFill()
+                NSBezierPath(ovalIn: rect.insetBy(dx: 1, dy: 1)).fill()
+                return true
+            }
+            sub.addItem(item)
+        }
+        sub.addItem(.separator())
+        sub.addItem(ActionMenuItem(L("Highlight with Note…")) { tab.highlightSelection(color: 0, askNote: true) })
+        let item = NSMenuItem(title: L("Highlight"), action: nil, keyEquivalent: "")
+        item.image = NSImage(systemSymbolName: "highlighter", accessibilityDescription: nil)
         item.submenu = sub
         menu.insertItem(item, at: copy + 1)
     }
