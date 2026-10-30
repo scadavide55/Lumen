@@ -286,6 +286,40 @@ final class BrowserState {
         switchSpace(to: space.id)
     }
 
+    /// Deletes a Space. One open in this window is left first, for another Space or, if it was the last, for no
+    /// Spaces at all; a window elsewhere showing it simply keeps its tabs outside Spaces.
+    func deleteSpace(_ id: UUID) {
+        guard !isPrivate, let space = Spaces.shared.space(id) else { return }
+        for w in WindowRegistry.shared.browsers where w !== self && w.spaceID == id { w.spaceID = nil }
+        if spaceID == id {
+            if let other = Spaces.shared.items(for: profileID).first(where: { $0.id != id }) {
+                switchSpace(to: other.id)
+            } else {
+                spaceID = nil
+            }
+        }
+        Spaces.shared.remove(space.id)
+    }
+
+    /// Ends Spaces for this profile. Nothing is lost: the tabs of each other Space come into this window as a tab
+    /// group named after it, and the Space buttons go away.
+    func turnOffSpaces() {
+        guard !isPrivate else { return }
+        for space in Spaces.shared.items(for: profileID) where space.id != spaceID {
+            if let w = WindowRegistry.shared.browsers.first(where: { $0 !== self && $0.spaceID == space.id }) {
+                w.spaceID = nil
+                continue
+            }
+            let snaps = (space.saved?.tabs ?? []).filter { $0.url != nil }
+            guard !snaps.isEmpty else { continue }
+            let brought = snaps.map { s in Tab(browser: self, url: s.url, title: s.title, state: s.state, pinned: false) }
+            tabs += brought
+            _ = group(brought, named: space.name)
+        }
+        spaceID = nil
+        Spaces.shared.removeAll(for: profileID)
+    }
+
     /// The next or previous Space, in the order they're listed.
     func switchSpace(by offset: Int) {
         let all = Spaces.shared.items(for: profileID)

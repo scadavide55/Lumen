@@ -33,6 +33,7 @@
 "3 months" = "3 mois";
 "3 tabs" = "3 onglets";
 "5 tabs" = "5 onglets";
+"A Space is a set of tabs you can leave and come back to, such as School and Coding: switching swaps every tab in the window. They only appear once you make one. Turning them off keeps every tab, each Space becoming a tab group." = "Un espace est un ensemble d'onglets à quitter et retrouver, comme École et Code : changer d'espace remplace tous les onglets de la fenêtre. Ils n'apparaissent qu'une fois créés. Les désactiver garde tous les onglets, chaque espace devenant un groupe.";
 "A Space keeps a whole set of tabs, groups and pinned tabs with a note to yourself. Leave School, open Coding, and come back to School exactly as it was." = "Un espace garde tout un ensemble d'onglets, de groupes et d'onglets épinglés, avec une note pour vous. Quittez École, ouvrez Code, et retrouvez École exactement comme vous l'aviez laissé.";
 "A few things worth knowing." = "Quelques choses à savoir.";
 "A focus timer in a tab of its own: 25 minutes of work and 5 of rest, or your own lengths. The time left shows in the tab's title, so you can see it from the tab list, and a soft sound says when it's done." = "Un minuteur de concentration dans son propre onglet : 25 minutes de travail et 5 de pause, ou vos propres durées. Le temps restant s'affiche dans le titre de l'onglet, visible depuis la liste, et un son doux annonce la fin.";
@@ -313,6 +314,8 @@
 "Delete all saved chats?" = "Supprimer toutes les discussions enregistrées ?";
 "Delete automation" = "Supprimer l'automatisation";
 "Delete “%@”?" = "Supprimer « %@ » ?";
+"Delete “%@”…" = "Supprimer « %@ »…";
+"Delete…" = "Supprimer…";
 "Deselect Tabs" = "Désélectionner les onglets";
 "Developer" = "Développeur";
 "Developer: %@" = "Développeur : %@";
@@ -331,6 +334,7 @@
 "Dragging on the page" = "Glisser-déposer dans la page";
 "Duplicate Tab" = "Dupliquer l'onglet";
 "Dusk" = "Crépuscule";
+"Each Space keeps its own tabs. Switching swaps them all." = "Chaque espace a ses propres onglets. Changer d'espace les remplace tous.";
 "Each profile keeps its own cookies, sign-ins and site data, so you can be signed in to different accounts at the same time. History, bookmarks, passwords and settings are shared." = "Chaque profil a ses propres cookies, connexions et données de sites, pour être connecté à plusieurs comptes en même temps. L'historique, les signets, les mots de passe et les réglages sont partagés.";
 "Easy to guess." = "Facile à deviner.";
 "EasyList (ads)" = "EasyList (publicités)";
@@ -344,6 +348,8 @@
 "Enable JavaScript" = "Activer JavaScript";
 "Enable Web Inspector" = "Activer l'inspecteur web";
 "Engine" = "Moteur";
+"Every Space becomes a tab group in this window" = "Chaque espace devient un groupe d'onglets dans cette fenêtre";
+"Every Space is removed. Nothing is lost: the tabs of your other Spaces come into this window, each Space as a tab group." = "Tous les espaces sont supprimés. Rien n'est perdu : les onglets de vos autres espaces arrivent dans cette fenêtre, chaque espace en groupe d'onglets.";
 "Every extension in one place" = "Toutes les extensions au même endroit";
 "Every shortcut in one place" = "Tous les raccourcis au même endroit";
 "Every window comes back when Tacet opens, closed windows stay closed, and links from other apps open as tabs instead of empty windows." = "Toutes les fenêtres reviennent à l’ouverture, les fenêtres fermées restent fermées, et les liens d’autres apps s’ouvrent en onglets au lieu de fenêtres vides.";
@@ -512,6 +518,7 @@
 "It will be able to:" = "Elle pourra :";
 "It works in Tacet, but Tacet's developer hasn't checked what it does. Add it only if you trust who made it." = "Il fonctionne dans Tacet, mais le développeur de Tacet n’a pas vérifié ce qu’il fait. Ajoutez-le seulement si vous faites confiance à son auteur.";
 "Its cookies, sign-ins and site data will be removed. Saved passwords stay in Tacet." = "Ses cookies, connexions et données de sites seront supprimés. Les mots de passe enregistrés restent dans Tacet.";
+"Its note goes with it. The tabs you see now stay open." = "Sa note est supprimée. Les onglets affichés restent ouverts.";
 "Its own window and Dock icon" = "Sa propre fenêtre et icône dans le Dock";
 "Its settings and data are removed too." = "Ses réglages et données sont aussi supprimés.";
 "Its tabs, groups and note are deleted with it." = "Ses onglets, groupes et note sont supprimés avec lui.";
@@ -666,6 +673,7 @@
 "No site loaded" = "Aucun site chargé";
 "No web apps yet. Open a site and choose Install as App from the page menu." = "Aucune web app pour l'instant. Ouvrez un site et choisissez Installer comme app dans le menu de la page.";
 "None" = "Aucun";
+"None yet. Make one with Tab › New Space… or the + at the bottom of the sidebar." = "Aucun pour l'instant. Créez-en un avec Onglet › Nouvel espace… ou le + en bas de la barre latérale.";
 "None. Turn Shield off for a site from the shield button in the toolbar." = "Aucun. Désactivez Shield pour un site avec le bouton bouclier de la barre d'outils.";
 "Not Now" = "Pas maintenant";
 "Not Secure" = "Non sécurisé";
@@ -854,6 +862,7 @@
 "Rename Bookmark" = "Renommer le signet";
 "Rename Group…" = "Renommer le groupe…";
 "Rename Space" = "Renommer l'espace";
+"Rename “%@”…" = "Renommer « %@ »…";
 "Rename…" = "Renommer…";
 "Reopen Closed Tab" = "Rouvrir l'onglet fermé";
 "Reopen closed tab" = "Rouvrir l'onglet fermé";
@@ -958,6 +967,7 @@
 "Settings › Extensions" = "Réglages › Extensions";
 "Settings › General › Move to another Mac" = "Réglages › Général › Passer à un autre Mac";
 "Settings › General › Opening rules" = "Réglages › Général › Règles d'ouverture";
+"Settings › General › Spaces" = "Réglages › Général › Espaces";
 "Settings › General › Tabs: when to group, and sites never to group" = "Réglages › Général › Onglets : quand grouper, et les sites à ne jamais grouper";
 "Settings › Passwords › Check…" = "Réglages › Mots de passe › Vérifier…";
 "Settings › Shield › Searching what pages said" = "Réglages › Shield › Rechercher dans le texte des pages";
@@ -1049,6 +1059,8 @@
 "Space %d" = "Espace %d";
 "Spaces" = "Espaces";
 "Spaces and pinned tabs" = "Espaces et onglets épinglés";
+"Spaces are clearer now. Delete or rename any Space from the Space button, see them all in Settings, or turn them off: nothing is lost, every Space comes back as a tab group." = "Les espaces sont plus clairs. Supprimez ou renommez n'importe quel espace avec le bouton Espace, voyez-les tous dans les Réglages, ou désactivez-les : rien n'est perdu, chaque espace revient en groupe d'onglets.";
+"Spaces, simpler" = "Espaces, plus simples";
 "Split View" = "Vue partagée";
 "Split View with New Tab" = "Vue partagée avec un nouvel onglet";
 "Split view" = "Vue partagée";
@@ -1153,6 +1165,7 @@
 "The Apple model is still downloading. Try again in a few minutes." = "Le modèle Apple est encore en cours de téléchargement. Réessayez dans quelques minutes.";
 "The Apple model isn't available on this Mac." = "Le modèle Apple n'est pas disponible sur ce Mac.";
 "The Apple model needs macOS 26 or later." = "Le modèle Apple nécessite macOS 26 ou ultérieur.";
+"The Space button › Turn Off Spaces…" = "Bouton Espace › Désactiver les espaces…";
 "The answer was cut off because it reached the length limit." = "La réponse a été coupée car elle a atteint la limite de longueur.";
 "The app gets its own window and Dock icon, and opens in ~/Applications/Tacet Apps. Sign in once inside the app: it keeps its own cookies." = "L'app a sa propre fenêtre et icône dans le Dock, dans ~/Applications/Tacet Apps. Connectez-vous une fois dans l'app : elle garde ses propres cookies.";
 "The app needs a name." = "L'app a besoin d'un nom.";
@@ -1236,12 +1249,15 @@
 "Turn Off" = "Désactiver";
 "Turn Off Ad Blocker" = "Désactiver le bloqueur de publicités";
 "Turn Off Everywhere" = "Désactiver partout";
+"Turn Off Spaces" = "Désactiver les espaces";
+"Turn Off Spaces…" = "Désactiver les espaces…";
 "Turn Off for %@" = "Désactiver sur %@";
 "Turn On" = "Activer";
 "Turn On Ad Blocker" = "Activer le bloqueur de publicités";
 "Turn On for %@" = "Activer sur %@";
 "Turn On…" = "Activer…";
 "Turn it off in Settings › General › Tabs" = "Désactivez-le dans Réglages › Général › Onglets";
+"Turn off Spaces?" = "Désactiver les espaces ?";
 "Turn off animations" = "Désactiver les animations";
 "Turn off this site's changes" = "Désactiver les changements de ce site";
 "Turn on" = "Activer";
@@ -1356,6 +1372,7 @@
 "Your bookmarks, history and sign-ins can come with you in the next step." = "À l'étape suivante, vous pourrez importer vos signets, votre historique et vos connexions.";
 "Your history stays; only what the pages said is deleted." = "L'historique reste ; seul le texte des pages est supprimé.";
 "Your name" = "Votre prénom";
+"Your open tabs become the Space “Main”, and this window switches to the new, empty one. Switch back any time from the Space button." = "Vos onglets ouverts deviennent l'espace « Main », et cette fenêtre passe au nouvel espace, vide. Revenez quand vous voulez avec le bouton Espace.";
 "Your own CSS for any site: hide distractions, change fonts, restyle pages. Applies to subdomains too." = "Votre propre CSS pour n'importe quel site : masquez les distractions, changez les polices, restylez les pages. S'applique aussi aux sous-domaines.";
 "Your own key: Anthropic, OpenAI, OpenRouter, DeepSeek, or a model on your Mac with Ollama" = "Votre propre clé : Anthropic, OpenAI, OpenRouter, DeepSeek, ou un modèle sur votre Mac avec Ollama";
 "Your passwords" = "Vos mots de passe";

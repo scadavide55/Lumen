@@ -359,6 +359,9 @@ struct LumenCommands: Commands {
                 Divider()
             }
             Button("New Space…") { if let b { SpaceActions.askNew(in: b) } }.disabled(b == nil || b?.isPrivate == true)
+            if let b, !b.isPrivate, !Spaces.shared.items(for: b.profileID).isEmpty {
+                Button("Turn Off Spaces…") { SpaceActions.askTurnOff(in: b) }
+            }
             Button("Next Space") { b?.switchSpace(by: 1) }
                 .keyboardShortcut(.rightArrow, modifiers: [.control, .command])
                 .disabled(b == nil || b?.isPrivate == true || Spaces.shared.items(for: b?.profileID).isEmpty)

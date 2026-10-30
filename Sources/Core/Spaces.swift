@@ -55,10 +55,15 @@ final class Spaces {
         persist()
     }
 
-    /// Only a Space no window shows can go; its tabs go with it.
+    /// Removes a Space and its saved tabs. Windows showing it are left out of Spaces first (BrowserState.deleteSpace).
     func remove(_ id: UUID) {
-        guard !isOpen(id) else { return }
         items.removeAll { $0.id == id }
+        persist()
+    }
+
+    /// Removes every Space of a profile.
+    func removeAll(for profile: UUID?) {
+        items.removeAll { $0.profile == profile }
         persist()
     }
 

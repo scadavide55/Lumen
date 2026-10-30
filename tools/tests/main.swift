@@ -90,12 +90,12 @@ check(!UpdateChecker.isNewer("1.5", than: "1.5.0"), "1.5 == 1.5.0")
 check(!UpdateChecker.isNewer("1.5.3", than: "1.5.4"), "1.5.3 < 1.5.4")
 
 // MARK: Welcome pages
-eq(WhatsNew.pages(since: "1.6.5").map(\.version), Array(repeating: "1.7", count: 5), "welcome after 1.6.5: only 1.7 pages")
-eq(Set(WhatsNew.pages(since: "1.6.4").map(\.version)), ["1.6.5", "1.7"], "welcome after 1.6.4: 1.6.5 and 1.7 pages")
+check(WhatsNew.pages(since: "1.7").isEmpty, "welcome after 1.7: nothing (1.7.0.1 is a fix)")
+eq(Set(WhatsNew.pages(since: "1.6.5").map(\.version)), ["1.7"], "welcome after 1.6.5: 1.7 and 1.7.0.1 pages")
 eq(Set(WhatsNew.pages(since: "1.6.1").map(\.version)), ["1.6.2", "1.6.3", "1.6.4", "1.6.5", "1.7"], "welcome after 1.6.1: every newer page")
 eq(WhatsNew.pages(since: "1.6").count, WhatsNew.all.count, "welcome after 1.6: every page")
 eq(WhatsNew.pages(since: "").count, WhatsNew.all.count, "welcome never seen: every page")
-check(WhatsNew.pages(since: "1.7").isEmpty, "welcome already seen: nothing")
+check(WhatsNew.pages(since: "1.7.0.1").isEmpty, "welcome already seen: nothing")
 
 // MARK: Arc's sidebar
 do {

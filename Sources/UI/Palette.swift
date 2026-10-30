@@ -382,6 +382,7 @@ struct CommandPalette: View {
             command(s.adBlock ? "Turn Off Ad Blocker" : "Turn On Ad Blocker", "shield.lefthalf.filled", "⇧⌘B") { s.adBlock.toggle() },
             command("Lock Window with Touch ID", "lock", "⌃⌘L") { b.lock() },
             command("New Space", "square.stack", "A set of tabs to leave and come back to") { SpaceActions.askNew(in: b) },
+            command("Turn Off Spaces", "square.stack.3d.down.forward", "Every Space becomes a tab group in this window") { SpaceActions.askTurnOff(in: b) },
             command("Hibernate Other Tabs", "moon.zzz", "Free memory used by background tabs") { b.hibernateOthers() },
             command("Close Duplicate Tabs", "square.on.square.dashed", "Keeps one tab per address") { b.closeDuplicates() },
             command("Group Tabs by Site", "square.grid.3x1.folder.badge.plus", "Groups tabs from the same site now") { b.groupBySiteNow() },

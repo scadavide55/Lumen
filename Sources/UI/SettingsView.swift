@@ -73,6 +73,7 @@ struct GeneralPane: View {
                     }
                 }
             }
+            SpacesSettings()
             OpeningRulesSettings()
             Section("Tabs") {
                 Toggle("Restore windows and tabs when Tacet opens", isOn: $s.restoreSession)

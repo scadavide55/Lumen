@@ -67,7 +67,7 @@ struct SpaceMenu: View {
         Button("Move Right") { Spaces.shared.move(space.id, by: 1) }
         Divider()
         Button("Delete Space…") { SpaceActions.askDelete(space, in: b) }
-            .disabled(Spaces.shared.isOpen(space.id))
+        Button("Turn Off Spaces…") { SpaceActions.askTurnOff(in: b) }
     }
 }
 
@@ -138,8 +138,13 @@ struct SpaceMenuButton: View {
                 Divider()
                 Button("New Space…") { SpaceActions.askNew(in: b) }
                 if let space = b.space {
+                    Button("Rename “\(space.name)”…") { SpaceActions.askRename(space, in: b) }
                     Button("Edit Note…") { SpaceActions.askNote(space, in: b) }
+                    Button("Delete “\(space.name)”…") { SpaceActions.askDelete(space, in: b) }
                 }
+                Divider()
+                Button("Turn Off Spaces…") { SpaceActions.askTurnOff(in: b) }
+                Text("Each Space keeps its own tabs. Switching swaps them all.")
             } label: {
                 HStack(spacing: 4) {
                     Image(systemName: b.space?.symbol ?? "square.stack")
@@ -159,9 +164,11 @@ struct SpaceMenuButton: View {
 
 enum SpaceActions {
     static func askNew(in b: BrowserState) {
-        Dialogs.prompt(b.window, title: L("New Space"),
-                       message: L("A set of tabs, groups and pinned tabs you can leave and come back to. Name it after what you do there: School, Coding, Holidays…"),
-                       defaultText: "") { name in
+        // The first time, say what happens to the tabs already open.
+        let first = b.spaceID == nil && b.tabs.contains { $0.url != nil }
+        let message = L("A set of tabs, groups and pinned tabs you can leave and come back to. Name it after what you do there: School, Coding, Holidays…")
+            + (first ? "\n\n" + L("Your open tabs become the Space “Main”, and this window switches to the new, empty one. Switch back any time from the Space button.") : "")
+        Dialogs.prompt(b.window, title: L("New Space"), message: message, defaultText: "") { name in
             guard let name else { return }
             withAnimation(.easeOut(duration: 0.15)) { b.newSpace(named: name) }
         }
@@ -183,9 +190,59 @@ enum SpaceActions {
     }
 
     static func askDelete(_ space: Space, in b: BrowserState) {
+        let open = b.spaceID == space.id
         Dialogs.confirm(b.window, title: String(format: L("Delete “%@”?"), space.name),
-                        message: L("Its tabs, groups and note are deleted with it."), ok: L("Delete")) { ok in
-            if ok { Spaces.shared.remove(space.id) }
+                        message: open ? L("Its note goes with it. The tabs you see now stay open.")
+                            : L("Its tabs, groups and note are deleted with it."), ok: L("Delete")) { ok in
+            if ok { withAnimation(.easeOut(duration: 0.15)) { b.deleteSpace(space.id) } }
         }
+    }
+
+    static func askTurnOff(in b: BrowserState) {
+        Dialogs.confirm(b.window, title: L("Turn off Spaces?"),
+                        message: L("Every Space is removed. Nothing is lost: the tabs of your other Spaces come into this window, each Space as a tab group."),
+                        ok: L("Turn Off")) { ok in
+            if ok { withAnimation(.easeOut(duration: 0.15)) { b.turnOffSpaces() } }
+        }
+    }
+}
+
+/// Settings › General › Spaces: what they are, the list, and the way out.
+struct SpacesSettings: View {
+    private var spaces = Spaces.shared
+
+    var body: some View {
+        SwiftUI.Section {
+            if spaces.items.isEmpty {
+                Text("None yet. Make one with Tab › New Space… or the + at the bottom of the sidebar.").foregroundStyle(.secondary)
+            }
+            ForEach(spaces.items) { space in
+                HStack {
+                    Image(systemName: space.symbol).foregroundStyle(space.tint).frame(width: 18)
+                    Text(space.name)
+                    if let p = space.profile, let name = Settings.shared.profiles.first(where: { $0.id == p })?.name {
+                        Text(name).font(.caption).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    if let b = window(for: space) {
+                        Button("Rename…") { SpaceActions.askRename(space, in: b) }
+                        Button("Delete…") { SpaceActions.askDelete(space, in: b) }
+                    }
+                }
+            }
+            if !spaces.items.isEmpty, let b = WindowRegistry.shared.lastFocused ?? WindowRegistry.shared.browsers.first(where: { !$0.isPrivate }) {
+                Button("Turn Off Spaces…") { SpaceActions.askTurnOff(in: b) }
+            }
+        } header: {
+            Text("Spaces")
+        } footer: {
+            Text("A Space is a set of tabs you can leave and come back to, such as School and Coding: switching swaps every tab in the window. They only appear once you make one. Turning them off keeps every tab, each Space becoming a tab group.")
+        }
+    }
+
+    /// A window of the Space's profile, to act in.
+    private func window(for space: Space) -> BrowserState? {
+        let all = WindowRegistry.shared.browsers.filter { !$0.isPrivate && $0.profileID == space.profile }
+        return all.first { $0.spaceID == space.id } ?? all.first
     }
 }

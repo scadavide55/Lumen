@@ -33,6 +33,7 @@
 "3 months" = "3 mesi";
 "3 tabs" = "3 schede";
 "5 tabs" = "5 schede";
+"A Space is a set of tabs you can leave and come back to, such as School and Coding: switching swaps every tab in the window. They only appear once you make one. Turning them off keeps every tab, each Space becoming a tab group." = "Uno spazio è un insieme di schede da lasciare e ritrovare, come Scuola e Programmazione: cambiando spazio cambiano tutte le schede della finestra. Compaiono solo quando ne crei uno. Disattivandoli non perdi nessuna scheda: ogni spazio diventa un gruppo.";
 "A Space keeps a whole set of tabs, groups and pinned tabs with a note to yourself. Leave School, open Coding, and come back to School exactly as it was." = "Uno spazio tiene un intero insieme di schede, gruppi e schede fissate, con una nota per te. Lasci Scuola, apri Programmazione e ritrovi Scuola esattamente com'era.";
 "A few things worth knowing." = "Alcune cose utili da sapere.";
 "A focus timer in a tab of its own: 25 minutes of work and 5 of rest, or your own lengths. The time left shows in the tab's title, so you can see it from the tab list, and a soft sound says when it's done." = "Un timer di concentrazione in una scheda tutta sua: 25 minuti di lavoro e 5 di pausa, o le durate che vuoi. Il tempo che resta compare nel titolo della scheda, così lo vedi dall'elenco delle schede, e un suono leggero ti avvisa quando finisce.";
@@ -313,6 +314,8 @@
 "Delete all saved chats?" = "Eliminare tutte le chat salvate?";
 "Delete automation" = "Elimina automazione";
 "Delete “%@”?" = "Eliminare “%@”?";
+"Delete “%@”…" = "Elimina “%@”…";
+"Delete…" = "Elimina…";
 "Deselect Tabs" = "Deseleziona schede";
 "Developer" = "Sviluppatore";
 "Developer: %@" = "Sviluppatore: %@";
@@ -331,6 +334,7 @@
 "Dragging on the page" = "Trascinamento nella pagina";
 "Duplicate Tab" = "Duplica scheda";
 "Dusk" = "Tramonto";
+"Each Space keeps its own tabs. Switching swaps them all." = "Ogni spazio ha le sue schede. Cambiando spazio cambiano tutte.";
 "Each profile keeps its own cookies, sign-ins and site data, so you can be signed in to different accounts at the same time. History, bookmarks, passwords and settings are shared." = "Ogni profilo ha i suoi cookie, accessi e dati dei siti, così puoi essere connesso a account diversi nello stesso momento. Cronologia, segnalibri, password e impostazioni sono in comune.";
 "Easy to guess." = "Facile da indovinare.";
 "EasyList (ads)" = "EasyList (pubblicità)";
@@ -344,6 +348,8 @@
 "Enable JavaScript" = "Abilita JavaScript";
 "Enable Web Inspector" = "Abilita Web Inspector";
 "Engine" = "Motore";
+"Every Space becomes a tab group in this window" = "Ogni spazio diventa un gruppo di schede in questa finestra";
+"Every Space is removed. Nothing is lost: the tabs of your other Spaces come into this window, each Space as a tab group." = "Tutti gli spazi vengono rimossi. Non si perde niente: le schede degli altri spazi arrivano in questa finestra, ogni spazio come gruppo di schede.";
 "Every extension in one place" = "Tutte le estensioni in un posto";
 "Every shortcut in one place" = "Tutte le scorciatoie in un posto";
 "Every window comes back when Tacet opens, closed windows stay closed, and links from other apps open as tabs instead of empty windows." = "Tutte le finestre tornano quando apri Tacet, quelle chiuse restano chiuse, e i link da altre app si aprono come schede invece che in finestre vuote.";
@@ -512,6 +518,7 @@
 "It will be able to:" = "Potrà:";
 "It works in Tacet, but Tacet's developer hasn't checked what it does. Add it only if you trust who made it." = "Funziona in Tacet, ma lo sviluppatore di Tacet non ha controllato cosa fa. Aggiungilo solo se ti fidi di chi l’ha fatto.";
 "Its cookies, sign-ins and site data will be removed. Saved passwords stay in Tacet." = "I suoi cookie, accessi e dati dei siti verranno rimossi. Le password salvate restano in Tacet.";
+"Its note goes with it. The tabs you see now stay open." = "La sua nota viene eliminata. Le schede che vedi ora restano aperte.";
 "Its own window and Dock icon" = "Finestra e icona nel Dock tutte sue";
 "Its settings and data are removed too." = "Vengono rimossi anche le sue impostazioni e i suoi dati.";
 "Its tabs, groups and note are deleted with it." = "Le sue schede, i gruppi e la nota vengono eliminati con lui.";
@@ -666,6 +673,7 @@
 "No site loaded" = "Nessun sito caricato";
 "No web apps yet. Open a site and choose Install as App from the page menu." = "Ancora nessuna web app. Apri un sito e scegli Installa come app dal menu della pagina.";
 "None" = "Nessuno";
+"None yet. Make one with Tab › New Space… or the + at the bottom of the sidebar." = "Ancora nessuno. Creane uno con Scheda › Nuovo spazio… o con il + in fondo alla barra laterale.";
 "None. Turn Shield off for a site from the shield button in the toolbar." = "Nessuno. Disattiva Shield per un sito dal pulsante a scudo nella barra degli strumenti.";
 "Not Now" = "Non ora";
 "Not Secure" = "Non sicuro";
@@ -854,6 +862,7 @@
 "Rename Bookmark" = "Rinomina segnalibro";
 "Rename Group…" = "Rinomina gruppo…";
 "Rename Space" = "Rinomina spazio";
+"Rename “%@”…" = "Rinomina “%@”…";
 "Rename…" = "Rinomina…";
 "Reopen Closed Tab" = "Riapri scheda chiusa";
 "Reopen closed tab" = "Riapri scheda chiusa";
@@ -958,6 +967,7 @@
 "Settings › Extensions" = "Impostazioni › Estensioni";
 "Settings › General › Move to another Mac" = "Impostazioni › Generali › Passa a un altro Mac";
 "Settings › General › Opening rules" = "Impostazioni › Generali › Regole di apertura";
+"Settings › General › Spaces" = "Impostazioni › Generali › Spazi";
 "Settings › General › Tabs: when to group, and sites never to group" = "Impostazioni › Generali › Schede: quando raggruppare e quali siti mai";
 "Settings › Passwords › Check…" = "Impostazioni › Password › Controlla…";
 "Settings › Shield › Searching what pages said" = "Impostazioni › Shield › Cercare nel testo delle pagine";
@@ -1049,6 +1059,8 @@
 "Space %d" = "Spazio %d";
 "Spaces" = "Spazi";
 "Spaces and pinned tabs" = "Spazi e schede fissate";
+"Spaces are clearer now. Delete or rename any Space from the Space button, see them all in Settings, or turn them off: nothing is lost, every Space comes back as a tab group." = "Gli spazi ora sono più chiari. Elimina o rinomina qualsiasi spazio dal pulsante Spazio, vedili tutti nelle Impostazioni, o disattivali: non si perde niente, ogni spazio torna come gruppo di schede.";
+"Spaces, simpler" = "Spazi, più semplici";
 "Split View" = "Vista divisa";
 "Split View with New Tab" = "Vista divisa con nuova scheda";
 "Split view" = "Vista divisa";
@@ -1153,6 +1165,7 @@
 "The Apple model is still downloading. Try again in a few minutes." = "Il modello Apple si sta ancora scaricando. Riprova tra qualche minuto.";
 "The Apple model isn't available on this Mac." = "Il modello Apple non è disponibile su questo Mac.";
 "The Apple model needs macOS 26 or later." = "Il modello Apple richiede macOS 26 o successivo.";
+"The Space button › Turn Off Spaces…" = "Pulsante Spazio › Disattiva spazi…";
 "The answer was cut off because it reached the length limit." = "La risposta è stata interrotta perché ha raggiunto il limite di lunghezza.";
 "The app gets its own window and Dock icon, and opens in ~/Applications/Tacet Apps. Sign in once inside the app: it keeps its own cookies." = "L'app ha la sua finestra e la sua icona nel Dock e si trova in ~/Applicazioni/Tacet Apps. Accedi una volta dentro l'app: conserva i suoi cookie.";
 "The app needs a name." = "L'app ha bisogno di un nome.";
@@ -1236,12 +1249,15 @@
 "Turn Off" = "Disattiva";
 "Turn Off Ad Blocker" = "Disattiva blocco pubblicità";
 "Turn Off Everywhere" = "Disattiva ovunque";
+"Turn Off Spaces" = "Disattiva spazi";
+"Turn Off Spaces…" = "Disattiva spazi…";
 "Turn Off for %@" = "Disattiva su %@";
 "Turn On" = "Attiva";
 "Turn On Ad Blocker" = "Attiva blocco pubblicità";
 "Turn On for %@" = "Attiva su %@";
 "Turn On…" = "Attiva…";
 "Turn it off in Settings › General › Tabs" = "Disattivala in Impostazioni › Generali › Schede";
+"Turn off Spaces?" = "Disattivare gli spazi?";
 "Turn off animations" = "Disattiva le animazioni";
 "Turn off this site's changes" = "Disattiva le modifiche di questo sito";
 "Turn on" = "Attiva";
@@ -1356,6 +1372,7 @@
 "Your bookmarks, history and sign-ins can come with you in the next step." = "Nel prossimo passaggio puoi portare con te segnalibri, cronologia e accessi.";
 "Your history stays; only what the pages said is deleted." = "La cronologia resta; viene eliminato solo il testo delle pagine.";
 "Your name" = "Il tuo nome";
+"Your open tabs become the Space “Main”, and this window switches to the new, empty one. Switch back any time from the Space button." = "Le schede aperte diventano lo spazio “Main” e questa finestra passa a quello nuovo, vuoto. Puoi tornare indietro quando vuoi dal pulsante Spazio.";
 "Your own CSS for any site: hide distractions, change fonts, restyle pages. Applies to subdomains too." = "Il tuo CSS per qualsiasi sito: nascondi distrazioni, cambia font, ridisegna pagine. Vale anche per i sottodomini.";
 "Your own key: Anthropic, OpenAI, OpenRouter, DeepSeek, or a model on your Mac with Ollama" = "La tua chiave: Anthropic, OpenAI, OpenRouter, DeepSeek, o un modello sul tuo Mac con Ollama";
 "Your passwords" = "Le tue password";
