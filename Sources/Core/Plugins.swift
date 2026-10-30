@@ -206,8 +206,10 @@ final class PluginStore {
         try FileManager.default.createDirectory(at: target.appendingPathComponent("app"), withIntermediateDirectories: true)
         for (name, data) in downloaded { try data.write(to: target.appendingPathComponent(name), options: .atomic) }
         if let app = p.app { try await downloadAssets(app, into: target.appendingPathComponent("app"), id: p.id) }
-        let enabled = installed[p.id]?.enabled ?? true
-        installed[p.id] = Installed(plugin: p, enabled: enabled)
+        // An update keeps how it was set up: on or off, pinned, and the sites it's off on.
+        var item = installed[p.id] ?? Installed(plugin: p)
+        item.plugin = p
+        installed[p.id] = item
         sources[p.id] = nil
         changed()
     }

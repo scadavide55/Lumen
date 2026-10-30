@@ -35,6 +35,8 @@ final class Tab: NSObject, Identifiable {
     var loginMenu: LoginMenu?
     var pendingSave: PendingLogin?
     var insecureWarning = false
+    /// A site asked for a passkey, which Tacet can't use yet: the banner that offers Safari instead.
+    var passkeyHelp: PasskeyHelp?
     /// Picking elements on the page to hide.
     var pickingElements = false
     @ObservationIgnored var lastActive = Date()
@@ -582,6 +584,9 @@ final class Tab: NSObject, Identifiable {
             if loginMenu != nil { loginMenu = nil }
         case "insecurePassword":
             insecureWarning = true
+        case "passkey":
+            guard let host, passkeyHelp == nil || passkeyHelp?.site != PasswordStore.site(host) else { return }
+            passkeyHelp = PasskeyHelp(site: PasswordStore.site(host), url: url)
         case "loginUsername":
             if let host, let name = body["username"] as? String, !name.isEmpty { rememberedUser = (host, name, Date()) }
         case "loginSubmit":
@@ -589,6 +594,75 @@ final class Tab: NSObject, Identifiable {
             offerToSave(username: body["username"] as? String ?? "", password: body["password"] as? String ?? "")
         default:
             break
+        }
+    }
+
+    // MARK: What the page said
+
+    /// A moment after a page loads, its text is kept so the page can be found later by what it said. Pages with a
+    /// password field aren't kept: what's on them is often private.
+    private func keepPageText(of url: URL, in webView: WKWebView) {
+        guard PageText.mayKeep(url, isPrivate: isPrivate) else { return }
+        let space = browser?.spaceID
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self, weak webView] in
+            guard let self, let webView, webView.url == url, !self.isReader else { return }
+            let js = "if (document.querySelector('input[type=password]')) return null; const t = (document.body && document.body.innerText) || ''; return t.replace(/\\s+/g, ' ').trim().slice(0, \(PageText.charLimit))"
+            webView.callAsyncJavaScript(js, arguments: [:], in: nil, in: .defaultClient) { [weak self] result in
+                guard let self, let text = try? result.get() as? String, webView.url == url else { return }
+                PageText.shared.keep(url: url, title: self.title, text: text, space: space)
+            }
+        }
+    }
+
+    // MARK: Passkeys
+
+    struct PasskeyHelp: Equatable {
+        enum Stage: Equatable { case ask, inSafari, importing, failed(String), needsAccess }
+        let site: String
+        let url: URL?
+        var stage = Stage.ask
+    }
+
+    /// Opens the page in Safari, where the passkey works, to sign in there.
+    func signInWithSafari() {
+        guard var help = passkeyHelp, let page = help.url ?? url,
+              let safari = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.Safari") else { return }
+        NSWorkspace.shared.open([page], withApplicationAt: safari, configuration: NSWorkspace.OpenConfiguration())
+        help.stage = .inSafari
+        passkeyHelp = help
+    }
+
+    /// Copies the site's cookies from Safari into this tab's website data and reloads, so the sign-in made there
+    /// carries on here.
+    func bringSignInFromSafari() {
+        guard var help = passkeyHelp, let store = webView?.configuration.websiteDataStore.httpCookieStore else { return }
+        help.stage = .importing
+        passkeyHelp = help
+        let site = help.site
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            let result = Result { try BrowserImporter.safariSignIns(site: site) }
+            DispatchQueue.main.async { [weak self] in
+                guard let self, self.passkeyHelp?.site == site else { return }
+                switch result {
+                case .failure(BrowserImporter.ImportError.permission):
+                    self.passkeyHelp?.stage = .needsAccess
+                case .failure(let error):
+                    self.passkeyHelp?.stage = .failed(error.localizedDescription)
+                case .success(let cookies) where cookies.isEmpty:
+                    self.passkeyHelp?.stage = .failed(L("Safari hasn't saved this sign-in yet. Quit Safari, then try again."))
+                case .success(let cookies):
+                    let group = DispatchGroup()
+                    for c in cookies {
+                        group.enter()
+                        store.setCookie(c) { group.leave() }
+                    }
+                    group.notify(queue: .main) { [weak self] in
+                        guard let self else { return }
+                        self.passkeyHelp = nil
+                        self.reload()
+                    }
+                }
+            }
         }
     }
 
@@ -626,11 +700,18 @@ final class Tab: NSObject, Identifiable {
     func fill(_ login: SavedLogin) {
         loginMenu = nil
         let reason = String(format: L("fill your password for %@"), login.host)
+        let site = PasswordStore.site(login.host)
+        guard let asked = webView, host.map(PasswordStore.site) == site else { return }
         PasswordStore.shared.password(for: login, reason: reason) { [weak self] password in
-            guard let password, let wv = self?.webView else { return }
+            // Touch ID takes a moment, and the page may have moved on meanwhile: the password only goes into the
+            // same web view, still on the login's site, over HTTPS (or plain HTTP on the very host it was saved for).
+            guard let self, let password, let wv = self.webView, wv === asked, let now = wv.url, let nowHost = now.host?.lowercased(),
+                  PasswordStore.site(nowHost) == site, now.scheme == "https" || now.scheme == "http" && nowHost == login.host.lowercased()
+            else { return }
             wv.window?.makeFirstResponder(wv)
-            wv.callAsyncJavaScript("return window.__lumenFill && window.__lumenFill(u, p)",
-                                   arguments: ["u": login.username, "p": password], in: nil, in: .defaultClient) { _ in }
+            // The page checks its own address too, in case a navigation started after the one above.
+            wv.callAsyncJavaScript("const h = location.hostname.toLowerCase(); if (h !== s && !h.endsWith('.' + s)) return false; return window.__lumenFill && window.__lumenFill(u, p)",
+                                   arguments: ["u": login.username, "p": password, "s": site], in: nil, in: .defaultClient) { _ in }
         }
     }
 
@@ -707,7 +788,8 @@ extension Tab: WKNavigationDelegate {
         if scheme == "lumen-continue-http" {
             decisionHandler(.cancel, preferences)
             let raw = String(url.absoluteString.dropFirst("lumen-continue-http:".count))
-            if let target = URL(string: raw), let h = target.host?.lowercased() {
+            // Only Tacet's own "Not Secure" page may lift HTTPS-only, and only for the address it was shown for.
+            if let target = URL(string: raw), let h = target.host?.lowercased(), target == failedURL {
                 HTTPSUpgrade.userAllowed.insert(h)
                 load(target)
             }
@@ -825,8 +907,11 @@ extension Tab: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         if waking { finishWaking(restoreScroll: true) }
+        // The passkey banner belongs to the site that asked; signing in may move between its pages.
+        if let help = passkeyHelp, help.site != host.map(PasswordStore.site) { passkeyHelp = nil }
         guard navigation !== internalNavigation, !isPrivate, !isReader, let u = webView.url else { return }
         History.shared.record(url: u, title: webView.title ?? "")
+        keepPageText(of: u, in: webView)
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {

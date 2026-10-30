@@ -404,6 +404,7 @@ struct ShieldPane: View {
                 Toggle("Clear cookies, cache and history when Tacet quits", isOn: $s.clearOnQuit)
                 Button("Clear Browsing Data…") { showClear = true }
             }
+            PageTextSettings()
             Section("Sites where Shield is off") {
                 if s.allowlist.isEmpty {
                     Text("None. Turn Shield off for a site from the shield button in the toolbar.").foregroundStyle(.secondary)

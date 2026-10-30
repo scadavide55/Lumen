@@ -26,6 +26,8 @@ struct CommandPalette: View {
     @State private var suggestions: [String] = []
     @State private var suggestTask: Task<Void, Never>?
     @State private var historyHits: [HistoryEntry] = []
+    /// Pages found by what they said.
+    @State private var pageHits: [PageText.Hit] = []
     @State private var historyTask: Task<Void, Never>?
     /// The rows, rebuilt only when the query or its async results change, never on hover or page loads.
     @State private var list: [PaletteItem] = []
@@ -133,6 +135,7 @@ struct CommandPalette: View {
         }
         .onChange(of: suggestions) { _, _ in refresh() }
         .onChange(of: historyHits.map(\.id)) { _, _ in refresh() }
+        .onChange(of: pageHits.map(\.id)) { _, _ in refresh() }
     }
 
     private func hint(_ key: String, _ label: String) -> some View {
@@ -230,13 +233,19 @@ struct CommandPalette: View {
         let trimmed = q.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             historyHits = []
+            pageHits = []
             return
         }
         historyTask = Task {
             try? await Task.sleep(for: .milliseconds(120))
             guard !Task.isCancelled else { return }
             let hits = await History.shared.searchInBackground(trimmed, limit: 6)
-            if !Task.isCancelled { historyHits = hits }
+            // Only from three letters on: shorter words match nearly every page.
+            let read = trimmed.count >= 3 && Settings.shared.rememberPageText && !b.isPrivate ? await PageText.shared.search(trimmed, limit: 4) : []
+            if !Task.isCancelled {
+                historyHits = hits
+                pageHits = read
+            }
         }
     }
 
@@ -319,6 +328,13 @@ struct CommandPalette: View {
                         run: { navigate(h.url, newTab: $0) })
         }
 
+        out += pageHits.filter { hit in !shown.contains(hit.url) && !hits.contains { $0.url == hit.url } }.map { hit in
+            PaletteItem(id: "p" + hit.url.absoluteString, icon: favicon(hit.url, fallback: "doc.text.magnifyingglass"),
+                        title: hit.title.isEmpty ? hit.url.absoluteString : hit.title,
+                        subtitle: plainSnippet(hit.snippet), badge: "Read",
+                        run: { navigate(hit.url, newTab: $0) })
+        }
+
         out += commands.filter { $0.title.lowercased().contains(lower) || $0.subtitle.lowercased().contains(lower) }.prefix(5)
 
         out += suggestions.filter { $0.lowercased() != lower }.map { text in
@@ -364,6 +380,7 @@ struct CommandPalette: View {
             command("Check for Updates", "arrow.down.app", "Looks for a newer Tacet on GitHub") { UpdateChecker.shared.check(force: true) { openWindow(id: "update") } },
             command(s.adBlock ? "Turn Off Ad Blocker" : "Turn On Ad Blocker", "shield.lefthalf.filled", "⇧⌘B") { s.adBlock.toggle() },
             command("Lock Window with Touch ID", "lock", "⌃⌘L") { b.lock() },
+            command("New Space", "square.stack", "A set of tabs to leave and come back to") { SpaceActions.askNew(in: b) },
             command("Hibernate Other Tabs", "moon.zzz", "Free memory used by background tabs") { b.hibernateOthers() },
             command("Close Duplicate Tabs", "square.on.square.dashed", "Keeps one tab per address") { b.closeDuplicates() },
             command("Group Tabs by Site", "square.grid.3x1.folder.badge.plus", "Groups tabs from the same site now") { b.groupBySiteNow() },
@@ -377,6 +394,14 @@ struct CommandPalette: View {
                 s.tabLayout = s.tabLayout == .vertical ? .horizontal : .vertical
             },
         ]
+        if !b.isPrivate {
+            for space in Spaces.shared.items where space.id != b.spaceID {
+                list.append(PaletteItem(id: "space" + space.id.uuidString, icon: .symbol(space.symbol),
+                                        title: String(format: L("Switch to %@"), space.name),
+                                        subtitle: space.note.isEmpty ? L("Space") : space.note, badge: "Command",
+                                        run: { _ in b.switchSpace(to: space.id) }))
+            }
+        }
         if let tab, tab.url != nil {
             list.insert(contentsOf: [
                 command(tab.isReader ? "Exit Reader" : "Reader", "doc.plaintext", "⇧⌘R") { tab.toggleReader() },

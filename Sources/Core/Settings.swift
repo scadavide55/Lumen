@@ -411,6 +411,14 @@ final class Settings: Observable {
     @Pref("strongPasswords") var suggestStrongPasswords = false
     @Pref("passwordManager") var passwordManager = ""
     @Pref("neverSave") var neverSaveHosts: [String] = []
+
+    // Searching what pages said
+    /// Keep the text of visited pages on this Mac, to find them by what they said.
+    @Pref("rememberPageText") var rememberPageText = true
+    /// How long that text is kept, in days.
+    @Pref("pageTextDays") var pageTextDays = 90
+    /// Sites whose pages' text is never kept.
+    @Pref("pageTextExcluded") var pageTextExcluded: [String] = []
     @Pref("httpsOnly") var httpsOnly = false
     @Pref("confirmDownloads") var confirmDangerousDownloads = true
     @Pref("lockPrivate") var lockPrivateWindows = true
@@ -504,6 +512,8 @@ final class Settings: Observable {
     func didChange(_ key: String) {
         if key == "theme" { applyTheme() }
         if key == "appIcon" { AppIcon.applyChosen(force: true) }
+        if key == "rememberPageText" && !rememberPageText { PageText.shared.clear() }
+        if key == "pageTextDays" { PageText.shared.prune(keepingDays: pageTextDays) }
         NotificationCenter.default.post(name: .settingChanged, object: self, userInfo: ["key": key])
     }
 

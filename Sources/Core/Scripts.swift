@@ -14,6 +14,8 @@ enum Scripts {
         if s.gpc {
             c.addUserScript(WKUserScript(source: gpc, injectionTime: .atDocumentStart, forMainFrameOnly: false, in: .page))
         }
+        // Before the page's own scripts, so sites never offer a passkey Tacet can't use.
+        c.addUserScript(WKUserScript(source: passkeys, injectionTime: .atDocumentStart, forMainFrameOnly: false, in: .page))
         let allow = json(s.allowlist)
         if s.adBlock && s.hideCookieBanners {
             c.addUserScript(WKUserScript(source: cookieBanners.replacingOccurrences(of: "__ALLOW__", with: allow),
@@ -125,6 +127,31 @@ enum Scripts {
     })();
     """#
 
+    // MARK: Passkeys
+
+    /// Passkeys in an app's web view need a permission Apple gives only to browsers in its developer program, which
+    /// Tacet doesn't have yet, so WebKit turns every request down. When a site asks for one, this tells Tacet, so it
+    /// can offer to sign in with Safari instead. Sites still see passkeys as available: hiding them makes some
+    /// (GitHub) drop the passkey button without asking, and then there'd be no moment to offer Safari.
+    static let passkeys = #"""
+    (() => {
+      if (!window.PublicKeyCredential || window.__tacetPasskeys) return;
+      window.__tacetPasskeys = true;
+      // On the prototype: WebKit ignores methods set on navigator.credentials itself.
+      const proto = window.CredentialsContainer && CredentialsContainer.prototype;
+      for (const name of ['get', 'create']) {
+        const original = proto && proto[name];
+        if (!original) continue;
+        Object.defineProperty(proto, name, { configurable: true, writable: true, value: function (options) {
+          // Quiet requests made while the page loads (passkey autofill) don't count as asking: WebKit answers them.
+          if (!options || !options.publicKey || options.mediation === 'conditional') return original.call(this, options);
+          window.dispatchEvent(new CustomEvent('tacet-passkey'));
+          return Promise.reject(new DOMException('Passkeys are not available in this browser.', 'NotAllowedError'));
+        } });
+      }
+    })();
+    """#
+
     // MARK: Logins: find sign-in fields, offer saved accounts, fill them, and notice submitted credentials
 
     static let logins = #"""
@@ -132,6 +159,8 @@ enum Scripts {
       if (window.__lumenLogins) return;
       window.__lumenLogins = true;
       const post = (m) => { try { webkit.messageHandlers.lumen.postMessage(m); } catch (e) {} };
+      // The passkeys script runs in the page and can't reach Tacet itself, so it says so with an event.
+      window.addEventListener('tacet-passkey', () => post({ type: 'passkey' }));
       const visible = (el) => {
         const r = el.getBoundingClientRect();
         return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden';

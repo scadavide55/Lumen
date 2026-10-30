@@ -447,6 +447,19 @@ enum BrowserImporter {
         return out
     }
 
+    /// The cookies Safari keeps for one site, subdomains included (google.com covers accounts.google.com), so a
+    /// sign-in made in Safari, with a passkey say, can be brought over.
+    static func safariSignIns(site: String) throws -> [HTTPCookie] {
+        let home = FileManager.default.homeDirectoryForCurrentUser
+        let folders = ["Library/Containers/com.apple.Safari/Data/Library/Cookies", "Library/Cookies"].map { home.appendingPathComponent($0).path }
+        // Without Full Disk Access macOS hides the folders altogether, which would look like no sign-in.
+        guard folders.contains(where: { (try? FileManager.default.contentsOfDirectory(atPath: $0)) != nil }) else { throw ImportError.permission }
+        return try safariCookies().filter { cookie in
+            let domain = cookie.domain.hasPrefix(".") ? String(cookie.domain.dropFirst()) : cookie.domain
+            return PublicSuffix.registrable(domain.lowercased()) == site
+        }
+    }
+
     /// Parses Safari's Cookies.binarycookies file.
     private static func safariCookies() throws -> [HTTPCookie] {
         let home = FileManager.default.homeDirectoryForCurrentUser

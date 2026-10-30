@@ -123,6 +123,69 @@ struct SavePasswordBanner: View {
     }
 }
 
+/// A site asked for a passkey: Tacet can't use passkeys yet, so it offers to sign in with Safari and bring the
+/// sign-in back, or to carry on with the site's other ways in.
+struct PasskeyBanner: View {
+    var tab: Tab
+    let help: Tab.PasskeyHelp
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "person.badge.key.fill").font(.system(size: 18)).foregroundStyle(.tint)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title).font(.system(size: 13, weight: .semibold))
+                Text(detail).font(.system(size: 11.5)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 8) {
+                    switch help.stage {
+                    case .ask:
+                        Button("Sign In with Safari") { tab.signInWithSafari() }.buttonStyle(.borderedProminent)
+                    case .inSafari, .failed:
+                        Button("I'm Signed In") { tab.bringSignInFromSafari() }.buttonStyle(.borderedProminent)
+                        Button("Open Safari Again") { tab.signInWithSafari() }
+                    case .importing:
+                        ProgressView().controlSize(.small)
+                    case .needsAccess:
+                        Button("Open Settings") {
+                            NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles")!)
+                        }
+                        Button("Try Again") { tab.bringSignInFromSafari() }.buttonStyle(.borderedProminent)
+                    }
+                }
+                .padding(.top, 5)
+            }
+            Spacer(minLength: 8)
+            Button { tab.passkeyHelp = nil } label: { Image(systemName: "xmark").font(.system(size: 10, weight: .bold)) }
+                .buttonStyle(.plain).foregroundStyle(.secondary).help("Use another way to sign in")
+        }
+        .controlSize(.small)
+        .padding(12)
+        .frame(maxWidth: 560)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.primary.opacity(0.1)))
+        .shadow(color: .black.opacity(0.18), radius: 14, y: 4)
+        .padding(10)
+        .transition(.move(edge: .top).combined(with: .opacity))
+    }
+
+    private var title: String {
+        switch help.stage {
+        case .ask: L("Tacet can't use passkeys yet")
+        case .inSafari, .importing: L("Sign in with your passkey in Safari")
+        case .failed: L("The sign-in didn't come across")
+        case .needsAccess: L("Tacet needs Full Disk Access")
+        }
+    }
+
+    private var detail: String {
+        switch help.stage {
+        case .ask: String(format: L("Sign in to %@ in Safari with Touch ID, and Tacet brings the sign-in back here. Or close this and choose another way to sign in, like a password or a code."), help.site)
+        case .inSafari, .importing: L("When you're signed in, come back and click I'm Signed In.")
+        case .failed(let reason): reason
+        case .needsAccess: L("Safari keeps its sign-ins where only apps with Full Disk Access can read them. Turn on Tacet in the list, then try again.")
+        }
+    }
+}
+
 /// Warning shown when a password field appears on an unencrypted page.
 struct InsecurePasswordBanner: View {
     var tab: Tab
@@ -326,6 +389,7 @@ struct PasswordCheckRow: View {
         case .breached: L("Found in a data breach: change it on this site.")
         case .reused: L("Used on more than one site.")
         case .weak: L("Easy to guess.")
+        case .unchecked: L("Couldn't be checked against data breaches: check again when you're online.")
         }
     }
 
@@ -338,6 +402,10 @@ struct PasswordCheckRow: View {
                         Label("No problems found", systemImage: "checkmark.shield.fill").foregroundStyle(.green)
                     } else {
                         Text(String(format: L("%d in data breaches · %d reused · %d weak"), count(.breached), count(.reused), count(.weak)))
+                        if count(.unchecked) > 0 {
+                            Text(String(format: L("%d couldn't be checked for breaches. Check again when you're online."), count(.unchecked)))
+                                .foregroundStyle(.orange)
+                        }
                     }
                 } else {
                     Text("Password check")

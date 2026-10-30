@@ -939,6 +939,8 @@ final class AssistantChat {
             var outputs: [(call: AIClient.ToolCall, output: String, isError: Bool)] = []
             toolImages = [:]
             for call in result.toolCalls {
+                // Stop means stop: nothing more runs once it's pressed, even calls the model already asked for.
+                if Task.isCancelled { return }
                 let (output, isError) = await runTool(call)
                 outputs.append((call, output, isError))
             }
@@ -1048,6 +1050,22 @@ final class AssistantChat {
         let (output, _) = await runTool(AIClient.ToolCall(id: UUID().uuidString, name: name, arguments: args ?? [:]))
         transcript.append(["role": "tool", "content": output])
         return AppleModel.shorten(output)
+    }
+
+    /// Asks before a click that could send, buy, delete or publish something.
+    @MainActor
+    private func confirmPageAction(_ label: String, on tab: Tab) async -> Bool {
+        let alert = NSAlert()
+        alert.messageText = String(format: L("Tacet Assistant wants to click “%@” on %@."),
+                                   label.isEmpty ? L("a button") : label, InputResolver.displayHost(tab.url))
+        alert.informativeText = L("This could send, buy, delete or publish something. Allow it only if it's what you asked for.")
+        alert.addButton(withTitle: L("Allow"))
+        alert.addButton(withTitle: L("Don't Allow"))
+        alert.buttons.last?.keyEquivalent = "\u{1b}"
+        guard let window = tab.webView?.window ?? NSApp.keyWindow else { return alert.runModal() == .alertFirstButtonReturn }
+        return await withCheckedContinuation { done in
+            alert.beginSheetModal(for: window) { done.resume(returning: $0 == .alertFirstButtonReturn) }
+        }
     }
 
     @MainActor
@@ -1185,6 +1203,16 @@ final class AssistantChat {
             default:
                 action = .drag
                 noteActivity(L("Dragging on the page"))
+            }
+            // Sending, buying, deleting or publishing needs the user's OK here, not only the model's word for it.
+            if action == .click || action == .type && (args["submit"] as? Bool ?? false) {
+                let (label, risky) = await PageControl.risk(of: args["ref"], submitting: action == .type, in: wv)
+                if risky {
+                    guard await confirmPageAction(label, on: tab) else {
+                        return ("The user didn't allow this. Don't try it another way; ask in the chat what they'd like to do.", true)
+                    }
+                    if Task.isCancelled || browser.current !== tab || tab.webView !== wv { return ("Stopped.", true) }
+                }
             }
             var (output, isError) = await PageControl.run(action, args: args, in: wv)
             if !isError, [.click, .type, .drag].contains(action) {

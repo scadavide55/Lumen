@@ -30,6 +30,7 @@ struct ToolbarContent: View {
             AddressPill(tab: tab).frame(maxWidth: horizontal ? 720 : .infinity)
             if horizontal { Spacer(minLength: 8) }
             if horizontal, let p = b.profile { ProfileBadge(profile: p, compact: true).fixedSize() }
+            if horizontal { SpaceMenuButton() }
             ExtensionButtons(tab: tab)
             ExtensionsMenuButton(tab: tab)
             ShieldButton(tab: tab)

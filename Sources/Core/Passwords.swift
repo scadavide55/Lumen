@@ -147,8 +147,10 @@ final class PasswordStore {
     // MARK: Password check
 
     enum Issue: String, Comparable {
-        case breached, reused, weak
-        static func < (a: Issue, b: Issue) -> Bool { [Issue.breached, .reused, .weak].firstIndex(of: a)! < [Issue.breached, .reused, .weak].firstIndex(of: b)! }
+        /// unchecked: the breach list couldn't be reached for it, so "not breached" isn't known.
+        case breached, reused, weak, unchecked
+        static func < (a: Issue, b: Issue) -> Bool { all.firstIndex(of: a)! < all.firstIndex(of: b)! }
+        private static let all: [Issue] = [.breached, .reused, .weak, .unchecked]
     }
 
     /// Looks at every saved password after one Touch ID: found in a data breach (via Have I Been Pwned, which only
@@ -166,8 +168,9 @@ final class PasswordStore {
                     if (sites[pw]?.count ?? 0) > 1 { issues[login.id, default: []].insert(.reused) }
                     if Self.isWeak(pw) { issues[login.id, default: []].insert(.weak) }
                 }
-                let breached = await Self.breached(Set(all.map(\.1)))
+                let (breached, unchecked) = await Self.breached(Set(all.map(\.1)))
                 for (login, pw) in all where breached.contains(pw) { issues[login.id, default: []].insert(.breached) }
+                for (login, pw) in all where unchecked.contains(pw) { issues[login.id, default: []].insert(.unchecked) }
                 let result = issues
                 await MainActor.run { done(result) }
             }
@@ -182,20 +185,24 @@ final class PasswordStore {
 
     /// The passwords that appear in Have I Been Pwned's list of breached passwords (k-anonymity: only a 5-character
     /// hash prefix is sent, and the answer is padded so its size doesn't reveal anything either).
-    static func breached(_ passwords: Set<String>) async -> Set<String> {
+    /// Also returns the passwords whose part of the list couldn't be downloaded, so they aren't shown as safe.
+    static func breached(_ passwords: Set<String>) async -> (found: Set<String>, unchecked: Set<String>) {
         var byPrefix: [String: [(suffix: String, password: String)]] = [:]
         for pw in passwords {
             let hash = Insecure.SHA1.hash(data: Data(pw.utf8)).map { String(format: "%02X", $0) }.joined()
             byPrefix[String(hash.prefix(5)), default: []].append((String(hash.dropFirst(5)), pw))
         }
         let session = URLSession(configuration: .ephemeral)
-        var found = Set<String>()
+        var found = Set<String>(), unchecked = Set<String>()
         for (prefix, entries) in byPrefix {
             guard let url = URL(string: "https://api.pwnedpasswords.com/range/" + prefix) else { continue }
             var request = URLRequest(url: url)
             request.setValue("true", forHTTPHeaderField: "Add-Padding")
             request.timeoutInterval = 15
-            guard let (data, response) = try? await session.data(for: request), (response as? HTTPURLResponse)?.statusCode == 200 else { continue }
+            guard let (data, response) = try? await session.data(for: request), (response as? HTTPURLResponse)?.statusCode == 200 else {
+                unchecked.formUnion(entries.map(\.password))
+                continue
+            }
             var counts: [String: Int] = [:]
             for line in String(decoding: data, as: UTF8.self).split(whereSeparator: \.isNewline) {
                 let parts = line.split(separator: ":")
@@ -203,7 +210,7 @@ final class PasswordStore {
             }
             for e in entries where (counts[e.suffix] ?? 0) > 0 { found.insert(e.password) }
         }
-        return found
+        return (found, unchecked)
     }
 
     // MARK: CSV

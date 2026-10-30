@@ -269,9 +269,11 @@ struct TabPane: View {
         .overlay(alignment: .top) {
             VStack(spacing: 0) {
                 if tab.insecureWarning { InsecurePasswordBanner(tab: tab) }
+                if let help = tab.passkeyHelp { PasskeyBanner(tab: tab, help: help) }
                 if let pending = tab.pendingSave { SavePasswordBanner(tab: tab, pending: pending) }
             }
             .animation(.easeOut(duration: 0.2), value: tab.pendingSave)
+            .animation(.easeOut(duration: 0.2), value: tab.passkeyHelp)
             .animation(.easeOut(duration: 0.2), value: tab.insecureWarning)
         }
         .overlay(alignment: .bottomTrailing) {

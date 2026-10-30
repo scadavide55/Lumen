@@ -207,6 +207,24 @@ enum PageControl {
         }
     }
 
+    /// Whether clicking an element (or pressing Return in it) could send, buy, delete or publish something: a form's
+    /// submit button, or a control whose words say so. Those wait for the user's OK, whatever the model was told.
+    @MainActor
+    static func risk(of ref: Any?, submitting: Bool, in webView: WKWebView) async -> (label: String, risky: Bool) {
+        let js = prelude + """
+        const el = byRef(args.ref);
+        if (!el) return ['', false];
+        const words = /\\b(send|buy|purchase|pay|order|checkout|check out|delete|remove|confirm|submit|publish|post|share|subscribe|unsubscribe|transfer|donate|book|reserve|sign out|log out|invia|acquista|compra|paga|ordina|elimina|cancella|rimuovi|conferma|pubblica|condividi|iscriviti|trasferisci|dona|prenota|esci|envoyer|acheter|payer|commander|supprimer|confirmer|publier|partager|réserver|donner)\\b/i;
+        const text = [label(el), el.getAttribute('aria-label') || '', el.value || '', el.title || ''].join(' ');
+        const submit = (el.tagName === 'BUTTON' && (el.getAttribute('type') || 'submit') === 'submit' && !!el.form)
+          || (el.tagName === 'INPUT' && ['submit', 'image'].includes(el.type));
+        return [label(el), submit || (args.submitting && !!el.form) || words.test(text)];
+        """
+        let r = try? await webView.callAsyncJavaScript(js, arguments: ["args": ["ref": ref ?? 0, "submitting": submitting]], in: nil, contentWorld: world)
+        let pair = r as? [Any] ?? []
+        return ((pair.first as? String) ?? "", (pair.last as? Bool) ?? true)
+    }
+
     /// Short words for the activity line, such as "Clicking “Sign in”".
     @MainActor
     static func label(of ref: Any?, in webView: WKWebView) async -> String {

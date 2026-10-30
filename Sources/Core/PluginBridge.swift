@@ -60,7 +60,7 @@ final class PluginBridge: NSObject, WKScriptMessageHandler {
         request.timeoutInterval = 30
         if let referer, ["http", "https"].contains(referer.scheme ?? "") { request.setValue(referer.absoluteString, forHTTPHeaderField: "Referer") }
         let session = URLSession(configuration: .ephemeral)
-        guard let (data, response) = try? await session.data(for: request),
+        guard let (data, response) = try? await session.data(for: request, delegate: WebTools.PublicRedirects.shared),
               (response as? HTTPURLResponse)?.statusCode == 200, data.count <= maxBytes,
               let type = response.mimeType?.lowercased(), type.hasPrefix("image/"), type != "image/svg+xml" else { return nil }
         return (data, type)

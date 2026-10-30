@@ -38,6 +38,12 @@ final class StoredFile<T: Codable> {
         self.format = format
     }
 
+    /// A file anywhere, for the tests.
+    init(at url: URL, format: Format = .json) {
+        self.url = url
+        self.format = format
+    }
+
     func load() -> T? {
         guard let data = try? Data(contentsOf: url) else { return nil }
         switch format {
@@ -57,14 +63,15 @@ final class StoredFile<T: Codable> {
         queue.asyncAfter(deadline: .now() + delay, execute: item)
     }
 
+    /// Waits for a write already under way, so an older value can never land after this one.
     func saveNow(_ value: T) {
         pending?.cancel()
-        Self.write(value, to: url, format: format)
+        queue.sync { Self.write(value, to: url, format: format) }
     }
 
     func delete() {
         pending?.cancel()
-        try? FileManager.default.removeItem(at: url)
+        queue.sync { try? FileManager.default.removeItem(at: url) }
     }
 
     private static func write(_ value: T, to url: URL, format: Format) {
@@ -277,6 +284,8 @@ final class History {
     }
 
     func remove(_ ids: Set<UUID>) {
+        // What those pages said goes with them.
+        PageText.shared.forget(urls: entries.filter { ids.contains($0.id) }.map(\.url))
         entries.removeAll { ids.contains($0.id) }
         db?.delete(ids)
     }
@@ -284,6 +293,7 @@ final class History {
     func clear(since date: Date? = nil) {
         if let date { entries.removeAll { $0.date >= date } } else { entries.removeAll() }
         db?.clear(since: date)
+        PageText.shared.clear(since: date)
     }
 
     /// Waits for history writes still in progress, before Tacet quits.
@@ -367,6 +377,8 @@ struct WindowSnapshot: Codable {
     var profile: UUID?
     /// Index of the tab shown beside the selected one.
     var split: Int?
+    /// The Space the window was showing.
+    var space: UUID?
 }
 
 struct TabGroup: Identifiable, Codable, Equatable {
@@ -485,7 +497,8 @@ final class Favicons {
         c.httpCookieAcceptPolicy = .never
         c.httpShouldSetCookies = false
         c.timeoutIntervalForRequest = 10
-        return URLSession(configuration: c)
+        // An icon's address was checked before the request; its redirects are checked the same way.
+        return URLSession(configuration: c, delegate: WebTools.PublicRedirects.shared, delegateQueue: nil)
     }()
 
     func cached(_ host: String?) -> NSImage? {

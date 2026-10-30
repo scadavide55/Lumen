@@ -172,12 +172,12 @@ final class ContentBlocker {
                 let prepared = zip(keys, downloaded).map { key, text in key == "cnameTrackers" ? Self.trimCNAMEList(text) : text }
                 let out = FilterConverter.convert(prepared.joined(separator: "\n"))
                 let chunks = Self.chunks(out)
-                DispatchQueue.main.async { self.compileFilters(chunks, total: out.block.count + out.hide.count) }
+                DispatchQueue.main.async { self.compileFilters(chunks, total: out.block.count + out.hide.count, for: keys) }
             }
         }
     }
 
-    private func compileFilters(_ chunks: [[[String: Any]]], total: Int) {
+    private func compileFilters(_ chunks: [[[String: Any]]], total: Int, for keys: [String]) {
         status = String(format: L("Compiling %@ rules…"), total.formatted())
         let stamp = Int(Date().timeIntervalSince1970)
         var lists: [WKContentRuleList] = []
@@ -185,7 +185,7 @@ final class ContentBlocker {
 
         func next(_ i: Int) {
             guard i < chunks.count else {
-                finish(lists, count: compiled)
+                finish(lists, count: compiled, for: keys)
                 return
             }
             compileResilient(chunks[i], id: "lumen-filter-\(stamp)-\(i)") { l, n in
@@ -197,7 +197,15 @@ final class ContentBlocker {
         next(0)
     }
 
-    private func finish(_ lists: [WKContentRuleList], count: Int) {
+    private func finish(_ lists: [WKContentRuleList], count: Int, for keys: [String]) {
+        // The lists were changed while these downloaded: these rules are out of date, so they're dropped and the
+        // lists chosen now are fetched instead.
+        guard Self.sources.filter({ Self.isEnabled($0.key) }).map(\.key) == keys else {
+            for l in lists { store.removeContentRuleList(forIdentifier: l.identifier) { _ in } }
+            updating = false
+            updateFilterLists()
+            return
+        }
         let old = filters.map(\.identifier)
         filters = lists
         filterCount = count

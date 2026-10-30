@@ -23,6 +23,7 @@ struct Sidebar: View {
             }
             if b.isPrivate { PrivateBadge() }
             if let p = b.profile { ProfileBadge(profile: p) }
+            if let space = b.space { SpaceHeader(space: space) }
             if !b.pinnedTabs.isEmpty { PinnedGrid() }
 
             if b.tabFilterVisible || b.tabs.count >= 12 { TabFilterField() }
@@ -48,6 +49,7 @@ struct Sidebar: View {
             .scrollIndicators(.never)
             .dropDestination(for: String.self) { items, _ in b.handleDrop(items, before: nil, pinned: false) }
 
+            if !b.isPrivate { SpaceBar() }
             SidebarFooter(showsDownloads: showsControls)
         }
         .padding(.horizontal, 10)
@@ -926,6 +928,7 @@ struct CompactBar: View {
             if let tab = b.current { NavButtons(tab: tab) }
             TabStrip(compact: true)
             if let p = b.profile { ProfileBadge(profile: p, compact: true).fixedSize() }
+            SpaceMenuButton()
             if let tab = b.current {
                 ExtensionButtons(tab: tab)
                 ExtensionsMenuButton(tab: tab)

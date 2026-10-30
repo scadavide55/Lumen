@@ -125,7 +125,7 @@ enum WebTools {
         var request = URLRequest(url: url)
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
         request.setValue("text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.5", forHTTPHeaderField: "Accept")
-        let (bytes, response) = try await session.bytes(for: request, delegate: RedirectGuard.shared)
+        let (bytes, response) = try await session.bytes(for: request, delegate: PublicRedirects.shared)
         let status = (response as? HTTPURLResponse)?.statusCode ?? 200
         if (300..<400).contains(status) { throw Failure.notAllowed("The page redirects to a local or private network address.") }
         guard (200..<300).contains(status) else { throw Failure.http(status) }
@@ -137,11 +137,19 @@ enum WebTools {
         return (data, response)
     }
 
-    private final class RedirectGuard: NSObject, URLSessionTaskDelegate {
-        static let shared = RedirectGuard()
+    /// Follows a redirect only to the same host, or to a public address whose name also resolves to public addresses,
+    /// so a public page can't send Tacet's own requests into the local network.
+    final class PublicRedirects: NSObject, URLSessionTaskDelegate {
+        static let shared = PublicRedirects()
         func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
                         newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
-            completionHandler(request.url.map(isPublic) == true ? request : nil)
+            guard let url = request.url, let host = url.host?.lowercased() else { completionHandler(nil); return }
+            if host == task.originalRequest?.url?.host?.lowercased(), ["http", "https"].contains(url.scheme?.lowercased() ?? "") {
+                completionHandler(request)
+                return
+            }
+            guard isPublic(url) else { completionHandler(nil); return }
+            Task { completionHandler(await WebTools.resolvesPublic(host) ? request : nil) }
         }
     }
 

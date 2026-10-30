@@ -2,7 +2,7 @@ import AppKit
 import WebKit
 
 /// A small separate window for pop-ups (sign-in dialogs, payment pages) when tabs aren't wanted.
-final class PopupWindow: NSObject, WKUIDelegate, NSWindowDelegate {
+final class PopupWindow: NSObject, WKUIDelegate, WKNavigationDelegate, NSWindowDelegate {
     let webView: WKWebView
     private let window: NSWindow
     private var observations: [NSKeyValueObservation] = []
@@ -21,6 +21,7 @@ final class PopupWindow: NSObject, WKUIDelegate, NSWindowDelegate {
                           styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
         super.init()
         webView.uiDelegate = self
+        webView.navigationDelegate = self
         window.contentView = webView
         window.delegate = self
         window.isReleasedWhenClosed = false
@@ -49,6 +50,39 @@ final class PopupWindow: NSObject, WKUIDelegate, NSWindowDelegate {
     }
 
     func webViewDidClose(_ webView: WKWebView) { window.close() }
+
+    // MARK: Navigation: other apps' links and downloads, as in a tab
+
+    func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction, preferences: WKWebpagePreferences,
+                 decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
+        guard let url = action.request.url else { decisionHandler(.cancel, preferences); return }
+        let scheme = url.scheme?.lowercased() ?? ""
+        if !["http", "https", "about", "data", "blob"].contains(scheme) {
+            // Another app's link (zoommtg:, mailto:...) opens only after the user says so, as in a tab.
+            decisionHandler(.cancel, preferences)
+            guard action.targetFrame?.isMainFrame == true || action.navigationType == .linkActivated,
+                  let app = NSWorkspace.shared.urlForApplication(toOpen: url) else { return }
+            let name = FileManager.default.displayName(atPath: app.path)
+            Dialogs.confirm(window, title: String(format: L("Open “%@”?"), name),
+                            message: String(format: L("%@ wants to open a “%@” link in %@."), InputResolver.displayHost(webView.url), scheme, name),
+                            ok: L("Open")) { if $0 { NSWorkspace.shared.open(url) } }
+            return
+        }
+        decisionHandler(action.shouldPerformDownload ? .download : .allow, preferences)
+    }
+
+    func webView(_ webView: WKWebView, decidePolicyFor response: WKNavigationResponse,
+                 decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        decisionHandler(response.canShowMIMEType ? .allow : .download)
+    }
+
+    func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
+        DownloadManager.shared.track(download)
+    }
+
+    func webView(_ webView: WKWebView, navigationResponse: WKNavigationResponse, didBecome download: WKDownload) {
+        DownloadManager.shared.track(download)
+    }
 
     func windowWillClose(_ notification: Notification) {
         observations = []

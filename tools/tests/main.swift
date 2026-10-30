@@ -577,5 +577,106 @@ eq(js("document.getElementById('host').shadowRoot.getElementById('u').shadowRoot
 eq(js("document.getElementById('host').shadowRoot.getElementById('p').shadowRoot.querySelector('input').value") as? String,
    "hunter2", "logins: fills the password in a shadow root")
 
+// MARK: A passkey request is turned down and reported
+
+_ = js("window.passkeyAsked = 0; window.addEventListener('tacet-passkey', () => window.passkeyAsked++)")
+_ = js(Scripts.passkeys)
+if (js("typeof PublicKeyCredential") as? String) == "function" {
+    var errName: Any?, settled = false
+    wv.callAsyncJavaScript("try { await navigator.credentials.get({ publicKey: { challenge: new Uint8Array(16) } }); return 'resolved' } catch (e) { return e.name }",
+                           arguments: [:], in: nil, in: .page) { r in errName = try? r.get(); settled = true }
+    let deadline = Date().addingTimeInterval(5)
+    while !settled && Date() < deadline { RunLoop.main.run(until: Date().addingTimeInterval(0.02)) }
+    eq(errName as? String, "NotAllowedError", "passkeys: a request is turned down")
+    eq(js("window.passkeyAsked") as? Int, 1, "passkeys: a request is reported")
+} else {
+    print("note: no PublicKeyCredential in the test web view, passkey checks skipped")
+}
+
+// MARK: Updater: the installed app survives every failure
+
+func swapRun(_ setup: (URL) throws -> (String, String)) -> URL {
+    let dir = FileManager.default.temporaryDirectory.appendingPathComponent("tacet-swap-" + UUID().uuidString)
+    try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+    let (current, newApp) = (try? setup(dir)) ?? ("", "")
+    let p = Process()
+    p.executableURL = URL(fileURLWithPath: "/bin/sh")
+    p.arguments = ["-c", UpdateInstaller.swapScript(current: current, newApp: newApp, waitingFor: 999_999)]
+    p.standardError = FileHandle.nullDevice
+    try? p.run(); p.waitUntilExit()
+    return dir
+}
+func marker(_ app: URL) -> String? { try? String(contentsOf: app.appendingPathComponent("v"), encoding: .utf8) }
+let swapOK = swapRun { dir in
+    for (n, v) in [("Tacet.app", "old"), ("New.app", "new")] {
+        try FileManager.default.createDirectory(at: dir.appendingPathComponent(n), withIntermediateDirectories: true)
+        try v.write(to: dir.appendingPathComponent(n + "/v"), atomically: true, encoding: .utf8)
+    }
+    return (dir.appendingPathComponent("Tacet.app").path, dir.appendingPathComponent("New.app").path)
+}
+eq(marker(swapOK.appendingPathComponent("Tacet.app")), "new", "updater: the new app replaces the old one")
+let swapBadCopy = swapRun { dir in
+    try FileManager.default.createDirectory(at: dir.appendingPathComponent("Tacet.app"), withIntermediateDirectories: true)
+    try "old".write(to: dir.appendingPathComponent("Tacet.app/v"), atomically: true, encoding: .utf8)
+    return (dir.appendingPathComponent("Tacet.app").path, dir.appendingPathComponent("Missing.app").path)
+}
+eq(marker(swapBadCopy.appendingPathComponent("Tacet.app")), "old", "updater: a failed copy puts the old app back")
+let swapNoMove = swapRun { dir in
+    let locked = dir.appendingPathComponent("locked")
+    try FileManager.default.createDirectory(at: locked.appendingPathComponent("Tacet.app"), withIntermediateDirectories: true)
+    try "old".write(to: locked.appendingPathComponent("Tacet.app/v"), atomically: true, encoding: .utf8)
+    try FileManager.default.setAttributes([.posixPermissions: 0o555], ofItemAtPath: locked.path)
+    return (locked.appendingPathComponent("Tacet.app").path, dir.appendingPathComponent("Missing.app").path)
+}
+eq(marker(swapNoMove.appendingPathComponent("locked/Tacet.app")), "old", "updater: if the app can't be moved aside, it's left alone")
+for d in [swapOK, swapBadCopy, swapNoMove] {
+    try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: d.appendingPathComponent("locked").path)
+    try? FileManager.default.removeItem(at: d)
+}
+
+// MARK: Saving: a save made now is never overwritten by an older one still being written
+
+struct Big: Codable { var n: Int; var pad: [String] }
+let stored = StoredFile<Big>(at: FileManager.default.temporaryDirectory.appendingPathComponent("tacet-order-\(UUID().uuidString).json"))
+stored.save(Big(n: 1, pad: Array(repeating: String(repeating: "x", count: 1000), count: 5000)), delay: 0)
+Thread.sleep(forTimeInterval: 0.01)
+stored.saveNow(Big(n: 2, pad: []))
+Thread.sleep(forTimeInterval: 0.5)
+eq(stored.load()?.n, 2, "storage: the newest save wins")
+stored.delete()
+
+// MARK: Finding pages by what they said
+
+do {
+    let dbURL = FileManager.default.temporaryDirectory.appendingPathComponent("tacet-pagetext-\(UUID().uuidString).sqlite")
+    let index = PageText(dbURL)
+    let swift = URL(string: "https://example.com/swift-memory")!
+    let pasta = URL(string: "https://ricette.example/carbonara")!
+    index.keep(url: swift, title: "Profiling apps", text: "To reduce the memory footprint of a Swift app, start with Instruments and look at allocations. " + String(repeating: "More words here. ", count: 10), space: nil)
+    index.keep(url: pasta, title: "Carbonara", text: "La carbonara si prepara con guanciale, uova e pecorino, perché la panna non c'entra. " + String(repeating: "Altro testo. ", count: 10), space: nil)
+    index.keep(url: URL(string: "https://short.example/")!, title: "Short", text: "too short", space: nil)
+    func found(_ q: String) -> [String] {
+        var out: [String]?
+        Task { out = await index.search(q).map(\.url.absoluteString) }
+        while out == nil { RunLoop.main.run(until: Date().addingTimeInterval(0.02)) }
+        return out ?? []
+    }
+    eq(found("memory footprint"), [swift.absoluteString], "page text: finds a page by words in it")
+    eq(found("alloc"), [swift.absoluteString], "page text: a word's start is enough")
+    eq(found("perche guanciale"), [pasta.absoluteString], "page text: accents don't matter")
+    eq(found("\"memory OR pasta"), [], "page text: typed search syntax is taken as plain words")
+    eq(found("too short"), [], "page text: almost empty pages aren't kept")
+    var snippet = ""
+    Task { snippet = await index.search("guanciale").first?.snippet ?? "-" }
+    while snippet.isEmpty { RunLoop.main.run(until: Date().addingTimeInterval(0.02)) }
+    check(snippet.contains("\u{2}guanciale\u{3}"), "page text: the passage marks the word found", snippet)
+    index.forget(site: "ricette.example")
+    eq(found("guanciale"), [], "page text: forgetting a site removes its pages")
+    index.clear()
+    eq(found("memory"), [], "page text: clearing removes everything")
+    eq(PageText.matchExpression("a \"b"), "\"a\"* \"b\"*", "page text: query becomes quoted prefixes")
+    try? FileManager.default.removeItem(at: dbURL)
+}
+
 print("\(passed) passed, \(failures) failed")
 exit(failures == 0 ? 0 : 1)

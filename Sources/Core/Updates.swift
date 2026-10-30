@@ -273,23 +273,30 @@ final class UpdateInstaller: NSObject, URLSessionDownloadDelegate {
         return p.terminationStatus == 0
     }
 
+    /// Waits for the process to end, then puts the new app in place of the current one. The installed app is only
+    /// removed once it's safely moved aside, and it's put back if the copy fails.
+    static func swapScript(current: String, newApp: String, waitingFor pid: Int32) -> String {
+        """
+        while kill -0 \(pid) 2>/dev/null; do sleep 0.2; done
+        backup="\(current).old-$$"
+        if mv "\(current)" "$backup"; then
+            if /usr/bin/ditto "\(newApp)" "\(current)"; then
+                rm -rf "$backup"
+                /usr/bin/xattr -dr com.apple.quarantine "\(current)"
+            else
+                rm -rf "\(current)"; mv "$backup" "\(current)"
+            fi
+        fi
+        """
+    }
+
     /// A small script waits for Tacet to quit, swaps the app and opens the new one.
     private func relaunch(into newApp: URL) {
         // The script below swaps the app in place; nothing else may move it meanwhile.
         AppRename.skip = true
         Session.shared.saveNow()
-        let current = Bundle.main.bundleURL.path
-        let script = """
-        while kill -0 \(ProcessInfo.processInfo.processIdentifier) 2>/dev/null; do sleep 0.2; done
-        backup="\(current).old-$$"
-        if mv "\(current)" "$backup" && /usr/bin/ditto "\(newApp.path)" "\(current)"; then
-            rm -rf "$backup"
-            /usr/bin/xattr -dr com.apple.quarantine "\(current)"
-        else
-            rm -rf "\(current)"; mv "$backup" "\(current)"
-        fi
-        /usr/bin/open "\(current)"
-        """
+        let script = Self.swapScript(current: Bundle.main.bundleURL.path, newApp: newApp.path,
+                                     waitingFor: ProcessInfo.processInfo.processIdentifier) + "\n/usr/bin/open \"\(Bundle.main.bundleURL.path)\""
         let p = Process()
         p.executableURL = URL(fileURLWithPath: "/bin/sh")
         p.arguments = ["-c", script]

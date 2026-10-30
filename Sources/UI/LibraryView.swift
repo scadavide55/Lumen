@@ -55,6 +55,8 @@ struct HistoryList: View {
     @State private var selection = Set<UUID>()
     /// Search results, found off the main thread; nil while the search field is empty.
     @State private var results: [HistoryEntry]?
+    /// Pages whose text matches, when Tacet keeps what pages said.
+    @State private var pageHits: [PageText.Hit] = []
 
     private var groups: [(Date, [HistoryEntry])] {
         let list = query.isEmpty ? Array(history.entries.prefix(3000)) : (results ?? [])
@@ -66,6 +68,7 @@ struct HistoryList: View {
     var body: some View {
         let groups = groups
         List(selection: $selection) {
+            if !query.isEmpty && !pageHits.isEmpty { PageTextResults(hits: pageHits, open: open) }
             ForEach(groups, id: \.0) { day, entries in
                 SwiftUI.Section(day.formatted(.dateTime.weekday(.wide).day().month(.wide))) {
                     ForEach(entries) { e in
@@ -91,7 +94,7 @@ struct HistoryList: View {
             }
         }
         .overlay {
-            if groups.isEmpty && (query.isEmpty || results != nil) {
+            if groups.isEmpty && pageHits.isEmpty && (query.isEmpty || results != nil) {
                 ContentUnavailableView(query.isEmpty ? LocalizedStringKey("No History") : "No Results", systemImage: "clock")
             }
         }
@@ -104,14 +107,18 @@ struct HistoryList: View {
             open(urls(ids))
         }
         .onDeleteCommand { history.remove(selection) }
-        .searchable(text: $query, placement: .toolbar, prompt: "Search history")
+        .searchable(text: $query, placement: .toolbar, prompt: "Search history and what pages said")
         .task(id: "\(query)\u{1}\(history.entries.count)") {
-            guard !query.isEmpty else { results = nil; return }
+            guard !query.isEmpty else { results = nil; pageHits = []; return }
             // Waits for a pause in typing; a newer keystroke cancels this one.
             try? await Task.sleep(for: .milliseconds(120))
             guard !Task.isCancelled else { return }
             let found = await history.filterInBackground(query)
-            if !Task.isCancelled { results = found }
+            let read = Settings.shared.rememberPageText ? await PageText.shared.search(query, limit: 20) : []
+            if !Task.isCancelled {
+                results = found
+                pageHits = read
+            }
         }
         .toolbar {
             Menu("Clear History") {

@@ -42,6 +42,9 @@ final class BrowserState {
         }
     }
     var splitID: UUID? { didSet { sessionChanged() } }
+    /// The Space this window shows; nil until Spaces are used.
+    var spaceID: UUID? { didSet { sessionChanged() } }
+    var space: Space? { Spaces.shared.space(spaceID) }
     var sidebarVisible: Bool {
         didSet { if !isPrivate { Settings.shared.sidebarVisible = sidebarVisible } }
     }
@@ -173,6 +176,8 @@ final class BrowserState {
         guard !isClosed else { return }
         isClosed = true
         ExtensionEvents.closedWindow(self)
+        // Its Space keeps the tabs, to open in any window later.
+        if !isPrivate { saveSpace() }
         // Its pages stop now (sound, video, timers), even if something still holds on to the window's state.
         for t in tabs { t.close() }
         if WindowRegistry.shared.lastFocused === self { WindowRegistry.shared.lastFocused = nil }
@@ -180,6 +185,7 @@ final class BrowserState {
     }
 
     private func restore(_ snap: WindowSnapshot) {
+        if !isPrivate, let id = snap.space, Spaces.shared.space(id) != nil { spaceID = id }
         groups = snap.groups ?? []
         tabs = snap.tabs.map { s in
             let t = Tab(browser: self, url: s.url, title: s.title, state: s.state, pinned: s.pinned)
@@ -198,7 +204,57 @@ final class BrowserState {
 
     func snapshot() -> WindowSnapshot {
         WindowSnapshot(tabs: tabs.map { $0.snapshot() }, selected: tabs.firstIndex { $0.id == selectedID } ?? 0, groups: groups, profile: profileID,
-                       split: splitID.flatMap { id in tabs.firstIndex { $0.id == id } })
+                       split: splitID.flatMap { id in tabs.firstIndex { $0.id == id } }, space: spaceID)
+    }
+
+    // MARK: Spaces
+
+    /// Keeps how this window's Space is now, so it comes back like this.
+    func saveSpace() {
+        guard !isPrivate, let spaceID, !tabs.isEmpty else { return }
+        let snap = snapshot()
+        Spaces.shared.update(spaceID) { $0.saved = snap }
+    }
+
+    /// Leaves this window's Space as it is and shows another one in its place. A Space open in another window is
+    /// brought forward instead of being opened twice.
+    func switchSpace(to id: UUID) {
+        guard !isPrivate, id != spaceID, let target = Spaces.shared.space(id) else { return }
+        if let other = WindowRegistry.shared.browsers.first(where: { $0 !== self && !$0.isClosed && $0.spaceID == id }) {
+            other.window?.makeKeyAndOrderFront(nil)
+            return
+        }
+        // Tabs open before Spaces were used aren't lost: they become a Space of their own.
+        if spaceID == nil, tabs.contains(where: { $0.url != nil }) {
+            spaceID = Spaces.shared.add(L("Main")).id
+        }
+        saveSpace()
+        let old = tabs
+        marked = []
+        splitID = nil
+        selectedID = nil
+        groups = []
+        tabs = []
+        old.forEach { $0.close() }
+        spaceID = id
+        if let snap = target.saved { restore(snap) }
+        if tabs.isEmpty { newTab() }
+    }
+
+    /// Makes a Space and switches to it, empty.
+    func newSpace(named name: String) {
+        guard !isPrivate else { return }
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let space = Spaces.shared.add(trimmed.isEmpty ? String(format: L("Space %d"), Spaces.shared.items.count + 1) : trimmed)
+        switchSpace(to: space.id)
+    }
+
+    /// The next or previous Space, in the order they're listed.
+    func switchSpace(by offset: Int) {
+        let all = Spaces.shared.items
+        guard !all.isEmpty else { return }
+        let i = all.firstIndex { $0.id == spaceID } ?? (offset > 0 ? -1 : 0)
+        switchSpace(to: all[(i + offset + all.count) % all.count].id)
     }
 
     // MARK: Opening and selecting

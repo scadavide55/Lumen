@@ -109,6 +109,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         if #available(macOS 15.4, *) { Extensions.shared.start() }
         AppIcon.applyChosen()
+        PageText.shared.prune(keepingDays: Settings.shared.pageTextDays)
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
@@ -139,8 +140,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         Session.shared.saveNow()
+        for b in WindowRegistry.shared.browsers { b.saveSpace() }
+        Spaces.shared.saveNow()
         AppRename.afterQuit()
         History.shared.flush()
+        PageText.shared.flush()
         guard Settings.shared.clearOnQuit else { return .terminateNow }
         DataCleaner.clear(range: .all, history: true, cookies: true, cache: true) {
             sender.reply(toApplicationShouldTerminate: true)
@@ -331,6 +335,21 @@ struct LumenCommands: Commands {
             if let b, !b.isPrivate, !SavedGroups.shared.items.isEmpty {
                 Menu("Saved Groups") {
                     ForEach(SavedGroups.shared.items) { g in Button(g.name) { b.open(g) } }
+                }
+            }
+            Divider()
+            Button("New Space…") { if let b { SpaceActions.askNew(in: b) } }.disabled(b == nil || b?.isPrivate == true)
+            Button("Next Space") { b?.switchSpace(by: 1) }
+                .keyboardShortcut(.rightArrow, modifiers: [.control, .command])
+                .disabled(b == nil || b?.isPrivate == true || Spaces.shared.items.isEmpty)
+            Button("Previous Space") { b?.switchSpace(by: -1) }
+                .keyboardShortcut(.leftArrow, modifiers: [.control, .command])
+                .disabled(b == nil || b?.isPrivate == true || Spaces.shared.items.isEmpty)
+            if let b, !b.isPrivate, !Spaces.shared.items.isEmpty {
+                Menu("Spaces") {
+                    ForEach(Spaces.shared.items) { sp in
+                        Toggle(sp.name, isOn: Binding(get: { b.spaceID == sp.id }, set: { _ in b.switchSpace(to: sp.id) }))
+                    }
                 }
             }
             Divider()

@@ -27,6 +27,10 @@ final class Extensions {
         /// Keeps the extension's storage and address the same between launches.
         var uniqueIdentifier = UUID().uuidString
         var added = Date()
+        /// What the user allowed ("p:" permissions, "m:" site patterns) and turned down. Nil for extensions added before
+        /// Tacet kept this: what they ask for now counts as allowed, as it was when they were added.
+        var approved: [String]?
+        var declined: [String]?
     }
 
     /// A Safari web extension found inside an app on this Mac.
@@ -380,7 +384,7 @@ extension Extensions {
             context.hasAccessToPrivateData = false
             // With the Web Inspector on (Settings › Advanced), its pages and popup can be inspected.
             context.isInspectable = Settings.shared.developer
-            Extensions.grantRequested(context)
+            await grantApproved(context, for: item)
             do {
                 try controller.load(context)
                 runtime.contexts[item.id] = context
@@ -424,11 +428,34 @@ extension Extensions {
         }
     }
 
-    /// Everything the extension asked for when it was added: the user approved it then.
-    static func grantRequested(_ context: WKWebExtensionContext) {
+    /// Grants what the user allowed when the extension was added. An extension inside another app updates with that
+    /// app, so anything new it asks for is only granted once the user says yes to it, and a no is remembered.
+    @MainActor
+    func grantApproved(_ context: WKWebExtensionContext, for item: Installed) async {
         let ext = context.webExtension
-        for p in ext.requestedPermissions { context.setPermissionStatus(.grantedExplicitly, for: p) }
-        for m in ext.requestedPermissionMatchPatterns { context.setPermissionStatus(.grantedExplicitly, for: m) }
+        let permissions = ext.requestedPermissions, patterns = ext.requestedPermissionMatchPatterns
+        let asked = Set(permissions.map { "p:" + $0.rawValue } + patterns.map { "m:" + $0.string })
+        var approved = Set(item.approved ?? Array(asked))
+        var declined = Set(item.declined ?? [])
+        let new = asked.subtracting(approved).subtracting(declined)
+        if !new.isEmpty {
+            let list = permissions.filter { new.contains("p:" + $0.rawValue) }.map(Self.describe)
+                + patterns.filter { new.contains("m:" + $0.string) }.map(Self.describe)
+            let alert = NSAlert()
+            alert.messageText = String(format: L("“%@” was updated and now also wants to:"), item.name)
+            alert.informativeText = Array(Set(list)).sorted().map { "• " + $0 }.joined(separator: "\n")
+            alert.addButton(withTitle: L("Allow"))
+            alert.addButton(withTitle: L("Don't Allow"))
+            if alert.runModal() == .alertFirstButtonReturn { approved.formUnion(new) } else { declined.formUnion(new) }
+        }
+        for p in permissions where approved.contains("p:" + p.rawValue) { context.setPermissionStatus(.grantedExplicitly, for: p) }
+        for m in patterns where approved.contains("m:" + m.string) { context.setPermissionStatus(.grantedExplicitly, for: m) }
+        if let i = installed.firstIndex(where: { $0.id == item.id }),
+           installed[i].approved.map(Set.init) != approved || (installed[i].declined.map(Set.init) ?? []) != declined {
+            installed[i].approved = approved.sorted()
+            installed[i].declined = declined.isEmpty ? nil : declined.sorted()
+            persist()
+        }
     }
 
     /// Adds a loaded extension after the user approved its permissions.
