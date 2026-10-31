@@ -321,7 +321,7 @@ struct TabPane: View {
             VStack(spacing: 0) {
                 if tab.insecureWarning { InsecurePasswordBanner(tab: tab) }
                 if let help = tab.passkeyHelp { PasskeyBanner(tab: tab, help: help) }
-                if !tab.draftOffer.isEmpty { DraftBanner(tab: tab) }
+                if !tab.draftOffer.isEmpty { DraftBanner(tab: tab, drafts: tab.draftOffer) }
                 if let pending = tab.pendingSave { SavePasswordBanner(tab: tab, pending: pending) }
             }
             .animation(.easeOut(duration: 0.2), value: tab.pendingSave)
